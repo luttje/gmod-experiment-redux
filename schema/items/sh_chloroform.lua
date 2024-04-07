@@ -1,0 +1,56 @@
+local ITEM = ITEM
+
+ITEM.name = "Chloroform"
+ITEM.price = 800
+ITEM.model = "models/props_junk/garbage_newspaper001a.mdl"
+ITEM.width = 1
+ITEM.height = 1
+ITEM.description = "Applying this on somebody will knock them out cold."
+
+ITEM.functions.Apply = {
+	OnRun = function(itemTable)
+		local chloroformTime = 5
+		local client = itemTable.player
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target) and target:IsPlayer() and target:GetCharacter()
+		and !target:GetNetVar("tying") and !target:IsRestricted()) then
+			itemTable.bBeingUsed = true
+
+			client:SetAction("@chloroforming", chloroformTime)
+
+			target:SetNetVar("beingChloroformed", true)
+			target:SetAction("@fBeingChloroformed", chloroformTime)
+
+			client:DoStaredAction(target, function()
+				Schema.ChloroformPlayer(target)
+
+				itemTable:Remove()
+				client:GetCharacter():UpdateAttrib("dexterity", 15)
+			end, chloroformTime, function()
+				client:SetAction()
+
+				target:SetAction()
+				target:SetNetVar("beingChloroformed")
+
+				itemTable.bBeingUsed = false
+			end)
+		else
+			client:NotifyLocalized("plyNotValid")
+		end
+
+		return false
+	end,
+
+	OnCanRun = function(itemTable)
+		return !IsValid(itemTable.entity) or itemTable.bBeingUsed
+	end
+}
+
+function ITEM:CanTransfer(inventory, newInventory)
+	return !self.bBeingUsed
+end

@@ -1,0 +1,36 @@
+local PLUGIN = PLUGIN
+
+function PLUGIN:GeneratorAdjustDamage(generator, damageInfo)
+	local protectorHandled = false
+	local informerHandled = false
+
+	for _, entity in ipairs(ents.FindInSphere(generator:GetPos(), self.boltProtectorRange)) do
+		if (entity:GetClass() == "exp_bolt_protector" and not protectorHandled) then
+			protectorHandled = true
+
+			local damageScale = 0.5
+
+			if (Schema.perk.GetOwned(PRK_INTERVENTION, generator.expClient)) then
+				local damageMultiplier = Schema.perk.GetProperty(PRK_INTERVENTION, "damageMultiplier")
+
+				damageScale = damageScale * damageMultiplier
+			end
+
+			damageInfo:ScaleDamage(damageScale)
+		elseif (entity:GetClass() == "exp_bolt_informer" and not informerHandled) then
+			informerHandled = true
+
+			local boltInformerOwner = entity.expClient
+
+			if (IsValid(boltInformerOwner) and boltInformerOwner == generator.expClient) then
+				if (not boltInformerOwner.expNextBoltInformerWarn or CurTime() >= boltInformerOwner.expNextBoltInformerWarn) then
+					ix.chat.Send(boltInformerOwner, "bolt_informer", "We have detected that your bolt generator is under attack!")
+
+					boltInformerOwner.expNextBoltInformerWarn = CurTime() + self.boltInformerWarnInterval
+				end
+
+				break
+			end
+		end
+	end
+end

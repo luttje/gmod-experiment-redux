@@ -1,0 +1,8 @@
+"experiment-redux"
+{
+	"base"		"helix"
+	"title"		"Experiment Redux"
+	"author"	"Experiment Redux"
+	"category"	"rp"
+	"menusystem" "1"
+}

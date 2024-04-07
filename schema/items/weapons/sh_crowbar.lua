@@ -1,0 +1,19 @@
+local ITEM = ITEM
+
+ITEM.name = "Crowbar"
+ITEM.price = 800
+ITEM.model = "models/weapons/w_crowbar.mdl"
+ITEM.width = 1
+ITEM.height = 1
+ITEM.uniqueID = "exp_metal_crowbar"
+ITEM.category = "Melee"
+ITEM.class = "weapon_crowbar"
+ITEM.weaponCategory = "melee"
+ITEM.description = "A scratched up and dirty metal crowbar."
+ITEM.meleeWeapon = true
+ITEM.isAttachment = true
+ITEM.loweredOrigin = Vector(-18, -5, 5)
+ITEM.loweredAngles = Angle(-10, 10, -80)
+ITEM.attachmentBone = "ValveBiped.Bip01_Spine"
+ITEM.attachmentOffsetAngles = Angle(200, 200, 0)
+ITEM.attachmentOffsetVector = Vector(0, 5, 2)
