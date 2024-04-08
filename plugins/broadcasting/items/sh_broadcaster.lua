@@ -9,14 +9,32 @@ ITEM.category = "Perpetuities"
 ITEM.description = "An antique broadcaster, do you think this'll still work?"
 ITEM.maximum = 5
 
+if (CLIENT) then
+	function ITEM:PopulateTooltip(tooltip)
+		if (not self.maximum) then
+			return
+		end
+
+		local panel = tooltip:AddRowAfter("name", "maximum")
+		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+		panel:SetText("You can only have " .. self.maximum .. " of this item in the world at a time!")
+		panel:SizeToContents()
+	end
+end
+
 ITEM.functions.Deploy = {
 	OnRun = function(item)
 		local client = item.player
-		local character = client:GetCharacter()
-		local trace = client:GetEyeTraceNoCursor()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
-			client:Notify("You cannot drop a broadcaster that far away!")
+        if (client:IsObjectLimited("broadcasters", item.maximum)) then
+            client:Notify("You can not place this as you have reached the maximum amount of this item!")
+            return false
+        end
+
+		local success, message, trace = client:TryTraceInteractAtDistance()
+
+		if (not success) then
+			client:Notify(message)
 
 			return false
 		end
@@ -26,13 +44,9 @@ ITEM.functions.Deploy = {
 		entity:SetModel(item.model)
 		entity:SetPos(trace.HitPos)
 		entity:Spawn()
+		client:AddLimitedObject("broadcasters", entity)
+		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
-
-		if (not client:TryAddLimitedObject("broadcasters", entity, item.maximum)) then
-            entity:Remove()
-			client:Notify("You can not place this as you have reached the maximum amount of this item!")
-			return false
-		end
 
 		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		local inventory = ix.item.inventories[item.invID]
@@ -44,7 +58,14 @@ ITEM.functions.Deploy = {
 ITEM.functions.Toggle = {
 	OnRun = function(item)
 		local client = item.player
-		local trace = client:GetEyeTraceNoCursor()
+		local success, message, trace = client:TryTraceInteractAtDistance()
+
+        if (not success) then
+            client:Notify(message)
+
+            return false
+        end
+
 		local entity = trace.Entity
 
 		if (not IsValid(entity) or entity:GetClass() ~= "exp_broadcaster") then
@@ -58,7 +79,12 @@ ITEM.functions.Toggle = {
 
 	OnCanRun = function(item)
 		local client = item.player
-		local trace = client:GetEyeTraceNoCursor()
+		local success, message, trace = client:TryTraceInteractAtDistance()
+
+        if (not success) then
+            return false
+        end
+
 		local entity = trace.Entity
 
 		return IsValid(entity) and entity:GetClass() == "exp_broadcaster"

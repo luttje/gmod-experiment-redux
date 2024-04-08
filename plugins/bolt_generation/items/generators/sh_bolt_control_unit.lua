@@ -8,14 +8,17 @@ ITEM.height = 3
 ITEM.uniqueID = "exp_bolt_control_unit"
 ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "Generates a steady rate of bolts over time and can be upgraded"
+ITEM.maximum = 1
 ITEM.data = {
 	upgrades = 0
 }
 
 if (CLIENT) then
-	function ITEM:PopulateTooltip(tooltip)
+    function ITEM:PopulateTooltip(tooltip)
+        self.baseTable.PopulateTooltip(self, tooltip)
+
 		local panel = tooltip:AddRowAfter("name", "upgrades")
-		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+		panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
 		panel:SetText("Upgrades: " .. self:GetData("upgrades", 0))
 		panel:SizeToContents()
 	end
@@ -26,7 +29,6 @@ ITEM.generator = {
 	powerName = "Power",
 	uniqueID = "exp_bolt_control_unit",
 	currency = 50,
-	maximum = 1,
     health = 200,
 	produce = 100, -- Base production
 	power = 4,

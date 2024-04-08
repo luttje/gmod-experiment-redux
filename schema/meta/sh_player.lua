@@ -53,3 +53,76 @@ function playerMeta:GetAlliance()
 
 	return alliance
 end
+
+if (SERVER) then
+    function playerMeta:PruneInvalidObjects()
+		local character = self:GetCharacter()
+
+        if (not character) then
+            return false
+        end
+
+        local limitedObjects = character:GetVar("limitedObjects", {})
+        local invalidObjects = {}
+
+        for objectType, objects in pairs(limitedObjects) do
+            for k, object in ipairs(objects) do
+                if (not IsValid(object)) then
+                    invalidObjects[#invalidObjects + 1] = {
+                        type = objectType,
+                        index = k
+                    }
+                end
+            end
+        end
+
+        for _, data in ipairs(invalidObjects) do
+            table.remove(limitedObjects[data.type], data.index)
+        end
+
+        character:SetVar("limitedObjects", limitedObjects)
+    end
+
+	hook.Add("PlayerSecondElapsed", "expPruneInvalidObjects", function(client)
+		client:PruneInvalidObjects()
+	end)
+
+	function playerMeta:AddLimitedObject(objectType, object)
+		local character = self:GetCharacter()
+		local limitedObjects = character:GetVar("limitedObjects", {})
+		local objects = limitedObjects[objectType] or {}
+
+		objects[#objects + 1] = object
+		limitedObjects[objectType] = objects
+
+		character:SetVar("limitedObjects", limitedObjects)
+	end
+end
+
+function playerMeta:IsObjectLimited(objectType, limit)
+	local character = self:GetCharacter()
+
+	if (not character) then
+		return false
+	end
+
+	local limitedObjects = character:GetVar("limitedObjects", {})
+	local objects = limitedObjects[objectType] or {}
+
+	return #objects >= limit
+end
+
+function playerMeta:TryTraceInteractAtDistance(distance)
+    local trace = self:GetEyeTraceNoCursor()
+	distance = ix.config.Get("maxInteractionDistance", distance)
+
+	if (trace.HitPos:Distance(trace.StartPos) > distance) then
+		return false, "You can not do that this far away!"
+	end
+
+    if (trace.HitNonWorld) then
+        return false, "You can not do that here!"
+    end
+
+	return true, "You can do that here.", trace
+end

@@ -72,14 +72,14 @@ function playerMeta:QueueBoostRemove(boostID, attribID, delay)
 end
 
 function playerMeta:CheckQueuedBoostRemovals()
-	local character = self:GetCharacter()
+    local character = self:GetCharacter()
 
-	if (not character) then
-		return
-	end
+    if (not character) then
+        return
+    end
 
-	local boostsToRemove = character:GetVar("boostsToRemove", {})
-	local curTime = CurTime()
+    local boostsToRemove = character:GetVar("boostsToRemove", {})
+    local curTime = CurTime()
 
     for boostID, attributes in pairs(boostsToRemove) do
         for attribID, removeTime in pairs(attributes) do
@@ -90,36 +90,12 @@ function playerMeta:CheckQueuedBoostRemovals()
         end
     end
 
-	character:SetVar("boostsToRemove", boostsToRemove)
+    character:SetVar("boostsToRemove", boostsToRemove)
 end
 
-function playerMeta:TryAddLimitedObject(objectType, object, limit)
-	local character = self:GetCharacter()
-
-	if (not character) then
-		return false
-	end
-
-    local objects = character:GetVar(objectType) or {}
-
-	if (#objects >= limit) then
-		return false
-	end
-
-	objects[#objects + 1] = object
-    character:SetVar(objectType, objects, true)
-
-	return true
-end
-
-function playerMeta:IsObjectLimited(objectType, limit)
-	local character = self:GetCharacter()
-
-	if (not character) then
-		return false
-	end
-
-	local objects = character:GetVar(objectType) or {}
-
-	return #objects >= limit
+function playerMeta:RegisterEntityToRemoveOnLeave(entity)
+    local character = self:GetCharacter()
+	local characterEntities = character:GetVar("charEnts") or {}
+	table.insert(characterEntities, entity)
+	character:SetVar("charEnts", characterEntities, true)
 end

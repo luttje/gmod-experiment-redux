@@ -40,7 +40,7 @@ function PLUGIN:GetRadioEntityToSetFrequency(client, frequency)
 		return
 	end
 
-    if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
+    if (trace.HitPos:Distance(client:GetShootPos()) > ix.config.Get("maxInteractionDistance")) then
         ix.util.Notify("This stationary radio is too far away!", client)
         return
     end

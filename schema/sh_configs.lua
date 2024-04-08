@@ -41,3 +41,7 @@ ix.config.Add("grenadeTrailMaxLifetime", 10, "How long the grenade trail lasts f
 	data = {min = -1, max = 10, decimals = 0},
 	category = "grenades"
 })
+
+ix.config.Add("maxInteractionDistance", 192, "How far away from the player an item/object can be placed.", nil, {
+	data = {min = 128, max = math.huge, decimals = 0},
+})

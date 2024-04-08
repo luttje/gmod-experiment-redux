@@ -13,9 +13,20 @@ ITEM.data = {
 }
 
 if (CLIENT) then
-	function ITEM:PopulateTooltip(tooltip)
-		local panel = tooltip:AddRowAfter("name", "frequency")
-		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+    function ITEM:PopulateTooltip(tooltip)
+        local after = "name"
+
+		if (self.maximum) then
+			local panel = tooltip:AddRowAfter(after, "maximum")
+			panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+			panel:SetText("You can only have " .. self.maximum .. " of this item in the world at a time!")
+            panel:SizeToContents()
+
+			after = "maximum"
+		end
+
+		local panel = tooltip:AddRowAfter(after, "frequency")
+		panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
 		panel:SetText(L("frequency", self:GetData("frequency", ITEM.data.frequency or 101.1)))
 		panel:SizeToContents()
 	end
@@ -24,11 +35,16 @@ end
 ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
-		local character = client:GetCharacter()
-		local trace = client:GetEyeTraceNoCursor()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
-			client:Notify("You cannot drop a radio that far away!")
+        if (client:IsObjectLimited("stationaryRadios", item.maximum)) then
+            client:Notify("You can not place this as you have reached the maximum amount of this item!")
+            return false
+        end
+
+		local success, message, trace = client:TryTraceInteractAtDistance()
+
+		if (not success) then
+			client:Notify(message)
 
 			return false
 		end
@@ -37,13 +53,9 @@ ITEM.functions.Place = {
 		entity:SetupRadio(client, item)
 		entity:SetPos(trace.HitPos)
 		entity:Spawn()
+		client:AddLimitedObject("stationaryRadios", entity)
+		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
-
-		if (not client:TryAddLimitedObject("stationaryRadios", entity, item.maximum)) then
-            entity:Remove()
-			client:Notify("You can not place this as you have reached the maximum amount of this item!")
-			return false
-		end
 
 		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		local inventory = ix.item.inventories[item.invID]

@@ -116,3 +116,14 @@ hook.Add("PlayerLoadedCharacter", "expCleanupNWVars", function(client, character
 
 	client.expCleanupList = {}
 end)
+
+if (CLIENT) then
+	function Schema.util.RunInventoryAction(itemID, inventoryID, action, data)
+		net.Start("ixInventoryAction")
+		net.WriteString(action)
+		net.WriteUInt(itemID, 32)
+		net.WriteUInt(inventoryID, 32)
+		net.WriteTable(data or {})
+		net.SendToServer()
+	end
+end

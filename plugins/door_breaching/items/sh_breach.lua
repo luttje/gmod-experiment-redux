@@ -11,10 +11,10 @@ ITEM.description = "A small device which looks similiar to a padlock."
 ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
-		local trace = client:GetEyeTraceNoCursor()
+		local success, message, trace = client:TryTraceInteractAtDistance()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
-			client:Notify("You are not close enough to the entity!")
+        if (not success) then
+			client:Notify(message)
 
 			return false
 		end
@@ -45,9 +45,9 @@ ITEM.functions.Place = {
 
 	OnCanRun = function(item)
 		local client = item.player
-		local trace = client:GetEyeTraceNoCursor()
+		local success, message, trace = client:TryTraceInteractAtDistance()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
+		if (not success) then
 			return false
 		end
 

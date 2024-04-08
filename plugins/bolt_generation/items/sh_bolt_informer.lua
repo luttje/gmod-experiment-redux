@@ -10,37 +10,50 @@ ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "Place it near your bold creators, and be informed when they take damage."
 ITEM.maximum = 5
 
+if (CLIENT) then
+	function ITEM:PopulateTooltip(tooltip)
+		if (not self.maximum) then
+			return
+		end
+
+		local panel = tooltip:AddRowAfter("name", "maximum")
+		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+		panel:SetText("You can only have " .. self.maximum .. " of this item in the world at a time!")
+		panel:SizeToContents()
+	end
+end
+
 ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
-		local character = client:GetCharacter()
-		local trace = client:GetEyeTraceNoCursor()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
-			client:Notify("You cannot place a bolt informer that far away!")
+        if (client:IsObjectLimited("boltInformers", item.maximum)) then
+            client:Notify("You can not place this as you have reached the maximum amount of this item!")
+            return false
+        end
+
+		local success, message, trace = client:TryTraceInteractAtDistance()
+
+		if (not success) then
+			client:Notify(message)
 
 			return false
 		end
 
 		local entity = ents.Create("exp_bolt_informer")
 		entity:SetupBoltInformer(client)
-
-		if (not client:TryAddLimitedObject("boltInformers", entity, item.maximum)) then
-            entity:Remove()
-			client:Notify("You can not place this as you have reached the maximum amount of this item!")
-			return false
-		end
-
 		entity:SetPos(trace.HitPos)
-		entity:Spawn()
+        entity:Spawn()
+		client:AddLimitedObject("boltInformers", entity)
+		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
 	end,
 
 	OnCanRun = function(item)
 		local client = item.player
-		local trace = client:GetEyeTraceNoCursor()
+		local success, message, trace = client:TryTraceInteractAtDistance()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
+		if (not success) then
 			return false
 		end
 
@@ -56,11 +69,3 @@ ITEM.functions.Place = {
 		return true
 	end
 }
-
-function ITEM:OnCanOrder(client)
-	if (SERVER and client:IsObjectLimited("boltInformers", self.maximum)) then
-		client:Notify("You have reached the maximum amount of this item!")
-
-		return false
-	end
-end
