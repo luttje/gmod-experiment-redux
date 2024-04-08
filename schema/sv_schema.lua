@@ -148,28 +148,6 @@ function Schema.BustDownDoor(client, door, force)
 	end)
 end
 
--- TODO: Move this logic to the items
-function Schema.DropWearableItems(client)
-	local spawnPos = client:GetPos() + Vector(0, 0, math.random(1, 48))
-	local character = client:GetCharacter()
-
-	if (character:GetData("shoes")) then
-		ix.item.Spawn("running_shoes", spawnPos)
-	end
-
-	if (character:GetData("helmet")) then
-		ix.item.Spawn("helmet", spawnPos)
-	end
-
-	if (character:GetData("knuckles")) then
-		ix.item.Spawn("brass_knuckles", spawnPos)
-	end
-
-	character:SetData("knuckles", false)
-	character:SetData("helmet", false)
-	character:SetData("shoes", false)
-end
-
 function Schema.PlayerDropRandomItems(client, evenEquipped)
 	local confusingPockets = Schema.perk.GetOwned(PRK_CONFUSINGPOCKETS, client)
 	local character = client:GetCharacter()
@@ -179,8 +157,6 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 		inventory = {},
 		cash = cash
 	}
-
-	Schema.DropWearableItems(client)
 
 	for _, item in pairs(inventory:GetItems(false)) do
 		local losesItem = (confusingPockets and math.random() <= 0.5) or (not confusingPockets and math.random() <= 0.75)
@@ -225,8 +201,6 @@ function Schema.PlayerDropAllItems(client, evenEquipped, disconnectPenalty)
 		inventory = {},
 		cash = cash
 	}
-
-	Schema.DropWearableItems(client)
 
 	for _, item in pairs(inventory:GetItems(false)) do
 		if (item:GetData("equip") and not evenEquipped) then

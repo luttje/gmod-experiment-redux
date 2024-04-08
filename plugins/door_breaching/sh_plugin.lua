@@ -1,8 +1,8 @@
 local PLUGIN = PLUGIN
 
-PLUGIN.name = "TODO"
+PLUGIN.name = "Door Breaching"
 PLUGIN.author = "Experiment Redux"
-PLUGIN.description = "Move these entities to their own plugins."
+PLUGIN.description = "Door breaching and protection systems."
 
 PLUGIN.doorProtectorRange = 256
 
