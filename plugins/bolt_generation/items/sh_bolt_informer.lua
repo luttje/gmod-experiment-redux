@@ -8,6 +8,7 @@ ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "Place it near your bold creators, and be informed when they take damage."
+ITEM.maximum = 5
 
 ITEM.functions.Place = {
 	OnRun = function(item)
@@ -24,10 +25,11 @@ ITEM.functions.Place = {
 		local entity = ents.Create("exp_bolt_informer")
 		entity:SetupBoltInformer(client)
 
-		-- TODO: Limit the amount that can be spawned (TODO: This logic is repetitive, move it somewhere common)
-		local informers = character:GetVar("boltInformers") or {}
-		informers[#informers + 1] = entity
-		character:SetVar("boltInformers", informers, true)
+		if (not client:TryAddLimitedObject("boltInformers", entity, item.maximum)) then
+            entity:Remove()
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		entity:SetPos(trace.HitPos)
 		entity:Spawn()
@@ -56,10 +58,7 @@ ITEM.functions.Place = {
 }
 
 function ITEM:OnCanOrder(client)
-	local character = client:GetCharacter()
-	local protectors = character:GetVar("boltInformers") or {}
-
-	if (#protectors >= 1) then
+	if (SERVER and client:IsObjectLimited("boltInformers", self.maximum)) then
 		client:Notify("You have reached the maximum amount of this item!")
 
 		return false

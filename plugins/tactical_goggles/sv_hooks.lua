@@ -40,7 +40,7 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageInfo)
 end
 
 function PLUGIN:EntityTakeDamage(client, damageInfo)
-	if (not client:HasTacticalGogglesActivated()) then
+	if (not client:IsPlayer() or not client:HasTacticalGogglesActivated()) then
 		return
 	end
 

@@ -37,7 +37,7 @@ end
 
 function ENT:GetEarnings()
 	local generator = self.expGenerator
-	return generator.money * ix.config.Get("incomeMultiplier")
+	return generator.produce * ix.config.Get("incomeMultiplier")
 end
 
 function ENT:ReleaseCharacterCount(character)

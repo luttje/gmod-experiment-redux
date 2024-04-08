@@ -8,6 +8,7 @@ ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "When placed near doors it will prevent them from being shot open. This does not protect from breaches. The protector is not permanent and can be destroyed by others."
+ITEM.maximum = 5
 
 ITEM.functions.Place = {
 	OnRun = function(item)
@@ -15,16 +16,17 @@ ITEM.functions.Place = {
 		local character = client:GetCharacter()
 		local trace = client:GetEyeTraceNoCursor()
 
-		if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
-			client:Notify("You cannot place a bolt protector that far away!")
+        if (trace.HitPos:Distance(client:GetShootPos()) > 192) then
+            client:Notify("You cannot place a bolt protector that far away!")
 
+            return false
+        end
+
+		if (not client:TryAddLimitedObject("doorProtectors", entity, item.maximum)) then
+            entity:Remove()
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
 			return false
 		end
-
-		-- TODO: Limit the amount that can be spawned (TODO: This logic is repetitive, move it somewhere common)
-		local protectors = character:GetVar("doorProtectors") or {}
-		protectors[#protectors + 1] = entity
-		character:SetVar("doorProtectors", protectors, true)
 
 		local entity = ents.Create("exp_door_protector")
 		entity:SetupDoorProtector(client)
@@ -46,10 +48,7 @@ ITEM.functions.Place = {
 }
 
 function ITEM:OnCanOrder(client)
-	local character = client:GetCharacter()
-	local protectors = character:GetVar("doorProtectors") or {}
-
-	if (#protectors >= 1) then
+	if (SERVER and client:IsObjectLimited("doorProtectors", self.maximum)) then
 		client:Notify("You have reached the maximum amount of this item!")
 
 		return false

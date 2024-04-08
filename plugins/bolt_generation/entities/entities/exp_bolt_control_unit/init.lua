@@ -26,7 +26,7 @@ end
 
 function ENT:GetEarnings()
 	local generator = self.expGenerator
-	return (generator.money + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
+	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
 end
 
 function ENT:Upgrade(client)

@@ -92,3 +92,34 @@ function playerMeta:CheckQueuedBoostRemovals()
 
 	character:SetVar("boostsToRemove", boostsToRemove)
 end
+
+function playerMeta:TryAddLimitedObject(objectType, object, limit)
+	local character = self:GetCharacter()
+
+	if (not character) then
+		return false
+	end
+
+    local objects = character:GetVar(objectType) or {}
+
+	if (#objects >= limit) then
+		return false
+	end
+
+	objects[#objects + 1] = object
+    character:SetVar(objectType, objects, true)
+
+	return true
+end
+
+function playerMeta:IsObjectLimited(objectType, limit)
+	local character = self:GetCharacter()
+
+	if (not character) then
+		return false
+	end
+
+	local objects = character:GetVar(objectType) or {}
+
+	return #objects >= limit
+end

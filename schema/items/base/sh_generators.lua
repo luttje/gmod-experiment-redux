@@ -23,7 +23,7 @@ function ITEM:OnRegistered()
 		self.generator.power,
 		self.generator.health,
 		self.generator.maximum,
-		self.generator.money,
+		self.generator.price,
 		self.generator.uniqueID,
 		self.generator.powerName,
 		self.generator.powerPlural,
@@ -32,12 +32,9 @@ function ITEM:OnRegistered()
 end
 
 local function tryOrShowError(client, uniqueID, silent)
-	local character = client:GetCharacter()
-	local generators = character:GetVar("generators") or {}
     local generator = Schema.generator.Get(uniqueID)
-	local maximum = generator.maximum
 
-	if (#generators >= maximum) then
+	if (SERVER and client:IsObjectLimited(uniqueID, generator.maximum)) then
 		if (not silent) then
 			client:Notify("You can not order this as you have reached the maximum amount of this item!")
 		end
@@ -92,10 +89,11 @@ ITEM.functions.Place = {
 			physicsObject:EnableMotion(false)
 		end
 
-		-- TODO: Limit the amount that can be spawned (TODO: This logic is repetitive, move it somewhere common)
-		local generators = character:GetVar("generators") or {}
-		generators[#generators + 1] = entity
-		character:SetVar("generators", generators, true)
+		if (not client:TryAddLimitedObject(generator.uniqueID, entity, generator.maximum)) then
+            entity:Remove()
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		local inventory = ix.item.inventories[item.invID]

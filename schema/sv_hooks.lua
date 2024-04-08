@@ -276,12 +276,12 @@ function Schema:PlayerDestroyGenerator(client, entity, generator)
 	end
 
 	if (Schema.perk.GetOwned(PRK_PAYBACK, client)) then
-		client:GetCharacter():GiveMoney(generator.money)
+		client:GetCharacter():GiveMoney(generator.price)
 
 		return
 	end
 
-	client:GetCharacter():GiveMoney((generator.money * .75))
+	client:GetCharacter():GiveMoney((generator.price * .75))
 end
 
 function Schema:PlayerPerkBought(client, perk)

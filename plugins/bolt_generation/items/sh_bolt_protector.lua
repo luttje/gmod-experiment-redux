@@ -8,6 +8,7 @@ ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "When placed near a BCU it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
+ITEM.maximum = 5
 
 ITEM.functions.Place = {
 	OnRun = function(item)
@@ -24,10 +25,11 @@ ITEM.functions.Place = {
 		local entity = ents.Create("exp_bolt_protector")
 		entity:SetupBoltProtector(client)
 
-		-- TODO: Limit the amount that can be spawned (TODO: This logic is repetitive, move it somewhere common)
-		local protectors = character:GetVar("boltProtectors") or {}
-		protectors[#protectors + 1] = entity
-		character:SetVar("boltProtectors", protectors, true)
+		if (not client:TryAddLimitedObject("boltProtectors", entity, item.maximum)) then
+            entity:Remove()
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		entity:SetPos(trace.HitPos)
 		entity:Spawn()
@@ -47,10 +49,7 @@ ITEM.functions.Place = {
 }
 
 function ITEM:OnCanOrder(client)
-	local character = client:GetCharacter()
-	local protectors = character:GetVar("boltProtectors") or {}
-
-	if (#protectors >= 1) then
+	if (SERVER and client:IsObjectLimited("boltProtectors", self.maximum)) then
 		client:Notify("You have reached the maximum amount of this item!")
 
 		return false

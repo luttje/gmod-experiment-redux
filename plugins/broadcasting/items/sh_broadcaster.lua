@@ -7,6 +7,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Perpetuities"
 ITEM.description = "An antique broadcaster, do you think this'll still work?"
+ITEM.maximum = 5
 
 ITEM.functions.Deploy = {
 	OnRun = function(item)
@@ -27,10 +28,11 @@ ITEM.functions.Deploy = {
 		entity:Spawn()
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
 
-		-- TODO: Limit the amount that can be spawned (TODO: This logic is repetitive, move it somewhere common)
-		local broadcasters = character:GetVar("broadcasters") or {}
-		broadcasters[#broadcasters + 1] = entity
-		character:SetVar("broadcasters", broadcasters, true)
+		if (not client:TryAddLimitedObject("broadcasters", entity, item.maximum)) then
+            entity:Remove()
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		local inventory = ix.item.inventories[item.invID]

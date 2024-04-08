@@ -16,7 +16,7 @@ end
 function Schema:CanPlayerUseBusiness(client, uniqueID)
 	local itemTable = ix.item.list[uniqueID]
 
-	if (itemTable.OnCanOrder) then
+    if (itemTable.OnCanOrder) then
 		return itemTable:OnCanOrder(client)
 	end
 end
