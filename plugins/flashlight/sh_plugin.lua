@@ -20,16 +20,10 @@ function PLUGIN:PlayerSwitchFlashlight(client, on)
 	end
 end
 
-function PLUGIN:PlayerTick(client, moveData)
+function PLUGIN:PlayerSecondElapsed(client)
     if (not client:FlashlightIsOn()) then
         return
     end
-
-    if (self.nextFlashlightCheck and CurTime() < self.nextFlashlightCheck) then
-        return
-    end
-
-	self.nextFlashlightCheck = CurTime() + 1
 
     local hasFlashlight = hook.Run("PlayerHasFlashlight", client)
 

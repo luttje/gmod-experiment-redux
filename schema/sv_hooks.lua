@@ -9,6 +9,10 @@ function Schema:CharacterLoaded(character)
 	Schema.achievement.LoadProgress(client)
 end
 
+function Schema:PlayerSecondElapsed(client)
+	client:CheckQueuedBoostRemovals()
+end
+
 function Schema:EntityTakeDamage(entity, damageInfo)
 	if (not entity:IsPlayer()) then
 		return

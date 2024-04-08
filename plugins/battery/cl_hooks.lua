@@ -6,8 +6,8 @@ ix.bar.Add(function()
 end, Color(182, 255, 0), nil, "battery")
 
 function PLUGIN:ShouldBarDraw(bar)
-	if (bar.identifier == "battery") then
-		return bar:GetValue() < PLUGIN.batteryMax
+    if (bar.identifier == "battery") then
+		return bar:GetValue() < 1
 	end
 end
 

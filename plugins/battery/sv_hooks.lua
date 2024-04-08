@@ -1,12 +1,6 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:PlayerTick(client, moveData)
-    if (self.nextBatteryCheck and CurTime() < self.nextBatteryCheck) then
-        return
-    end
-
-	self.nextBatteryCheck = CurTime() + 1
-
+function PLUGIN:PlayerSecondElapsed(client)
     local character = client:GetCharacter()
 
     if (not character) then

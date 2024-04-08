@@ -55,3 +55,37 @@ function playerMeta:GetAlliance()
 
 	return alliance
 end
+
+function playerMeta:QueueBoostRemove(boostID, attribID, delay)
+    local character = self:GetCharacter()
+
+    if (not character) then
+        return
+    end
+
+    local boostsToRemove = character:GetData("boostsToRemove", {})
+
+    boostsToRemove[boostID] = boostsToRemove[boostID] or {}
+    boostsToRemove[boostID][attribID] = CurTime() + delay
+
+    character:SetData("boostsToRemove", boostsToRemove)
+end
+
+function playerMeta:CheckQueuedBoostRemovals()
+	local character = self:GetCharacter()
+
+	if (not character) then
+		return
+	end
+
+	local boostsToRemove = character:GetData("boostsToRemove", {})
+	local curTime = CurTime()
+
+	for boostID, attributes in pairs(boostsToRemove) do
+		for attribID, removeTime in pairs(attributes) do
+			if (curTime >= removeTime) then
+				character:RemoveBoost(boostID, attribID)
+			end
+		end
+	end
+end

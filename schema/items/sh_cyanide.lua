@@ -6,6 +6,7 @@ ITEM.model = "models/props_junk/garbage_plasticbottle002a.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "A bottle of cyanide, warnings are plastered all over it."
+ITEM.useSound = "npc/barnacle/barnacle_gulp1.wav"
 
 ITEM.functions.Drink = {
 	OnRun = function(item)

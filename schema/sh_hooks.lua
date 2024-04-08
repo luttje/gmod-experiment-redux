@@ -1,6 +1,16 @@
 function Schema:DoPluginIncludes(path, plugin)
-	ix.util.IncludeDir(path.."/achievements", true)
-	ix.util.IncludeDir(path.."/perks", true)
+    ix.util.IncludeDir(path .. "/achievements", true)
+    ix.util.IncludeDir(path .. "/perks", true)
+end
+
+function Schema:PlayerTick(client, moveData)
+    if (self.nextPlayerTick and CurTime() < self.nextPlayerTick) then
+        return
+    end
+
+    self.nextPlayerTick = CurTime() + 1
+
+	hook.Run("PlayerSecondElapsed", client)
 end
 
 function Schema:CanPlayerUseBusiness(client, uniqueID)
