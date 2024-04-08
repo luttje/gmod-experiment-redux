@@ -63,12 +63,12 @@ function playerMeta:QueueBoostRemove(boostID, attribID, delay)
         return
     end
 
-    local boostsToRemove = character:GetData("boostsToRemove", {})
+    local boostsToRemove = character:GetVar("boostsToRemove", {})
 
     boostsToRemove[boostID] = boostsToRemove[boostID] or {}
     boostsToRemove[boostID][attribID] = CurTime() + delay
 
-    character:SetData("boostsToRemove", boostsToRemove)
+    character:SetVar("boostsToRemove", boostsToRemove)
 end
 
 function playerMeta:CheckQueuedBoostRemovals()
@@ -78,14 +78,17 @@ function playerMeta:CheckQueuedBoostRemovals()
 		return
 	end
 
-	local boostsToRemove = character:GetData("boostsToRemove", {})
+	local boostsToRemove = character:GetVar("boostsToRemove", {})
 	local curTime = CurTime()
 
-	for boostID, attributes in pairs(boostsToRemove) do
-		for attribID, removeTime in pairs(attributes) do
-			if (curTime >= removeTime) then
-				character:RemoveBoost(boostID, attribID)
-			end
-		end
-	end
+    for boostID, attributes in pairs(boostsToRemove) do
+        for attribID, removeTime in pairs(attributes) do
+            if (curTime >= removeTime) then
+                character:RemoveBoost(boostID, attribID)
+                boostsToRemove[boostID][attribID] = nil
+            end
+        end
+    end
+
+	character:SetVar("boostsToRemove", boostsToRemove)
 end
