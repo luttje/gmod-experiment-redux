@@ -22,11 +22,16 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 end
 
 function Schema:InitializedPlugins()
+	local ammoItems = {}
 	local items = ix.item.list
 
 	for _, item in pairs(items) do
 		if (item.isAttachment and item.class ~= nil) then
 			Schema.RegisterWeaponAttachment(item)
+		end
+
+		if (item.base == "base_ammo" and item.calibre) then
+			ammoItems[item.calibre] = item
 		end
 
 		if (item.forcedWeaponCalibre) then
@@ -36,6 +41,15 @@ function Schema:InitializedPlugins()
 			end
 
 			Schema.ammo.ForceWeaponCalibre(item.class, item.forcedWeaponCalibre)
+		end
+	end
+
+	local calibres = Schema.ammo.GetAllCalibres()
+
+	-- Check if the calibre has a matching ammo item
+	for _, calibre in ipairs(calibres) do
+		if (not ammoItems[calibre]) then
+			ErrorNoHalt("No ammo item found for calibre '" .. calibre .. "'. You should create an ammo item for this calibre.\n")
 		end
 	end
 end

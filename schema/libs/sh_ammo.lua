@@ -31,25 +31,25 @@ end
 Schema.ammo.RegisterCalibre(createCustomAmmoType("5.7x28mm"), "5.7x28mm", "5.7x28mm Rounds")
 Schema.ammo.RegisterCalibre(createCustomAmmoType("5.56x45mm"), "5.56x45mm", "5.56x45mm Rounds")
 Schema.ammo.RegisterCalibre(createCustomAmmoType("7.62x39mm"), "7.62x39mm", "7.62x39mm Rounds")
-Schema.ammo.RegisterCalibre(createCustomAmmoType("6x35mm"), "6x35mm", "6mm Whisper Rounds") -- TODO: Make item
-Schema.ammo.RegisterCalibre(createCustomAmmoType("7.62x51mm"), "7.62x51mm", "7.62x51mm Rounds") -- TODO: Make item
-Schema.ammo.RegisterCalibre(createCustomAmmoType(".223 Remington"), ".223 Remington", ".223 Remington Rounds") -- TODO: Make item
-Schema.ammo.RegisterCalibre(createCustomAmmoType(".308 Winchester"), ".308 Winchester", ".308 Winchester Rounds") -- TODO: Make item
-Schema.ammo.RegisterCalibre(createCustomAmmoType("12.7x99mm"), "12.7x99mm", ".50 BMG Rounds") -- TODO: Make item
+Schema.ammo.RegisterCalibre(createCustomAmmoType("6x35mm"), "6x35mm", "6mm Whisper Rounds")
+Schema.ammo.RegisterCalibre(createCustomAmmoType("7.62x51mm"), "7.62x51mm", "7.62x51mm Rounds")
+Schema.ammo.RegisterCalibre(createCustomAmmoType(".223 Remington"), ".223 Remington", ".223 Remington Rounds")
+Schema.ammo.RegisterCalibre(createCustomAmmoType(".308 Winchester"), ".308 Winchester", ".308 Winchester Rounds")
+Schema.ammo.RegisterCalibre(createCustomAmmoType("12.7x99mm"), "12.7x99mm", ".50 BMG Rounds")
 
 Schema.ammo.RegisterCalibre(createCustomAmmoType("beanbag"), "beanbag", "Beanbag Pellets")
 Schema.ammo.RegisterCalibre("buckshot", "12 Gauge", "12 Gauge Shells")
-Schema.ammo.RegisterCalibre(createCustomAmmoType("16 Gauge"), "16 Gauge", "16 Gauge Shells") -- TODO: Make item
-Schema.ammo.RegisterCalibre(createCustomAmmoType("23x75mmR"), "23x75mmR", "23x75mmR Shells") -- TODO: Make item
+Schema.ammo.RegisterCalibre(createCustomAmmoType("16 Gauge"), "16 Gauge", "16 Gauge Shells")
+Schema.ammo.RegisterCalibre(createCustomAmmoType("23x75mmR"), "23x75mmR", "23x75mmR Shells")
 
 Schema.ammo.RegisterCalibre("357", ".357", ".357 Rounds")
-Schema.ammo.RegisterCalibre(createCustomAmmoType(".357 SIG"), ".357 SIG", ".357 SIG Rounds")  -- TODO: Make item
+Schema.ammo.RegisterCalibre(createCustomAmmoType(".357 SIG"), ".357 SIG", ".357 SIG Rounds")
 Schema.ammo.RegisterCalibre("pistol", "9x19mm", "9x19mm Rounds")
-Schema.ammo.RegisterCalibre(createCustomAmmoType(".32 ACP"), ".32 ACP", ".32 ACP Rounds")  -- TODO: Make item
+Schema.ammo.RegisterCalibre(createCustomAmmoType(".32 ACP"), ".32 ACP", ".32 ACP Rounds")
 Schema.ammo.RegisterCalibre(createCustomAmmoType(".45 ACP"), ".45 ACP", ".45 ACP Rounds")
 Schema.ammo.RegisterCalibre(createCustomAmmoType(".40 S&W"), ".40 S&W", ".40 S&W")
 
-Schema.ammo.RegisterCalibre(createCustomAmmoType("4.6x30mm"), "4.6x30mm", "4.6x30mm Rounds")  -- TODO: Make item
+Schema.ammo.RegisterCalibre(createCustomAmmoType("4.6x30mm"), "4.6x30mm", "4.6x30mm Rounds")
 
 function Schema.ammo.GetCalibreName(calibre)
     local ammo = Schema.ammo.lookupCalibre[calibre]
@@ -69,6 +69,10 @@ function Schema.ammo.GetCalibreName(calibre)
 	end
 
 	return calibreData.name
+end
+
+function Schema.ammo.GetAllCalibres()
+	return table.GetKeys(Schema.ammo.lookupCalibre)
 end
 
 function Schema.ammo.ConvertToCalibreName(ammo)
