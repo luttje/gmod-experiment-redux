@@ -2,7 +2,7 @@
 {
 	"$basetexture" "dev/dev_combinescanline"
 	"$additive" 1
-	"$alphatest" 1
+	"$vertexalpha" 1
 
 	"Proxies"
 	{
@@ -17,7 +17,7 @@
 		"Sine"
 		{
 			"resultVar" "$color[1]"
-			"sineperiod" .01
+			"sineperiod" .5
 			"sinemin" .3
 			"sinemax" .4
 		}

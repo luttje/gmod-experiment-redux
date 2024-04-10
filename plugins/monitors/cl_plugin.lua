@@ -48,146 +48,176 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 			continue
 		end
 
-		local entityParent = monitor:GetParent()
-		local correctedAngle = monitor:GetAngles()
-		correctedAngle:RotateAroundAxis(monitor:GetForward(), 90)
-		correctedAngle:RotateAroundAxis(monitor:GetUp(), 90)
-		local alpha = 50 + (25 * math.sin(CurTime()) * monitor.random)
+        self:SetupMonitorDrawing(monitor)
+	end
+end
 
-		-- TODO: Make sure not all monitors are blinking at the same time.
-		-- if(monitor.justSparked)then
-		-- 	if(not monitor.justSparkedTimer)then
-		-- 		monitor.justSparkedTimer = true
-		-- 		timer.Simple(0, function()
-		-- 			if(IsValid(monitor))then
-		-- 				monitor.justSparkedTimer = nil
-		-- 				monitor.justSparked = nil
-		-- 			end
-		-- 		end)
-		-- 	end
+function PLUGIN:SetupMonitorDrawing(monitor)
+	local correctedAngle, scale = self:PrepareMonitorForDrawing(monitor)
+	local customRenderTarget, renderTargetMaterial = self:GetMonitorRenderTarget(monitor)
+	local wave = 25 * math.sin(CurTime()) * monitor.random
+	monitor.drawAlphaBackground = 90 + wave
+	monitor.drawAlphaForeground = 225 + wave
+	monitor.drawStutterX = math.random() > 0.01 and 0 or math.sin(CurTime() * 40) * 2
+	monitor.drawStutterY = math.random() > 0.01 and 0 or math.sin(CurTime() * 20) * 4
 
-		-- 	return
-		-- end
+	-- Draw the monitor contents to the render target so we can easily mirror the whole thing
+	render.PushRenderTarget(customRenderTarget)
+	self:DrawMonitorContents(monitor)
+	render.PopRenderTarget()
 
-		local width, height, scale = monitor:GetMonitorWidth(), monitor:GetMonitorHeight(), monitor:GetMonitorScale()
-		local scaledSize = 256 -- TODO: Scale
+	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale)
+	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale, true)
+end
 
-		local direction, distance = nil, 0
+function PLUGIN:PrepareMonitorForDrawing(monitor)
+    local correctedAngle = monitor:GetAngles()
+    correctedAngle:RotateAroundAxis(monitor:GetForward(), 90)
+    correctedAngle:RotateAroundAxis(monitor:GetUp(), 90)
 
-		if (IsValid(TEST_BOUNTY)) then
-			local centerOfMonitorPos =
-				monitor:GetPos()
-				- (
-					monitor:GetAngles():Right() * (width * .5 * scale)
-				)
-				- (
-					monitor:GetAngles():Up() * (height * .5 * scale)
-				)
+    local scale = monitor:GetMonitorScale() or 1
+    local entityParent = monitor:GetParent()
+    if IsValid(entityParent) then
+        scale = scale * entityParent:GetModelScale()
+    end
 
-			-- At 70 on z to point at their face
-			local heading = (TEST_BOUNTY:GetPos() + Vector(0, 0, 70)) - centerOfMonitorPos
+    return correctedAngle, scale
+end
 
-			distance = heading:Length()
-			direction = heading / distance
-		end
+function PLUGIN:GetMonitorRenderTarget(monitor)
+	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
+	local renderTarget = GetRenderTarget("monitor_rendertarget_" .. monitor:EntIndex(), width, height)
 
-		local customRenderTarget = GetRenderTarget("monitor_rendertarget_" .. monitor:EntIndex(), width, height)
-		monitor._RenderTargetMaterial = monitor._RenderTargetMaterial or
+	monitor.expRenderTargetMaterial = monitor.expRenderTargetMaterial or
 		CreateMaterial("monitor_material_" .. monitor:EntIndex(), "UnlitGeneric", {
-			["$basetexture"] = customRenderTarget:GetName(),
+			["$basetexture"] = renderTarget:GetName(),
 			["$translucent"] = 1,
 			["$vertexalpha"] = 1
 		})
 
-		render.PushRenderTarget(customRenderTarget)
-		cam.Start2D()
-		render.Clear(0, 0, 0, 0, true, true)
+	return renderTarget, monitor.expRenderTargetMaterial
+end
 
-		if (direction) then
-			local rotation
-			local correctedDirection = direction
-			local monitorAngles = monitor:GetAngles()
+function PLUGIN:DrawMonitorContents(monitor)
+    cam.Start2D()
+    render.Clear(0, 0, 0, 0, true, true)
+    self:DrawDirectionArrowIfApplicable(monitor)
+    self:DrawMonitorOverlay(monitor)
+    cam.End2D()
+end
 
-			-- Why -1? I dunno, maybe because we're facing the opposite way of the player. This math is beyond me but through 2 hours of trial and error it's now working
-			correctedDirection:Rotate(Angle(0, monitorAngles.y * -1, 0))
-			local x, y, z = math.Round(correctedDirection.x), math.Round(correctedDirection.y),
-				math.Round(correctedDirection.z)
+function PLUGIN:DrawDirectionArrowIfApplicable(monitor)
+	local direction, distance = self:GetDirectionToTarget(monitor)
 
-			-- We ignore the x as we're only drawing an arrow in 2D, without perspective
-			if (y == 0 and z == 1) then
-				rotation = 90
-			elseif (y == 1 and z == 1) then
-				rotation = 45
-			elseif (y == 1 and z == 0) then
-				rotation = 0
-			elseif (y == 1 and z == -1) then
-				rotation = -45
-			elseif (y == 0 and z == -1) then
-				rotation = -90
-			elseif (y == -1 and z == -1) then
-				rotation = -135
-			elseif (y == -1 and z == 0) then
-				rotation = 180
-			elseif (y == -1 and z == 1) then
-				rotation = 135
-			end
+    if (direction) then
+        self:DrawDistanceText(monitor, distance)
+        self:DrawDirectionArrow(monitor, direction)
+    end
+end
 
-			local font = "ixMediumFont"
-			-- TODO: Use this (https://gist.github.com/CaptainPRICE/132fd12cf45a24b39176) to calculate in feet and inches as well if that's what the player prefers
-			local distanceCentimeters = distance / 2
-			local distanceRounded = math.Round(distanceCentimeters / 100)
-			local text = distanceRounded == 0 and "They're right here!" or
-				(distanceRounded .. (distanceRounded == 1 and " meter" or " meters"))
-			local textWidth, textHeight = self:GetCachedTextSize(font, text)
+function PLUGIN:GetDirectionToTarget(monitor)
+	if not IsValid(TEST_BOUNTY) then return end
 
-			surface.SetTextColor(255, 255, 255, alpha)
-			surface.SetFont(font)
-			surface.SetTextPos((width * .5) - (textWidth * .5), (height * .5) + (scaledSize * .5) + 10)
-			surface.DrawText(text)
+	local centerOfMonitorPos = monitor:GetPos()
+		- monitor:GetAngles():Right() * (monitor:GetMonitorWidth() * .5 * monitor:GetMonitorScale())
+		- monitor:GetAngles():Up() * (monitor:GetMonitorHeight() * .5 * monitor:GetMonitorScale())
 
-			surface.SetDrawColor(255, 255, 255, alpha)
-			if (rotation) then
-				surface.SetMaterial(arrowMaterial)
-				surface.DrawTexturedRectRotated(width * .5, height * .5, scaledSize, scaledSize, rotation)
-			else
-				if (x == 1) then
-					surface.SetMaterial(arrowBackwardMaterial)
-				elseif (x == -1) then
-					surface.SetMaterial(arrowForwardMaterial)
-				else
-					-- Draw a dot to indicate the target is directly in front of the screen
-					drawCircle(width * .5, height * .5, scaledSize, 18)
-				end
+	local heading = (TEST_BOUNTY:GetPos() + Vector(0, 0, 70)) - centerOfMonitorPos
+	local distance = heading:Length()
+	local direction = heading / distance
 
-				surface.DrawTexturedRect((width * .5) - (scaledSize * .5), (height * .5) - (scaledSize * .5), scaledSize,
-					scaledSize)
-			end
+	return direction, distance
+end
+
+function PLUGIN:DrawDistanceText(monitor, distance)
+	local font = "ixMediumFont"
+	local distanceCentimeters = distance / 2
+	local distanceRounded = math.Round(distanceCentimeters / 100)
+	local text = distanceRounded == 0 and "They're right here!" or
+		(distanceRounded .. (distanceRounded == 1 and " meter" or " meters"))
+	local textWidth, textHeight = self:GetCachedTextSize(font, text)
+
+	surface.SetTextColor(255, 255, 255, monitor.drawAlphaForeground)
+	surface.SetFont(font)
+	surface.SetTextPos((monitor:GetMonitorWidth() * .5) - (textWidth * .5), (monitor:GetMonitorHeight() * .5) + 128)
+	surface.DrawText(text)
+end
+
+function PLUGIN:DrawDirectionArrow(monitor, direction)
+	local rotation
+	local correctedDirection = direction
+	local monitorAngles = monitor:GetAngles()
+
+	correctedDirection:Rotate(Angle(0, monitorAngles.y * -1, 0))
+	local x, y, z = math.Round(correctedDirection.x), math.Round(correctedDirection.y), math.Round(correctedDirection.z)
+
+	if (y == 0 and z == 1) then
+		rotation = 90
+	elseif (y == 1 and z == 1) then
+		rotation = 45
+	elseif (y == 1 and z == 0) then
+		rotation = 0
+	elseif (y == 1 and z == -1) then
+		rotation = -45
+	elseif (y == 0 and z == -1) then
+		rotation = -90
+	elseif (y == -1 and z == -1) then
+		rotation = -135
+	elseif (y == -1 and z == 0) then
+		rotation = 180
+	elseif (y == -1 and z == 1) then
+		rotation = 135
+	end
+
+	surface.SetDrawColor(255, 255, 255, monitor.drawAlphaForeground)
+	if (rotation) then
+		surface.SetMaterial(arrowMaterial)
+		surface.DrawTexturedRectRotated(monitor:GetMonitorWidth() * .5, monitor:GetMonitorHeight() * .5, 256, 256, rotation)
+	else
+		if (x == 1) then
+			surface.SetMaterial(arrowBackwardMaterial)
+		elseif (x == -1) then
+			surface.SetMaterial(arrowForwardMaterial)
+		else
+			drawCircle(monitor:GetMonitorWidth() * .5, monitor:GetMonitorHeight() * .5, 256, 18)
 		end
 
-		local texW, texH = 512, 512
-		surface.SetDrawColor(200, 200, 200, 100)
-		surface.SetMaterial(scanLinesMaterial)
-		surface.DrawTexturedRectUV(0, 0, width, height, 0, 0, width / texW, height / texH)
-		cam.End2D()
-		render.PopRenderTarget()
-
-		cam.Start3D2D(
-			monitor:GetPos(),
-			correctedAngle,
-			scale and (scale * (IsValid(entityParent) and entityParent:GetModelScale() or 1)) or 1)
-		surface.SetDrawColor(255, 255, 255, alpha)
-		surface.SetMaterial(monitor._RenderTargetMaterial)
-		surface.DrawTexturedRect(0, 0, width, height)
-		cam.End3D2D()
-
-		correctedAngle:RotateAroundAxis(monitor:GetUp(), 180)
-		cam.Start3D2D(
-			monitor:GetPos(),
-			correctedAngle,
-			scale and (scale * (IsValid(entityParent) and entityParent:GetModelScale() or 1)) or 1)
-		surface.SetDrawColor(100, 100, 100, alpha)
-		surface.SetMaterial(monitor._RenderTargetMaterial)
-		surface.DrawTexturedRectUV(-width, 0, width, height, 1, 0, 0, 1)
-		cam.End3D2D()
+		surface.DrawTexturedRect(monitor:GetMonitorWidth() * .5 - 128, monitor:GetMonitorHeight() * .5 - 128, 256, 256)
 	end
+end
+
+function PLUGIN:DrawMonitorOverlay(monitor)
+	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
+
+    local texW, texH = 512, 512
+    surface.SetDrawColor(200, 200, 200, 200)
+    surface.SetMaterial(scanLinesMaterial)
+    surface.DrawTexturedRectUV(0, 0, width, height, 0, 0, width / texW, height / texH)
+end
+
+function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale, mirrored)
+	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
+
+	if (mirrored) then
+		correctedAngle = Angle(
+			correctedAngle.p,
+			correctedAngle.y,
+			correctedAngle.r
+		)
+		correctedAngle:RotateAroundAxis(monitor:GetUp(), 180)
+	end
+
+	cam.Start3D2D(
+        monitor:GetPos(),
+        correctedAngle,
+        scale
+    )
+    surface.SetDrawColor(255, 255, 255, monitor.drawAlphaBackground)
+	surface.SetMaterial(renderTargetMaterial)
+	if (mirrored) then
+		surface.DrawTexturedRectUV(-width, 0, width, height, 1, 0, 0, 1)
+	else
+    	surface.DrawTexturedRect(monitor.drawStutterX, monitor.drawStutterY, width - monitor.drawStutterX, height - monitor.drawStutterY)
+	end
+    cam.End3D2D()
 end
