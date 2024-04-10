@@ -21,7 +21,7 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 	end
 end
 
-function Schema:InitializedSchema()
+function Schema:InitializedPlugins()
 	local items = ix.item.list
 
 	for _, item in pairs(items) do

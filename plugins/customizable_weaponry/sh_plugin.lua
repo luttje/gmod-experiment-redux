@@ -23,7 +23,7 @@ local conVarsToSet = {
 	-- Balance recoil, damage and other features
 	["tacrp_mult_recoil_kick"] = { isServer = true, value = 0.75 },
 	["tacrp_mult_recoil_vis"] = { isServer = true, value = 0.5 },
-	["sway"] = { isServer = true, value = false }, -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
+	["tacrp_sway"] = { isServer = true, value = false }, -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
 	["tacrp_freeaim"] = { isServer = true, value = false }, -- false disables: While not aiming, moving around will cause the crosshair to move off center
 	-- ["tacrp_physbullet"] = false, -- false disables: Bullets will be hitscan up to a certain range depending on muzzle velocity
 	-- ["tacrp_recoilpattern"] = false,
