@@ -52,8 +52,6 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 		local correctedAngle = monitor:GetAngles()
 		correctedAngle:RotateAroundAxis(monitor:GetForward(), 90)
 		correctedAngle:RotateAroundAxis(monitor:GetUp(), 90)
-
-		local scale = monitor:GetMonitorScale()
 		local alpha = 50 + (25 * math.sin(CurTime()) * monitor.random)
 
 		-- TODO: Make sure not all monitors are blinking at the same time.
@@ -93,13 +91,17 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 			direction = heading / distance
 		end
 
-		-- TODO: Draw back-side (mirrored) as well
-		cam.Start3D2D(
-			monitor:GetPos(),
-			correctedAngle,
-			scale and (scale * (IsValid(entityParent) and entityParent:GetModelScale() or 1)) or 1)
-		surface.SetDrawColor(77, 148, 255, alpha)
-		surface.DrawRect(0, 0, width, height)
+		local customRenderTarget = GetRenderTarget("monitor_rendertarget_" .. monitor:EntIndex(), width, height)
+		monitor._RenderTargetMaterial = monitor._RenderTargetMaterial or
+		CreateMaterial("monitor_material_" .. monitor:EntIndex(), "UnlitGeneric", {
+			["$basetexture"] = customRenderTarget:GetName(),
+			["$translucent"] = 1,
+			["$vertexalpha"] = 1
+		})
+
+		render.PushRenderTarget(customRenderTarget)
+		cam.Start2D()
+		render.Clear(0, 0, 0, 0, true, true)
 
 		if (direction) then
 			local rotation
@@ -166,6 +168,26 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 		surface.SetDrawColor(200, 200, 200, 100)
 		surface.SetMaterial(scanLinesMaterial)
 		surface.DrawTexturedRectUV(0, 0, width, height, 0, 0, width / texW, height / texH)
+		cam.End2D()
+		render.PopRenderTarget()
+
+		cam.Start3D2D(
+			monitor:GetPos(),
+			correctedAngle,
+			scale and (scale * (IsValid(entityParent) and entityParent:GetModelScale() or 1)) or 1)
+		surface.SetDrawColor(255, 255, 255, alpha)
+		surface.SetMaterial(monitor._RenderTargetMaterial)
+		surface.DrawTexturedRect(0, 0, width, height)
+		cam.End3D2D()
+
+		correctedAngle:RotateAroundAxis(monitor:GetUp(), 180)
+		cam.Start3D2D(
+			monitor:GetPos(),
+			correctedAngle,
+			scale and (scale * (IsValid(entityParent) and entityParent:GetModelScale() or 1)) or 1)
+		surface.SetDrawColor(100, 100, 100, alpha)
+		surface.SetMaterial(monitor._RenderTargetMaterial)
+		surface.DrawTexturedRectUV(-width, 0, width, height, 1, 0, 0, 1)
 		cam.End3D2D()
 	end
 end
