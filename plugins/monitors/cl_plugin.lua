@@ -48,13 +48,13 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 			continue
 		end
 
-        self:SetupMonitorDrawing(monitor)
+		self:SetupMonitorDrawing(monitor)
 	end
 end
 
 function PLUGIN:SetupMonitorDrawing(monitor)
 	local correctedAngle, scale = self:PrepareMonitorForDrawing(monitor)
-	local customRenderTarget, renderTargetMaterial = self:GetMonitorRenderTarget(monitor)
+	local customRenderTarget, renderTargetMaterial, renderTargetMaterialMirrored = self:GetMonitorRenderTarget(monitor)
 	local wave = 25 * math.sin(CurTime()) * monitor.random
 	monitor.drawAlphaBackground = 90 + wave
 	monitor.drawAlphaForeground = 225 + wave
@@ -66,22 +66,22 @@ function PLUGIN:SetupMonitorDrawing(monitor)
 	self:DrawMonitorContents(monitor)
 	render.PopRenderTarget()
 
-	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale)
-	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale, true)
+	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial)
+	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial, renderTargetMaterialMirrored)
 end
 
 function PLUGIN:PrepareMonitorForDrawing(monitor)
-    local correctedAngle = monitor:GetAngles()
-    correctedAngle:RotateAroundAxis(monitor:GetForward(), 90)
-    correctedAngle:RotateAroundAxis(monitor:GetUp(), 90)
+	local correctedAngle = monitor:GetAngles()
+	correctedAngle:RotateAroundAxis(monitor:GetForward(), 90)
+	correctedAngle:RotateAroundAxis(monitor:GetUp(), 90)
 
-    local scale = monitor:GetMonitorScale() or 1
-    local entityParent = monitor:GetParent()
-    if IsValid(entityParent) then
-        scale = scale * entityParent:GetModelScale()
-    end
+	local scale = monitor:GetMonitorScale() or 1
+	local entityParent = monitor:GetParent()
+	if IsValid(entityParent) then
+		scale = scale * entityParent:GetModelScale()
+	end
 
-    return correctedAngle, scale
+	return correctedAngle, scale
 end
 
 function PLUGIN:GetMonitorRenderTarget(monitor)
@@ -94,25 +94,32 @@ function PLUGIN:GetMonitorRenderTarget(monitor)
 			["$translucent"] = 1,
 			["$vertexalpha"] = 1
 		})
+	monitor.expRenderTargetMaterialMirrored = monitor.expRenderTargetMaterialMirrored or
+		CreateMaterial("monitor_material_mirrored_" .. monitor:EntIndex(), "UnlitGeneric", {
+			["$basetexture"] = renderTarget:GetName(),
+			["$translucent"] = 1,
+			["$vertexalpha"] = 1,
+			["$basetexturetransform"] = "center .5 .5 scale -1 1 rotate 0 translate 0 0"
+		})
 
-	return renderTarget, monitor.expRenderTargetMaterial
+	return renderTarget, monitor.expRenderTargetMaterial, monitor.expRenderTargetMaterialMirrored
 end
 
 function PLUGIN:DrawMonitorContents(monitor)
-    cam.Start2D()
-    render.Clear(0, 0, 0, 0, true, true)
-    self:DrawDirectionArrowIfApplicable(monitor)
-    self:DrawMonitorOverlay(monitor)
-    cam.End2D()
+	cam.Start2D()
+	render.Clear(0, 0, 0, 0, true, true)
+	self:DrawDirectionArrowIfApplicable(monitor)
+	self:DrawMonitorOverlay(monitor)
+	cam.End2D()
 end
 
 function PLUGIN:DrawDirectionArrowIfApplicable(monitor)
 	local direction, distance = self:GetDirectionToTarget(monitor)
 
-    if (direction) then
-        self:DrawDistanceText(monitor, distance)
-        self:DrawDirectionArrow(monitor, direction)
-    end
+	if (direction) then
+		self:DrawDistanceText(monitor, distance)
+		self:DrawDirectionArrow(monitor, direction)
+	end
 end
 
 function PLUGIN:GetDirectionToTarget(monitor)
@@ -172,7 +179,8 @@ function PLUGIN:DrawDirectionArrow(monitor, direction)
 	surface.SetDrawColor(255, 255, 255, monitor.drawAlphaForeground)
 	if (rotation) then
 		surface.SetMaterial(arrowMaterial)
-		surface.DrawTexturedRectRotated(monitor:GetMonitorWidth() * .5, monitor:GetMonitorHeight() * .5, 256, 256, rotation)
+		surface.DrawTexturedRectRotated(monitor:GetMonitorWidth() * .5, monitor:GetMonitorHeight() * .5, 256, 256,
+			rotation)
 	else
 		if (x == 1) then
 			surface.SetMaterial(arrowBackwardMaterial)
@@ -189,35 +197,49 @@ end
 function PLUGIN:DrawMonitorOverlay(monitor)
 	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
 
-    local texW, texH = 512, 512
-    surface.SetDrawColor(200, 200, 200, 200)
-    surface.SetMaterial(scanLinesMaterial)
-    surface.DrawTexturedRectUV(0, 0, width, height, 0, 0, width / texW, height / texH)
+	local texW, texH = 512, 512
+	surface.SetDrawColor(200, 200, 200, 200)
+	surface.SetMaterial(scanLinesMaterial)
+	surface.DrawTexturedRectUV(0, 0, width, height, 0, 0, width / texW, height / texH)
 end
 
-function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, correctedAngle, scale, mirrored)
+function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, renderTargetMaterialMirrored)
 	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
+	local halfWidth = width * .5
+	local halfHeight = height * .5
+	local monitorPos = monitor:GetPos()
+	local monitorRight = monitor:GetRight()
+	local monitorUp = monitor:GetUp()
 
-	if (mirrored) then
-		correctedAngle = Angle(
-			correctedAngle.p,
-			correctedAngle.y,
-			correctedAngle.r
+	monitorPos = monitorPos + monitorRight * -halfWidth
+	monitorPos = monitorPos + monitorUp * -halfHeight
+
+	local quadPoints = {}
+
+	-- TODO: With DrawQuad we can use 4 points to draw the monitor, instead of trying to set it up with scaling and width/height conversions and whatnot.
+	-- TODO: Change the config UI to let users set the 4 points (using their physgun or something) and then we can draw the monitor based on those points.
+	quadPoints[1] = monitorPos + monitorRight * halfWidth + monitorUp * halfHeight
+	quadPoints[2] = monitorPos - monitorRight * halfWidth + monitorUp * halfHeight
+	quadPoints[3] = monitorPos - monitorRight * halfWidth - monitorUp * halfHeight
+	quadPoints[4] = monitorPos + monitorRight * halfWidth - monitorUp * halfHeight
+
+	render.SetMaterial(renderTargetMaterial)
+	render.DrawQuad(
+		quadPoints[1],
+		quadPoints[2],
+		quadPoints[3],
+		quadPoints[4],
+		Color(255, 255, 255, monitor.drawAlphaBackground)
+	)
+
+	if (renderTargetMaterialMirrored) then
+		render.SetMaterial(renderTargetMaterialMirrored)
+		render.DrawQuad(
+			quadPoints[2],
+			quadPoints[1],
+			quadPoints[4],
+			quadPoints[3],
+			Color(255, 255, 255, monitor.drawAlphaBackground)
 		)
-		correctedAngle:RotateAroundAxis(monitor:GetUp(), 180)
 	end
-
-	cam.Start3D2D(
-        monitor:GetPos(),
-        correctedAngle,
-        scale
-    )
-    surface.SetDrawColor(255, 255, 255, monitor.drawAlphaBackground)
-	surface.SetMaterial(renderTargetMaterial)
-	if (mirrored) then
-		surface.DrawTexturedRectUV(-width, 0, width, height, 1, 0, 0, 1)
-	else
-    	surface.DrawTexturedRect(monitor.drawStutterX, monitor.drawStutterY, width - monitor.drawStutterX, height - monitor.drawStutterY)
-	end
-    cam.End3D2D()
 end
