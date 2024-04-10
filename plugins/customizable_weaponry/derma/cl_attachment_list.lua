@@ -45,6 +45,7 @@ function PANEL:AddCompatibleWeapon(itemTable)
 	label:DockMargin(5, 0, 0, 0)
 	label:SetFont("ixMediumFont")
 	label:SetText(weapon.PrintName)
+	label:SizeToContents()
 	label:SetContentAlignment(4)
 	label:SetExpensiveShadow(1, Color(0, 0, 0, 150))
 end

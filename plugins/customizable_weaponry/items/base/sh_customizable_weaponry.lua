@@ -4,6 +4,14 @@ ITEM.base = "base_weapons"
 ITEM.name = "TacRP Weapon"
 ITEM.description = "A weapon that can be enhanced with attachments."
 
+function ITEM:GetFilters()
+	local filters = {}
+
+	filters["Type: " .. self.weaponCategory] = "checkbox"
+
+	return filters
+end
+
 function ITEM:OnEquipWeapon(client, weapon)
 	local attachments = self:GetData("attachments", {})
 

@@ -70,6 +70,29 @@ function ITEM.PaintOver(icon, itemTable, w, h)
 	end
 end
 
+function ITEM:GetSearchMatches(search)
+	local compatibleItems = PLUGIN:GetCompatibleItems(self.attachmentId)
+
+	for _, item in ipairs(compatibleItems) do
+		if (item.name:lower():find(search, 1, true)) then
+			return true
+		end
+	end
+
+	return false
+end
+
+function ITEM:GetFilters()
+	local compatibleWeapons = PLUGIN:GetCompatibleItems(self.attachmentId)
+	local filters = {}
+
+	for _, itemTable in pairs(compatibleWeapons) do
+		filters["Compatible with " .. itemTable.name] = "checkbox"
+	end
+
+	return filters
+end
+
 ITEM.functions.ListCompatibleItems = {
 	name = "List Compatible Items",
 	icon = "icon16/text_list_bullets.png",
