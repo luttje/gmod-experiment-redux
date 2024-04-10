@@ -53,6 +53,8 @@ function PANEL:Populate(attachmentId)
 	local compatibleItems = PLUGIN:GetCompatibleItems(attachmentId)
 	local attachment = TacRP.GetAttTable(attachmentId)
 
+	table.SortByMember(compatibleItems, "name", true)
+
 	self:SetTitle("Weapons compatible with the '" .. attachment.PrintName .. "'")
 
 	for _, weaponItem in ipairs(compatibleItems) do
