@@ -7,6 +7,25 @@ ITEM.model = "models/weapons/tacint/addons/optic_rmr_hq.mdl"
 ITEM.attachmentId = "optic_rmr"
 ITEM.category = "Weapon Attachments"
 
+-- TODO: This is too cluttered
+-- if (CLIENT) then
+--     function ITEM:PopulateTooltip(tooltip)
+-- 		local compatibleItems = PLUGIN:GetCompatibleItems(self.attachmentId)
+-- 		local compatibleItemsString = ""
+
+-- 		for _, item in ipairs(compatibleItems) do
+-- 			compatibleItemsString = compatibleItemsString .. item.name .. ", "
+-- 		end
+
+--         local panel = tooltip:AddRowAfter("name", "compatibleItems")
+--         panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
+--         panel:SetText("Compatible with: " .. compatibleItemsString)
+-- 		panel:SizeToContents()
+
+-- 		return tooltip
+-- 	end
+-- end
+
 function ITEM:GetModel()
 	if (SERVER) then
 		-- Attachments are really small, so to prevent them glitching, show a bigger model when spawning the item on the server
@@ -21,6 +40,44 @@ function ITEM:GetAttachment()
 
 	return attachment
 end
+
+-- Hack a context menu into the business panel for attachments to list compatible weapons before the player buys them
+function ITEM.PaintOver(icon, itemTable, w, h)
+	local parent = icon:GetParent()
+
+	if (not parent) then
+		return
+	end
+
+	if (parent:GetName() ~= "ixBusinessItem") then
+		return
+	end
+
+	if (icon.expHasInjectedContextMenu) then
+		return
+	end
+
+	icon.expHasInjectedContextMenu = true
+
+	icon.DoRightClick = function(icon)
+		local menu = DermaMenu()
+
+		menu:AddOption("List Compatible Items", function()
+			PLUGIN:ShowCompatibleItems(itemTable.attachmentId)
+		end):SetImage("icon16/text_list_bullets.png")
+
+		menu:Open()
+	end
+end
+
+ITEM.functions.ListCompatibleItems = {
+	name = "List Compatible Items",
+	icon = "icon16/text_list_bullets.png",
+	OnClick = function(item)
+		PLUGIN:ShowCompatibleItems(item.attachmentId)
+		return false
+	end,
+}
 
 ITEM.functions.Attach = {
 	name = "Attach to a Weapon",

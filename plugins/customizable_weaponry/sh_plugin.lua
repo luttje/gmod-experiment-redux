@@ -62,3 +62,52 @@ for conVarName, value in pairs(conVarsToSet) do
 		ErrorNoHalt("Invalid value type for conVar " .. conVarName .. " in conVarsToSet.")
 	end
 end
+
+PLUGIN.compatibleItemsLookup = {}
+
+function PLUGIN:GetCompatibleItems(attachmentId)
+	local attachment = TacRP.GetAttTable(attachmentId)
+	local categories = istable(attachment.Category) and attachment.Category or { attachment.Category }
+	local compatibleItems = {}
+
+	for _, category in ipairs(categories) do
+		local items = self.compatibleItemsLookup[category]
+
+		if (items) then
+			for _, item in ipairs(items) do
+				compatibleItems[#compatibleItems + 1] = item
+			end
+		end
+	end
+
+	return compatibleItems
+end
+
+function PLUGIN:InitializedPlugins()
+	local items = ix.item.list
+
+	for _, item in pairs(items) do
+		if (item.base ~= "base_customizable_weaponry") then
+			continue
+		end
+
+		local swep = weapons.Get(item.class)
+
+		if (not swep or not swep.Attachments) then
+			continue
+		end
+
+		for attachmentSlotId, attachmentSlot in pairs(swep.Attachments) do
+			local categories = istable(attachmentSlot.Category) and attachmentSlot.Category or { attachmentSlot.Category }
+
+			for _, category in ipairs(categories) do
+				if (not self.compatibleItemsLookup[category]) then
+					self.compatibleItemsLookup[category] = {}
+				end
+
+				local newIndex = #self.compatibleItemsLookup[category] + 1
+				self.compatibleItemsLookup[category][newIndex] = item
+			end
+		end
+	end
+end

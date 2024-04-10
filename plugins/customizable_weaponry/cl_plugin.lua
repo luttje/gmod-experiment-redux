@@ -8,3 +8,8 @@ function TacRP.GetBind(binding)
 
     return string.upper(bind)
 end
+
+function PLUGIN:ShowCompatibleItems(attachmentId)
+	local window = vgui.Create("expAttachmentList")
+	window:Populate(attachmentId)
+end
