@@ -12,4 +12,4 @@ ITEM.iconCam = {
 	fov = 5.13
 }
 
-Schema.ammo.ForceWeaponCalibre(ITEM.class, ".40 S&W")
+ITEM.forcedWeaponCalibre = ".40 S&W"

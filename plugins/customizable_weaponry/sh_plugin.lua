@@ -19,6 +19,22 @@ local conVarsToSet = {
 	-- This is because Material("*.png") fails to load on the server
 	-- See https://wiki.facepunch.com/gmod/Global.Material#description
 	["tacrp_generateattentities"] = { isServer = true, value = false },
+
+	-- Balance recoil, damage and other features
+	["tacrp_mult_recoil_kick"] = { isServer = true, value = 0.75 },
+	["tacrp_mult_recoil_vis"] = { isServer = true, value = 0.5 },
+	["sway"] = { isServer = true, value = false }, -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
+	["tacrp_freeaim"] = { isServer = true, value = false }, -- false disables: While not aiming, moving around will cause the crosshair to move off center
+	-- ["tacrp_physbullet"] = false, -- false disables: Bullets will be hitscan up to a certain range depending on muzzle velocity
+	-- ["tacrp_recoilpattern"] = false,
+	-- ["tacrp_altrecoil"] = false, -- false disables: If enabled, gaining bloom intensifies recoil but does not modify spread.\nIf disabled, gaining bloom increases spread but does not modify recoil kick (old behavior).\nBloom is gained when firing consecutive shots.
+	-- ["tacrp_mult_damage"] = 0.5,
+	-- ["tacrp_mult_damage_magnum"] = 0.8,
+	-- ["tacrp_mult_damage_sniper"] = 0.8,
+	-- ["tacrp_mult_damage_shotgun"] = 0.8,
+	-- ["tacrp_mult_damage_explosive"] = 0.5,
+	-- ["tacrp_penalty_reload"] = false,
+	-- ["tacrp_penalty_melee"] = false,
 }
 
 for conVarName, value in pairs(conVarsToSet) do

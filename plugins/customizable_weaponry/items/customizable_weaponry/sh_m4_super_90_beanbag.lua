@@ -21,7 +21,4 @@ ITEM.requiresGunsmith = true
 ITEM.attachmentOffsetAngles = Angle(0, 0, 0)
 ITEM.attachmentOffsetVector = Vector(-3.96, 4.95, -2.97)
 
--- We must delay forcing calibre until the plugin has been initialized (otherwise the SWEP will not have been registered yet)
-hook.Add("InitializedPlugins", "expCustomizableWeaponryBeanbagShotgun", function()
-	Schema.ammo.ForceWeaponCalibre(ITEM.class, "beanbag")
-end)
+ITEM.forcedWeaponCalibre = "beanbag"
