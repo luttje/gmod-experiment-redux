@@ -2,6 +2,12 @@ function Schema:GetGameDescription()
 	return Schema.name
 end
 
+function Schema:OnPhysgunFreeze(weapon, physObj, entity, client)
+	if (not IsValid(physObj)) then
+		return false
+	end
+end
+
 function Schema:CharacterLoaded(character)
 	local client = character:GetPlayer()
 

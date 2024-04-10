@@ -8,7 +8,7 @@ function Schema:LoadFonts(font, genericFont)
 end
 
 function Schema:ContextMenuOpen()
-	return false
+	return LocalPlayer():IsAdmin() and IS_CONTEXT_MENU_ENABLED
 end
 
 function Schema:RenderScreenspaceEffects()

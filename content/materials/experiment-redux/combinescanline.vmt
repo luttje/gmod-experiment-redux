@@ -1,0 +1,32 @@
+"UnlitGeneric"
+{
+	"$basetexture" "dev/dev_combinescanline"
+	"$additive" 1
+	"$vertexalpha" 1
+
+	"Proxies"
+	{
+
+		"Sine"
+		{
+			"resultVar" "$color[0]"
+			"sineperiod" 1
+			"sinemin" .2
+			"sinemax" .3
+		}
+		"Sine"
+		{
+			"resultVar" "$color[1]"
+			"sineperiod" .5
+			"sinemin" .3
+			"sinemax" .4
+		}
+
+		"TextureScroll"
+		{
+			"texturescrollvar" "$baseTextureTransform"
+			"texturescrollrate" .02
+			"texturescrollangle" -90
+		}
+	}
+}
