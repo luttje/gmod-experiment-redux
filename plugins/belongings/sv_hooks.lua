@@ -10,10 +10,6 @@ end
 
 function PLUGIN:CanTransferItem(item, sourceInventory, targetInventory)
 	if (targetInventory.vars and targetInventory.vars.isBelongings) then
-		if (targetInventory.vars.isBelongingsDropping) then
-			return true
-		end
-
 		return false
 	end
 end
@@ -74,9 +70,6 @@ function PLUGIN:CreatePlayerDropItemsContainerEntity(client, character, dropInfo
 	entity:Spawn()
 
 	ix.inventory.New(0, self:GetPerfectFitInventoryType(dropInfo.inventory), function(inventory)
-		inventory.vars.isBelongings = entity
-		inventory.vars.isBelongingsDropping = true
-
 		if (IsValid(entity)) then
 			for _, item in ipairs(dropInfo.inventory) do
 				inventory:Add(item.id, 1, item.data)
@@ -85,6 +78,7 @@ function PLUGIN:CreatePlayerDropItemsContainerEntity(client, character, dropInfo
 			entity:SetInventory(inventory)
 		end
 
-		inventory.vars.isBelongingsDropping = false
+		-- Set this after all the items have been added.
+		inventory.vars.isBelongings = entity
 	end)
 end

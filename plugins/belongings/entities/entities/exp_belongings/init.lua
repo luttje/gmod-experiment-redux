@@ -71,24 +71,27 @@ end
 function ENT:OpenInventory(activator)
 	local inventory = self:GetInventory()
 
-	if (inventory) then
-		local name = self:GetDisplayName()
-
-		ix.storage.Open(activator, inventory, {
-			name = name,
-			entity = self,
-			searchTime = ix.config.Get("containerOpenTime", 0.7),
-			data = { money = self:GetMoney() },
-			OnPlayerOpen = function()
-			end,
-			OnPlayerClose = function()
-
-				ix.log.Add(activator, "closeContainer", name, inventory:GetID())
-			end
-		})
-
-		ix.log.Add(activator, "openContainer", name, inventory:GetID())
+	if (not inventory) then
+		ErrorNoHalt("Attempt to open belongings with no inventory!\n")
+		return
 	end
+
+	local name = self:GetDisplayName()
+
+	ix.storage.Open(activator, inventory, {
+		name = name,
+		entity = self,
+		searchTime = ix.config.Get("containerOpenTime", 0.7),
+		data = { money = self:GetMoney() },
+		OnPlayerOpen = function()
+		end,
+		OnPlayerClose = function()
+
+			ix.log.Add(activator, "closeContainer", name, inventory:GetID())
+		end
+	})
+
+	ix.log.Add(activator, "openContainer", name, inventory:GetID())
 end
 
 function ENT:Use(activator)

@@ -14,11 +14,11 @@ function PLUGIN:LoadBelongings()
 		entity:Spawn()
 
 		ix.inventory.Restore(inventoryID, belongingsData.invWidth, belongingsData.invHeight, function(inventory)
-			inventory.vars.isBelongings = entity
-
 			if (IsValid(entity)) then
 				entity:SetInventory(inventory)
 			end
+
+			inventory.vars.isBelongings = entity
 		end)
 
 		if (not belongingsData.moveable) then
