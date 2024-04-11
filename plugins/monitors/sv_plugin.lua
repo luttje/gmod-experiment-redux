@@ -3,7 +3,7 @@ local PLUGIN = PLUGIN
 util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
 
--- ix.plugin.list["monitors"]:SetTarget(player.GetByID(1))
+-- lua_run ix.plugin.list["monitors"]:SetTarget(player.GetByID(1))
 function PLUGIN:SetTarget(entity)
 	net.Start("expSetMonitorTarget")
 	net.WriteEntity(entity)

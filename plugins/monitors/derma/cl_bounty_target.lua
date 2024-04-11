@@ -23,7 +23,7 @@ function PANEL:DrawDistanceText(distance)
 		(distanceRounded .. (distanceRounded == 1 and " meter" or " meters"))
 	local textWidth, textHeight = PLUGIN:GetCachedTextSize(font, text)
 
-	surface.SetTextColor(255, 255, 255, 255)
+	surface.SetTextColor(255, 255, 255, 90)
 	surface.SetFont(font)
 	surface.SetTextPos((self:GetWide() * .5) - (textWidth * .5), (self:GetTall() * .5) + 128)
 	surface.DrawText(text)
@@ -55,7 +55,7 @@ function PANEL:DrawDirectionArrow(direction)
 		rotation = 135
 	end
 
-	surface.SetDrawColor(255, 255, 255, 255)
+	surface.SetDrawColor(255, 255, 255, 90)
 	if (rotation) then
 		surface.SetMaterial(arrowMaterial)
 		surface.DrawTexturedRectRotated(self:GetWide() * .5, self:GetTall() * .5, 256, 256, rotation)

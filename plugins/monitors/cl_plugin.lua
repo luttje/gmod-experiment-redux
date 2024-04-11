@@ -6,6 +6,14 @@ net.Receive("expSetMonitorTarget", function(length)
 	local entity = net.ReadEntity()
 
 	PLUGIN.targetedEntity = IsValid(entity) and entity or nil
+
+	local monitors = ents.FindByClass("exp_monitor")
+
+	for _, monitor in pairs(monitors) do
+		if (IsValid(entity)) then
+			PLUGIN:SetMonitorTargetVgui(monitor, function(parent) return vgui.Create("expMonitorTarget", parent) end)
+		end
+	end
 end)
 
 net.Receive("expMonitorsPrintPresets", function(length)
@@ -66,8 +74,8 @@ end
 function PLUGIN:SetupMonitorDrawing(monitor)
 	local customRenderTarget, renderTargetMaterial, renderTargetMaterialMirrored = self:GetMonitorRenderTarget(monitor)
 	local wave = 25 * math.sin(CurTime()) * monitor.random
-	monitor.drawAlphaBackground = 90 + wave
-	monitor.drawAlphaForeground = 225 + wave
+	monitor.drawAlphaBackground = 55 + wave
+	monitor.drawAlphaForeground = 90 + wave
 	monitor.drawStutterX = math.random() > 0.01 and 0 or math.sin(CurTime() * 40) * 2
 	monitor.drawStutterY = math.random() > 0.01 and 0 or math.sin(CurTime() * 20) * 4
 
@@ -88,14 +96,14 @@ function PLUGIN:GetMonitorRenderTarget(monitor)
 		CreateMaterial("monitor_material_" .. monitor:EntIndex(), "UnlitGeneric", {
 			["$basetexture"] = renderTarget:GetName(),
 			["$translucent"] = 1,
-			["$vertexalpha"] = 1
+			["$vertexalpha"] = 1,
 		})
 	monitor.expRenderTargetMaterialMirrored = monitor.expRenderTargetMaterialMirrored or
 		CreateMaterial("monitor_material_mirrored_" .. monitor:EntIndex(), "UnlitGeneric", {
 			["$basetexture"] = renderTarget:GetName(),
 			["$translucent"] = 1,
 			["$vertexalpha"] = 1,
-			["$basetexturetransform"] = "center .5 .5 scale -1 1 rotate 0 translate 0 0"
+			["$basetexturetransform"] = "center .5 .5 scale -1 1 rotate 0 translate 0 0",
 		})
 
 	return renderTarget, monitor.expRenderTargetMaterial, monitor.expRenderTargetMaterialMirrored
@@ -142,6 +150,12 @@ function PLUGIN:SetupAndOrDrawHtml(monitor)
 		monitor.expHtmlPanel:SetKeyboardInputEnabled(false)
 
 		function monitor.expHtmlPanel:ConsoleMessage(msg) end
+
+		monitor:CallOnRemove("expMonitorHtmlPanelRemove", function()
+			if (IsValid(monitor.expHtmlPanel)) then
+				monitor.expHtmlPanel:Remove()
+			end
+		end)
 	end
 
 	if (monitor.expMonitorTargetHtml ~= monitor.expHtmlPanelHtml) then
@@ -174,15 +188,15 @@ function PLUGIN:SetupAndOrDrawVgui(monitor)
 	end
 
 	if (not IsValid(monitor.expVguiPanel)) then
-		monitor.expVguiPanel = vgui.Create("DPanel")
+		monitor.expVguiPanel = vgui.Create("EditablePanel")
 		monitor.expVguiPanel:SetSize(monitor:GetMonitorWidth(), monitor:GetMonitorHeight())
-		monitor.expVguiPanel:SetPaintBackground(false)
 		monitor.expVguiPanel:SetPaintedManually(true)
 
-		function monitor.expVguiPanel:Paint(width, height)
-			surface.SetDrawColor(0, 0, 0, 255)
-			surface.DrawRect(0, 0, width, height)
-		end
+		monitor:CallOnRemove("expMonitorVguiPanelRemove", function()
+			if (IsValid(monitor.expVguiPanelVguiInstance)) then
+				monitor.expVguiPanelVguiInstance:Remove()
+			end
+		end)
 	end
 
 	if (monitor.expMonitorTargetVgui ~= monitor.expVguiPanelVgui) then
@@ -191,8 +205,13 @@ function PLUGIN:SetupAndOrDrawVgui(monitor)
 
 		monitor.expVguiPanelVguiInstance = monitor.expMonitorTargetVgui(monitor.expVguiPanel)
 		if (not IsValid(monitor.expVguiPanelVguiInstance)) then
-			print("Invalid monitor target vgui function return value")
+			ErrorNoHalt("Invalid monitor target vgui function return value. Return a VGUI Panel!\n")
 			return
+		end
+
+		-- Ensure it's parented to the monitor panel, otherwise it may not be removed when the panel is removed
+		if (monitor.expVguiPanelVguiInstance:GetParent() ~= monitor.expVguiPanel) then
+			monitor.expVguiPanelVguiInstance:SetParent(monitor.expVguiPanel)
 		end
 
 		if (monitor.expVguiPanelVguiInstance.SetMonitor) then
@@ -257,7 +276,7 @@ function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, renderT
 		quadPoints[2],
 		quadPoints[3],
 		quadPoints[4],
-		Color(255, 255, 255, monitor.drawAlphaBackground)
+		Color(255, 255, 255, monitor.drawAlphaForeground)
 	)
 
 	if (renderTargetMaterialMirrored) then
