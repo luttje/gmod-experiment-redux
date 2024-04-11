@@ -3,7 +3,7 @@ local PLUGIN = PLUGIN
 util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
 
--- expMonitors:SetTarget(player.GetByID(1))
+-- ix.plugin.list["monitors"]:SetTarget(player.GetByID(1))
 function PLUGIN:SetTarget(entity)
 	net.Start("expSetMonitorTarget")
 	net.WriteEntity(entity)
