@@ -26,8 +26,12 @@ ITEM.functions.Combine = {
 			return false
 		end
 
-		for _, scrapItem in ipairs(scrap) do
-			scrapItem:Remove()
+        for i, scrapItem in ipairs(scrap) do
+            scrapItem:Remove()
+
+			if i >= amalgamAmount then
+				break
+			end
 		end
 
 		inventory:Add("scrap_amalgam", 1)
