@@ -6,6 +6,7 @@ ix.currency.model = "models/props_lab/exp01a.mdl"
 ix.config.SetDefault("intro", false)
 ix.config.SetDefault("music", "music/HL2_song23_SuitSong3.mp3")
 ix.config.SetDefault("maxAttributes", 100)
+ix.config.SetDefault("communityURL", "")
 
 ix.config.Add("allianceCost", 10000, "How much an alliance costs to create.", nil, {
 	data = { min = 0, max = 1000000 },

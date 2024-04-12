@@ -66,9 +66,29 @@ if (SERVER) then
 	util.AddNetworkString("exp_AchievementProgress")
 	util.AddNetworkString("exp_AchievementsLoad")
 
+    ---Progress an achievement, optionally with a specific amount.
+	---If the progress is a string, it will be used as a key to track progress (1 progression per key)
+	---@param client any
+	---@param achievement any
+	---@param progress any
+	---@return boolean
 	function Schema.achievement.Progress(client, achievement, progress)
 		local achievementTable = Schema.achievement.Get(achievement)
-		local achievements = client:GetCharacter():GetData("achievements", {})
+        local achievements = client:GetCharacter():GetData("achievements", {})
+		local character = client:GetCharacter()
+
+		if (isstring(progress)) then
+            local achievementProgressKeys = character:GetData("achievementProgressKeys", {})
+
+            if (achievementProgressKeys[progress]) then
+                return false
+            end
+
+            achievementProgressKeys[progress] = true
+            character:SetData("achievementProgressKeys", achievementProgressKeys)
+
+			progress = 1
+		end
 
 		if (not progress) then
 			progress = 1
@@ -87,7 +107,7 @@ if (SERVER) then
 
 		achievements[achievementTable.uniqueID] = math.Clamp(currentAchievement + progress, 0,
 			achievementTable.maximum)
-		client:GetCharacter():SetData("achievements", achievements)
+		character:SetData("achievements", achievements)
 
 		if (achievements[achievementTable.uniqueID] < achievementTable.maximum) then
 			if (achievementTable.OnProgress) then
@@ -97,7 +117,7 @@ if (SERVER) then
 			ix.chat.Send(client, "achievement", achievementTable.name)
 
 			if (achievementTable.reward) then
-				client:GetCharacter():GiveMoney(achievementTable.reward)
+				character:GiveMoney(achievementTable.reward)
 			end
 
 			if (achievementTable.OnAchieved) then

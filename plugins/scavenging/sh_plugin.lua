@@ -3,6 +3,7 @@ local PLUGIN = PLUGIN
 PLUGIN.name = "Scavenging"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Scatter items around the map for players to find."
+PLUGIN.junkChances = {}
 
 ix.util.Include("sh_commands.lua")
 
@@ -34,25 +35,6 @@ ix.config.Add("scrapAmalgamAmount", 5, "How much scrap it takes to make a scrap 
 ix.inventory.Register("scavenging:base", 5, 1)
 
 if (SERVER) then
-	PLUGIN.defaultJunkChances = {
-		{
-			item = "junk_can",
-			chance = 50
-		},
-		{
-			item = "junk_can2",
-			chance = 45
-		},
-		{
-			item = "junk_pot",
-			chance = 10
-		},
-		{
-			item = "sawblade",
-			chance = 8
-		}
-	}
-
 	-- Let's allow players to store items in scavenging sources (might result in fun where players can hide items for others to find)
 	-- function PLUGIN:CanTransferItem(item, sourceInventory, targetInventory)
 	-- 	if (targetInventory.vars and targetInventory.vars.isScavengingSource) then
@@ -60,16 +42,33 @@ if (SERVER) then
 	-- 	end
 	-- end
 
-	local function closeIfEmpty(inventory)
-		if (not inventory.vars or not IsValid(inventory.vars.isScavengingSource)) then
-			return
-		end
+    local function closeIfEmpty(inventory)
+        if (not inventory.vars or not IsValid(inventory.vars.isScavengingSource)) then
+            return
+        end
 
-		local entity = inventory.vars.isScavengingSource
+        local entity = inventory.vars.isScavengingSource
 
-		if (table.Count(entity:GetInventory():GetItems()) == 0) then
-			ix.storage.Close(inventory)
-		end
+        if (table.Count(entity:GetInventory():GetItems()) == 0) then
+            ix.storage.Close(inventory)
+        end
+    end
+
+	function PLUGIN:InitializedPlugins()
+		local items = ix.item.list
+
+        for _, item in pairs(items) do
+            if (not item.chanceToScavenge) then
+                continue
+            end
+
+			self.junkChances[#self.junkChances + 1] = {
+				item = item.uniqueID,
+				chance = item.chanceToScavenge
+            }
+        end
+
+		table.SortByMember(self.junkChances, "chance", true)
 	end
 
     function PLUGIN:AddItemsToScavengingSource(entity, inventory)
@@ -81,15 +80,22 @@ if (SERVER) then
 		end
 
         local roll = math.random(1, 100)
-		local junkChances = self.defaultJunkChances
 
-		table.SortByMember(junkChances, "chance", true)
+        for _, junkChance in ipairs(self.junkChances) do
+            if (roll > junkChance.chance) then
+                continue
+            end
 
-        for _, junkChance in ipairs(junkChances) do
-			if (roll <= junkChance.chance) then
-				local itemTable = ix.item.list[junkChance.item]
+			local itemTable = ix.item.list[junkChance.item]
 
-				if (itemTable) then
+            if (itemTable) then
+                local addToScavenge = true
+
+                if (itemTable.OnFillScavengeSource) then
+                    addToScavenge = itemTable:OnFillScavengeSource(entity, inventory) ~= false
+                end
+
+				if (addToScavenge) then
 					inventory:Add(junkChance.item)
 					break
 				end
