@@ -13,20 +13,27 @@ ix.config.Add("allianceCost", 10000, "How much an alliance costs to create.", ni
 })
 
 ix.config.Add("incomeMultiplier", 1, "The income multiplier for generators and salary", nil, {
-	data = {min = 0, max = 100, decimals = 1}
+	data = { min = 0, max = 100, decimals = 1 },
+	category = "income"
 })
 
-ix.config.Add("teleportGeneratorEarnings", false, "Wether income from generators should be teleported to the player. If not they'll have to get it from the generator manually.", nil, {})
+ix.config.Add("teleportGeneratorEarnings", false,
+	"Wether income from generators should be teleported to the player. If not they'll have to get it from the generator manually.",
+	nil, {
+		category = "income"
+	})
 
-ix.config.Add("armorEffectiveness", 0.75, "How much damage armor will prevent, for example 0.75 will let a quarter of the damage through.", nil, {
-	data = {min = 0, max = 1, decimals = 2}
+ix.config.Add("armorEffectiveness", 0.75,
+	"How much damage armor will prevent, for example 0.75 will let a quarter of the damage through.", nil, {
+	data = { min = 0, max = 1, decimals = 2 }
 })
 
 ix.config.Add("beanbagRagdollDuration", 15, "How long players knocked out by beanbags will be ragdolled for.", nil, {
-	data = {min = 0, max = 600}
+	data = { min = 0, max = 600 }
 })
 
-ix.config.Add("requiredGraceAfterDamage", 60, "How long after taking damage a player can disconnect without dropping everything.", nil, {
+ix.config.Add("requiredGraceAfterDamage", 60,
+	"How long after taking damage a player can disconnect without dropping everything.", nil, {
 	data = { min = 0, max = 300 },
 	category = "moderation"
 })
@@ -39,13 +46,14 @@ ix.config.Add("grenadeTrailColor", Color(255, 100, 0), "The color of the grenade
 	category = "grenades"
 })
 
-ix.config.Add("grenadeTrailMaxLifetime", 10, "How long the grenade trail lasts for (-1 means for as long as the grenade exists).", nil, {
-	data = {min = -1, max = 10, decimals = 0},
+ix.config.Add("grenadeTrailMaxLifetime", 10,
+	"How long the grenade trail lasts for (-1 means for as long as the grenade exists).", nil, {
+	data = { min = -1, max = 10, decimals = 0 },
 	category = "grenades"
 })
 
 ix.config.Add("maxInteractionDistance", 192, "How far away from the player an item/object can be placed.", nil, {
-	data = {min = 128, max = math.huge, decimals = 0},
+	data = { min = 128, max = math.huge, decimals = 0 },
 })
 
 Schema.implantPacData = {

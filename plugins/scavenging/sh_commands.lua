@@ -23,7 +23,7 @@ do
 		ent:MakeInventory()
 		ent:Activate()
 
-		client:Notify("Scavenging source spawned!")
+		client:Notify("Scavenging source spawned.")
 	end
 
 	ix.command.Add("ScavengeSpawn", COMMAND)

@@ -42,7 +42,7 @@ do
 		ent:Activate()
 		ent:SetHelper(true)
 
-		client:Notify("Monitor spawned!")
+		client:Notify("Monitor spawned.")
 	end
 
 	ix.command.Add("MonitorSpawn", COMMAND)

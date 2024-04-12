@@ -4,7 +4,6 @@ ITEM.name = "BCU 'Bolt Control Unit'"
 ITEM.model = "models/props_combine/suit_charger001.mdl"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.uniqueID = "exp_bolt_control_unit"
 ITEM.category = "Wealth Generation & Protection"
 ITEM.description = "Generates a steady rate of bolts over time and can be upgraded"
 ITEM.maximum = 1
@@ -30,8 +29,6 @@ if (CLIENT) then
 end
 
 ITEM.generator = {
-	powerPlural = "Power",
-	powerName = "Power",
 	uniqueID = "exp_bolt_control_unit",
 	currency = 50,
     health = 200,

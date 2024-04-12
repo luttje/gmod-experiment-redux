@@ -25,8 +25,6 @@ function ITEM:OnRegistered()
         self.generator.health,
         self.generator.price,
         self.generator.uniqueID,
-        self.generator.powerName,
-        self.generator.powerPlural,
         self.generator.upgrades
     )
 end
@@ -61,9 +59,14 @@ function ITEM:OnRemoved()
 end
 
 function ITEM:GetNextUpgrade(entity)
-	local generator = Schema.generator.Get(self.uniqueID)
+    local generator = Schema.generator.Get(self.generator.uniqueID)
 
     return generator.upgrades[entity:GetUpgrades() + 1]
+end
+
+function ITEM:OnEarned(entity, amount)
+    -- Set the power of the generator on the item
+	self:SetData("power", entity:GetPower() or 0)
 end
 
 function ITEM:OnCanOrder(client)
@@ -85,7 +88,7 @@ function ITEM:OnCanOrder(client)
     -- TODO: That would be friendly, but we can also consider it the players' own mistake since they were warned.
 	-- TODO: We'll just let them destroy existing generators if they mistakenly order multiple.
 
-    local generator = Schema.generator.Get(self.uniqueID)
+    local generator = Schema.generator.Get(self.generator.uniqueID)
 
 	if (client:IsObjectLimited(generator.uniqueID, self.maximum)) then
 		client:Notify("You can not order this as you have reached the maximum amount of this item!")
@@ -97,7 +100,7 @@ end
 ITEM.functions.Place = {
 	OnRun = function(item)
         local client = item.player
-        local generator = Schema.generator.Get(item.uniqueID)
+        local generator = Schema.generator.Get(item.generator.uniqueID)
 
         if (client:IsObjectLimited(generator.uniqueID, item.maximum)) then
             client:Notify("You can not place this as you have reached the maximum amount of this item!")
@@ -130,7 +133,7 @@ ITEM.functions.Place = {
 
 	OnCanRun = function(item)
         local client = item.player
-        local generator = Schema.generator.Get(item.uniqueID)
+        local generator = Schema.generator.Get(item.generator.uniqueID)
 
 		return not client:IsObjectLimited(generator.uniqueID, item.maximum)
 	end

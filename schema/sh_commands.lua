@@ -3,7 +3,7 @@ do
 
 	COMMAND.description = "Search the tied character you are looking at."
 
-	function COMMAND:OnRun(client, arguments)
+	function COMMAND:OnRun(client)
 		local data = {}
 			data.start = client:GetShootPos()
 			data.endpos = data.start + client:GetAimVector() * 96
@@ -146,4 +146,73 @@ do
 	end
 
 	ix.command.Add("CharTakeDamage", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Bump the entity position you are looking at towards where you are looking."
+	COMMAND.arguments = {
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, amount)
+		local data = {}
+			data.start = client:GetShootPos()
+			data.endpos = data.start + client:GetAimVector() * 1000
+			data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (not IsValid(target)) then
+			ix.util.Notify("You must look at a valid entity!", client)
+			return
+		end
+
+		target:SetPos(target:GetPos() + client:GetAimVector() * (amount or 10))
+	end
+
+	ix.command.Add("EntityBump", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove entities of a certain class within a radius around you."
+	COMMAND.arguments = {
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, class, radius)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target)) then
+			if (target:IsPlayer()) then
+				ix.util.Notify("You must look at an entity, not a player!", client)
+				return
+			end
+
+			class = target:GetClass()
+		end
+
+		local entities = ents.FindInSphere(client:GetPos(), radius or 256)
+		local count = 0
+
+		for _, entity in ipairs(entities) do
+			if (entity:GetClass() == class) then
+				count = count + 1
+				entity:Remove()
+			end
+		end
+
+		ix.util.Notify("Removed " .. count .. " entities of class '" .. class .. "'.", client)
+	end
+
+	ix.command.Add("EntityRemove", COMMAND)
 end

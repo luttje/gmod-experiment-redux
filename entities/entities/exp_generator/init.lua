@@ -57,20 +57,20 @@ function ENT:Upgrade(client, nextUpgrade)
 
 	self:EmitSound("items/suitchargeok1.wav", 75)
 
-	client:Notify("You have successfully upgraded the generator!")
+	client:Notify("You have successfully upgraded the generator.")
 end
 
 function ENT:SetupGenerator(client, item)
 	self.expGenerator = Schema.generator.Get(item.generator.uniqueID)
 
 	self:SetHealth(self.expGenerator.health)
-	self:SetPower(self.expGenerator.power)
+	self:SetPower(item:GetData("power", self.expGenerator.power))
 
 	self:SetItemID(item.uniqueID)
 	self:SetUpgrades(item:GetData("upgrades", 0))
 
 	self:SetItemOwner(client)
-	self:SetOwnerName(client:Name())
+	self:SetOwnerName(L("generatorOwnerName", client, client:Name()))
 	self.expItemID = item.id
 
 	if (item.OnEntityCreated) then
@@ -81,11 +81,23 @@ function ENT:SetupGenerator(client, item)
 
 	timer.Create(uniqueID, item.payTimeInSeconds, 0, function()
 		if (IsValid(self) and IsValid(self:GetItemOwner())) then
-			self:OnEarned(client, self:GetEarnings())
+			if (self:GetCanEarn()) then
+				self:OnEarned(self:GetEarnings())
+			end
 		else
 			timer.Remove(uniqueID)
 		end
 	end)
+end
+
+function ENT:GetCanEarn()
+	local canEarn = self:GetPower() > 0
+
+	if (hook.Run("GeneratorCanEarn", self) == false) then
+		canEarn = false
+	end
+
+	return canEarn
 end
 
 function ENT:GetEarnings()
@@ -94,10 +106,21 @@ function ENT:GetEarnings()
 	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
 end
 
-function ENT:OnEarned(client, money)
+function ENT:OnEarned(money)
+	self:SetPower(math.max(self:GetPower() - 1, 0))
+
+	local itemID = self.expItemID
+    local itemTable = ix.item.instances[itemID]
+
+	if (itemTable.OnEarned) then
+		itemTable:OnEarned(self, money)
+	end
+
 	if (money <= 0) then
 		return
 	end
+
+	local client = self:GetItemOwner()
 
 	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
 
@@ -138,7 +161,14 @@ function ENT:OnOptionSelected(client, option, data)
 		return
 	end
 
+	local heldBolts = self:GetHeldBolts() or 0
+
 	if (option == L("pickup", client) and client == self:GetItemOwner()) then
+		if (heldBolts > 0) then
+			client:GetCharacter():GiveMoney(heldBolts)
+			client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
+		end
+
 		self.ixIsSafe = true
 		self:Remove()
 
@@ -158,7 +188,6 @@ function ENT:OnOptionSelected(client, option, data)
         self:Upgrade(client, nextUpgrade)
 	end
 
-	local heldBolts = self:GetHeldBolts() or 0
 	if (option == L("withdraw", client, heldBolts)) then
 		if (heldBolts <= 0) then
 			client:Notify("There are no bolts to withdraw!")
@@ -169,6 +198,40 @@ function ENT:OnOptionSelected(client, option, data)
 		client:GetCharacter():GiveMoney(heldBolts)
 
 		client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
+	end
+
+	if (option == L("generatorRecharge", client)) then
+		local power = self:GetPower()
+
+		if (power >= itemTable.generator.power) then
+			client:Notify("The generator is already fully charged!")
+			return
+		end
+
+		-- Take scrap from the player to recharge the generator (1 scrap = 1 power)
+		local scrap = client:GetCharacter():GetInventory():GetItemsByUniqueID("scrap")
+
+		if (#scrap <= 0) then
+			client:Notify("You do not have any scrap to recharge the generator with!")
+			return
+		end
+
+		local chargeAmount = itemTable.generator.power - power
+		local scrapAmount = 0
+
+		for _, scrapItem in ipairs(scrap) do
+			scrapItem:Remove()
+
+			scrapAmount = scrapAmount + 1
+
+			if (scrapAmount >= chargeAmount) then
+				break
+			end
+		end
+
+		self:SetPower(math.min(power + scrapAmount, itemTable.generator.power))
+
+		client:NotifyLocalized("generatorRecharged", scrapAmount)
 	end
 end
 

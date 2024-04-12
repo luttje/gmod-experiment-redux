@@ -2,7 +2,6 @@ local PLUGIN = PLUGIN
 
 function PLUGIN:OnCharacterCreated(client, character)
 	local inventory = character:GetInventory()
-
 	inventory:Add("bolt_control_unit", 1)
 end
 

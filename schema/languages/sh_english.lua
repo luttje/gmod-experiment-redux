@@ -7,6 +7,15 @@ LANGUAGE = {
 
     upgrade = "'%s' (-%s)",
     withdraw = "Withdraw (+%s)",
+	generatorOwnerName = "%s's Generator",
+
+	generator = "Generator",
+	generatorDesc = "A generator that produces energy.",
+	generatorHealth = "Health: %s",
+    generatorPower = "Power: %s",
+
+	generatorRecharge = "Recharge",
+	generatorRecharged = "You have successfully recharged the generator with %d scrap.",
 
 	pickup = "Pick Up",
 	turnOn = "Turn On",

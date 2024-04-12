@@ -13,12 +13,17 @@ function ENT:OnPopulateEntityInfo(tooltip)
 
     local itemTable = self:GetItemTable()
 
-	if (not itemTable) then
-		return
-	end
+    if (not itemTable) then
+        return
+    end
+
+    local powerBar = tooltip:Add("expGeneratorPower")
+    powerBar:SetPower(self:GetPower())
+    powerBar:SetMaxPower(itemTable.generator.power)
+	powerBar:Dock(BOTTOM)
 
 	local description = tooltip:AddRow("description")
-	description:SetText("Upgrades: " .. upgrades .. "/" .. #itemTable.generator.upgrades)
+    description:SetText("Upgrades: " .. upgrades .. " / " .. #itemTable.generator.upgrades)
     description:SizeToContents()
 
 	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
@@ -56,12 +61,18 @@ function ENT:GetEntityMenu(client)
 	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
 
     if (not teleportEarnings) then
-		local heldBolts = self:GetHeldBolts() or 0
+        local heldBolts = self:GetHeldBolts() or 0
 
-		if (heldBolts > 0) then
-        	options[L("withdraw", heldBolts)] = function() end
-		end
+        if (heldBolts > 0) then
+            options[L("withdraw", heldBolts)] = function() end
+        end
     end
+
+    local power = self:GetPower()
+
+	if (power < itemTable.generator.power) then
+		options[L("generatorRecharge")] = function() end
+	end
 
 	itemTable.player = nil
     itemTable.entity = nil

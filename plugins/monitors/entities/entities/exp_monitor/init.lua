@@ -120,7 +120,7 @@ net.Receive("expMonitorConfigResponse", function(length, client)
 	monitor:SetMonitorScale(scale)
 
 	if (not IsValid(parent)) then
-		client:Notify("You must select a parent entity first.")
+		client:Notify("You must select a parent entity first!")
 		return
 	end
 
