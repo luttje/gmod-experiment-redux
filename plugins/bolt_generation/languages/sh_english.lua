@@ -1,0 +1,3 @@
+LANGUAGE = {
+    upgrade = "'%s' (%s)",
+}

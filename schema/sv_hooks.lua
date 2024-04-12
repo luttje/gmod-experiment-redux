@@ -252,7 +252,6 @@ function Schema:PlayerLoadedCharacter(client, curChar, prevChar)
 		for _, v in ipairs(informers) do
 			if (IsValid(v)) then
 				v:Remove()
-				inventory:Add("suitcase", 1)
 			end
 		end
 

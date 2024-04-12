@@ -3,13 +3,23 @@ include("shared.lua")
 ENT.PopulateEntityInfo = true
 
 function ENT:OnPopulateEntityInfo(tooltip)
-	local item = self:GetItemTable()
+	local ownerName = self:GetOwnerName() or "Unnamed"
+	local upgrades = self:GetUpgrades() or 0
 
-	if (not item) then
+	local name = tooltip:AddRow("name")
+	name:SetImportant()
+	name:SetText(ownerName)
+    name:SizeToContents()
+
+    local itemTable = self:GetItemTable()
+
+	if (not itemTable) then
 		return
 	end
 
-	-- ix.hud.PopulateItemTooltip(tooltip, item)
+	local description = tooltip:AddRow("description")
+	description:SetText("Upgrades: " .. upgrades .. "/" .. #itemTable.generator.upgrades)
+	description:SizeToContents()
 end
 
 function ENT:GetEntityMenu(client)
@@ -20,13 +30,23 @@ function ENT:GetEntityMenu(client)
 		return false
 	end
 
-	itemTable.player = client
-	itemTable.entity = self
+	local owner = self:GetItemOwner()
 
-	options[L("pickup")] = function() end
+	itemTable.entity = self
+    itemTable.player = client
+
+	if (IsValid(owner) and owner == client) then
+        options[L("pickup")] = function() end
+	end
+
+	local nextUpgrade, upgradeLabel = self:GetNextUpgrade()
+
+	if (nextUpgrade) then
+		options[upgradeLabel] = function() end
+	end
 
 	itemTable.player = nil
-	itemTable.entity = nil
+    itemTable.entity = nil
 
 	return options
 end

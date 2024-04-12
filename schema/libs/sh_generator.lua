@@ -3,16 +3,16 @@ if(Schema.generator == nil)then
 	Schema.generator.stored = {}
 end
 
-function Schema.generator.Register(name, power, health, cash, uniqueID, powerName, powerPlural, upgrades)
+function Schema.generator.Register(name, power, health, produce, uniqueID, powerName, powerPlural, upgrades)
 	Schema.generator.stored[uniqueID] = {
 		powerPlural = powerPlural or powerName or "Power",
 		powerName = powerName or "Power",
-		uniqueID = uniqueID,
+		upgrades = upgrades or {},
+		produce = produce or 100,
 		health = health or 100,
+		uniqueID = uniqueID,
 		power = power or 2,
-		cash = cash or 100,
 		name = name,
-		upgrades = upgrades or {}
 	}
 end
 

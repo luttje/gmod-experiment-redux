@@ -7,7 +7,7 @@ ITEM.width = 2
 ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Generators"
-ITEM.payTime = 600
+ITEM.payTime = 10
 ITEM.maximum = 1
 
 function ITEM:OnRegistered()
@@ -32,20 +32,38 @@ function ITEM:OnRegistered()
 end
 
 if (CLIENT) then
-	function ITEM:PopulateTooltip(tooltip)
-		if (not self.maximum) then
-			return
-		end
+    function ITEM:PopulateTooltip(tooltip)
+        if (not self.maximum) then
+            return
+        end
 
-		local panel = tooltip:AddRowAfter("name", "maximum")
-		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-		panel:SetText("You can only have " .. self.maximum .. " of this item in the world at a time!")
-		panel:SizeToContents()
+        local panel = tooltip:AddRowAfter("name", "maximum")
+        panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+        panel:SetText("You can only have " .. self.maximum .. " of this item in the world at a time!")
+        panel:SizeToContents()
+    end
+
+	function ITEM:PaintOver(item, w, h)
+		if (item:GetData("placed")) then
+			surface.SetDrawColor(110, 255, 110, 100)
+			surface.DrawRect(w - 14, h - 14, 8, 8)
+		end
 	end
 end
 
 function ITEM:CanTransfer(oldInventory, newInventory)
-	return false
+    -- Only allow moving within the same inventory
+    return newInventory == nil
+end
+
+function ITEM:OnRemoved()
+	self:SetData("placed", nil)
+end
+
+function ITEM:GetNextUpgrade(entity)
+	local generator = Schema.generator.Get(self.uniqueID)
+
+    return generator.upgrades[entity:GetUpgrades() + 1]
 end
 
 function ITEM:OnCanOrder(client)
@@ -79,7 +97,7 @@ end
 ITEM.functions.Place = {
 	OnRun = function(item)
         local client = item.player
-		local generator = Schema.generator.Get(item.uniqueID)
+        local generator = Schema.generator.Get(item.uniqueID)
 
         if (client:IsObjectLimited(generator.uniqueID, item.maximum)) then
             client:Notify("You can not place this as you have reached the maximum amount of this item!")
@@ -105,34 +123,15 @@ ITEM.functions.Place = {
 			physicsObject:EnableMotion(false)
 		end
 
-		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
-		local inventory = ix.item.inventories[item.invID]
-		inventory:Remove(item.id, false, true)
+        item:SetData("placed", true)
 
 		return false
-	end,
-}
+    end,
 
-ITEM.functions.zDestroy = {
-    name = "Destroy",
-	icon = "icon16/cross.png",
-
-    OnClick = function(item)
-		Derma_Query("Are you sure you want to destroy this generator?", "Destroy Generator", "Yes", function()
-			Schema.util.RunInventoryAction(item:GetID(), item.invID, "zDestroy")
-		end, "No", function() end)
-
-		-- We will manually send the inventory action
-		return false
-	end,
-
-	OnRun = function(item)
+	OnCanRun = function(item)
         local client = item.player
+        local generator = Schema.generator.Get(item.uniqueID)
 
-        client:EmitSound("ambient/materials/dinnerplates1.wav", 75, 200)
-
-        ix.log.Add(client, "itemDestroy", item:GetName(), item:GetID())
-
-		return true
-	end,
+		return not client:IsObjectLimited(generator.uniqueID, item.maximum)
+	end
 }

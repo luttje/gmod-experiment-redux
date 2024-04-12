@@ -1,5 +1,11 @@
 local PLUGIN = PLUGIN
 
+function PLUGIN:OnCharacterCreated(client, character)
+	local inventory = character:GetInventory()
+
+	inventory:Add("bolt_control_unit", 1)
+end
+
 function PLUGIN:GeneratorAdjustDamage(generator, damageInfo)
 	local protectorHandled = false
 	local informerHandled = false
@@ -10,7 +16,7 @@ function PLUGIN:GeneratorAdjustDamage(generator, damageInfo)
 
 			local damageScale = 0.5
 
-			if (Schema.perk.GetOwned(PRK_INTERVENTION, generator.expClient)) then
+			if (Schema.perk.GetOwned(PRK_INTERVENTION, generator:GetItemOwner())) then
 				local damageMultiplier = Schema.perk.GetProperty(PRK_INTERVENTION, "damageMultiplier")
 
 				damageScale = damageScale * damageMultiplier

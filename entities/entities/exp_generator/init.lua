@@ -8,6 +8,60 @@ function ENT:Initialize()
 	self:PhysicsInit(SOLID_VPHYSICS)
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
+
+	self:SetUseType(SIMPLE_USE)
+end
+
+function ENT:GetEarnings()
+	local generator = self.expGenerator
+	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
+end
+
+function ENT:Upgrade(client, nextUpgrade)
+	local generator = self.expGenerator
+
+    if (not generator or not generator.upgrades) then
+        error("Generator is missing upgrades table!")
+    end
+
+    local price = nextUpgrade.price
+
+	if (Schema.perk.GetOwned(PRK_MERCANTILE, client)) then
+		local priceModifier = Schema.perk.GetProperty(PRK_MERCANTILE, "priceModifier")
+		price = price * priceModifier
+	end
+
+	if (not client:GetCharacter():HasMoney(price)) then
+		client:Notify("You can not afford this upgrade!")
+		return
+	end
+
+	local canUpgrade, message
+
+	if(nextUpgrade.condition)then
+		canUpgrade, message = nextUpgrade.condition(client, self)
+	else
+		canUpgrade = true
+	end
+
+	if (not canUpgrade) then
+		client:Notify(message or "An unknown error occured!")
+		return
+	end
+
+	client:GetCharacter():TakeMoney(price)
+
+	local itemID = self.expItemID
+	local itemTable = ix.item.instances[itemID]
+
+	itemTable:SetData("upgrades", itemTable:GetData("upgrades", 0) + 1)
+	self.extraProduce = (self.extraProduce or 0) + nextUpgrade.produce
+
+	self:SetUpgrades(itemTable:GetData("upgrades", 0))
+
+	self:EmitSound("items/suitchargeok1.wav", 75)
+
+	client:Notify("You have successfully upgraded the generator!")
 end
 
 function ENT:SetupGenerator(client, item)
@@ -17,7 +71,10 @@ function ENT:SetupGenerator(client, item)
 	self:SetPower(self.expGenerator.power)
 
 	self:SetItemID(item.uniqueID)
-	self.expClient = client
+	self:SetUpgrades(item:GetData("upgrades", 0))
+
+	self:SetItemOwner(client)
+	self:SetOwnerName(client:Name())
 	self.expItemID = item.id
 
 	if (item.OnEntityCreated) then
@@ -27,17 +84,12 @@ function ENT:SetupGenerator(client, item)
 	local uniqueID = "expGenerator" .. item.id
 
 	timer.Create(uniqueID, item.payTime, 0, function()
-		if (IsValid(self) and IsValid(self.expClient)) then
+		if (IsValid(self) and IsValid(self:GetItemOwner())) then
 			self:OnEarned(client, self:GetEarnings())
 		else
 			timer.Remove(uniqueID)
 		end
 	end)
-end
-
-function ENT:GetEarnings()
-	local generator = self.expGenerator
-	return generator.produce * ix.config.Get("incomeMultiplier")
 end
 
 function ENT:ReleaseCharacterCount(character)
@@ -54,19 +106,39 @@ function ENT:ReleaseCharacterCount(character)
 end
 
 function ENT:OnOptionSelected(client, option, data)
-	if (option == L("pickup", client)) then
-		local character = client:GetCharacter()
-		local inventory = character:GetInventory()
-		inventory:Add(self.expItemID)
+	local itemID = self.expItemID
+    local itemTable = ix.item.instances[itemID]
 
+	if (not itemTable) then
+		client:Notify("This generator is broken!")
+		ErrorNoHalt("Generator with item ID " .. itemID .. " is missing item table!\n")
+		return
+	end
+
+	if (option == L("pickup", client) and client == self:GetItemOwner()) then
 		self.ixIsSafe = true
 		self:Remove()
+
+		if (itemTable.OnRemoved) then
+			itemTable:OnRemoved()
+		end
+	end
+
+    local nextUpgrade, upgradeLabel = self:GetNextUpgrade(client)
+
+	if (option == upgradeLabel) then
+		if (not nextUpgrade) then
+			client:Notify("You have reached the maximum amount of upgrades!")
+			return
+		end
+
+        self:Upgrade(client, nextUpgrade)
 	end
 end
 
 function ENT:OnDuplicated(entTable)
 	local itemID = entTable.expItemID
-	local client = entTable.expClient
+	local client = self:GetItemOwner()
 	local itemTable = ix.item.instances[itemID]
 
 	ix.item.Instance(0, itemTable.uniqueID, itemTable.data, 1, 1, function(item)
@@ -130,7 +202,7 @@ function ENT:OnEarned(client, money)
 end
 
 function ENT:AdjustDamage(damageInfo)
-	local owner = self.expClient
+	local owner = self:GetItemOwner()
 
 	if (IsValid(owner) and Schema.perk.GetOwned(PRK_STEELSHEETS, owner)) then
 		damageInfo:ScaleDamage(0.25)
@@ -140,8 +212,10 @@ function ENT:AdjustDamage(damageInfo)
 end
 
 function ENT:OnRemove()
-	if (IsValid(self.expClient) and self.expClient:GetCharacter()) then
-		self:ReleaseCharacterCount(self.expClient:GetCharacter())
+	local owner = self:GetItemOwner()
+
+	if (IsValid(owner) and owner:GetCharacter()) then
+		self:ReleaseCharacterCount(owner:GetCharacter())
 	end
 
 	if (!ix.shuttingDown and !self.ixIsSafe and self.expItemID) then
@@ -156,16 +230,18 @@ function ENT:OnRemove()
 					itemTable:OnDestroyed(self)
 				end
 
-				ix.log.Add(self.expLastAttacker, "generatorDestroy", self.expClient)
+				ix.log.Add(self.expLastAttacker, "generatorDestroy", owner)
 			end
 
 			if (itemTable.OnRemoved) then
 				itemTable:OnRemoved()
 			end
 
-			local query = mysql:Delete("ix_items")
-				query:Where("item_id", self.expItemID)
-			query:Execute()
+			if (itemTable.removeCompletely) then
+				local query = mysql:Delete("ix_items")
+					query:Where("item_id", self.expItemID)
+				query:Execute()
+			end
 		end
 	end
 end
