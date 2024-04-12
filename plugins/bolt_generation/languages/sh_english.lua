@@ -1,3 +1,0 @@
-LANGUAGE = {
-    upgrade = "'%s' (%s)",
-}

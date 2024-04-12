@@ -5,6 +5,9 @@ LANGUAGE = {
 	alliance = "Alliance",
     perks = "Perks",
 
+    upgrade = "'%s' (-%s)",
+    withdraw = "Withdraw (+%s)",
+
 	pickup = "Pick Up",
 	turnOn = "Turn On",
 	turnOff = "Turn Off",

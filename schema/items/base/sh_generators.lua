@@ -7,7 +7,7 @@ ITEM.width = 2
 ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Generators"
-ITEM.payTime = 10
+ITEM.payTimeInSeconds = 600
 ITEM.maximum = 1
 
 function ITEM:OnRegistered()

@@ -5,16 +5,12 @@ include("shared.lua")
 function ENT:Initialize()
 	self:SetModel(self.Model)
 
-	self:PhysicsInit(SOLID_VPHYSICS)
-	self:SetMoveType(MOVETYPE_VPHYSICS)
+	-- self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_NONE)
 	self:SetSolid(SOLID_VPHYSICS)
+	self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 
 	self:SetUseType(SIMPLE_USE)
-end
-
-function ENT:GetEarnings()
-	local generator = self.expGenerator
-	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
 end
 
 function ENT:Upgrade(client, nextUpgrade)
@@ -83,13 +79,40 @@ function ENT:SetupGenerator(client, item)
 
 	local uniqueID = "expGenerator" .. item.id
 
-	timer.Create(uniqueID, item.payTime, 0, function()
+	timer.Create(uniqueID, item.payTimeInSeconds, 0, function()
 		if (IsValid(self) and IsValid(self:GetItemOwner())) then
 			self:OnEarned(client, self:GetEarnings())
 		else
 			timer.Remove(uniqueID)
 		end
 	end)
+end
+
+function ENT:GetEarnings()
+	local generator = self.expGenerator
+
+	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
+end
+
+function ENT:OnEarned(client, money)
+	if (money <= 0) then
+		return
+	end
+
+	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
+
+	if (teleportEarnings) then
+		client:GetCharacter():GiveMoney(money)
+		client:Notify("You have earned ".. ix.currency.Get(money).." from your generator.")
+	else
+		local heldBolts = self:GetHeldBolts() or 0
+
+		self:SetHeldBolts(heldBolts + money)
+	end
+
+	self:EmitSound("npc/scanner/scanner_scan1.wav", 75)
+
+	ix.log.Add(client, "generatorEarn", money)
 end
 
 function ENT:ReleaseCharacterCount(character)
@@ -133,6 +156,19 @@ function ENT:OnOptionSelected(client, option, data)
 		end
 
         self:Upgrade(client, nextUpgrade)
+	end
+
+	local heldBolts = self:GetHeldBolts() or 0
+	if (option == L("withdraw", client, heldBolts)) then
+		if (heldBolts <= 0) then
+			client:Notify("There are no bolts to withdraw!")
+			return
+		end
+
+		self:SetHeldBolts(0)
+		client:GetCharacter():GiveMoney(heldBolts)
+
+		client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
 	end
 end
 
@@ -191,14 +227,6 @@ function ENT:OnTakeDamage(damageInfo)
 
 	self.expIsDestroying = true
 	self:Remove()
-end
-
-function ENT:OnEarned(client, money)
-	if (money > 0) then
-		client:GetCharacter():GiveMoney(money)
-		client:Notify("You have earned ".. ix.currency.Get(money).." from your generator.")
-		ix.log.Add(client, "generatorEarn", money)
-	end
 end
 
 function ENT:AdjustDamage(damageInfo)

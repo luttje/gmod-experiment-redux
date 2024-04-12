@@ -8,6 +8,7 @@ function ENT:SetupDataTables()
 
     self:NetworkVar("Int", "Power")
     self:NetworkVar("Int", "Upgrades")
+    self:NetworkVar("Int", "HeldBolts")
 
 	self:NetworkVar("Entity", "ItemOwner")
     self:NetworkVar("String", "OwnerName")

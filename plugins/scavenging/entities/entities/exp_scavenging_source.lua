@@ -28,7 +28,7 @@ if (SERVER) then
 		self:SetModel(self.Model)
 
 		self:SetSolid(SOLID_BBOX)
-		self:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 	end
 
 	function ENT:SetInvisible(invisible)

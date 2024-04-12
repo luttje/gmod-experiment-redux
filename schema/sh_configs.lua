@@ -16,6 +16,8 @@ ix.config.Add("incomeMultiplier", 1, "The income multiplier for generators and s
 	data = {min = 0, max = 100, decimals = 1}
 })
 
+ix.config.Add("teleportGeneratorEarnings", false, "Wether income from generators should be teleported to the player. If not they'll have to get it from the generator manually.", nil, {})
+
 ix.config.Add("armorEffectiveness", 0.75, "How much damage armor will prevent, for example 0.75 will let a quarter of the damage through.", nil, {
 	data = {min = 0, max = 1, decimals = 2}
 })
