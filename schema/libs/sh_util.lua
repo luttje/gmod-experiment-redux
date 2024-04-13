@@ -37,20 +37,23 @@ end
 --- Returns true if the throttle is active, otherwise false.
 ---@param scope string
 ---@param delay number
----@param client any? If provided, the throttle will be unique to the client.
+---@param entity any? If provided, the throttle will be unique to the entity.
 ---@return boolean
-function Schema.util.Throttle(scope, delay, client)
-	if (client) then
-		scope = scope .. "_" .. client:SteamID64()
+function Schema.util.Throttle(scope, delay, entity)
+	local scopeTable = Schema.util.throttles
+
+	if (entity) then
+		scopeTable = entity.expThrottles or {}
+		entity.expThrottles = scopeTable
 	end
 
-	if (Schema.util.throttles[scope] == nil) then
-		Schema.util.throttles[scope] = CurTime() + delay
+	if (scopeTable[scope] == nil) then
+		scopeTable[scope] = CurTime() + delay
 
 		return false
 	end
 
-	return Schema.util.throttles[scope] > CurTime()
+	return scopeTable[scope] > CurTime()
 end
 
 local playerMeta = FindMetaTable("Player")
