@@ -53,7 +53,13 @@ function Schema.util.Throttle(scope, delay, entity)
 		return false
 	end
 
-	return scopeTable[scope] > CurTime()
+	local throttled = scopeTable[scope] > CurTime()
+
+	if (not throttled) then
+		scopeTable[scope] = CurTime() + delay
+	end
+
+	return throttled
 end
 
 local playerMeta = FindMetaTable("Player")
