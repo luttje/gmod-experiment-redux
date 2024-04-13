@@ -1,6 +1,7 @@
 function Schema:DoPluginIncludes(path, plugin)
 	ix.util.IncludeDir(path .. "/achievements", true)
 	ix.util.IncludeDir(path .. "/perks", true)
+	ix.util.IncludeDir(path .. "/npcs", true)
 end
 
 function Schema:PlayerTick(client, moveData)

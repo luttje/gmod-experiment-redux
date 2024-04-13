@@ -4,7 +4,22 @@ function Schema:LoadFonts(font, genericFont)
         size = math.max(ScreenScale(4), 12),
         extended = true,
         weight = 400
-    })
+	})
+
+    surface.CreateFont("expSmallerFont", {
+        font = font,
+        size = math.max(ScreenScale(6), 12),
+        extended = true,
+        weight = 400
+	})
+
+	surface.CreateFont("expSmallItalicFont", {
+		font = font,
+		size = math.max(ScreenScale(6), 17),
+		extended = true,
+		weight = 400,
+		italic = true
+	})
 end
 
 function Schema:ContextMenuOpen()

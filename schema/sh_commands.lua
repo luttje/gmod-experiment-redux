@@ -216,3 +216,65 @@ do
 
 	ix.command.Add("EntityRemove", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Spawn an NPC with the interaction config based on the id you provide."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, interactionID)
+		local interaction = Schema.npc.GetInteraction(interactionID)
+
+		if (not interaction) then
+			ix.util.Notify("Invalid NPC interaction ID!", client)
+			return
+		end
+
+		local data = {}
+			data.start = client:GetShootPos()
+			data.endpos = data.start + client:GetAimVector() * 96
+			data.filter = client
+		local trace = util.TraceLine(data)
+
+		local angledTowardsPlayer = (client:GetPos() - trace.HitPos):Angle()
+		angledTowardsPlayer.p = 0
+
+		local npc = ents.Create("exp_npc")
+		npc:SetupInteraction(interaction)
+		npc:SetPos(trace.HitPos + trace.HitNormal * 4) -- slightly above the ground so legs don't glitch
+		npc:SetAngles(angledTowardsPlayer)
+		npc:Spawn()
+
+		ix.util.Notify("NPC spawned successfully.", client)
+	end
+
+	ix.command.Add("NpcAdd", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove the NPC you are looking at."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target) and target:GetClass() == "exp_npc") then
+			target:Remove()
+			ix.util.Notify("NPC removed successfully.", client)
+		else
+			ix.util.Notify("You must look at an NPC!", client)
+		end
+	end
+
+	ix.command.Add("NpcRemove", COMMAND)
+end
