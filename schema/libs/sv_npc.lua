@@ -15,10 +15,10 @@ function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 	local npcID = npcEntity:GetNpcId()
 	local npc = Schema.npc.Get(npcID)
 
-	if (not npc) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
-		return
-	end
+    if (not npc) then
+        ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+        return
+    end
 
 	local interaction = npc:OnInteract(client, npcEntity, desiredInteraction)
 
@@ -29,7 +29,7 @@ function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 	}
 
 	net.Start("expNpcInteractShow")
-	net.WriteString(npcID)
+	net.WriteEntity(npcEntity)
 	net.WriteString(interaction)
 	net.Send(client)
 end
@@ -78,6 +78,12 @@ net.Receive("expNpcInteractResponse", function(length, client)
 	if (not interaction) then
 		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
+	end
+
+    local interactionData = npc:GetInteraction(interaction)
+
+	if (interactionData.registersCompletion) then
+		Schema.npc.CompleteInteraction(client, interaction, npcID)
 	end
 
 	Schema.npc.StartInteraction(client, npcEntity, response)

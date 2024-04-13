@@ -14,23 +14,35 @@ function PANEL:SetInteraction(interaction)
 		return
 	end
 
-	local height = 0
+	local responses = interaction.responses
+    local height = 0
 
-	for _, answer in ipairs(interaction.responses) do
+	if (isfunction(responses)) then
+		responses = responses(LocalPlayer(), self.npcEntity, self)
+	end
+
+    for _, answer in ipairs(responses) do
 		local button = self:Add("DButton")
 		button:SetTall(32)
 		button:Dock(TOP)
 		button:SetFont("ixSmallFont")
 		button:DockMargin(0, 0, 0, 8)
 		button:SetText(answer.text)
-		button.DoClick = function()
-			self:OnAnswer(answer)
+        button.DoClick = function()
+            self:OnAnswer(answer)
+        end
+
+		if (answer.color) then
+			function button:Paint(width, height)
+				surface.SetDrawColor(Color(answer.color.r, answer.color.g, answer.color.b, 100))
+				surface.DrawRect(0, 0, width, height)
+			end
 		end
 
 		height = height + button:GetTall()
 	end
 
-	self:SetTall(height)
+    self:SetTall(height)
 end
 
 function PANEL:Close()
@@ -85,7 +97,9 @@ function PANEL:ShowLoading(text)
 	textLabel:SetFont("expSmallItalicFont")
 	textLabel:SetTextColor(Color(255, 255, 255, 40))
 	textLabel:SetContentAlignment(5)
-	textLabel:Dock(TOP)
+    textLabel:Dock(TOP)
+
+	self:SetTall(64)
 end
 
 vgui.Register("expNpcAnswers", PANEL, "EditablePanel")
@@ -101,8 +115,11 @@ function PANEL:Init()
     self:SetDeleteOnClose(true)
     self:SetTitle(L("interaction"))
 
-    self.html = self:Add("HTML")
+    self.html = self:Add("DHTML")
     self.html:Dock(FILL)
+    self.html:AddFunction("interop", "onKnownTextHeight", function(height)
+		self:RecalculateDimensions(height)
+	end)
 
     self.answers = self:Add("expNpcAnswers")
     self.answers:Dock(BOTTOM)
@@ -114,8 +131,13 @@ function PANEL:Init()
     Schema.npc.panel = self
 end
 
-function PANEL:RecalculateDimensions()
-    self:SetSize(math.min(ScrW(), 512), 200)
+function PANEL:RecalculateDimensions(htmlHeight)
+	local tilteBarHeight = 24
+    htmlHeight = htmlHeight or 200
+
+	local height = htmlHeight + tilteBarHeight + self.answers:GetTall() + 32
+
+    self:SetSize(math.min(ScrW(), 512), math.min(height, ScrH()))
     self:SetPos(ScrW() * 0.5 - self:GetWide() * 0.5, ScrH() - self:GetTall() - 32)
 end
 
@@ -149,18 +171,30 @@ function PANEL:SetText(text)
 				</style>
 			</head>
 			<body>
-				<p>]] .. text .. [[</p>
+				<div id="text">]] .. text .. [[</div>
+
+				<script>
+					var text = document.getElementById("text");
+					var height = text.clientHeight + 16; // Add the body padding
+
+					document.addEventListener("DOMContentLoaded", function() {
+						window.interop.onKnownTextHeight(height);
+					});
+				</script>
 			</body>
 		</html>
 	]])
 end
 
-function PANEL:SetInteraction(interaction, npc)
-	local text = istable(interaction.text) and interaction.text[math.random(#interaction.text)] or interaction.text
+function PANEL:SetInteraction(interaction, npc, npcEntity)
+    local text = istable(interaction.text) and interaction.text[math.random(#interaction.text)] or interaction.text
+	self.npcEntity = npcEntity
 
 	self:SetTitle(npc.name or L("conversation"))
 	self:SetText(text)
-	self.answers:SetInteraction(interaction)
+    self.answers:SetInteraction(interaction)
+
+	self.html:RunJavascript("window.interop.onKnownTextHeight(height);")
 end
 
 function PANEL:OnRemove()

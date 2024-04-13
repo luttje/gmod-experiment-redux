@@ -27,9 +27,12 @@ function META:GetInteractions()
     return self.interactions
 end
 
-function META:RegisterInteraction(uniqueID, data)
+function META:RegisterInteraction(uniqueID, data, registersCompletion)
     self.interactions = self.interactions or {}
+	data.registersCompletion = registersCompletion
     self.interactions[uniqueID] = data
+
+	return uniqueID
 end
 
 function META:GetInteraction(uniqueID)

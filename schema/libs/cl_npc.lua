@@ -1,10 +1,10 @@
 Schema.npc = Schema.npc or {}
 
 net.Receive("expNpcInteractShow", function(length)
-	local npcID = net.ReadString()
+	local npcEntity = net.ReadEntity()
     local interaction = net.ReadString()
 
-    local npc = Schema.npc.Get(npcID)
+    local npc = Schema.npc.Get(npcEntity:GetNpcId())
 
     if (not npc) then
         ErrorNoHalt("Attempted to interact with an invalid NPC.")
@@ -23,6 +23,6 @@ net.Receive("expNpcInteractShow", function(length)
 		return
 	end
 
-	local frame = vgui.Create("expNpcInteraction")
-	frame:SetInteraction(interaction, npc)
+	local panel = vgui.Create("expNpcInteraction")
+	panel:SetInteraction(interaction, npc, npcEntity)
 end)

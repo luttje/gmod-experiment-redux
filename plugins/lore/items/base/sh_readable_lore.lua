@@ -5,6 +5,7 @@ ITEM.model = Model("models/props_c17/paper01.mdl")
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "Some paper with writing on it."
+ITEM.isLoreItem = true
 
 if (CLIENT) then
     function ITEM:PopulateTooltip(tooltip)
