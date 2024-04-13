@@ -93,7 +93,7 @@ function ITEM:OnEquipped()
 	local client = self.player
 	local character = client:GetCharacter()
 
-	local multiplier = Schema.perk.GetOwned(PRK_ARMORED, client) and 1.5 or 1
+	local multiplier = Schema.perk.GetOwned("armored", client) and 1.5 or 1
 	local armor = self:GetData("armor", self.maxArmor * multiplier)
 	self:SetData("armor", armor)
 

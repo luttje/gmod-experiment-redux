@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Boltless Wanderer"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 5000
 ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.description = "Experience the ultimate sacrifice by losing all your bolts to the chaos."
 
-ACH_BOLTLESS_WANDERER = Schema.achievement.Register(ACHIEVEMENT)

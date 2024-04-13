@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Enduring Spirit"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -9,4 +9,3 @@ ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.requiredAttribute = 100
 ACHIEVEMENT.description = "Embolden yourself to withstand any trial, achieving 100% endurance through relentless perseverance."
 
-ACH_ENDURING_SPIRIT = Schema.achievement.Register(ACHIEVEMENT)

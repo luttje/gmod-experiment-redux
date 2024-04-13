@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Ransacked"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 1000
 ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.description = "Extract a fortune of $8000 from someone's remains, proving that fortune favors the bold."
 
-ACH_RANSACKED = Schema.achievement.Register(ACHIEVEMENT)

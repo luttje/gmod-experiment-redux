@@ -1,15 +1,10 @@
-local INTERACTION = {}
+local NPC = NPC
 
-INTERACTION.npcIdentity = {
-	name = "Principal Archivist",
-	description = "A wise looking man, who seems to know more than he lets on.",
-}
+NPC.name = "Principal Archivist"
+NPC.description = "A wise looking man, who seems to know more than he lets on."
+NPC.model = "models/Humans/Group03/male_08.mdl"
 
-INTERACTION.npcAppearance = {
-	model = "models/Humans/Group03/male_08.mdl",
-}
-
-local firstMeeting = {
+NPC:RegisterInteraction("firstMeeting", {
 	text = "Hi! Nice to meet you",
 	responses = {
 		{
@@ -20,9 +15,9 @@ local firstMeeting = {
 			text = "I'm not interested.",
 		},
 	}
-}
+})
 
-local consequentMeeting = {
+NPC:RegisterInteraction("consequentMeeting", {
 	text = {
 		"Hey you, come here. I have something to tell you.",
 		"Hello, I have some information that you might find useful.",
@@ -38,9 +33,9 @@ local consequentMeeting = {
 			text = "I'm not interested.",
 		},
 	}
-}
+})
 
-local introResponse = {
+NPC:RegisterInteraction("introResponse", {
 	text = "Things are not what they seem. The world is not as it appears.",
 	responses = {
 		{
@@ -51,29 +46,21 @@ local introResponse = {
 			text = "Okay wacko, I'm out of here.",
 		},
 	}
-}
+})
 
-function INTERACTION:OnInteract(client, npc, desiredInteraction)
+function NPC:OnInteract(client, npcEntity, desiredInteraction)
 	if (desiredInteraction == nil) then
 		if (not Schema.npc.HasCompletedInteraction(client, "meeting", self.uniqueID)) then
 			Schema.npc.CompleteInteraction(client, "meeting", self.uniqueID)
-			return firstMeeting
+			return "firstMeeting"
 		end
 
-		return consequentMeeting
+		return "consequentMeeting"
 	end
 
-	if (desiredInteraction == "introResponse") then
-		return introResponse
-	end
-
-	return {
-		text = "I have nothing more to say to you.",
-	}
+	return desiredInteraction
 end
 
-function INTERACTION:OnEnd(client, npc)
-	npc:PrintChat("Goodbye then")
+function NPC:OnEnd(client, npcEntity)
+	npcEntity:PrintChat("Goodbye then")
 end
-
-Schema.npc.RegisterInteraction(INTERACTION, "archivist")

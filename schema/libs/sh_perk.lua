@@ -12,20 +12,35 @@ function Schema.perk.GetAll()
 	return Schema.perk.stored
 end
 
-function Schema.perk.Register(perk)
-	perk.uniqueID = perk.uniqueID or string.lower(string.gsub(perk.name, "%s", "_"))
-    perk.index = tonumber(util.CRC(perk.name))
+function Schema.perk.LoadFromDir(directory)
+    local oldGlobal = PERK
 
-	Schema.perk.stored[perk.uniqueID] = perk
-	Schema.perk.buffer[perk.index] = perk
+    for _, fileName in ipairs(file.Find(directory .. "/*.lua", "LUA")) do
+        local uniqueID = string.lower(fileName:sub(4, -5))
 
-	resource.AddFile("materials/"..perk.backgroundImage..".vtf")
-	resource.AddFile("materials/"..perk.backgroundImage..".vmt")
+        PERK = Schema.perk.stored[uniqueID] or {}
+        PERK.uniqueID = uniqueID
+		PERK.index = table.Count(Schema.perk.buffer) + 1
 
-	resource.AddFile("materials/"..perk.foregroundImage..".vtf")
-	resource.AddFile("materials/"..perk.foregroundImage..".vmt")
+        ix.util.Include(directory .. "/" .. fileName, "shared")
 
-	return perk.uniqueID
+		if (SERVER) then
+			if (PERK.backgroundImage) then
+				resource.AddFile("materials/" .. PERK.backgroundImage .. ".vtf")
+				resource.AddFile("materials/" .. PERK.backgroundImage .. ".vmt")
+			end
+
+			if (PERK.foregroundImage) then
+				resource.AddFile("materials/" .. PERK.foregroundImage .. ".vtf")
+				resource.AddFile("materials/" .. PERK.foregroundImage .. ".vmt")
+			end
+		end
+
+        Schema.perk.stored[PERK.uniqueID] = PERK
+        Schema.perk.buffer[PERK.index] = PERK
+    end
+
+	PERK = oldGlobal
 end
 
 function Schema.perk.Get(name)

@@ -1,7 +1,11 @@
+function Schema:PostGamemodeLoaded()
+	baseclass.Set("exp_npc", Schema.meta.npc)
+end
+
 function Schema:DoPluginIncludes(path, plugin)
-	ix.util.IncludeDir(path .. "/achievements", true)
-	ix.util.IncludeDir(path .. "/perks", true)
-	ix.util.IncludeDir(path .. "/npcs", true)
+	Schema.achievement.LoadFromDir(path.."/achievements")
+	Schema.perk.LoadFromDir(path.."/perks")
+	Schema.npc.LoadFromDir(path.."/npcs")
 end
 
 function Schema:PlayerTick(client, moveData)
@@ -64,7 +68,7 @@ function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter
 
 	local mode = client:IsRunning() and "run" or "walk"
 
-	if (mode == "walk" and Schema.perk.GetOwned(PRK_LIGHTSTEP, client)) then
+	if (mode == "walk" and Schema.perk.GetOwned("lightstep", client)) then
 		return true
 	end
 

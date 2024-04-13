@@ -4,48 +4,33 @@ util.AddNetworkString("expNpcInteractShow")
 util.AddNetworkString("expNpcInteractResponse")
 util.AddNetworkString("expNpcInteractEnd")
 
-function Schema.npc.StartInteraction(client, npc, desiredInteraction)
-	local distance = client:GetPos():Distance(npc:GetPos())
+function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
+	local distance = client:GetPos():Distance(npcEntity:GetPos())
 
 	if (distance > ix.config.Get("maxInteractionDistance")) then
 		client:Notify("You are too far away from this NPC to interact with them.")
 		return
 	end
 
-	local interactionID = npc:GetInteractionID()
-	local interactionConfig = Schema.npc.interactions[interactionID]
+	local npcID = npcEntity:GetNpcId()
+	local npc = Schema.npc.Get(npcID)
 
-	if (not interactionConfig) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.")
+	if (not npc) then
+		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
-	local interaction
+	local interaction = npc:OnInteract(client, npcEntity, desiredInteraction)
 
-	if (interactionConfig.OnInteract) then
-		interaction = interactionConfig:OnInteract(client, npc, desiredInteraction)
-	else
-		if (desiredInteraction) then
-			interaction = interactionConfig.interactions[desiredInteraction]
-		else
-			if (not interactionConfig.defaultInteraction) then
-				ErrorNoHalt("Attempted to interact with an NPC interaction that has no default interaction.")
-				return
-			end
-
-			interaction = interactionConfig.interactions[interactionConfig.defaultInteraction]
-		end
-	end
-
-	client.expCurrentInteraction = {
+    client.expCurrentInteraction = {
+		npcEntity = npcEntity,
 		npc = npc,
 		interaction = interaction,
 	}
 
-	interaction.title = interaction.title or npc:GetDisplayName()
-
 	net.Start("expNpcInteractShow")
-	net.WriteTable(interaction)
+	net.WriteString(npcID)
+	net.WriteString(interaction)
 	net.Send(client)
 end
 
@@ -78,24 +63,24 @@ net.Receive("expNpcInteractResponse", function(length, client)
 		return
 	end
 
-	local npc = client.expCurrentInteraction.npc
+	local npcEntity = client.expCurrentInteraction.npcEntity
 
-	local interactionID = npc:GetInteractionID()
-	local interactionConfig = Schema.npc.interactions[interactionID]
+	local npcID = npcEntity:GetNpcId()
+	local npc = Schema.npc.Get(npcID)
 
-	if (not interactionConfig) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.")
+	if (not npc) then
+		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
 	local interaction = client.expCurrentInteraction.interaction
 
 	if (not interaction) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.")
+		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
-	Schema.npc.StartInteraction(client, npc, response)
+	Schema.npc.StartInteraction(client, npcEntity, response)
 end)
 
 net.Receive("expNpcInteractEnd", function(length, client)
@@ -104,17 +89,17 @@ net.Receive("expNpcInteractEnd", function(length, client)
 		return
 	end
 
-	local npc = client.expCurrentInteraction.npc
+	local npcEntity = client.expCurrentInteraction.npcEntity
 
-	local interactionID = npc:GetInteractionID()
-	local interactionConfig = Schema.npc.interactions[interactionID]
+	local npcID = npcEntity:GetNpcId()
+	local npc = Schema.npc.Get(npcID)
 
-	if (not interactionConfig) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.")
+	if (not npc) then
+		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
-	if (interactionConfig.OnEnd) then
-		interactionConfig:OnEnd(client, npc)
+	if (npc.OnEnd) then
+		npc:OnEnd(client, npcEntity)
 	end
 end)

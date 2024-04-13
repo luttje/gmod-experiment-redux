@@ -1,4 +1,4 @@
-local PERK = {}
+local PERK = PERK
 
 PERK.name = "Armadillo"
 PERK.price = 8000
@@ -7,4 +7,3 @@ PERK.backgroundColor = Color(255,212,0,255)
 PERK.foregroundImage = "experiment-redux/symbol/armadillo"
 PERK.description = "With this perk you will be able to purchase the best clothing."
 
-PRK_ARMADILLO = Schema.perk.Register(PERK)

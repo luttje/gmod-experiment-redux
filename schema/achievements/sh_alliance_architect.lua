@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Alliance Architect"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 20
 ACHIEVEMENT.description = "Expand your influence by welcoming twenty souls into the fold of your formidable alliance."
 
-ACH_ALLIANCE_ARCHITECT = Schema.achievement.Register(ACHIEVEMENT)

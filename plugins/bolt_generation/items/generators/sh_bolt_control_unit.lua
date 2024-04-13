@@ -60,7 +60,7 @@ ITEM.generator = {
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned(PRK_LOGISTICS, client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("logistics", client), "You do not have the master of logistics perk!"
 			end
 		},
 		{
@@ -72,7 +72,7 @@ ITEM.generator = {
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned(PRK_LOGISTICS, client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("logistics", client), "You do not have the master of logistics perk!"
 			end
 		},
 		{
@@ -84,7 +84,7 @@ ITEM.generator = {
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
 				end
 
-				return Schema.perk.GetOwned(PRK_LOGISTICS, client), "You do not have the master of logistics perk!"
+				return Schema.perk.GetOwned("logistics", client), "You do not have the master of logistics perk!"
 			end
 		}
 	}

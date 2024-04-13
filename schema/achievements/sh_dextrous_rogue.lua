@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Dextrous Rogue"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -9,4 +9,3 @@ ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.requiredAttribute = 100
 ACHIEVEMENT.description = "Attain the pinnacle of dexterity, without any external aids."
 
-ACH_DEXTROUS_ROGUE = Schema.achievement.Register(ACHIEVEMENT)

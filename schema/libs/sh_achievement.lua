@@ -12,20 +12,35 @@ function Schema.achievement.GetAll()
 	return Schema.achievement.stored
 end
 
-function Schema.achievement.Register(achievement)
-	achievement.uniqueID = achievement.uniqueID or string.lower(string.gsub(achievement.name, "%s", "_"))
-	achievement.index = tonumber(util.CRC(achievement.name))
+function Schema.achievement.LoadFromDir(directory)
+    local oldGlobal = ACHIEVEMENT
 
-	Schema.achievement.stored[achievement.uniqueID] = achievement
-	Schema.achievement.buffer[achievement.index] = achievement
+    for _, fileName in ipairs(file.Find(directory .. "/*.lua", "LUA")) do
+        local uniqueID = string.lower(fileName:sub(4, -5))
 
-	resource.AddFile("materials/"..achievement.backgroundImage..".vtf")
-	resource.AddFile("materials/"..achievement.backgroundImage..".vmt")
+        ACHIEVEMENT = Schema.achievement.stored[uniqueID] or {}
+        ACHIEVEMENT.uniqueID = uniqueID
+		ACHIEVEMENT.index = table.Count(Schema.achievement.buffer) + 1
 
-	resource.AddFile("materials/"..achievement.foregroundImage..".vtf")
-	resource.AddFile("materials/"..achievement.foregroundImage..".vmt")
+        ix.util.Include(directory .. "/" .. fileName, "shared")
 
-	return achievement.uniqueID
+		if (SERVER) then
+			if (ACHIEVEMENT.backgroundImage) then
+				resource.AddFile("materials/" .. ACHIEVEMENT.backgroundImage .. ".vtf")
+				resource.AddFile("materials/" .. ACHIEVEMENT.backgroundImage .. ".vmt")
+			end
+
+			if (ACHIEVEMENT.foregroundImage) then
+				resource.AddFile("materials/" .. ACHIEVEMENT.foregroundImage .. ".vtf")
+				resource.AddFile("materials/" .. ACHIEVEMENT.foregroundImage .. ".vmt")
+			end
+		end
+
+        Schema.achievement.stored[ACHIEVEMENT.uniqueID] = ACHIEVEMENT
+        Schema.achievement.buffer[ACHIEVEMENT.index] = ACHIEVEMENT
+    end
+
+	ACHIEVEMENT = oldGlobal
 end
 
 function Schema.achievement.Get(name)

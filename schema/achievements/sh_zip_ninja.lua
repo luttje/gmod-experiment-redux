@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Zip Ninja"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 10
 ACHIEVEMENT.description = "Prove your mastery over restraint by successfully using zip ties on ten characters."
 
-ACH_ZIP_NINJA = Schema.achievement.Register(ACHIEVEMENT)

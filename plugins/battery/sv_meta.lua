@@ -9,7 +9,7 @@ function playerMeta:EnableStealth()
 		return false
 	end
 
-    Schema.achievement.Progress(self, ACH_GOSTEALTH)
+    Schema.achievement.Progress(self, "go_stealth")
 
 	self:SetRenderMode(RENDERMODE_TRANSCOLOR)
     self:SetColor(Color(255, 255, 255, 0))
@@ -52,7 +52,7 @@ function playerMeta:EnableThermal()
 		return false
 	end
 
-    Schema.achievement.Progress(self, ACH_GOTHERMAL)
+    Schema.achievement.Progress(self, "go_thermal")
     self:EmitSound("items/nvg_on.wav")
 
     character:SetData("thermal", true)

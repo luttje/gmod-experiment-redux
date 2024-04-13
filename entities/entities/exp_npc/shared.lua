@@ -15,7 +15,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Bool", "NoBubble")
 	self:NetworkVar("String", "DisplayName")
 	self:NetworkVar("String", "Description")
-	self:NetworkVar("String", "InteractionID")
+	self:NetworkVar("String", "NpcId")
 end
 
 function ENT:SetAnim()

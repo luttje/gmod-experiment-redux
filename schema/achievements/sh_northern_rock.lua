@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Northern Rock"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -9,4 +9,3 @@ ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.requiredMoney = 30000
 ACHIEVEMENT.description = "Amass a fortune of over thirty thousand bolts."
 
-ACH_NORTHERN_ROCK = Schema.achievement.Register(ACHIEVEMENT)

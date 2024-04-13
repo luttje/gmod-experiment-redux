@@ -14,7 +14,7 @@ function SWEP.CreateEffectAtGrenadeEntity(entity, client)
 	Schema.grenades.SpawnFlash(position)
 
 	if (IsValid(client)) then
-        local emitSmoke = Schema.perk.GetOwned(PRK_EXPERIMENTALIST, client)
+        local emitSmoke = Schema.perk.GetOwned("experimentalist", client)
 
 		if (emitSmoke) then
 			Schema.grenades.SpawnSmoke(position, 1)

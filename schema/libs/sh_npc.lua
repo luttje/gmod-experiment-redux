@@ -1,5 +1,5 @@
 Schema.npc = Schema.npc or {}
-Schema.npc.interactions = Schema.npc.interactions or {}
+Schema.npc.stored = Schema.npc.stored or {}
 
 ix.chat.Register("npc", {
 	CanSay = function(self, speaker, text)
@@ -10,17 +10,29 @@ ix.chat.Register("npc", {
 	end,
 })
 
-function Schema.npc.RegisterInteraction(interaction, uniqueID)
-	interaction.uniqueID = uniqueID
-	Schema.npc.interactions[uniqueID] = interaction
+function Schema.npc.LoadFromDir(directory)
+    local oldGlobal = NPC
+
+    for _, fileName in ipairs(file.Find(directory .. "/*.lua", "LUA")) do
+        local uniqueID = string.lower(fileName:sub(4, -5))
+
+        NPC = Schema.npc.stored[uniqueID] or setmetatable({}, Schema.meta.npc)
+        NPC.uniqueID = uniqueID
+
+        ix.util.Include(directory .. "/" .. fileName, "shared")
+
+        Schema.npc.stored[NPC.uniqueID] = NPC
+    end
+
+	NPC = oldGlobal
 end
 
-function Schema.npc.GetInteraction(uniqueID)
-	return Schema.npc.interactions[uniqueID]
+function Schema.npc.Get(uniqueID)
+	return Schema.npc.stored[uniqueID]
 end
 
-function Schema.npc.GetInteractions()
-	return Schema.npc.interactions
+function Schema.npc.GetAll()
+	return Schema.npc.stored
 end
 
 --- Checks if a player has completed an interaction, optionally within a scope (e.g: belonging to a quest/npc)

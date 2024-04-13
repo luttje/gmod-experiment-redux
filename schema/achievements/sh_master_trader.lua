@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Master Trader"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -9,4 +9,3 @@ ACHIEVEMENT.maximum = 10
 ACHIEVEMENT.atLeast = 2
 ACHIEVEMENT.description = "Acquire ten shipments from the shadowy Business, each containing at least two items."
 
-ACH_MASTER_TRADER = Schema.achievement.Register(ACHIEVEMENT)

@@ -220,17 +220,17 @@ end
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Spawn an NPC with the interaction config based on the id you provide."
+	COMMAND.description = "Spawn an NPC with the NPC config based on the id you provide."
 	COMMAND.arguments = {
 		ix.type.string,
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, interactionID)
-		local interaction = Schema.npc.GetInteraction(interactionID)
+	function COMMAND:OnRun(client, npcID)
+		local npc = Schema.npc.Get(npcID)
 
-		if (not interaction) then
-			ix.util.Notify("Invalid NPC interaction ID!", client)
+		if (not npc) then
+			ix.util.Notify("Invalid NPC ID!", client)
 			return
 		end
 
@@ -243,11 +243,11 @@ do
 		local angledTowardsPlayer = (client:GetPos() - trace.HitPos):Angle()
 		angledTowardsPlayer.p = 0
 
-		local npc = ents.Create("exp_npc")
-		npc:SetupInteraction(interaction)
-		npc:SetPos(trace.HitPos + trace.HitNormal * 4) -- slightly above the ground so legs don't glitch
-		npc:SetAngles(angledTowardsPlayer)
-		npc:Spawn()
+		local npcEntity = ents.Create("exp_npc")
+		npcEntity:SetupNPC(npc)
+		npcEntity:SetPos(trace.HitPos + trace.HitNormal * 4) -- slightly above the ground so legs don't glitch
+		npcEntity:SetAngles(angledTowardsPlayer)
+		npcEntity:Spawn()
 
 		ix.util.Notify("NPC spawned successfully.", client)
 	end

@@ -105,38 +105,37 @@ function ENT:SetupRandomVoiceSet(model)
 	self:SetVoiceSet(randomVoiceLines)
 end
 
-function ENT:SetupInteraction(interaction)
-	self:SetInteractionID(interaction.uniqueID)
+function ENT:SetupNPC(npc)
+	self:SetNpcId(npc.uniqueID)
 
-	if (interaction.npcIdentity) then
-		self:SetDisplayName(interaction.npcIdentity.name)
-		self:SetDescription(interaction.npcIdentity.description)
+	if (npc.name) then
+        self:SetDisplayName(npc.name)
 	end
 
-	if (interaction.npcAppearance) then
-		if (interaction.npcAppearance.model) then
-			self:SetModel(interaction.npcAppearance.model)
-		end
+	if (npc.description) then
+		self:SetDescription(npc.description)
+	end
 
-		if (interaction.npcAppearance.skin) then
-			self:SetSkin(interaction.npcAppearance.skin)
-		end
+	if (npc.model) then
+		self:SetModel(npc.model)
+	end
 
-		if (interaction.npcAppearance.bodygroups) then
-			for k, v in pairs(interaction.npcAppearance.bodygroups) do
-				self:SetBodygroup(k, v)
-			end
+	if (npc.skin) then
+		self:SetSkin(npc.skin)
+	end
+
+	if (npc.bodygroups) then
+		for k, v in pairs(npc.bodygroups) do
+			self:SetBodygroup(k, v)
 		end
 	end
 
-	if (interaction.npcVoice) then
-		if (interaction.npcVoice.set) then
-			self:SetVoiceSet(interaction.npcVoice.set)
-		end
+	if (npc.voiceSet) then
+		self:SetVoiceSet(npc.voiceSet)
+	end
 
-		if (interaction.npcVoice.pitch) then
-			self:SetVoicePitch(interaction.npcVoice.pitch)
-		end
+	if (npc.voicePitch) then
+		self:SetVoicePitch(npc.voicePitch)
 	end
 end
 

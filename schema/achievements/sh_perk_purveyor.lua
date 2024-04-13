@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Perk Purveyor"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 1000
 ACHIEVEMENT.maximum = 5
 ACHIEVEMENT.description = "Diversify your arsenal by acquiring five unique perks."
 
-ACH_PERK_PURVEYOR = Schema.achievement.Register(ACHIEVEMENT)

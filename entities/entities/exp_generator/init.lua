@@ -22,8 +22,8 @@ function ENT:Upgrade(client, nextUpgrade)
 
     local price = nextUpgrade.price
 
-	if (Schema.perk.GetOwned(PRK_MERCANTILE, client)) then
-		local priceModifier = Schema.perk.GetProperty(PRK_MERCANTILE, "priceModifier")
+	if (Schema.perk.GetOwned("mercantile", client)) then
+		local priceModifier = Schema.perk.GetProperty("mercantile", "priceModifier")
 		price = price * priceModifier
 	end
 
@@ -295,7 +295,7 @@ end
 function ENT:AdjustDamage(damageInfo)
 	local owner = self:GetItemOwner()
 
-	if (IsValid(owner) and Schema.perk.GetOwned(PRK_STEELSHEETS, owner)) then
+	if (IsValid(owner) and Schema.perk.GetOwned("steelsheets", owner)) then
 		damageInfo:ScaleDamage(0.25)
 	end
 

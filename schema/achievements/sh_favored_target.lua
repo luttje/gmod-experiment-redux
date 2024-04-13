@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Favored Target"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 1000
 ACHIEVEMENT.maximum = 10
 ACHIEVEMENT.description = "Fall before your adversaries ten times."
 
-ACH_FAVORED_TARGET = Schema.achievement.Register(ACHIEVEMENT)

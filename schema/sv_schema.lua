@@ -149,7 +149,7 @@ function Schema.BustDownDoor(client, door, force)
 end
 
 function Schema.PlayerDropRandomItems(client, evenEquipped)
-	local confusingPockets = Schema.perk.GetOwned(PRK_CONFUSINGPOCKETS, client)
+	local confusingPockets = Schema.perk.GetOwned("confusingpockets", client)
 	local character = client:GetCharacter()
 	local inventory = character:GetInventory()
 	local cash = character:GetMoney()
@@ -185,7 +185,7 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 		dropInfo.money = amount
 
 		if (character:GetMoney() == 0) then
-			Schema.achievement.Progress(client, ACH_BOLTLESS_WANDERER, 1)
+			Schema.achievement.Progress(client, "boltless_wanderer", 1)
 		end
 	end
 
@@ -218,7 +218,7 @@ function Schema.PlayerDropAllItems(client, evenEquipped, disconnectPenalty)
 		character:TakeMoney(amount, "Death")
 		dropInfo.money = amount
 
-		Schema.achievement.Progress(client, ACH_BOLTLESS_WANDERER, 1)
+		Schema.achievement.Progress(client, "boltless_wanderer", 1)
 	end
 
 	hook.Run("CreatePlayerDropItemsContainerEntity", client, character, dropInfo)

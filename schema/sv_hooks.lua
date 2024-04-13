@@ -59,7 +59,7 @@ function Schema:PlayerHurt(client, attacker, health, damage)
 end
 
 function Schema:GetPlayerPainSound(client)
-	if (Schema.perk.GetOwned(PRK_HIT_IN_THE_GUT, client) and math.random() <= 0.5) then
+	if (Schema.perk.GetOwned("hit_in_the_gut", client) and math.random() <= 0.5) then
 		local delay = 2
 		return "vo/npc/male01/hitingut0" .. math.random(1, 2) .. ".wav", delay
 	end
@@ -105,8 +105,8 @@ local function handleBeanbagWeaponDamage(client, attacker, damageInfo)
 
 	local luck = 0.9
 
-	if (Schema.perk.GetOwned(PRK_JAMESDANIELS, client)) then
-		luck = luck * Schema.perk.GetProperty(PRK_JAMESDANIELS, "chance")
+	if (Schema.perk.GetOwned("jamesdaniels", client)) then
+		luck = luck * Schema.perk.GetProperty("jamesdaniels", "chance")
 	end
 
 	local gotLucky = math.random() < luck
@@ -151,8 +151,8 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 
 	-- Adjust head damage based on perks and items.
 	if (hitGroup == HITGROUP_HEAD) then
-		if (Schema.perk.GetOwned(PRK_HEADPLATE, client)) then
-			local chance = Schema.perk.GetProperty(PRK_HEADPLATE, "chance")
+		if (Schema.perk.GetOwned("headplate", client)) then
+			local chance = Schema.perk.GetProperty("headplate", "chance")
 
 			if (math.random() < chance) then
 				damageInfo:ScaleDamage(0)
@@ -163,13 +163,13 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 		if (attacker:IsPlayer()) then
 			local weaponIsSilenced = IsValid(weapon) and weapon.ixItem and weapon.ixItem.isSilenced
 			local attackerIsStealthed = attacker:HasStealthActivated()
-			local hasAssassinsCreedPerk = Schema.perk.GetOwned(PRK_ASSASSINSCREED, attacker)
+			local hasAssassinsCreedPerk = Schema.perk.GetOwned("assassinscreed", attacker)
 
 			if (weaponIsSilenced and attackerIsStealthed and hasAssassinsCreedPerk) then
-				local chance = Schema.perk.GetProperty(PRK_ASSASSINSCREED, "chance")
+				local chance = Schema.perk.GetProperty("assassinscreed", "chance")
 
 				if (math.random() < chance) then
-					local bonusDamage = Schema.perk.GetProperty(PRK_ASSASSINSCREED, "bonusDamage")
+					local bonusDamage = Schema.perk.GetProperty("assassinscreed", "bonusDamage")
 
 					damageInfo:ScaleDamage(bonusDamage)
 				end
@@ -197,16 +197,16 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 	-- Adjust melee damage based on perks and items.
 	-- TODO: Check if ScalePlayerDamage is called for this type of melee damage
 	if (damageInfo:IsDamageType(DMG_CLUB) or damageInfo:IsDamageType(DMG_SLASH)) then
-		if (Schema.perk.GetOwned(PRK_BLUNTDEFENSE, client)) then
-			local damageScale = Schema.perk.GetProperty(PRK_BLUNTDEFENSE, "damageScale")
+		if (Schema.perk.GetOwned("bluntdefense", client)) then
+			local damageScale = Schema.perk.GetProperty("bluntdefense", "damageScale")
 			damageInfo:ScaleDamage(damageScale)
 		end
 	end
 
 	-- Adjust fall damage based on perks and items.
 	if (damageInfo:IsFallDamage()) then
-		if (Schema.perk.GetOwned(PRK_LEGBRACES, client)) then
-			local damageScale = Schema.perk.GetProperty(PRK_LEGBRACES, "damageScale")
+		if (Schema.perk.GetOwned("legbraces", client)) then
+			local damageScale = Schema.perk.GetProperty("legbraces", "damageScale")
 			damageInfo:ScaleDamage(damageScale)
 		end
 	end
@@ -219,7 +219,7 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 end
 
 function Schema:PlayerDeath(client, inflictor, attacker)
-	Schema.achievement.Progress(client, ACH_FAVORED_TARGET)
+	Schema.achievement.Progress(client, "favored_target")
 end
 
 function Schema:PlayerUse(client, entity)
@@ -280,7 +280,7 @@ function Schema:PlayerDestroyGenerator(client, entity, generator)
 		return
 	end
 
-	if (Schema.perk.GetOwned(PRK_PAYBACK, client)) then
+	if (Schema.perk.GetOwned("payback", client)) then
 		client:GetCharacter():GiveMoney(generator.price)
 
 		return
@@ -290,21 +290,21 @@ function Schema:PlayerDestroyGenerator(client, entity, generator)
 end
 
 function Schema:PlayerPerkBought(client, perk)
-	Schema.achievement.Progress(client, ACH_PERK_PURVEYOR)
+	Schema.achievement.Progress(client, "perk_purveyor")
 end
 
 function Schema:CreateShipment(client, shipmentEntity)
-	local atLeast = Schema.achievement.GetProperty(ACH_MASTER_TRADER, "atLeast")
+	local atLeast = Schema.achievement.GetProperty("master_trader", "atLeast")
 	if (shipmentEntity:GetItemCount() >= atLeast) then
-		Schema.achievement.Progress(client, ACH_MASTER_TRADER)
+		Schema.achievement.Progress(client, "master_trader")
 	end
 
 	for uniqueID, amount in ipairs(shipmentEntity.items) do
 		local itemTable = ix.item.list[uniqueID]
 
-		local targetItemId = Schema.achievement.GetProperty(ACH_FREEMAN, "targetItemId")
+		local targetItemId = Schema.achievement.GetProperty("freeman", "targetItemId")
 		if (itemTable.uniqueID == targetItemId) then
-			Schema.achievement.Progress(client, ACH_FREEMAN)
+			Schema.achievement.Progress(client, "freeman")
 			break
 		end
 	end
@@ -312,44 +312,44 @@ end
 
 function Schema:CharacterVarChanged(character, key, oldValue, value)
 	if (key == "money") then
-		local requiredMoney = Schema.achievement.GetProperty(ACH_NORTHERN_ROCK, "requiredMoney")
+		local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
 
 		if (value > requiredMoney) then
-			Schema.achievement.Progress(character:GetPlayer(), ACH_NORTHERN_ROCK)
+			Schema.achievement.Progress(character:GetPlayer(), "northern_rock")
 		end
 	end
 end
 
 function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
 	if (attributeKey == "str") then
-		local requiredAttribute = Schema.achievement.GetProperty(ACH_TITANS_STRENGTH, "requiredAttribute")
+		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, ACH_TITANS_STRENGTH)
+			Schema.achievement.Progress(client, "titans_strength")
 		end
 	elseif (attributeKey == "dex") then
-		local requiredAttribute = Schema.achievement.GetProperty(ACH_DEXTROUS_ROGUE, "requiredAttribute")
+		local requiredAttribute = Schema.achievement.GetProperty("dextrous_rogue", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, ACH_DEXTROUS_ROGUE)
+			Schema.achievement.Progress(client, "dextrous_rogue")
 		end
 	elseif (attributeKey == "end") then
-		local requiredAttribute = Schema.achievement.GetProperty(ACH_ENDURING_SPIRIT, "requiredAttribute")
+		local requiredAttribute = Schema.achievement.GetProperty("enduring_spirit", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, ACH_ENDURING_SPIRIT)
+			Schema.achievement.Progress(client, "enduring_spirit")
 		end
 	elseif (attributeKey == "acr") then
-		local requiredAttribute = Schema.achievement.GetProperty(ACH_NATURAL_ACROBAT, "requiredAttribute")
+		local requiredAttribute = Schema.achievement.GetProperty("natural_acrobat", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, ACH_NATURAL_ACROBAT)
+			Schema.achievement.Progress(client, "natural_acrobat")
 		end
 	elseif (attributeKey == "agl") then
-		local requiredAttribute = Schema.achievement.GetProperty(ACH_AGILE_SHADOW, "requiredAttribute")
+		local requiredAttribute = Schema.achievement.GetProperty("agile_shadow", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, ACH_AGILE_SHADOW)
+			Schema.achievement.Progress(client, "agile_shadow")
 		end
 	end
 end

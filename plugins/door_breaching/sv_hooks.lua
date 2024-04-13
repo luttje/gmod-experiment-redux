@@ -4,7 +4,7 @@ function PLUGIN:EntityBreached(entity, client, breach, noSound)
 	self:OpenDoor(entity, client, noSound)
 
 	if (IsValid(client)) then
-		Schema.achievement.Progress(client, ACH_DOORWAY_DEMOLISHER)
+		Schema.achievement.Progress(client, "doorway_demolisher")
 	end
 end
 
@@ -46,7 +46,7 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 			continue
 		end
 
-		if (IsValid(entity.expClient) and Schema.perk.GetOwned(PRK_JINXED_DOOR, entity.expClient)) then
+		if (IsValid(entity.expClient) and Schema.perk.GetOwned("jinxed_door", entity.expClient)) then
 			attacker:TakeDamage(damageInfo:GetDamage(), entity, entity)
 		end
 

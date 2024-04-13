@@ -1,7 +1,8 @@
 Schema.registeredWeaponAttachments = Schema.registeredWeaponAttachments or {}
+Schema.meta = Schema.meta or {}
 
 Schema.name = "Experiment Redux"
-Schema.Author = "Experiment Redux"
+Schema.author = "Experiment Redux"
 Schema.description = "It's a dog-eat-dog world out there, and these dogs have guns."
 Schema.version = {
 	major = 6,
@@ -33,8 +34,10 @@ RANK_COL = 6
 RANK_GEN = 7
 
 ix.util.IncludeDir("meta")
-ix.util.IncludeDir("achievements")
-ix.util.IncludeDir("perks")
+
+Schema.achievement.LoadFromDir(Schema.folder .. "/schema/achievements")
+Schema.perk.LoadFromDir(Schema.folder .. "/schema/perks")
+Schema.npc.LoadFromDir(Schema.folder .. "/schema/npcs")
 
 ix.chat.Register("achievement", {
 	OnChatAdd = function(self, speaker, text)

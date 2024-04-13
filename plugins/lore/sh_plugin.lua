@@ -8,20 +8,6 @@ if (SERVER) then
     util.AddNetworkString("expReadLore")
 end
 
-function PLUGIN:CreateArchivistAchievement(loreItemCount)
-	local ACHIEVEMENT = {}
-
-	ACHIEVEMENT.name = "Archivist"
-	ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
-	ACHIEVEMENT.backgroundColor = Color(48,93,124,255)
-	ACHIEVEMENT.foregroundImage = "experiment-redux/symbol/film"
-	ACHIEVEMENT.reward = 1500
-	ACHIEVEMENT.maximum = loreItemCount
-	ACHIEVEMENT.description = "Find and read all the lore items."
-
-	ACH_ARCHIVIST = Schema.achievement.Register(ACHIEVEMENT)
-end
-
 function PLUGIN:InitializedPlugins()
     local items = ix.item.list
     local loreItemCount = 0
@@ -34,7 +20,7 @@ function PLUGIN:InitializedPlugins()
         loreItemCount = loreItemCount + 1
     end
 
-    self:CreateArchivistAchievement(loreItemCount)
+	Schema.achievement.Get("archivist").maximum = loreItemCount
 end
 
 if (not CLIENT) then

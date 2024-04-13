@@ -152,10 +152,10 @@ function PANEL:SetText(text)
 	]])
 end
 
-function PANEL:SetInteraction(interaction)
+function PANEL:SetInteraction(interaction, npc)
 	local text = istable(interaction.text) and interaction.text[math.random(#interaction.text)] or interaction.text
 
-	self:SetTitle(interaction.title)
+	self:SetTitle(npc.name or L("conversation"))
 	self:SetText(text)
 	self.answers:SetInteraction(interaction)
 end

@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Hooligan"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -8,4 +8,3 @@ ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 50
 ACHIEVEMENT.description = "Unleash destruction upon fifty of your adversaries' structures."
 
-ACH_HOOLIGAN = Schema.achievement.Register(ACHIEVEMENT)

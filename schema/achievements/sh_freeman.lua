@@ -1,4 +1,4 @@
-local ACHIEVEMENT = {}
+local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Freeman"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
@@ -9,4 +9,3 @@ ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.targetItemId = "weapon_crowbar"
 ACHIEVEMENT.description = "Be the decisive hand that secures a shipment of crowbars."
 
-ACH_FREEMAN = Schema.achievement.Register(ACHIEVEMENT)

@@ -15,8 +15,8 @@ function PLUGIN:GeneratorAdjustDamage(generator, damageInfo)
 
 			local damageScale = 0.5
 
-			if (Schema.perk.GetOwned(PRK_INTERVENTION, generator:GetItemOwner())) then
-				local damageMultiplier = Schema.perk.GetProperty(PRK_INTERVENTION, "damageMultiplier")
+			if (Schema.perk.GetOwned("intervention", generator:GetItemOwner())) then
+				local damageMultiplier = Schema.perk.GetProperty("intervention", "damageMultiplier")
 
 				damageScale = damageScale * damageMultiplier
 			end
