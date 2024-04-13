@@ -97,22 +97,26 @@ function PANEL:Init()
         Schema.npc.panel:Remove()
     end
 
-    self:SetSize(350, 400)
-    self:Center()
-    self:SetBackgroundBlur(true)
+    self:SetBackgroundBlur(false)
     self:SetDeleteOnClose(true)
     self:SetTitle(L("interaction"))
 
     self.html = self:Add("HTML")
-	self.html:Dock(FILL)
+    self.html:Dock(FILL)
 
-	self.answers = self:Add("expNpcAnswers")
-	self.answers:Dock(BOTTOM)
-	self.answers:DockMargin(8, 8, 8, 8)
+    self.answers = self:Add("expNpcAnswers")
+    self.answers:Dock(BOTTOM)
+    self.answers:DockMargin(8, 8, 8, 8)
 
+    self:RecalculateDimensions()
     self:MakePopup()
 
     Schema.npc.panel = self
+end
+
+function PANEL:RecalculateDimensions()
+    self:SetSize(math.min(ScrW(), 512), 200)
+    self:SetPos(ScrW() * 0.5 - self:GetWide() * 0.5, ScrH() - self:GetTall() - 32)
 end
 
 function PANEL:ReplaceNewLines(text)
@@ -130,7 +134,6 @@ function PANEL:SetText(text)
 						font-family: Arial, sans-serif;
 						font-size: 14px;
 						color: #FFF;
-						background-color: #303030;
 						margin: 0;
 						padding: 8px;
 					}
