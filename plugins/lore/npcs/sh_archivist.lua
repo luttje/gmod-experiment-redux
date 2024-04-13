@@ -143,6 +143,10 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
         if (not Schema.npc.HasCompletedInteraction(client, firstMeeting, self.uniqueID)) then
             return firstMeeting
         end
+
+		if (Schema.npc.HasCompletedInteraction(client, collectionAccepted, self.uniqueID)) then
+			return continueCollection
+		end
     end
 
     if (desiredInteraction == foundLoreItem) then
@@ -164,10 +168,6 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
         character:GiveMoney(count * 50)
 
         return foundLoreItem
-    end
-
-    if (Schema.npc.HasCompletedInteraction(client, collectionAccepted, self.uniqueID)) then
-        return continueCollection
     end
 
     return desiredInteraction
