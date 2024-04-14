@@ -243,11 +243,8 @@ do
 		local angledTowardsPlayer = (client:GetPos() - trace.HitPos):Angle()
 		angledTowardsPlayer.p = 0
 
-		local npcEntity = ents.Create("exp_npc")
-		npcEntity:SetupNPC(npc)
-		npcEntity:SetPos(trace.HitPos + trace.HitNormal * 4) -- slightly above the ground so legs don't glitch
-		npcEntity:SetAngles(angledTowardsPlayer)
-		npcEntity:Spawn()
+		-- Spawn slightly above the ground so legs don't glitch
+		Schema.npc.SpawnEntity(npc, trace.HitPos + trace.HitNormal * 4, angledTowardsPlayer)
 
 		ix.util.Notify("NPC spawned successfully.", client)
 	end

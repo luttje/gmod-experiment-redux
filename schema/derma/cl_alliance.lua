@@ -445,7 +445,7 @@ end
 
 vgui.Register("exp_Alliance", PANEL, "DScrollPanel")
 
-hook.Add("CreateMenuButtons", "exp_Alliance", function(tabs)
+hook.Add("CreateMenuButtons", "expAddAllianceMenuButton", function(tabs)
 	tabs["alliance"] = function(container)
 		container:Add("exp_Alliance")
 	end

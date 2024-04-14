@@ -169,7 +169,7 @@ end
 
 vgui.Register("exp_Perks", PANEL, "DScrollPanel")
 
-hook.Add("CreateMenuButtons", "exp_Perks", function(tabs)
+hook.Add("CreateMenuButtons", "expAddPerksMenuButton", function(tabs)
 	tabs["perks"] = function(container)
 		container:Add("exp_Perks")
 	end

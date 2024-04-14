@@ -4,6 +4,18 @@ util.AddNetworkString("expNpcInteractShow")
 util.AddNetworkString("expNpcInteractResponse")
 util.AddNetworkString("expNpcInteractEnd")
 
+function Schema.npc.SpawnEntity(npc, position, angles)
+    npc = isstring(npc) and Schema.npc.Get(npc) or npc
+
+	local npcEntity = ents.Create("exp_npc")
+	npcEntity:SetupNPC(npc)
+	npcEntity:SetPos(position)
+	npcEntity:SetAngles(angles)
+	npcEntity:Spawn()
+
+	return npcEntity
+end
+
 function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 	local distance = client:GetPos():Distance(npcEntity:GetPos())
 
@@ -107,5 +119,35 @@ net.Receive("expNpcInteractEnd", function(length, client)
 
 	if (npc.OnEnd) then
 		npc:OnEnd(client, npcEntity)
+	end
+end)
+
+hook.Add("SaveData", "expSaveNpcData", function()
+	local npcData = {}
+
+	for _, npc in pairs(ents.FindByClass("exp_npc")) do
+		npcData[#npcData + 1] = {
+            id = npc:GetNpcId(),
+            position = npc:GetPos(),
+            angles = npc:GetAngles(),
+		}
+	end
+
+    Schema:SetData({
+		npcData = npcData,
+	})
+end)
+
+hook.Add("LoadData", "expLoadNpcData", function()
+	local data = Schema:GetData()
+
+    if (not data) then
+        return
+    end
+
+	local npcData = data.npcData or {}
+
+	for _, npc in ipairs(npcData) do
+		Schema.npc.SpawnEntity(npc.id, npc.position, npc.angles)
 	end
 end)

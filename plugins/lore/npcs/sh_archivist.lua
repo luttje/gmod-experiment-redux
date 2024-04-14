@@ -3,6 +3,7 @@ local NPC = NPC
 NPC.name = "Principal Archivist"
 NPC.description = "A wise looking man, who seems to know more than he lets on."
 NPC.model = "models/Humans/Group03/male_08.mdl"
+NPC.voicePitch = 95
 
 local firstMeeting = NPC:RegisterInteraction("firstMeeting", {
 	text = "Hi! Nice to meet you",

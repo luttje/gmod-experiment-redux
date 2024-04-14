@@ -195,7 +195,7 @@ net.Receive("expMonitorConfig", function()
 	panelList:AddItem(parentModelButton)
 end)
 
-hook.Add("PreDrawHalos", "AddPropHalos", function()
+hook.Add("PreDrawHalos", "expAddPropHalosOnHighlight", function()
 	if (highlightedEntity) then
 		halo.Add({ highlightedEntity }, Color(255, 0, 0), 5, 5, 2)
 	end

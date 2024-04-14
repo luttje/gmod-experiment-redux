@@ -155,7 +155,7 @@ end
 
 vgui.Register("exp_Achievements", PANEL, "DScrollPanel")
 
-hook.Add("CreateMenuButtons", "exp_Achievements", function(tabs)
+hook.Add("CreateMenuButtons", "expAddAchievementsMenuButton", function(tabs)
 	tabs["achievements"] = function(container)
 		container:Add("exp_Achievements")
 	end
