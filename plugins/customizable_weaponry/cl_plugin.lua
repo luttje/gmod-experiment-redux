@@ -9,6 +9,9 @@ function TacRP.GetBind(binding)
     return string.upper(bind)
 end
 
+-- This removes autoreloading and melee attacks with weapons (which would require binding +tacrp_melee)
+hook.Remove("CreateMove", "TacRP_CreateMove")
+
 function PLUGIN:ShowCompatibleItems(attachmentId)
 	local window = vgui.Create("expAttachmentList")
 	window:Populate(attachmentId)

@@ -8,12 +8,12 @@ ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 
 local conVarsToSet = {
-	["tacrp_funny_loudnoises"] = { isServer = true, value = 0 },
-	["tacrp_checknews"] = { isServer = true, value = 0 },
-	["tacrp_hud"] = { isServer = true, value = 0 },
-	["tacrp_drawhud"] = { isServer = false, value = 0 },
-	["tacrp_shutup"] = { isServer = false, value = 1 },
-	["tacrp_hints"] = { isServer = false, value = 0 },
+	["tacrp_funny_loudnoises"] = { isServer = true, value = false },
+	["tacrp_checknews"] = { isServer = true, value = false },
+	["tacrp_hud"] = { isServer = true, value = false },
+	["tacrp_drawhud"] = { isServer = false, value = false },
+	["tacrp_shutup"] = { isServer = false, value = true },
+	["tacrp_hints"] = { isServer = false, value = false },
 
 	-- Note that without setting this to false the server errors in TacRP.LoadAtt.
 	-- This is because Material("*.png") fails to load on the server
@@ -25,6 +25,7 @@ local conVarsToSet = {
 	["tacrp_mult_recoil_vis"] = { isServer = true, value = 0.5 },
 	["tacrp_sway"] = { isServer = true, value = false }, -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
 	["tacrp_freeaim"] = { isServer = true, value = false }, -- false disables: While not aiming, moving around will cause the crosshair to move off center
+	["tacrp_autoreload"] = { isServer = false, value = false }
 	-- ["tacrp_physbullet"] = false, -- false disables: Bullets will be hitscan up to a certain range depending on muzzle velocity
 	-- ["tacrp_recoilpattern"] = false,
 	-- ["tacrp_altrecoil"] = false, -- false disables: If enabled, gaining bloom intensifies recoil but does not modify spread.\nIf disabled, gaining bloom increases spread but does not modify recoil kick (old behavior).\nBloom is gained when firing consecutive shots.
