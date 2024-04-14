@@ -4,6 +4,13 @@ if (Schema.util == nil) then
 	Schema.util.throttles = {}
 end
 
+--- Converts Source Engine units (1 unit = 1 inch) to centimeters (1 unit = 2.54 cm)
+---@param unit any
+---@return unknown
+function Schema.util.UnitToCentimeters(unit)
+	return unit * 2.54
+end
+
 --- Creates a scope that allows only a single transaction to be active at a time.
 ---@param scope string
 ---@param callback fun(release: fun())

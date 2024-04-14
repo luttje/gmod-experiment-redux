@@ -106,10 +106,11 @@ function ENT:SetupRandomVoiceSet(model)
 end
 
 function ENT:SetupNPC(npc)
+	self.expNpcData = npc
 	self:SetNpcId(npc.uniqueID)
 
 	if (npc.name) then
-        self:SetDisplayName(npc.name)
+		self:SetDisplayName(npc.name)
 	end
 
 	if (npc.description) then
@@ -139,8 +140,19 @@ function ENT:SetupNPC(npc)
 	end
 end
 
-function ENT:PrintChat(message)
-	local range = ix.config.Get("chatRange", 280)
+function ENT:Think()
+	if (self.expNpcData) then
+		if (self.expNpcData.OnThink) then
+			self.expNpcData:OnThink(self)
+		end
+	end
+
+	self:NextThink(CurTime() + 1)
+	return true
+end
+
+function ENT:PrintChat(message, isYelling)
+	local range = ix.config.Get("chatRange", 280) * (isYelling and 2 or 1)
 	local receivers = {}
 
 	for _, entity in ipairs(ents.FindInSphere(self:GetPos(), range)) do
@@ -149,14 +161,21 @@ function ENT:PrintChat(message)
 		end
 	end
 
-	ix.chat.Send(nil, "npc", message, false, receivers, {self:GetDisplayName()})
+	ix.chat.Send(nil, "npc", message, false, receivers, {
+		name = self:GetDisplayName(),
+		yelling = isYelling or false
+	})
 end
 
-function ENT:SpeakFromSet(index)
-	local randomVoiceLines = self:GetVoiceSet()
+function ENT:SpeakFromSet(randomVoiceLines, index)
+	randomVoiceLines = randomVoiceLines or self:GetVoiceSet()
 	local randomVoiceLine = randomVoiceLines[index or math.random(#randomVoiceLines)]
 
-	self:EmitSound(randomVoiceLine, 75, self:GetVoicePitch())
+	self:SpeakSound(randomVoiceLine)
+end
+
+function ENT:SpeakSound(sound)
+	self:EmitSound(sound, 75, self:GetVoicePitch())
 end
 
 function ENT:Use(activator, caller)

@@ -19,7 +19,7 @@ net.Receive("expNpcInteractShow", function(length)
 	end
 
 	if (IsValid(Schema.npc.panel)) then
-		Schema.npc.panel:SetInteraction(interaction, npc)
+		Schema.npc.panel:SetInteraction(interaction, npc, npcEntity)
 		return
 	end
 

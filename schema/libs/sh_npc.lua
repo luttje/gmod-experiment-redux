@@ -6,7 +6,9 @@ ix.chat.Register("npc", {
 		return not IsValid(speaker)
 	end,
 	OnChatAdd = function(self, speaker, text, anonymous, data)
-		chat.AddText(Color(255, 255, 255), ("%s says \"%s\""):format(data[1], text))
+		local format = data.yelling and "%s yells \"%s\"" or "%s says \"%s\""
+
+		chat.AddText(Color(255, 255, 255), format:format(data.name, text))
 	end,
 })
 

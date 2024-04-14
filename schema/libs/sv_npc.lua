@@ -34,6 +34,10 @@ function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 
 	local interaction = npc:OnInteract(client, npcEntity, desiredInteraction)
 
+	if (not interaction) then
+		return
+	end
+
     client.expCurrentInteraction = {
 		npcEntity = npcEntity,
 		npc = npc,
