@@ -7,12 +7,12 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
 ITEM.description = "A green fruit, it has a hard outer shell."
-ITEM.boostAttribs = {
-	["acr"] = {
+ITEM.attributeBoosts = {
+	["acrobatics"] = {
 		amount = 2,
 		duration = 600,
 	},
-	["agl"] = {
+	["agility"] = {
 		amount = 2,
 		duration = 600,
 	},

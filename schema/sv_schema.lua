@@ -100,11 +100,11 @@ function Schema.MakeExplosion(position, scale)
 end
 
 function Schema.GetHealAmount(character, amount)
-	return amount * Schema.GetAttributeFraction(character, "med")
+	return amount * Schema.GetAttributeFraction(character, "medical")
 end
 
 function Schema.GetDexterityTime(character, time)
-	return time * Schema.GetAttributeFraction(character, "dex")
+	return time * Schema.GetAttributeFraction(character, "dexterity")
 end
 
 function Schema.BustDownDoor(client, door, force)

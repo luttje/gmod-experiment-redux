@@ -5,7 +5,10 @@ NPC.description = "A spirited figure waiting eagerly at the finish line of a rac
 NPC.model = "models/humans/group02/female_02.mdl"
 NPC.voicePitch = 105
 NPC.entryFeeRewardFactor = 0.75
-NPC.staminaReward = 1
+NPC.attributeRewards = {
+	["stamina"] = 1,
+	["endurance"] = 0.5,
+}
 
 local noRaceStartedMessages = {
 	"No race has been started yet! I can't help you.",
@@ -124,12 +127,15 @@ function NPC:OnInteract(client, npcEntity)
 				npcEntity:PrintChat(winnerName .. " finished the race in " .. winner.time .. "! Well done.")
 
 				if (IsValid(winner.client)) then
-					winner.client:Notify("You've won " .. ix.currency.Get(prize) .. " for finishing the race and your stamina has improved.")
+					winner.client:Notify("You've won " .. ix.currency.Get(prize) .. " for finishing the race. Your stamina and endurance have improved.")
 				end
 			end)
 
 			character:GiveMoney(prize)
-			character:UpdateAttrib("stm", NPC.staminaReward)
+
+			for attribute, reward in pairs(NPC.attributeRewards) do
+				character:UpdateAttrib(attribute, reward)
+			end
 		else
 			npcEntity:PrintChat("I can't believe it! No one finished the race, so there's no winner!")
 		end

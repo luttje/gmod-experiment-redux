@@ -7,8 +7,8 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
 ITEM.description = "A takeout carton, it's filled with cold noodles."
-ITEM.boostAttribs = {
-	["end"] = {
+ITEM.attributeBoosts = {
+	["endurance"] = {
 		amount = 2,
 		duration = 600
 	}

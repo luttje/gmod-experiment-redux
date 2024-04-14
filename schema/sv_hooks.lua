@@ -19,6 +19,15 @@ function Schema:PlayerSecondElapsed(client)
 	client:CheckQueuedBoostRemovals()
 end
 
+function Schema:GetPlayerPunchDamage(client, damage, context)
+	if (not client:GetCharacter()) then
+		return
+	end
+
+	context.damage = context.damage
+		+ (client:GetCharacter():GetAttribute("strength", 0) * ix.config.Get("strengthMultiplier"))
+end
+
 function Schema:EntityTakeDamage(entity, damageInfo)
 	if (not entity:IsPlayer()) then
 		return
@@ -43,7 +52,7 @@ function Schema:PlayerHurt(client, attacker, health, damage)
 		local painSound, delay = hook.Run("GetPlayerPainSound", client)
 
 		if (painSound) then
-			if (not client:IsBot() and client:IsFemale() and !painSound:find("female")) then
+			if (not client:IsBot() and client:IsFemale() and ! painSound:find("female")) then
 				painSound = painSound:gsub("male", "female")
 			end
 
@@ -69,15 +78,15 @@ function Schema:GetPlayerPainSound(client)
 	if (hitGroup and math.random() <= 0.4) then
 		local delay = 2
 		if (hitGroup == HITGROUP_HEAD) then
-			return "vo/npc/male01/ow0"..math.random(1, 2)..".wav", delay
+			return "vo/npc/male01/ow0" .. math.random(1, 2) .. ".wav", delay
 		elseif (hitGroup == HITGROUP_CHEST or hitGroup == HITGROUP_GENERIC) then
-			return "vo/npc/male01/hitingut0"..math.random(1, 2)..".wav", delay
+			return "vo/npc/male01/hitingut0" .. math.random(1, 2) .. ".wav", delay
 		elseif (hitGroup == HITGROUP_LEFTLEG or hitGroup == HITGROUP_RIGHTLEG) then
-			return "vo/npc/male01/myleg0"..math.random(1, 2)..".wav", delay
+			return "vo/npc/male01/myleg0" .. math.random(1, 2) .. ".wav", delay
 		elseif (hitGroup == HITGROUP_LEFTARM or hitGroup == HITGROUP_RIGHTARM) then
-			return "vo/npc/male01/myarm0"..math.random(1, 2)..".wav", delay
+			return "vo/npc/male01/myarm0" .. math.random(1, 2) .. ".wav", delay
 		elseif (hitGroup == HITGROUP_GEAR) then
-			return "vo/npc/male01/startle0"..math.random(1, 2)..".wav", delay
+			return "vo/npc/male01/startle0" .. math.random(1, 2) .. ".wav", delay
 		end
 	end
 
@@ -181,8 +190,9 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 			local item = ix.item.instances[helmetItemId]
 
 			if (not item) then
-				ix.log.Add(client, "schemaDebug", "Schema:ScalePlayerDamage", "Attempt to get invalid helmet item instance: " ..
-				tostring(helmetItemId))
+				ix.log.Add(client, "schemaDebug", "Schema:ScalePlayerDamage",
+					"Attempt to get invalid helmet item instance: " ..
+					tostring(helmetItemId))
 				return
 			end
 
@@ -190,7 +200,7 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 			character:SetData("helmet", nil)
 			local inventory = ix.item.inventories[item.invID]
 			inventory:Remove(helmetItemId, false, true)
-			client:EmitSound("physics/body/body_medium_impact_soft"..math.random(1, 7)..".wav")
+			client:EmitSound("physics/body/body_medium_impact_soft" .. math.random(1, 7) .. ".wav")
 		end
 	end
 
@@ -210,12 +220,6 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 			damageInfo:ScaleDamage(damageScale)
 		end
 	end
-
-	-- TODO: Test if this is not too much damage reduction
-	local endurance = Schema.GetAttributeFraction(character, "end")
-	local damageScale = 1.2 - endurance -- Always take at least 20% of the damage
-
-	damageInfo:ScaleDamage(damageScale)
 end
 
 function Schema:PlayerDeath(client, inflictor, attacker)
@@ -223,7 +227,7 @@ function Schema:PlayerDeath(client, inflictor, attacker)
 end
 
 function Schema:PlayerUse(client, entity)
-	if (!client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and !entity:GetNetVar("untying")) then
+	if (! client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and ! entity:GetNetVar("untying")) then
 		entity:SetAction("@beingUntied", 5)
 		entity:SetNetVar("untying", true)
 
@@ -321,31 +325,25 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 end
 
 function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
-	if (attributeKey == "str") then
+	if (attributeKey == "strength") then
 		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
 			Schema.achievement.Progress(client, "titans_strength")
 		end
-	elseif (attributeKey == "dex") then
+	elseif (attributeKey == "dexterity") then
 		local requiredAttribute = Schema.achievement.GetProperty("dextrous_rogue", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
 			Schema.achievement.Progress(client, "dextrous_rogue")
 		end
-	elseif (attributeKey == "end") then
-		local requiredAttribute = Schema.achievement.GetProperty("enduring_spirit", "requiredAttribute")
-
-		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "enduring_spirit")
-		end
-	elseif (attributeKey == "acr") then
+	elseif (attributeKey == "acrobatics") then
 		local requiredAttribute = Schema.achievement.GetProperty("natural_acrobat", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
 			Schema.achievement.Progress(client, "natural_acrobat")
 		end
-	elseif (attributeKey == "agl") then
+	elseif (attributeKey == "agility") then
 		local requiredAttribute = Schema.achievement.GetProperty("agile_shadow", "requiredAttribute")
 
 		if (value >= requiredAttribute) then

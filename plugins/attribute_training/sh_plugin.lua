@@ -12,7 +12,7 @@ if (CLIENT) then
 			return
 		end
 
-		local raceStartEntity = client:GetNWEntity("expRaceJoined")
+		local raceStartEntity = client:GetNetVar("expRaceJoined")
 
 		if (not IsValid(raceStartEntity)) then
 			return

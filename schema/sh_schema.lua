@@ -11,6 +11,17 @@ Schema.version = {
 	suffix = "alpha"
 }
 
+Schema.disabledPlugins = {
+	-- We use our own stamina system, that doesn't train by running
+	"stamina",
+
+	-- We use our own strength system, that doesn't train by throwing punches
+	"strength",
+
+	-- We don't want player positions to be saved, they can only spawn at the spawn points
+	"spawnsaver",
+}
+
 ix.util.Include("libs/thirdparty/sh_netstream2.lua")
 
 ix.util.Include("sh_commands.lua")

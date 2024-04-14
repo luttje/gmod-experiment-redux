@@ -7,8 +7,8 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
 ITEM.description = "A tinned can, it slushes when you shake it."
-ITEM.boostAttribs = {
-	["end"] = {
+ITEM.attributeBoosts = {
+	["endurance"] = {
 		amount = 1,
 		duration = 600
 	}

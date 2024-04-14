@@ -3,9 +3,9 @@ function Schema:PostGamemodeLoaded()
 end
 
 function Schema:DoPluginIncludes(path, plugin)
-	Schema.achievement.LoadFromDir(path.."/achievements")
-	Schema.perk.LoadFromDir(path.."/perks")
-	Schema.npc.LoadFromDir(path.."/npcs")
+	Schema.achievement.LoadFromDir(path .. "/achievements")
+	Schema.perk.LoadFromDir(path .. "/perks")
+	Schema.npc.LoadFromDir(path .. "/npcs")
 end
 
 function Schema:PlayerTick(client, moveData)
@@ -54,7 +54,26 @@ function Schema:InitializedPlugins()
 	-- Check if the calibre has a matching ammo item
 	for _, calibre in ipairs(calibres) do
 		if (not ammoItems[calibre]) then
-			ErrorNoHalt("No ammo item found for calibre '" .. calibre .. "'. You should create an ammo item for this calibre.\n")
+			ErrorNoHalt("No ammo item found for calibre '" ..
+				calibre .. "'. You should create an ammo item for this calibre.\n")
+		end
+	end
+
+	if (SERVER) then
+		local anyNewUnloaded = false
+
+		for _, pluginID in ipairs(Schema.disabledPlugins) do
+			local pluginUnloaded = ix.plugin.unloaded[pluginID] == true
+
+			if (not pluginUnloaded) then
+				anyNewUnloaded = true
+				ix.plugin.SetUnloaded(pluginID, true)
+				ErrorNoHalt("Helix Plugin Notice: The plugin '" .. pluginID .. "' is marked as disabled in the schema.\n")
+			end
+		end
+
+		if (anyNewUnloaded) then
+			ErrorNoHalt("Helix Plugin Notice: Some plugins were disabled by the schema. You should most definitely restart the server to apply these changes!\n")
 		end
 	end
 end

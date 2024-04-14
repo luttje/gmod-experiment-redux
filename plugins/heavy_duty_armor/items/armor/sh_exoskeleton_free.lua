@@ -7,7 +7,7 @@ ITEM.description =
 ITEM.maxArmor = 500
 ITEM.hasTearGasProtection = true
 ITEM.attribBoosts = {
-	["med"] = 35,
+	["medical"] = 35,
 }
 ITEM.width = 2
 ITEM.height = 1

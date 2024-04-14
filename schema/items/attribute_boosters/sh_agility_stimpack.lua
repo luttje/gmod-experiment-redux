@@ -7,8 +7,8 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Stimpacks"
 ITEM.description = "A Stimpack branded stimulator promising to enhance the body. This stimpack temporarily enhances your agility by 25 points."
-ITEM.boostAttribs = {
-	["agl"] = {
+ITEM.attributeBoosts = {
+	["agility"] = {
 		amount = 25,
 		duration = 3600
 	}

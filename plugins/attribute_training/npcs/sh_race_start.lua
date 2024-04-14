@@ -6,8 +6,8 @@ NPC.model = "models/humans/group01/male_03.mdl"
 NPC.voicePitch = 90
 
 NPC.raceStartCost = 100
-NPC.raceStartsAfterSeconds = 10
-NPC.raceIntervalInMinutes = 2
+NPC.raceStartsAfterSeconds = 30
+NPC.raceIntervalInMinutes = 15
 NPC.raceStartDistanceLimit = 256
 
 local raceStart = NPC:RegisterInteraction("raceStart", {
@@ -62,7 +62,7 @@ local raceJoined = NPC:RegisterInteraction("raceJoined", {
 local raceAlreadyJoined = NPC:RegisterInteraction("raceAlreadyJoined", {
 	text = function(client, npcEntity, answersPanel)
 		-- Show a response, depending on if the race has started or not
-		local currentRaceStart = npcEntity:GetNWInt("expCurrentRaceStart", 0)
+		local currentRaceStart = npcEntity:GetNetVar("expCurrentRaceStart", 0)
 		local curTime = CurTime()
 
 		if (currentRaceStart > 0 and currentRaceStart - curTime > 0) then
@@ -86,7 +86,7 @@ local raceAlreadyStarted = NPC:RegisterInteraction("raceAlreadyStarted", {
 
 local raceRecentlyStarted = NPC:RegisterInteraction("raceRecentlyStarted", {
 	text = function(client, npcEntity, answersPanel)
-		local nextRaceStart = npcEntity:GetNWInt("expNextRaceStart", 0)
+		local nextRaceStart = npcEntity:GetNetVar("expNextRaceStart", 0)
 		local curTime = CurTime()
 		local raceStartRemaining = string.NiceTime(math.ceil(nextRaceStart - curTime))
 
@@ -101,7 +101,7 @@ local raceRecentlyStarted = NPC:RegisterInteraction("raceRecentlyStarted", {
 })
 
 function NPC:OnInteract(client, npcEntity, desiredInteraction)
-	local currentRaceStart = npcEntity:GetNWInt("expCurrentRaceStart", 0)
+	local currentRaceStart = npcEntity:GetNetVar("expCurrentRaceStart", 0)
 	local curTime = CurTime()
 
 	if (npcEntity.expRaceData and npcEntity.expRaceData.runners and npcEntity.expRaceData.runners[client]) then
@@ -114,7 +114,7 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
 		end
 	end
 
-	local nextRaceStart = npcEntity:GetNWInt("expNextRaceStart", 0)
+	local nextRaceStart = npcEntity:GetNetVar("expNextRaceStart", 0)
 
 	if (nextRaceStart > 0) then
 		if (nextRaceStart - curTime > 0) then
@@ -136,9 +136,9 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
 		end
 
 		character:TakeMoney(entryFee)
-		npcEntity:SetNWInt("expCurrentRaceStart", curTime + NPC.raceStartsAfterSeconds)
-		npcEntity:SetNWInt("expNextRaceStart", curTime + (NPC.raceIntervalInMinutes * 60))
-		client:SetNWEntity("expRaceJoined", npcEntity)
+		npcEntity:SetNetVar("expCurrentRaceStart", curTime + NPC.raceStartsAfterSeconds)
+		npcEntity:SetNetVar("expNextRaceStart", curTime + (NPC.raceIntervalInMinutes * 60))
+		client:SetNetVar("expRaceJoined", npcEntity)
 		npcEntity.expRaceData = npcEntity.expRaceData or {}
 		npcEntity.expRaceData.runners = npcEntity.expRaceData.runners or {}
 		npcEntity.expRaceData.runners[client] = {
@@ -158,7 +158,7 @@ end
 
 function NPC:OnThink(npcEntity)
 	local curTime = CurTime()
-	local currentRaceStart = npcEntity:GetNWInt("expCurrentRaceStart", 0)
+	local currentRaceStart = npcEntity:GetNetVar("expCurrentRaceStart", 0)
 
 	if (currentRaceStart == 0) then
 		return
@@ -170,7 +170,7 @@ function NPC:OnThink(npcEntity)
 		end
 
 		npcEntity:PrintChat("I can't believe it! No one finished, so there's no winner!")
-		npcEntity:SetNWInt("expCurrentRaceStart", 0)
+		npcEntity:SetNetVar("expCurrentRaceStart", 0)
 		npcEntity.expRaceData = nil
 		return
 	end
@@ -191,13 +191,13 @@ function NPC:OnThink(npcEntity)
 			npcEntity.expRaceData.countdown = npcEntity.expRaceData.countdown - 1
 		else
 			npcEntity:PrintChat("GO!", true)
-			npcEntity:SetNWInt("expCurrentRaceStart", 0)
+			npcEntity:SetNetVar("expCurrentRaceStart", 0)
 			npcEntity.expRaceData.countdown = nil
 			npcEntity.expRaceData.raceStartedAt = curTime
 
 			-- Hide the distance limit for the runners
 			for runner, data in pairs(npcEntity.expRaceData.runners) do
-				runner:SetNWEntity("expRaceJoined", NULL)
+				runner:SetNetVar("expRaceJoined", NULL)
 			end
 		end
 
@@ -221,7 +221,7 @@ function NPC:CheckRunners(npcEntity)
 			npcEntity:PrintChat(runner:Name() .. " has forfeited the race!", true)
 			npcEntity.expRaceData.runners[runner] = nil
 
-			runner:SetNWEntity("expRaceJoined", NULL)
+			runner:SetNetVar("expRaceJoined", NULL)
 			continue
 		end
 

@@ -7,13 +7,13 @@ ITEM.height = 1
 ITEM.category = "Stimpacks"
 ITEM.description = "A Stimpack branded stimulator promising to enhance the body."
 ITEM.boostSound = "items/medshot4.wav"
-ITEM.boostAttribs = {
+ITEM.attributeBoosts = {
 	-- Example:
-	-- ["agl"] = {
+	-- ["agility"] = {
 	-- 	amount = 25,
 	-- 	duration = 3600
 	-- },
-	-- ["acr"] = {
+	-- ["acrobatics"] = {
 	-- 	amount = 25,
 	-- 	duration = 3600
 	-- }
@@ -24,9 +24,14 @@ ITEM.functions.Consume = {
         local client = item.player
 		local character = client:GetCharacter()
 
-        for attrib, data in pairs(item.boostAttribs) do
-            character:AddBoost(item.uniqueID, attrib, data.amount)
-            client:QueueBoostRemove(item.uniqueID, attrib, data.duration)
+		for attribute, data in pairs(item.attributeBoosts) do
+			if (not ix.attributes.list[attribute]) then
+				-- In case the attribute plugin is disabled, we skip this attribute.
+				continue
+			end
+
+            character:AddBoost(item.uniqueID, attribute, data.amount)
+            client:QueueBoostRemove(item.uniqueID, attribute, data.duration)
         end
 
 		if (item.GetEmitBoostSound) then

@@ -10,5 +10,5 @@ ITEM.description = "They look tattered and dirty."
 ITEM.pacData = {}
 ITEM.degredationPerSecond = 0.005
 ITEM.attribBoosts = {
-	["stm"] = 5
+	["stamina"] = 5
 }

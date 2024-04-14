@@ -7,12 +7,12 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
 ITEM.description = "A jug filled with delicious milk."
-ITEM.boostAttribs = {
-	["end"] = {
+ITEM.attributeBoosts = {
+	["endurance"] = {
 		amount = 2,
 		duration = 600,
     },
-	["str"] = {
+	["strength"] = {
 		amount = 2,
 		duration = 600,
 	},
