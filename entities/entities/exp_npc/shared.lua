@@ -1,4 +1,4 @@
-DEFINE_BASECLASS("base_anim")
+DEFINE_BASECLASS("base_ai")
 
 ENT.Base = "base_ai"
 ENT.Type = "ai"

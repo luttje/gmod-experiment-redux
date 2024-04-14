@@ -1,12 +1,8 @@
-DEFINE_BASECLASS("base_anim")
-
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
 
--- Note to self: Having DEFINE_BASECLASS here will cause the NPC to float
--- whilst having it above the include doesnt? Wtf does baseclass.Get do to cause that?
--- DEFINE_BASECLASS("base_anim")
+DEFINE_BASECLASS("base_ai")
 
 local randomModels = {
 	"models/Humans/Group02/Male_02.mdl",
@@ -141,14 +137,19 @@ function ENT:SetupNPC(npc)
 end
 
 function ENT:Think()
-	if (self.expNpcData) then
-		if (self.expNpcData.OnThink) then
-			self.expNpcData:OnThink(self)
-		end
+	if (not self.expNpcData) then
+		return
 	end
 
-	self:NextThink(CurTime() + 1)
-	return true
+	if (self.nextCheckThink and self.nextCheckThink > CurTime()) then
+		return
+	end
+
+	self.nextCheckThink = CurTime() + 1
+
+	if (self.expNpcData.OnThink) then
+		self.expNpcData:OnThink(self)
+	end
 end
 
 function ENT:PrintChat(message, isYelling)

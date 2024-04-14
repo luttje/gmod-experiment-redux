@@ -1,6 +1,6 @@
 include("shared.lua")
 
-DEFINE_BASECLASS("base_anim")
+DEFINE_BASECLASS("base_ai")
 
 ENT.PopulateEntityInfo = true
 
