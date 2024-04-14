@@ -138,10 +138,11 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
 		character:TakeMoney(entryFee)
 		npcEntity:SetNetVar("expCurrentRaceStart", curTime + NPC.raceStartsAfterSeconds)
 		npcEntity:SetNetVar("expNextRaceStart", curTime + (NPC.raceIntervalInMinutes * 60))
-		client:SetNetVar("expRaceJoined", npcEntity)
+		client:SetCharacterNetVar("expRaceJoined", npcEntity)
 		npcEntity.expRaceData = npcEntity.expRaceData or {}
 		npcEntity.expRaceData.runners = npcEntity.expRaceData.runners or {}
 		npcEntity.expRaceData.runners[client] = {
+			name = client:Name(),
 			joinedAt = curTime,
 			entryFee = entryFee,
 		}
@@ -197,7 +198,7 @@ function NPC:OnThink(npcEntity)
 
 			-- Hide the distance limit for the runners
 			for runner, data in pairs(npcEntity.expRaceData.runners) do
-				runner:SetNetVar("expRaceJoined", NULL)
+				runner:SetCharacterNetVar("expRaceJoined", NULL)
 			end
 		end
 
@@ -218,10 +219,10 @@ function NPC:CheckRunners(npcEntity)
 		local distance = runner:GetPos():Distance(npcEntity:GetPos())
 
 		if (distance > NPC.raceStartDistanceLimit) then
-			npcEntity:PrintChat(runner:Name() .. " has forfeited the race!", true)
+			npcEntity:PrintChat(npcEntity.expRaceData.runners[runner].name .. " has forfeited the race!", true)
 			npcEntity.expRaceData.runners[runner] = nil
 
-			runner:SetNetVar("expRaceJoined", NULL)
+			runner:SetCharacterNetVar("expRaceJoined", NULL)
 			continue
 		end
 
@@ -241,4 +242,31 @@ local goodbyes = {
 
 function NPC:OnEnd(client, npcEntity)
 	npcEntity:PrintChat(goodbyes[math.random(#goodbyes)])
+end
+
+if (CLIENT) then
+	function NPC:HUDPaint(npcEntity)
+		local client = LocalPlayer()
+		local raceEntityPosition = npcEntity:GetPos()
+		local distance = client:GetPos():Distance(raceEntityPosition)
+
+		if (distance >= NPC.raceStartDistanceLimit) then
+			return
+		end
+
+		local position = (raceEntityPosition + Vector(0, 0, 52)):ToScreen()
+		local limitInMeters = math.floor(Schema.util.UnitToCentimeters(NPC.raceStartDistanceLimit) / 100)
+		local distanceInMeters = math.ceil(Schema.util.UnitToCentimeters(distance) / 100)
+
+		if (not position.visible) then
+			return
+		end
+
+		local color = distanceInMeters > (limitInMeters * .8) and Color(255, 50, 50) or Color(90, 140, 90)
+
+		draw.SimpleTextOutlined("Stay within " .. limitInMeters .. "m to stay in race.", "ixSmallFont", position.x,
+			position.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+		draw.SimpleTextOutlined("Distance: " .. distanceInMeters .. "m", "ixBigFont", position.x, position.y + 8,
+			color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
+	end
 end

@@ -12,34 +12,52 @@ if (CLIENT) then
 			return
 		end
 
-		local raceStartEntity = client:GetNetVar("expRaceJoined")
+		local raceStartEntity = client:GetCharacterNetVar("expRaceJoined")
 
-		if (not IsValid(raceStartEntity)) then
+		if (IsValid(raceStartEntity)) then
+			local npc = Schema.npc.Get(raceStartEntity:GetNpcId())
+			npc:HUDPaint(raceStartEntity)
+		end
+
+		local targetPracticeChallenger = client:GetCharacterNetVar("targetPracticeChallenger")
+
+		if (IsValid(targetPracticeChallenger)) then
+			local npc = Schema.npc.Get(targetPracticeChallenger:GetNpcId())
+			npc:HUDPaint(targetPracticeChallenger)
+		end
+	end
+end
+
+if (SERVER)then
+	function PLUGIN:SaveData()
+		local targetPracticeSpawners = {}
+
+		for _, targetPracticeSpawner in pairs(ents.FindByClass("exp_target_practice_spawn")) do
+			targetPracticeSpawners[#targetPracticeSpawners + 1] = {
+				position = targetPracticeSpawner:GetPos(),
+				angles = targetPracticeSpawner:GetAngles(),
+			}
+		end
+
+		self:SetData({
+			targetPracticeSpawners = targetPracticeSpawners,
+		})
+	end
+
+	function PLUGIN:LoadData()
+		local data = self:GetData()
+
+		if (not data) then
 			return
 		end
 
-		local npc = Schema.npc.Get(raceStartEntity:GetNpcId())
+		local targetPracticeSpawners = data.targetPracticeSpawners or {}
 
-		if (not npc) then
-			return
-		end
-
-		local raceEntityPosition = raceStartEntity:GetPos()
-		local distance = client:GetPos():Distance(raceEntityPosition)
-
-		if (distance < npc.raceStartDistanceLimit) then
-			local position = (raceEntityPosition + Vector(0, 0, 52)):ToScreen()
-			local limitInMeters = math.floor(Schema.util.UnitToCentimeters(npc.raceStartDistanceLimit) / 100)
-			local distanceInMeters = math.ceil(Schema.util.UnitToCentimeters(distance) / 100)
-
-			if (position.visible) then
-				local color = distanceInMeters > (limitInMeters * .8) and Color(255, 50, 50) or Color(90, 140, 90)
-
-				draw.SimpleTextOutlined("Stay within " .. limitInMeters .. "m to stay in race.", "ixSmallFont", position.x,
-					position.y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
-				draw.SimpleTextOutlined("Distance: " .. distanceInMeters .. "m", "ixBigFont", position.x, position.y + 8,
-					color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, color_black)
-			end
+		for _, targetPracticeSpawner in ipairs(targetPracticeSpawners) do
+			local entity = ents.Create("exp_target_practice_spawn")
+			entity:SetPos(targetPracticeSpawner.position)
+			entity:SetAngles(targetPracticeSpawner.angles)
+			entity:Spawn()
 		end
 	end
 end
