@@ -30,7 +30,6 @@ ITEM.functions.Apply = {
 				Schema.ChloroformPlayer(target)
 
 				itemTable:Remove()
-				client:GetCharacter():UpdateAttrib("dexterity", 15)
 			end, chloroformTime, function()
 				client:SetAction()
 
