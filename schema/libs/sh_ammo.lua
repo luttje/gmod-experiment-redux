@@ -107,12 +107,7 @@ function Schema.ammo.ForceWeaponCalibre(swepClass, calibre)
 	local ammo = Schema.ammo.ammoCalibre[ammoName].ammo
 
 	if (ammo and istable(ammo)) then
-		local ammoData = game.GetAmmoID(ammo.name)
-
-		if (ammoData == -1) then
-			game.AddAmmoType(ammo)
-		end
-
+		game.AddAmmoType(ammo)
 		ammoName = ammo.name
 	end
 

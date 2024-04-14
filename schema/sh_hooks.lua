@@ -28,7 +28,7 @@ end
 
 function Schema:InitializedPlugins()
 	local ammoItems = {}
-	local items = ix.item.list
+    local items = ix.item.list
 
 	for _, item in pairs(items) do
 		if (item.isAttachment and item.class ~= nil) then
