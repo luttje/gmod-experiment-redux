@@ -20,7 +20,7 @@ function Schema.achievement.LoadFromDir(directory)
 
         ACHIEVEMENT = Schema.achievement.stored[uniqueID] or {}
         ACHIEVEMENT.uniqueID = uniqueID
-		ACHIEVEMENT.index = table.Count(Schema.achievement.buffer) + 1
+		ACHIEVEMENT.index = tonumber(util.CRC(uniqueID))
 
         ix.util.Include(directory .. "/" .. fileName, "shared")
 
@@ -229,7 +229,6 @@ else
 
 		Schema.achievement.UpdatePanel()
 	end)
-
 
 	net.Receive("exp_AchievementsLoad", function()
 		local achievements = net.ReadTable()

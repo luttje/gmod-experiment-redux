@@ -105,9 +105,7 @@ function PANEL:OnMouseReleased(keyCode)
 		return
 	end
 
-	net.Start("PerkRequestBuy")
-	net.WriteString(self.perk.uniqueID)
-	net.SendToServer()
+	Schema.perk.RequestBuy(self.perk)
 end
 
 function PANEL:Paint(width, height)

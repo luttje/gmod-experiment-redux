@@ -20,7 +20,7 @@ function Schema.perk.LoadFromDir(directory)
 
         PERK = Schema.perk.stored[uniqueID] or {}
         PERK.uniqueID = uniqueID
-		PERK.index = table.Count(Schema.perk.buffer) + 1
+		PERK.index = tonumber(util.CRC(uniqueID))
 
         ix.util.Include(directory .. "/" .. fileName, "shared")
 
@@ -149,7 +149,7 @@ if (SERVER) then
 	end
 
 	net.Receive("PerkRequestBuy", function(len, client)
-		local perkUniqueID = net.ReadString()
+		local perkIndex = net.ReadUInt(32)
 		local character = client:GetCharacter()
 
 		if (client.NextBuyPerk and client.NextBuyPerk > CurTime()) then
@@ -161,11 +161,11 @@ if (SERVER) then
 		end
 
 		client.NextBuyPerk = CurTime() + 5
-		local perkTable = Schema.perk.Get(perkUniqueID)
+		local perkTable = Schema.perk.Get(perkIndex)
 
 		if (not perkTable) then
 			ix.log.Add(client, "schemaDebug", "PerkRequestBuy", "Attempt to check for invalid perk: " ..
-				tostring(perkUniqueID))
+				tostring(perkIndex))
 		end
 
 		if (not character:HasMoney(perkTable.price)) then
@@ -211,12 +211,18 @@ else
 		return checkHasPerk(Schema.perk.localOwned, perkTable)
 	end
 
+	function Schema.perk.RequestBuy(perk)
+		net.Start("PerkRequestBuy")
+		net.WriteUInt(perk.index, 32)
+		net.SendToServer()
+	end
+
 	net.Receive("PerkGive", function()
-		local perk = net.ReadUInt(32)
-        local perkTable = Schema.perk.Get(perk)
+		local perkIndex = net.ReadUInt(32)
+        local perkTable = Schema.perk.Get(perkIndex)
 
         if (not perkTable) then
-			error("Perk with index " .. perk .. " does not exist.")
+			error("Perk with index " .. perkIndex .. " does not exist.")
 			return
 		end
 
