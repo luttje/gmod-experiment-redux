@@ -41,7 +41,7 @@ function playerMeta:EnableTacticalGoggles()
     self:EmitSound("items/nvg_on.wav")
 
     character:SetData("tacticalGoggles", true)
-	self:SetCharacterNWBool("tacticalGoggles", true)
+	self:SetCharacterNetVar("tacticalGoggles", true)
 
 	return true
 end
@@ -52,7 +52,7 @@ function playerMeta:DisableTacticalGoggles()
     self:EmitSound("items/nvg_off.wav")
 
     character:SetData("tacticalGoggles", false)
-	self:SetCharacterNWBool("tacticalGoggles", false)
+	self:SetCharacterNetVar("tacticalGoggles", false)
 end
 
 function playerMeta:ToggleTacticalGoggles()

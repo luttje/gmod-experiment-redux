@@ -57,7 +57,7 @@ function ITEM:OnEquipped()
 	local character = client:GetCharacter()
 
 	character:SetData("skullMask", true)
-	client:SetCharacterNWBool("expSkullMask", true)
+	client:SetCharacterNetVar("expSkullMask", true)
 end
 
 function ITEM:OnUnequipped()
@@ -65,5 +65,5 @@ function ITEM:OnUnequipped()
 	local character = client:GetCharacter()
 
 	character:SetData("skullMask", nil)
-	client:SetCharacterNWBool("expSkullMask", false)
+	client:SetCharacterNetVar("expSkullMask", false)
 end

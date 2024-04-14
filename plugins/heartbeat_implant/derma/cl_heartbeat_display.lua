@@ -97,7 +97,7 @@ function PANEL:Paint(width, height)
     surface.DrawTexturedRect(0, 0, width, height)
 
     -- Draw ourselves manually
-	if (not client:GetCharacterNWBool("hasGhostheartPerk", false)) then
+	if (not client:GetCharacterNetVar("hasGhostheartPerk", false)) then
 		surface.SetDrawColor(255, 255, 255, (alpha * .8) + (math.sin(curTime * 10) * (alpha * .3)))
 		surface.SetMaterial(PLUGIN.heartbeatPoint)
 		surface.DrawTexturedRect(width / 2 - 8, height / 2 - 8, 16, 16)
@@ -125,7 +125,7 @@ function PANEL:Paint(width, height)
 				continue
 			end
 
-            if (entity:GetCharacterNWBool("hasGhostheartPerk", false)) then
+            if (entity:GetCharacterNetVar("hasGhostheartPerk", false)) then
 				continue
 			end
 

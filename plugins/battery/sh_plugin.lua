@@ -19,11 +19,11 @@ PLUGIN.batteryDecrement = {
 local playerMeta = FindMetaTable("Player")
 
 function playerMeta:HasStealthActivated()
-    return self:GetCharacterNWBool("expStealth", false)
+    return self:GetCharacterNetVar("expStealth", false)
 end
 
 function playerMeta:HasThermalActivated()
-    return self:GetCharacterNWBool("expThermal", false)
+    return self:GetCharacterNetVar("expThermal", false)
 end
 
 if (not CLIENT) then

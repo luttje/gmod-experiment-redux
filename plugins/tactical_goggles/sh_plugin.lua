@@ -21,5 +21,5 @@ end
 local playerMeta = FindMetaTable("Player")
 
 function playerMeta:HasTacticalGogglesActivated()
-	return self:GetCharacterNWBool("tacticalGoggles", false)
+	return self:GetCharacterNetVar("tacticalGoggles", false)
 end

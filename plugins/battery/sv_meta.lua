@@ -17,7 +17,7 @@ function playerMeta:EnableStealth()
     self:EmitSound("items/nvg_on.wav")
 
     character:SetData("stealth", true)
-	self:SetCharacterNWBool("expStealth", true)
+	self:SetCharacterNetVar("expStealth", true)
 
 	return true
 end
@@ -30,7 +30,7 @@ function playerMeta:DisableStealth()
 	self:EmitSound("items/nvg_off.wav")
 
 	character:SetData("stealth", false)
-    self:SetCharacterNWBool("expStealth", false)
+    self:SetCharacterNetVar("expStealth", false)
 end
 
 function playerMeta:ToggleStealth()
@@ -56,7 +56,7 @@ function playerMeta:EnableThermal()
     self:EmitSound("items/nvg_on.wav")
 
     character:SetData("thermal", true)
-	self:SetCharacterNWBool("expThermal", true)
+	self:SetCharacterNetVar("expThermal", true)
 end
 
 function playerMeta:DisableThermal()
@@ -65,7 +65,7 @@ function playerMeta:DisableThermal()
 	self:EmitSound("items/nvg_off.wav")
 
     character:SetData("thermal", false)
-	self:SetCharacterNWBool("expThermal", false)
+	self:SetCharacterNetVar("expThermal", false)
 end
 
 function playerMeta:ToggleThermal()

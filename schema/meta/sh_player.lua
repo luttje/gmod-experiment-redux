@@ -126,3 +126,44 @@ function playerMeta:TryTraceInteractAtDistance(distance)
 
 	return true, "You can do that here.", trace
 end
+
+-- Helpers to ensure networked variables are only set for the specified character.
+-- The networked vars will be set to their default values when the character changes
+function playerMeta:SetCharacterNetVar(key, value)
+	local character = self:GetCharacter()
+
+	if (not character) then
+		error("Attempted to set networked var for player without a character.")
+		return
+	end
+
+	local cleanupList = self.expCleanupList or {}
+	self.expCleanupList = cleanupList
+
+	-- Store the original value, so we can restore it when the character changes
+	if (not cleanupList[key]) then
+		cleanupList[key] = self:GetNetVar(key)
+	end
+
+	self:SetNetVar(key, value)
+end
+
+function playerMeta:GetCharacterNetVar(key, default)
+	local character = self:GetCharacter()
+
+	if (not character) then
+		return default
+	end
+
+	return self:GetNetVar(key, default)
+end
+
+hook.Add("PlayerLoadedCharacter", "expCleanupCharacterNetVars", function(client, character, currentChar)
+	if (client.expCleanupList) then
+		for key, value in pairs(client.expCleanupList) do
+			client:SetCharacterNetVar(key, value)
+		end
+	end
+
+	client.expCleanupList = {}
+end)
