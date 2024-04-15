@@ -46,6 +46,7 @@ function ENT:Initialize()
 
 	self:SetSolid(SOLID_BBOX)
 	self:SetMoveType(MOVETYPE_STEP)
+	self:SetUseType(SIMPLE_USE)
 
 	self:CapabilitiesAdd(bit.bor(CAP_MOVE_GROUND, CAP_ANIMATEDFACE, CAP_TURN_HEAD))
 

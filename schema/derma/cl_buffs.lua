@@ -190,4 +190,6 @@ end
 
 vgui.Register("expBuffIcon", PANEL, "EditablePanel")
 
-Schema.buff.RefreshPanel()
+if (IsValid(ix.gui.buffs)) then
+	Schema.buff.CreateHUDPanel()
+end

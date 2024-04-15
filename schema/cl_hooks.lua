@@ -1,5 +1,5 @@
--- Make tooltips better readable by removing the opacity of the background
-derma.GetNamedSkin("helix").Colours.DarkerBackground.a = 255
+-- Make tooltips better readable by reducing the opacity of the background
+derma.GetNamedSkin("helix").Colours.DarkerBackground.a = 200
 
 function Schema:LoadFonts(font, genericFont)
     surface.CreateFont("expTinyFont", {
@@ -34,11 +34,15 @@ function Schema:LoadFonts(font, genericFont)
 end
 
 function Schema:InitPostEntity()
-	Schema.buff.RefreshPanel()
+	Schema.buff.CreateHUDPanel()
+end
+
+function Schema:CharacterLoaded(character)
+    Schema.buff.CreateHUDPanel()
 end
 
 function Schema:ScreenResolutionChanged(oldWidth, oldHeight)
-	Schema.buff.RefreshPanel()
+	Schema.buff.CreateHUDPanel()
 end
 
 function Schema:CreateCharacterInfo(panel)

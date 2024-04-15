@@ -29,6 +29,7 @@ if (SERVER) then
 
 		self:SetSolid(SOLID_BBOX)
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		self:SetUseType(SIMPLE_USE)
 	end
 
 	function ENT:SetInvisible(invisible)
@@ -98,10 +99,8 @@ if (SERVER) then
 		ix.log.Add(activator, "openContainer", name, inventory:GetID())
 	end
 
-	function ENT:OnOptionSelected(client, option, data)
-		if (option == L("search", client)) then
-			self:OpenInventory(client)
-		end
+	function ENT:Use(activator)
+		self:OpenInventory(activator)
 	end
 
 	function ENT:OnRemove()
@@ -148,12 +147,4 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	local description = tooltip:AddRow("description")
 	description:SetText("It might contain something useful...")
 	description:SizeToContents()
-end
-
-function ENT:GetEntityMenu(client)
-	local options = {}
-
-	options[L("search")] = function() end
-
-	return options
 end

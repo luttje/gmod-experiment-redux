@@ -193,26 +193,27 @@ if (SERVER) then
 else
 	Schema.buff.localActiveUntil = Schema.buff.localActiveUntil or {}
 
-	function Schema.buff.CreateHUDPanel()
-		if (IsValid(ix.gui.buffs)) then
-			ix.gui.buffs:Remove()
-		end
+    function Schema.buff.CreateHUDPanel()
+        if (IsValid(ix.gui.buffs)) then
+            ix.gui.buffs:Remove()
+        end
 
-		local panel = vgui.Create("expBuffManager")
-		panel:SetTall(ScrH())
-		panel:ParentToHUD()
+        local panel = vgui.Create("expBuffManager")
+        panel:SetTall(ScrH())
+        panel:ParentToHUD()
 
-		ix.gui.buffs = panel
+        ix.gui.buffs = panel
+		panel:RefreshBuffs()
 
-		return panel
-	end
+        return panel
+    end
 
 	function Schema.buff.GetPanel()
 		return ix.gui.buffs
 	end
 
 	function Schema.buff.RefreshPanel()
-		local panel = Schema.buff.CreateHUDPanel()
+		local panel = Schema.buff.GetPanel()
 
 		if (IsValid(panel)) then
 			panel:RefreshBuffs()
