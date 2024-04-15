@@ -51,7 +51,7 @@ function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 end
 
 --- Marks an interaction as completed for a player, optionally within a scope (e.g: belonging to a quest/npc)
----@param client any
+---@param client Player
 ---@param interaction any
 ---@param scope? any
 function Schema.npc.CompleteInteraction(client, interaction, scope)

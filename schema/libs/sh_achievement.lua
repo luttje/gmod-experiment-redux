@@ -6,7 +6,7 @@ if (SERVER) then
 
     ---Progress an achievement, optionally with a specific amount.
 	---If the progress is a string, it will be used as a key to track progress (1 progression per key)
-	---@param client any
+	---@param client Player
 	---@param achievement any
 	---@param progress any
 	---@return boolean

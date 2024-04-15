@@ -22,6 +22,7 @@ end
 
 function Schema:PlayerSecondElapsed(client)
 	client:CheckQueuedBoostRemovals()
+	Schema.buff.CheckExpired(client)
 end
 
 function Schema:GetPlayerPunchDamage(client, damage, context)

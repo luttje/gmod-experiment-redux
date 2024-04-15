@@ -12,7 +12,7 @@ ix.chat.Register("npc", {
 })
 
 --- Checks if a player has completed an interaction, optionally within a scope (e.g: belonging to a quest/npc)
----@param client any
+---@param client Player
 ---@param interaction any
 ---@param scope? any
 ---@return boolean

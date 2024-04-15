@@ -30,8 +30,9 @@ ITEM.functions.Consume = {
 				continue
 			end
 
-            character:AddBoost(item.uniqueID, attribute, data.amount)
-            client:QueueBoostRemove(item.uniqueID, attribute, data.duration)
+			local boostID = "item#"..item.uniqueID
+            character:AddBoost(boostID, attribute, data.amount)
+            client:QueueBoostRemove(boostID, attribute, data.duration)
         end
 
 		if (item.GetEmitBoostSound) then

@@ -56,7 +56,7 @@ end
 --- Returns true if the throttle is active, otherwise false.
 ---@param scope string
 ---@param delay number
----@param entity any? If provided, the throttle will be unique to the entity.
+---@param entity Entity? If provided, the throttle will be unique to the entity.
 ---@return boolean
 function Schema.util.Throttle(scope, delay, entity)
 	local scopeTable = Schema.util.throttles

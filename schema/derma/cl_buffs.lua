@@ -121,7 +121,7 @@ function PANEL:Think()
 	local duration = self:GetActiveUntil() - CurTime()
 
 	if (duration <= 0) then
-		Schema.buff.UpdateOnPanel(self.buff.uniqueID, self:GetActiveUntil())
+		Schema.buff.UpdateLocal(self.buff.uniqueID, self:GetActiveUntil())
 		return
 	end
 
@@ -148,7 +148,7 @@ if (IsValid(ix.gui.buffs)) then
 
 	if (Schema.buff.localActiveUntil) then
 		for uniqueID, activeUntil in pairs(Schema.buff.localActiveUntil) do
-			Schema.buff.UpdateOnPanel(uniqueID, activeUntil)
+			Schema.buff.UpdateLocal(uniqueID, activeUntil)
 		end
 	end
 end
