@@ -15,7 +15,7 @@ function SWEP.CreateEffectAtGrenadeEntity(entity, client)
 
 	Schema.MakeExplosion(position, 1)
 
-	Schema.grenades.SpawnSmoke(position, 0.2)
+	Schema.grenade.SpawnSmoke(position, 0.2)
 
 	-- Remove as the exp_flare entity will handle showing the flare + grenade.
 	entity:Remove()

@@ -1,6 +1,6 @@
-Schema.grenades = Schema.grenades or {}
+Schema.grenade = Schema.grenade or {}
 
-function Schema.grenades.SpawnFlash(position)
+function Schema.grenade.SpawnFlash(position)
 	Schema.MakeExplosion(position, 16)
 
 	for _, otherClient in ipairs(player.GetAll()) do
@@ -21,7 +21,7 @@ function Schema.grenades.SpawnFlash(position)
 	end
 end
 
-function Schema.grenades.SpawnSmoke(position, scale)
+function Schema.grenade.SpawnSmoke(position, scale)
 	local effectData = EffectData()
 
 	effectData:SetOrigin(position)
@@ -30,7 +30,7 @@ function Schema.grenades.SpawnSmoke(position, scale)
 	util.Effect("exp_effect_smoke", effectData, true, true)
 end
 
-function Schema.grenades.SpawnTearGas(position, grenadeEntityIndex)
+function Schema.grenade.SpawnTearGas(position, grenadeEntityIndex)
 	local effectData = EffectData()
 
 	effectData:SetStart(position)
@@ -75,7 +75,7 @@ function Schema.grenades.SpawnTearGas(position, grenadeEntityIndex)
 	end)
 end
 
-function Schema.grenades.CreateGrenadeEntity(client, power)
+function Schema.grenade.CreateGrenadeEntity(client, power)
 	local position = client:GetShootPos() + (client:GetAimVector() * 64)
 	local entity = ents.Create("prop_physics")
 	local trace = client:GetEyeTraceNoCursor()
@@ -143,7 +143,7 @@ function Schema.grenades.CreateGrenadeEntity(client, power)
 	return entity
 end
 
-function Schema.grenades.HandleRemoveItem(client, weapon)
+function Schema.grenade.HandleRemoveItem(client, weapon)
 	local character = client:GetCharacter()
 
 	if (not character) then

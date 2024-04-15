@@ -12,8 +12,8 @@ function SWEP.CreateEffectAtGrenadeEntity(entity, client)
 	local entIndex = entity:EntIndex()
 	local position = entity:GetPos()
 
-	Schema.grenades.SpawnTearGas(position, entIndex)
-	Schema.grenades.SpawnSmoke(position, 1)
+	Schema.grenade.SpawnTearGas(position, entIndex)
+	Schema.grenade.SpawnSmoke(position, 1)
 
 	Schema.DecayEntity(entity, 30)
 end

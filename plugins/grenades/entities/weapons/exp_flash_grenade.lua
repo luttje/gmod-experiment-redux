@@ -11,13 +11,13 @@ SWEP.ViewModel = "models/weapons/cstrike/c_eq_flashbang.mdl"
 function SWEP.CreateEffectAtGrenadeEntity(entity, client)
 	local position = entity:GetPos()
 
-	Schema.grenades.SpawnFlash(position)
+	Schema.grenade.SpawnFlash(position)
 
 	if (IsValid(client)) then
         local emitSmoke = Schema.perk.GetOwned("experimentalist", client)
 
 		if (emitSmoke) then
-			Schema.grenades.SpawnSmoke(position, 1)
+			Schema.grenade.SpawnSmoke(position, 1)
 		end
 	end
 

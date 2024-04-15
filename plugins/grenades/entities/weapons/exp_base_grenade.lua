@@ -75,7 +75,7 @@ function SWEP:Think()
 		self:SendWeaponAnim(ACT_VM_DRAW)
 
 		if (SERVER) then
-            Schema.grenades.HandleRemoveItem(self.Owner, self)
+            Schema.grenade.HandleRemoveItem(self.Owner, self)
 
 			self.Owner:RemoveAmmo(1, "grenade")
 
@@ -134,7 +134,7 @@ function SWEP.CreateEffectAtGrenadeEntity(entity, client)
     -- Schema.MakeExplosion(position, 1)
 
 	-- Make smoke
-	-- Schema.grenades.SpawnSmoke(position, 0.2)
+	-- Schema.grenade.SpawnSmoke(position, 0.2)
 
 	-- Probably fade the grenade entity out after a whil
 	-- Schema.DecayEntity(entity, 30)
@@ -146,7 +146,7 @@ function SWEP:CreateGrenade(power)
     end
 
 	local client = self.Owner
-    local entity = Schema.grenades.CreateGrenadeEntity(client, power)
+    local entity = Schema.grenade.CreateGrenadeEntity(client, power)
 	local effectFunction = self.CreateEffectAtGrenadeEntity
 
     timer.Simple(self.TimeBeforeDetonate, function()
