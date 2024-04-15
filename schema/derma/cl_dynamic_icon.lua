@@ -63,4 +63,4 @@ function PANEL:PaintOver(width, height)
 	end
 end
 
-vgui.Register("exp_DynamicIcon", PANEL, "DImageButton")
+vgui.Register("expDynamicIcon", PANEL, "DImageButton")

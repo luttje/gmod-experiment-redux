@@ -11,8 +11,13 @@ end
 function Schema:CharacterLoaded(character)
 	local client = character:GetPlayer()
 
-	Schema.perk.LoadOwned(client)
-	Schema.achievement.LoadProgress(client)
+	Schema.perk.LoadOwned(client, character)
+	Schema.buff.LoadActive(client, character)
+	Schema.achievement.LoadProgress(client, character)
+end
+
+function Schema:CharacterPreSave(character)
+	Schema.buff.PrepareSaveActive(character:GetPlayer(), character)
 end
 
 function Schema:PlayerSecondElapsed(client)

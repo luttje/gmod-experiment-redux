@@ -118,8 +118,8 @@ if (SERVER) then
 		ix.log.Add(client, "perkBought", perkTable.name)
 	end
 
-	function Schema.perk.LoadOwned(client)
-		local perks = client:GetCharacter():GetData("perks", {})
+	function Schema.perk.LoadOwned(client, character)
+		local perks = character:GetData("perks", {})
 
 		net.Start("PerkLoadOwned")
 		net.WriteTable(perks)

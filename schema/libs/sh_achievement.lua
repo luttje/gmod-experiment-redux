@@ -12,8 +12,8 @@ if (SERVER) then
 	---@return boolean
 	function Schema.achievement.Progress(client, achievement, progress)
 		local achievementTable = Schema.achievement.Get(achievement)
-        local achievements = client:GetCharacter():GetData("achievements", {})
 		local character = client:GetCharacter()
+        local achievements = character:GetData("achievements", {})
 
 		if (isstring(progress)) then
             local achievementProgressKeys = character:GetData("achievementProgressKeys", {})
@@ -71,8 +71,8 @@ if (SERVER) then
 		net.Send(client)
 	end
 
-	function Schema.achievement.LoadProgress(client)
-		local achievements = client:GetCharacter():GetData("achievements", {})
+	function Schema.achievement.LoadProgress(client, character)
+		local achievements = character:GetData("achievements", {})
 
 		net.Start("exp_AchievementsLoad")
 		net.WriteTable(achievements)

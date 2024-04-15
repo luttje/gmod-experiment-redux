@@ -16,7 +16,7 @@ AccessorFunc(PANEL, "paintFunction", "BackgroundPaintFunction")
 function PANEL:Init()
 	self:SetTall(64)
 
-	self.icon = self:Add("exp_DynamicIcon")
+	self.icon = self:Add("expDynamicIcon")
 	self.icon:Dock(LEFT)
 
 	self.name = self:Add("DLabel")

@@ -39,24 +39,6 @@ function PLUGIN:GetDirectionToTarget(monitor)
 	return direction, distance
 end
 
-function PLUGIN:GetCachedTextSize(font, text)
-	if (! self.CachedTextSizes) then
-		self.CachedTextSizes = {}
-	end
-
-	if (! self.CachedTextSizes[font]) then
-		self.CachedTextSizes[font] = {}
-	end
-
-	if (! self.CachedTextSizes[font][text]) then
-		surface.SetFont(font)
-
-		self.CachedTextSizes[font][text] = { surface.GetTextSize(text) }
-	end
-
-	return unpack(self.CachedTextSizes[font][text])
-end
-
 function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 	if (isDrawingSkybox or isDrawingDepth) then return end
 

@@ -8,7 +8,19 @@ end
 ---@param unit any
 ---@return unknown
 function Schema.util.UnitToCentimeters(unit)
-	return unit * 2.54
+    return unit * 2.54
+end
+
+--- Converts a time in seconds to a short nice time format (e.g: 2s, 1m, 1h)
+---@param time number The time in seconds.
+---@return string
+function Schema.util.GetNiceShortTime(time)
+    local text = string.NiceTime(time)
+
+    local parts = text:Split(" ")
+    local last = parts[#parts]
+
+	return parts[1] .. last:sub(1, 1):lower()
 end
 
 --- Creates a scope that allows only a single transaction to be active at a time.

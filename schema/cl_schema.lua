@@ -1,5 +1,23 @@
 Schema.stunEffects = {}
 
+function Schema.GetCachedTextSize(font, text)
+	if (not Schema.CachedTextSizes) then
+		Schema.CachedTextSizes = {}
+	end
+
+	if (not Schema.CachedTextSizes[font]) then
+		Schema.CachedTextSizes[font] = {}
+	end
+
+	if (not Schema.CachedTextSizes[font][text]) then
+		surface.SetFont(font)
+
+		Schema.CachedTextSizes[font][text] = { surface.GetTextSize(text) }
+	end
+
+	return unpack(Schema.CachedTextSizes[font][text])
+end
+
 net.Receive("exp_TearGassed", function()
 	Schema.tearGassed = CurTime() + 20
 end)

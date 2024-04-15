@@ -4,22 +4,41 @@ function Schema:LoadFonts(font, genericFont)
         size = math.max(ScreenScale(4), 12),
         extended = true,
         weight = 400
-	})
+    })
 
     surface.CreateFont("expSmallerFont", {
         font = font,
         size = math.max(ScreenScale(6), 12),
         extended = true,
         weight = 400
-	})
+    })
 
-	surface.CreateFont("expSmallItalicFont", {
-		font = font,
-		size = math.max(ScreenScale(6), 17),
-		extended = true,
-		weight = 400,
-		italic = true
-	})
+    surface.CreateFont("expSmallItalicFont", {
+        font = font,
+        size = math.max(ScreenScale(6), 17),
+        extended = true,
+        weight = 400,
+        italic = true
+    })
+
+    surface.CreateFont("expSmallOutlinedFont", {
+        font = font,
+        size = math.max(ScreenScale(6), 12),
+        extended = true,
+		shadow = true,
+        weight = 600,
+    })
+end
+
+function Schema:InitPostEntity()
+    ix.gui.buffs = vgui.Create("expBuffManager")
+end
+
+function Schema:ScreenResolutionChanged(oldWidth, oldHeight)
+	if (IsValid(ix.gui.buffs)) then
+		ix.gui.buffs:Remove()
+		ix.gui.buffs = vgui.Create("expBuffManager")
+	end
 end
 
 function Schema:ContextMenuOpen()

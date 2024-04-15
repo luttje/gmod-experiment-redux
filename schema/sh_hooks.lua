@@ -4,6 +4,7 @@ end
 
 function Schema:DoPluginIncludes(path, plugin)
 	Schema.achievement.LoadFromDir(path .. "/achievements")
+	Schema.buff.LoadFromDir(path .. "/buffs")
 	Schema.perk.LoadFromDir(path .. "/perks")
 	Schema.npc.LoadFromDir(path .. "/npcs")
 end

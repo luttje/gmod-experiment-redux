@@ -275,3 +275,36 @@ do
 
 	ix.command.Add("NpcRemove", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Applies a buff to yourself or the character you are looking at."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, buffID)
+		if (not Schema.buff.Exists(buffID)) then
+			ix.util.Notify("Invalid buff ID!", client)
+			return
+		end
+
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+
+		if (IsValid(target) and target:IsPlayer()) then
+			Schema.buff.SetActive(target, buffID)
+			ix.util.Notify("Buff applied to " .. target:GetName() .. ".", client)
+		else
+			Schema.buff.SetActive(client, buffID)
+			ix.util.Notify("Buff applied to yourself.", client)
+		end
+	end
+
+	ix.command.Add("BuffApply", COMMAND)
+end

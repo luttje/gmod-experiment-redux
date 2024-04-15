@@ -68,28 +68,32 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 		_G[libraryGlobalName] = oldGlobal
 	end
 
-	library.Get = function(name)
-		if (library.buffer[name]) then
-			return library.buffer[name]
-		elseif (library.stored[name]) then
-			return library.stored[name]
-		else
-			local foundObject
+    library.Get = function(name)
+        if (library.buffer[name]) then
+            return library.buffer[name]
+        elseif (library.stored[name]) then
+            return library.stored[name]
+        else
+            local foundObject
 
-			for _, libraryObject in pairs(library.stored) do
-				if (string.find(string.lower(libraryObject.name), string.lower(name))) then
-					if (foundObject) then
-						if (string.len(libraryObject.name) < string.len(foundObject.name)) then
-							foundObject = libraryObject
-						end
-					else
-						foundObject = libraryObject
-					end
-				end
-			end
+            for _, libraryObject in pairs(library.stored) do
+                if (string.find(string.lower(libraryObject.name), string.lower(name))) then
+                    if (foundObject) then
+                        if (string.len(libraryObject.name) < string.len(foundObject.name)) then
+                            foundObject = libraryObject
+                        end
+                    else
+                        foundObject = libraryObject
+                    end
+                end
+            end
 
-			return foundObject
-		end
+            return foundObject
+        end
+    end
+
+	library.Exists = function(name)
+		return library.Get(name) ~= nil
 	end
 
     library.GetProperty = function(name, key)

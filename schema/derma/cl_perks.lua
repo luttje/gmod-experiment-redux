@@ -18,7 +18,7 @@ function PANEL:Init()
 
 	self:SetCursor("hand")
 
-	self.icon = self:Add("exp_DynamicIcon")
+	self.icon = self:Add("expDynamicIcon")
 	self.icon:Dock(LEFT)
 
 	self.name = self:Add("DLabel")

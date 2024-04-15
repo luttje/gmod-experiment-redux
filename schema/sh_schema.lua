@@ -47,6 +47,7 @@ RANK_GEN = 7
 ix.util.IncludeDir("meta")
 
 Schema.achievement.LoadFromDir(Schema.folder .. "/schema/achievements")
+Schema.buff.LoadFromDir(Schema.folder .. "/schema/buffs")
 Schema.perk.LoadFromDir(Schema.folder .. "/schema/perks")
 Schema.npc.LoadFromDir(Schema.folder .. "/schema/npcs")
 

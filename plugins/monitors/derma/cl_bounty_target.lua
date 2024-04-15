@@ -21,7 +21,7 @@ function PANEL:DrawDistanceText(distance)
 	local distanceRounded = math.Round(distanceCentimeters / 100)
 	local text = distanceRounded == 0 and "They're right here!" or
 		(distanceRounded .. (distanceRounded == 1 and " meter" or " meters"))
-	local textWidth, textHeight = PLUGIN:GetCachedTextSize(font, text)
+	local textWidth, textHeight = Schema.GetCachedTextSize(font, text)
 
 	surface.SetTextColor(255, 255, 255, 90)
 	surface.SetFont(font)
