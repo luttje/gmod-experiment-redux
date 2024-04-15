@@ -6,7 +6,7 @@ ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 2
 ITEM.height = 1
 ITEM.noDrop = true
-ITEM.category = "Wealth Generation & Protection"
+ITEM.category = "Protection"
 ITEM.description = "When placed near doors it will prevent them from being shot open. This does not protect from breaches. The protector is not permanent and can be destroyed by others."
 ITEM.maximum = 5
 

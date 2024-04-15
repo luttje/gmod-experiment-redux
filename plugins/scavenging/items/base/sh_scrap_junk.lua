@@ -5,6 +5,7 @@ ITEM.model = "models/props_interiors/pot02a.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "Just some junk. Perhaps it can be recycled to scrap."
+ITEM.noBusiness = true
 ITEM.scrapAmount = 1
 
 function ITEM:GetFilters()
@@ -26,7 +27,5 @@ ITEM.functions.Scrap = {
 
 		client:Notify("You scrapped the item.")
 		client:GetCharacter():GetInventory():Add("scrap", item:GetScrapAmount(client))
-
-		return true
 	end
 }

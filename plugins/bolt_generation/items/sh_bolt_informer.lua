@@ -6,7 +6,7 @@ ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.noDrop = true
-ITEM.category = "Wealth Generation & Protection"
+ITEM.category = "Protection"
 ITEM.description = "Place it near your bold creators, and be informed when they take damage."
 ITEM.maximum = 5
 

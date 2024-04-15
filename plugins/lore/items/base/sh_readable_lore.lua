@@ -6,6 +6,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "Some paper with writing on it."
 ITEM.isLoreItem = true
+ITEM.noBusiness = true
 
 if (CLIENT) then
     function ITEM:PopulateTooltip(tooltip)

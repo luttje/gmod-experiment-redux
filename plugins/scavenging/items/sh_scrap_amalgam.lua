@@ -4,6 +4,7 @@ ITEM.name = "Scrap Amalgam"
 ITEM.model = "models/props_phx/gears/bevel9.mdl"
 ITEM.width = 1
 ITEM.height = 1
+ITEM.noBusiness = true
 ITEM.description = "An amalgamation of scrap metal, its easier to carry than individual pieces of scrap."
 
 function ITEM:GetFilters()

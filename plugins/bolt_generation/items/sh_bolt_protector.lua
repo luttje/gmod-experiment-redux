@@ -6,7 +6,7 @@ ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.noDrop = true
-ITEM.category = "Wealth Generation & Protection"
+ITEM.category = "Protection"
 ITEM.description = "When placed near a BCU it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
 ITEM.maximum = 5
 
