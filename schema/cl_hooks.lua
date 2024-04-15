@@ -1,3 +1,6 @@
+-- Make tooltips better readable by removing the opacity of the background
+derma.GetNamedSkin("helix").Colours.DarkerBackground.a = 255
+
 function Schema:LoadFonts(font, genericFont)
     surface.CreateFont("expTinyFont", {
         font = font,
@@ -31,13 +34,31 @@ function Schema:LoadFonts(font, genericFont)
 end
 
 function Schema:InitPostEntity()
-    ix.gui.buffs = vgui.Create("expBuffManager")
+	Schema.buff.RefreshPanel()
 end
 
 function Schema:ScreenResolutionChanged(oldWidth, oldHeight)
-	if (IsValid(ix.gui.buffs)) then
-		ix.gui.buffs:Remove()
-		ix.gui.buffs = vgui.Create("expBuffManager")
+	Schema.buff.RefreshPanel()
+end
+
+function Schema:CreateCharacterInfo(panel)
+	-- Adds the buff manager to the character panel
+	panel.buffs = panel:Add("ixCategoryPanel")
+	panel.buffs:SetText(L("buffs"))
+	panel.buffs:Dock(TOP)
+	panel.buffs:DockMargin(0, 0, 0, 8)
+
+	local buffManager = panel.buffs:Add("expBuffManager")
+	buffManager:Dock(TOP)
+	buffManager:RefreshBuffs()
+	panel.buffs.manager = buffManager
+
+	panel.buffs:SizeToContents()
+end
+
+function Schema:UpdateCharacterInfo(panel, character)
+	if (panel.buffs and panel.buffs.manager) then
+		panel.buffs.manager:RefreshBuffs()
 	end
 end
 

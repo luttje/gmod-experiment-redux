@@ -10,3 +10,5 @@ BUFF.attributeBoosts = {
 	["endurance"] = 5,
 }
 BUFF.description = "You're a newbie, but you're learning quickly. Your endurance is temporarily boosted."
+
+-- TODO: Add functionality that makes the player invulnerable, unless they attack another player.

@@ -3,11 +3,6 @@ local PANEL = {}
 PANEL.padding = 24
 
 function PANEL:Init()
-	self.OnCursorEntered = function() end
-	self.OnMouseReleased = function() end
-	self.OnCursorExited = function() end
-	self.OnMousePressed = function() end
-	self:SetCursor("none")
 end
 
 function PANEL:PerformLayout(width, height)
@@ -63,4 +58,4 @@ function PANEL:PaintOver(width, height)
 	end
 end
 
-vgui.Register("expDynamicIcon", PANEL, "DImageButton")
+vgui.Register("expDynamicIcon", PANEL, "EditablePanel")

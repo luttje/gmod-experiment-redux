@@ -3,7 +3,10 @@ LANGUAGE = {
 
 	achievements = "Achievements",
 	alliance = "Alliance",
-    perks = "Perks",
+	buffs = "Nano Buffs",
+	perks = "Perks",
+
+	noBuffs = "No active nano buffs.",
 
     upgrade = "'%s' (-%s)",
     withdraw = "Withdraw (+%s)",

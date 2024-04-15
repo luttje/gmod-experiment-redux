@@ -306,5 +306,39 @@ do
 		end
 	end
 
-	ix.command.Add("BuffApply", COMMAND)
+	ix.command.Add("CharBuffApply", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Immediately removes a buff from yourself or the character you are looking at."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, buffID)
+		if (not Schema.buff.Exists(buffID)) then
+			ix.util.Notify("Invalid buff ID!", client)
+			return
+		end
+
+		local data = {}
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
+		local target = util.TraceLine(data).Entity
+		local curTime = CurTime()
+
+		if (IsValid(target) and target:IsPlayer()) then
+			Schema.buff.SetActive(target, buffID, curTime)
+			ix.util.Notify("Buff removed from " .. target:GetName() .. ".", client)
+		else
+			Schema.buff.SetActive(client, buffID, curTime)
+			ix.util.Notify("Buff removed from yourself.", client)
+		end
+	end
+
+	ix.command.Add("CharBuffRemove", COMMAND)
 end

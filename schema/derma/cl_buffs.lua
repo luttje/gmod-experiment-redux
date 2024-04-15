@@ -3,17 +3,18 @@ local PANEL = {}
 AccessorFunc(PANEL, "padding", "Padding", FORCE_NUMBER)
 
 function PANEL:Init()
-	self:SetSize(ScrW() * 0.35, ScrH())
-	self:SetPos(4, 4)
-	self:ParentToHUD()
+	self:SetWide(ScrW() * 0.35)
+	self:SetPos(0, 0)
+	self:SetBorder(4)
+	self:SetSpaceY(8)
+	self:SetSpaceX(8)
+	self:SetStretchWidth(false)
+	self:SetStretchHeight(true)
 
 	self.buffs = {}
 	self.padding = 2
 
-	-- Add buffs that were registered before manager creation
-	for uniqueID, activeUntil in ipairs(Schema.buff.localActiveUntil) do
-		self:AddBuff(uniqueID, activeUntil)
-	end
+	self:RefreshBuffs()
 end
 
 function PANEL:GetAll()
@@ -21,17 +22,47 @@ function PANEL:GetAll()
 end
 
 function PANEL:Clear()
-	for k, buffPanel in ipairs(self.buffs) do
-		buffPanel:Remove()
+	self.buffs = {}
 
-		table.remove(self.buffs, k)
+	for _, panel in ipairs(self:GetChildren()) do
+		panel:Remove()
 	end
 end
 
-function PANEL:AddBuff(uniqueID, activeUntil)
+function PANEL:RefreshBuffs()
+	local buffs = Schema.buff.localActiveUntil
+
+	self:Clear()
+
+	local buffAmount = 0
+
+	for index, activeUntil in pairs(buffs) do
+		local active = activeUntil > CurTime()
+
+		if (active) then
+			self:AddBuff(index, activeUntil)
+			buffAmount = buffAmount + 1
+		else
+			self:RemoveBuff(index)
+		end
+	end
+
+	if (not self:IsHUDPanel() and buffAmount == 0) then
+		local label = self:Add("DLabel")
+		label:SetContentAlignment(5)
+		label:SetFont("ixSmallFont")
+		label:SetTextColor(color_white)
+		label:SetText(L("noBuffs"))
+		label:SizeToContents()
+	end
+
+	self:InvalidateLayout(true)
+end
+
+function PANEL:AddBuff(index, activeUntil)
 	local panel = self:Add("expBuffIcon")
 	panel:SetVisible(true)
-	panel:SetBuff(uniqueID)
+	panel:SetBuff(index)
 	panel:SetActiveUntil(activeUntil)
 
 	self.buffs[#self.buffs + 1] = panel
@@ -40,9 +71,9 @@ function PANEL:AddBuff(uniqueID, activeUntil)
 	return panel
 end
 
-function PANEL:RemoveBuff(uniqueID)
+function PANEL:RemoveBuff(index)
 	for k, buffPanel in ipairs(self.buffs) do
-		if (buffPanel.buff.uniqueID == uniqueID) then
+		if (buffPanel.buff.index == index) then
 			buffPanel:Remove()
 
 			table.remove(self.buffs, k)
@@ -60,16 +91,27 @@ function PANEL:Sort()
 	end)
 end
 
+function PANEL:IsHUDPanel()
+	return self == ix.gui.buffs
+end
+
 function PANEL:Think()
+	if (not self:IsHUDPanel()) then
+		return
+	end
+
+	-- Don't update buffs when not visible and we're not in the character menu
 	local menu = (IsValid(ix.gui.characterMenu) and !ix.gui.characterMenu:IsClosing()) and ix.gui.characterMenu
 		or IsValid(ix.gui.menu) and ix.gui.menu
-	local fraction = menu and 1 - menu.currentAlpha / 255 or 1
 
-	self:SetAlpha(255 * fraction)
+	if (menu) then
+		local fraction = menu and 1 - menu.currentAlpha / 255 or 1
 
-	-- Don't update buffs when not visible
-	if (fraction == 0) then
-		return
+		self:SetAlpha(255 * fraction)
+
+		if (fraction == 0) then
+			return
+		end
 	end
 
 	local barManager = ix.gui.bars
@@ -79,14 +121,14 @@ function PANEL:Think()
 		offsetY = barManager:GetTall() + barManager:GetPadding()
 	end
 
-	self:SetPos(4, 4 + offsetY)
+	self:SetPos(0, offsetY)
 end
 
 function PANEL:OnRemove()
 	self:Clear()
 end
 
-vgui.Register("expBuffManager", PANEL, "Panel")
+vgui.Register("expBuffManager", PANEL, "DIconLayout")
 
 PANEL = {}
 
@@ -105,11 +147,19 @@ function PANEL:Init()
 	self.label:SetExpensiveShadow(1, color_black)
 	self.label:SetText("")
 
-	self:SetWide(48)
+	self:SetSize(48, 48 + 16)
 end
 
 function PANEL:SetBuff(buffID)
 	self.buff = Schema.buff.Get(buffID)
+
+	local panels = { self, self.label, self.icon }
+
+	for _, panel in ipairs(panels) do
+		panel:SetHelixTooltip(function(tooltip)
+			Schema.buff.PopulateTooltip(tooltip, self.buff)
+		end)
+	end
 
 	local opacity = 255
 
@@ -121,7 +171,7 @@ function PANEL:Think()
 	local duration = self:GetActiveUntil() - CurTime()
 
 	if (duration <= 0) then
-		Schema.buff.UpdateLocal(self.buff.uniqueID, self:GetActiveUntil())
+		Schema.buff.localActiveUntil[self.buff.index] = nil
 		return
 	end
 
@@ -131,24 +181,13 @@ function PANEL:Think()
 
 	local text = Schema.util.GetNiceShortTime(duration)
 	self.label:SetTextColor(Color(255, 255, 255, self.icon.opacity))
-	self.label:SetText(text)
-	self.label:SizeToContents()
 
-	self:SetTall(self.icon:GetTall() + self.label:GetTall())
-end
-
-function PANEL:PaintOver(width, height)
+	if (text ~= self.label:GetText()) then
+		self.label:SetText(text)
+		self.label:SizeToContents()
+	end
 end
 
 vgui.Register("expBuffIcon", PANEL, "EditablePanel")
 
-if (IsValid(ix.gui.buffs)) then
-	ix.gui.buffs:Remove()
-	ix.gui.buffs = vgui.Create("expBuffManager")
-
-	if (Schema.buff.localActiveUntil) then
-		for uniqueID, activeUntil in pairs(Schema.buff.localActiveUntil) do
-			Schema.buff.UpdateLocal(uniqueID, activeUntil)
-		end
-	end
-end
+Schema.buff.RefreshPanel()

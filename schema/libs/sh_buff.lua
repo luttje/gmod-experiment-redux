@@ -193,53 +193,74 @@ if (SERVER) then
 else
 	Schema.buff.localActiveUntil = Schema.buff.localActiveUntil or {}
 
+	function Schema.buff.CreateHUDPanel()
+		if (IsValid(ix.gui.buffs)) then
+			ix.gui.buffs:Remove()
+		end
+
+		local panel = vgui.Create("expBuffManager")
+		panel:SetTall(ScrH())
+		panel:ParentToHUD()
+
+		ix.gui.buffs = panel
+
+		return panel
+	end
+
 	function Schema.buff.GetPanel()
 		return ix.gui.buffs
 	end
 
-	function Schema.buff.UpdateLocal(buff, activeUntil)
-		local panel = Schema.buff.GetPanel()
+	function Schema.buff.RefreshPanel()
+		local panel = Schema.buff.CreateHUDPanel()
 
-		Schema.buff.localActiveUntil[buff] = activeUntil
-
-		if (not IsValid(panel)) then
-			return
-		end
-
-		local active = activeUntil > math.ceil(CurTime())
-
-		if (active) then
-			panel:AddBuff(buff, activeUntil)
-		else
-			panel:RemoveBuff(buff)
+		if (IsValid(panel)) then
+			panel:RefreshBuffs()
 		end
 	end
 
-	function Schema.buff.ClearLocal()
-		local panel = Schema.buff.GetPanel()
-		Schema.buff.localActiveUntil = {}
+	function Schema.buff.PopulateTooltip(tooltip, buffTable)
+		local name = tooltip:AddRow("name")
+		name:SetImportant()
+		name:SetText(buffTable.name)
+		name:SetBackgroundColor(buffTable.backgroundColor)
+		name:SizeToContents()
 
-		if (IsValid(panel)) then
-			panel:Clear()
+		local description = tooltip:AddRow("description")
+		description:SetText(buffTable.description)
+		description:SizeToContents()
+
+		if (buffTable.attributeBoosts) then
+			for attributeKey, boostAmount in pairs(buffTable.attributeBoosts) do
+				local attribute = ix.attributes.list[attributeKey]
+				local panel = tooltip:AddRowAfter("description", "boost" .. attributeKey)
+				panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+				panel:SetText("Boosts " .. attribute.name .. " by " .. math.Round(boostAmount, 2))
+				panel:SizeToContents()
+			end
 		end
+
+		tooltip:SizeToContents()
 	end
 
 	net.Receive("exp_BuffUpdated", function(msg)
-		local buff = net.ReadUInt(32)
+		local index = net.ReadUInt(32)
 		local activeUntil = net.ReadUInt(32)
-		local buffTable = Schema.buff.Get(buff)
+		local buffTable = Schema.buff.Get(index)
 
 		if (not buffTable) then
-			error("Buff with index " .. buff .. " does not exist.")
+			error("Buff with index " .. index .. " does not exist.")
 			return
 		end
 
-		Schema.buff.UpdateLocal(buffTable.uniqueID, activeUntil)
+		Schema.buff.localActiveUntil[index] = activeUntil
+		Schema.buff.RefreshPanel()
 	end)
 
 	net.Receive("exp_BuffsLoaded", function()
 		local buffs = net.ReadTable()
-		Schema.buff.ClearLocal()
+
+		Schema.buff.localActiveUntil = {}
 
 		for uniqueID, activeUntil in pairs(buffs) do
 			local buffTable = Schema.buff.Get(uniqueID)
@@ -249,7 +270,9 @@ else
 				continue
 			end
 
-			Schema.buff.UpdateLocal(buffTable.uniqueID, activeUntil)
+			Schema.buff.localActiveUntil[buffTable.index] = activeUntil
 		end
+
+		Schema.buff.RefreshPanel()
 	end)
 end
