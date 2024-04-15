@@ -1,5 +1,5 @@
 function Schema:PostGamemodeLoaded()
-	baseclass.Set("exp_npc", Schema.meta.npc)
+	baseclass.Set("exp_npc_meta", Schema.meta.npc)
 end
 
 function Schema:DoPluginIncludes(path, plugin)

@@ -1,4 +1,4 @@
-Schema.npc = Schema.npc or {}
+Schema.npc = ix.util.GetOrCreateCommonLibrary("NPC", function() return setmetatable({}, Schema.meta.npc) end)
 
 net.Receive("expNpcInteractShow", function(length)
 	local npcEntity = net.ReadEntity()

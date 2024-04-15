@@ -1,8 +1,4 @@
-if (Schema.perk == nil) then
-	Schema.perk = {}
-	Schema.perk.stored = {}
-	Schema.perk.buffer = {}
-end
+Schema.perk = ix.util.GetOrCreateCommonLibrary("Perk")
 
 function Schema.perk.GetBuffer()
 	return Schema.perk.buffer
@@ -49,21 +45,21 @@ function Schema.perk.Get(name)
 	elseif (Schema.perk.stored[name]) then
 		return Schema.perk.stored[name]
 	else
-		local perk = nil
+		local foundPerk = nil
 
 		for _, perk in pairs(Schema.perk.stored) do
 			if (string.find(string.lower(perk.name), string.lower(name))) then
-				if (perk) then
-					if (string.len(perk.name) < string.len(perk.name)) then
-						perk = perk
+				if (foundPerk) then
+					if (string.len(perk.name) < string.len(foundPerk.name)) then
+						foundPerk = perk
 					end
 				else
-					perk = perk
+					foundPerk = perk
 				end
 			end
 		end
 
-		return perk
+		return foundPerk
 	end
 end
 
