@@ -52,5 +52,7 @@ LANGUAGE = {
 	broadcasterBroadcasting = "Broadcasting...",
 	broadcasterTurnedOff = "Turned Off...",
 
-	chatRadioing = "Radioing...",
+    chatRadioing = "Radioing...",
+
+	rareItem = "Rare Item",
 }

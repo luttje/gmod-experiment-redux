@@ -14,17 +14,14 @@ end
 ]]
 
 SWEP.PrintName = "Base Holder"
-SWEP.Instructions = "Primary Fire: Toggle."
 SWEP.Contact = ""
 SWEP.Purpose = ""
 SWEP.Author = "Experiment Redux"
 
-SWEP.ViewModel = Model("models/weapons/c_slam.mdl")
 SWEP.WorldModel = ""
 SWEP.UseHands = true
 
 SWEP.IsAlwaysRaised = true
-SWEP.HoldType = "slam"
 
 SWEP.AdminSpawnable = false
 SWEP.Spawnable = false
@@ -46,6 +43,8 @@ SWEP.Secondary.Ammo = ""
 -- SWEP.HoldingAttachmentScale = 0.5
 
 -- Hides the entire left hand and arm + detonator + slam
+SWEP.ViewModel = Model("models/weapons/c_slam.mdl")
+SWEP.HoldType = "slam"
 SWEP.HiddenBones = {
 	"ValveBiped.Bip01_L_Clavicle",
 	"ValveBiped.Bip01_L_UpperArm",
@@ -75,6 +74,18 @@ local function hideBonesIfNeeded(weapon, entity)
     if (weapon.expBonesHidden) then
         return
     end
+
+    if (DEBUG_LIST_ALL_BONES) then
+        timer.Simple(0, function()
+            if (not IsValid(entity)) then
+                return
+            end
+
+			for i = 0, entity:GetBoneCount() - 1 do
+				print(i, entity:GetBoneName(i))
+			end
+		end)
+	end
 
     local bonesBefore = {}
 
@@ -141,21 +152,25 @@ local function drawHoldingModel(weapon, entity)
 end
 
 local function cleanupHoldingAndBones(weapon)
-	if (IsValid(weapon.expHoldingClientsideModel)) then
-		weapon.expHoldingClientsideModel:Remove()
-	end
+    if (IsValid(weapon.expHoldingClientsideModel)) then
+        weapon.expHoldingClientsideModel:Remove()
+    end
 
-	weapon.expHoldingClientsideModel = nil
-	local entity = weapon.expBonesHiddenOnEntity
+    weapon.expHoldingClientsideModel = nil
+    local entity = weapon.expBonesHiddenOnEntity
 
     if (weapon.expBonesHidden and IsValid(entity)) then
-		for boneIndex, data in pairs(weapon.expBonesHidden) do
-			entity:ManipulateBoneScale(boneIndex, data.scale)
-			entity:ManipulateBonePosition(boneIndex, data.position)
-		end
-	end
+        for boneIndex, data in pairs(weapon.expBonesHidden) do
+            entity:ManipulateBoneScale(boneIndex, data.scale)
+            entity:ManipulateBonePosition(boneIndex, data.position)
+        end
+    end
 
-	weapon.expBonesHidden = nil
+    weapon.expBonesHidden = nil
+end
+
+function SWEP:Initialize()
+	self:SetWeaponHoldType(self.HoldType)
 end
 
 function SWEP:PreDrawViewModel(entity, weapon, client)

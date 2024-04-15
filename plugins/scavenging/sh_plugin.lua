@@ -79,7 +79,7 @@ if (SERVER) then
 			return
 		end
 
-        local roll = math.random(1, 100)
+        local roll = math.Rand(0, 100)
 
         for _, junkChance in ipairs(self.junkChances) do
             if (roll > junkChance.chance) then
