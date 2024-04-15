@@ -4,111 +4,20 @@ if (SERVER) then
 	AddCSLuaFile()
 end
 
-if (CLIENT) then
-	SWEP.Slot = 0
-	SWEP.SlotPos = 6
-	SWEP.DrawAmmo = false
-	SWEP.PrintName = "Blueprint Builder"
-	SWEP.DrawCrosshair = true
-end
+DEFINE_BASECLASS("exp_base_holder")
 
+SWEP.Base = "exp_base_holder"
+SWEP.PrintName = "Blueprint Builder"
 SWEP.Instructions = "Primary Fire: Build.\nSecondary Fire: Rotate (Hold Sprint-button to snap)."
-SWEP.Contact = ""
 SWEP.Purpose = "Construct structures."
-SWEP.Author = "Experiment Redux"
 
-SWEP.ViewModel = Model("models/weapons/c_slam.mdl")
-SWEP.WorldModel = ""
-SWEP.UseHands = true
-
-SWEP.IsAlwaysRaised = true
-SWEP.HoldType = "slam"
-
-SWEP.AdminSpawnable = false
-SWEP.Spawnable = false
-
-SWEP.Primary.DefaultClip = 0
-SWEP.Primary.Automatic = false
-SWEP.Primary.ClipSize = -1
-SWEP.Primary.Ammo = ""
-
-SWEP.Secondary.DefaultClip = 0
-SWEP.Secondary.Automatic = false
-SWEP.Secondary.ClipSize = -1
-SWEP.Secondary.Ammo = ""
-
--- Hide the entire left hand and arm + detonator + slam
-SWEP.HiddenBones = {
-	"ValveBiped.Bip01_L_Clavicle",
-	"ValveBiped.Bip01_L_UpperArm",
-	"ValveBiped.Bip01_L_Forearm",
-	"ValveBiped.Bip01_L_Hand",
-	"ValveBiped.Bip01_L_Finger4",
-	"ValveBiped.Bip01_L_Finger41",
-	"ValveBiped.Bip01_L_Finger42",
-	"ValveBiped.Bip01_L_Finger3",
-	"ValveBiped.Bip01_L_Finger31",
-	"ValveBiped.Bip01_L_Finger32",
-	"ValveBiped.Bip01_L_Finger2",
-	"ValveBiped.Bip01_L_Finger21",
-	"ValveBiped.Bip01_L_Finger22",
-	"ValveBiped.Bip01_L_Finger1",
-	"ValveBiped.Bip01_L_Finger11",
-	"ValveBiped.Bip01_L_Finger12",
-	"ValveBiped.Bip01_L_Finger0",
-	"ValveBiped.Bip01_L_Finger01",
-	"ValveBiped.Bip01_L_Finger02",
-	"Detonator",
-	"Slam_base",
-	"Slam_panel"
-}
-
-local function hideBonesIfNeeded(weapon, entity)
-	if (weapon.expBonesHidden) then
-		return
-	end
-
-	local bonesBefore = {}
-
-	for _, bone in ipairs(weapon.HiddenBones) do
-		local boneIndex = entity:LookupBone(bone)
-
-		if (boneIndex) then
-			bonesBefore[boneIndex] = {
-				scale = entity:GetManipulateBoneScale(boneIndex),
-				position = entity:GetManipulateBonePosition(boneIndex)
-			}
-
-			entity:ManipulateBoneScale(boneIndex, Vector(0, 0, 0))
-			entity:ManipulateBonePosition(boneIndex, Vector(0, 0, -100))
-		end
-	end
-
-	weapon.expBonesHidden = bonesBefore
-	weapon.expBonesHiddenOnEntity = entity
-end
-
-local function cleanupBones(weapon)
-	local entity = weapon.expBonesHiddenOnEntity
-
-	if (weapon.expBonesHidden and IsValid(entity)) then
-		for boneIndex, data in pairs(weapon.expBonesHidden) do
-			entity:ManipulateBoneScale(boneIndex, data.scale)
-			entity:ManipulateBonePosition(boneIndex, data.position)
-		end
-	end
-
-	weapon.expBonesHidden = nil
-end
+SWEP.HoldingModel = "models/props_lab/clipboard.mdl"
+SWEP.HoldingAttachmentBone = "ValveBiped.Bip01_R_Hand"
+SWEP.HoldingAttachmentOffset = Vector(4.5, 1.5, -1.5)
+SWEP.HoldingAttachmentAngle = Angle(90, -45, 90)
+SWEP.HoldingAttachmentScale = 0.6
 
 local wireframeMaterial = Material("models/wireframe")
-
-function SWEP:PreDrawViewModel(entity, weapon, client)
-	hideBonesIfNeeded(self, entity)
-end
-
-function SWEP:PostDrawViewModel(entity, weapon, client)
-end
 
 hook.Add("InputMouseApply", "expStructureBuilderHandleInput", function(userCommand, x, y, angle)
 	local client = LocalPlayer()
@@ -287,44 +196,13 @@ function SWEP:Think()
 end
 
 function SWEP:OnRemove()
-	if (CLIENT) then
-		if (IsValid(self.Owner)) then
-			cleanupBones(self)
-		end
+    BaseClass.OnRemove(self)
 
+	if (CLIENT) then
 		for _, structure in ipairs(self.expClientSideModels or {}) do
 			structure.entity:Remove()
 		end
 	end
-end
-
-function SWEP:Holster()
-    local client = self.Owner
-
-	self:SendWeaponAnim(ACT_VM_HOLSTER)
-
-	if (CLIENT and IsValid(client)) then
-		cleanupBones(self)
-	end
-
-    -- if (not SERVER or not IsValid(client)) then
-    --     return true
-    -- end
-
-	-- local character = client:GetCharacter()
-	-- local uniqueID = self:GetNetVar("itemID")
-    -- local item = character:GetInventory():HasItem(uniqueID)
-
-    -- if (not item) then
-    --     client:Notify("You do not have the required blueprint.")
-	-- 	client:StripWeapon(self:GetClass())
-    --     return true
-    -- end
-
-	-- -- Would unequp the item
-	-- -- item:Unequip(client, true)
-
-	return true
 end
 
 function SWEP:PrimaryAttack()
