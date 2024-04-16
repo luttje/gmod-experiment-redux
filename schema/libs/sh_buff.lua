@@ -64,7 +64,7 @@ if (SERVER) then
 	---@param client Player
 	---@param buffIndex string|number
 	---@param data? table
-	---@return boolean, ActiveBuff
+	---@return boolean|ActiveBuff, Buff
 	function Schema.buff.GetActive(client, buffIndex, data)
 		local character = client:GetCharacter()
 
@@ -95,10 +95,10 @@ if (SERVER) then
 					continue
 				end
 
-				return true, buff
+				return buff, buffTable
 			end
 
-			return true, buff
+			return buff, buffTable
 		end
 
 		return false

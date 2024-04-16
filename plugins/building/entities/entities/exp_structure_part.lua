@@ -63,10 +63,8 @@ if (SERVER) then
 		end
 	end
 
-    function ENT:Touch(entity)
-		if (entity:IsPlayer()) then
-			self.expIsTouched = true
-		end
+	function ENT:Touch(entity)
+		self.expIsTouched = true
 	end
 else
 	function ENT:Draw()

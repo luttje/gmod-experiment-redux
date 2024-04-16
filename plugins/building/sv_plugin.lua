@@ -48,23 +48,6 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	PLUGIN:BuildStructure(client, item, position, angles)
 end)
 
-function testA(client, structureBuilder)
-
-	local victimData = {
-		victim = structureBuilder
-	}
-	local exists, buff = Schema.buff.GetActive(client, "siege_surge", victimData)
-
-	if (not exists) then
-		Schema.buff.SetActive(client, "siege_surge", nil, victimData)
-		return
-	end
-
-	-- If it does exist, increment the buff stack count and network it to the client
-	local buffTable = Schema.buff.Get("siege_surge")
-	buffTable:Stack(client, buff)
-end
-
 function PLUGIN:StructureDestroyed(client, structure)
 	if (not IsValid(client)) then
 		return
@@ -76,7 +59,15 @@ function PLUGIN:StructureDestroyed(client, structure)
 		return
 	end
 
-	-- lua_run Schema.buff.SetActive(player.GetByID(1), "siege_surge", nil, { victim = player.GetByID(1) })
-	-- lua_run testA(player.GetByID(1), player.GetByID(1))
-	testA(client, structureBuilder)
+	local victimData = {
+		victim = structureBuilder
+	}
+	local buff, buffTable = Schema.buff.GetActive(client, "siege_surge", victimData)
+
+	if (not buff) then
+		Schema.buff.SetActive(client, "siege_surge", nil, victimData)
+		return
+	end
+
+	buffTable:Stack(client, buff)
 end

@@ -255,8 +255,11 @@ function ENT:FinishConstruction(client)
 
 			child:SetTrigger(false)
 
-			if (child.expIsTouched and IsValid(client)) then
-				client:Notify("You cannot finish construction with players in the way.")
+			if (child.expIsTouched) then
+				if (IsValid(client)) then
+					client:Notify("You cannot finish the construction while it's intersecting with another object.")
+				end
+
 				return
 			end
 		end
@@ -287,7 +290,28 @@ function ENT:OnTakeDamage(damageInfo)
 		return
 	end
 
-	self:SetHealth(self:Health() - damageInfo:GetDamage())
+	local damage = damageInfo:GetDamage()
+	local attacker = damageInfo:GetAttacker()
+
+	if (IsValid(attacker) and attacker:IsPlayer()) then
+		local structureBuilder = self:GetClient()
+
+		if (IsValid(structureBuilder)) then
+			local victimData = {
+				victim = structureBuilder
+			}
+			local buff, buffTable = Schema.buff.GetActive(attacker, "siege_surge", victimData)
+
+			if (buff) then
+				local stacks = buffTable:GetStacks(attacker, buff)
+
+				damage = damage * stacks
+				print("Damage increased by " .. stacks .. "x (was: " .. damageInfo:GetDamage() .. ", now: " .. damage .. ")")
+			end
+		end
+	end
+
+	self:SetHealth(self:Health() - damage)
 
 	-- TODO: Change color of the structure parts to indicate damage
 

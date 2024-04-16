@@ -123,12 +123,20 @@ function META:OnExpire(client, buff, expiredThroughDeath)
 	end
 end
 
+--- Gets the current stack count of the buff
+---@param client any
+---@param buff any
+---@return number
+function META:GetStacks(client, buff)
+	return buff.data and buff.data.stacks or 1
+end
+
 --- Stacks the buff if possible
 ---@param client any
 ---@param buff any
 function META:Stack(client, buff)
 	local maxStacks = self.maxStacks or 1
-	local currentStacks = buff.data.stacks or 1
+	local currentStacks = self:GetStacks(client, buff)
 
 	if (currentStacks >= maxStacks) then
 		return
