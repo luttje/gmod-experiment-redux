@@ -81,6 +81,53 @@ function Schema.util.Throttle(scope, delay, entity)
 	return throttled
 end
 
+--- Expands the bounds of a cube to a list of points.
+---@param boundsMin Vector
+---@param boundsMax Vector
+---@param relativePosition Vector
+---@param relativeAngles Angle
+function Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, relativePosition, relativeAngles)
+	local corners = {
+		Vector(boundsMin.x, boundsMin.y, boundsMin.z),
+		Vector(boundsMin.x, boundsMin.y, boundsMax.z),
+		Vector(boundsMin.x, boundsMax.y, boundsMin.z),
+		Vector(boundsMin.x, boundsMax.y, boundsMax.z),
+		Vector(boundsMax.x, boundsMin.y, boundsMin.z),
+		Vector(boundsMax.x, boundsMin.y, boundsMax.z),
+		Vector(boundsMax.x, boundsMax.y, boundsMin.z),
+		Vector(boundsMax.x, boundsMax.y, boundsMax.z),
+	}
+
+	local cube = {}
+
+	for _, corner in ipairs(corners) do
+		local relativeCornerPosition, relativeCornerAngles = LocalToWorld(corner, Angle(0, 0, 0), relativePosition, relativeAngles)
+
+		table.insert(cube, relativeCornerPosition)
+	end
+
+	return cube
+end
+
+--- Traces from each corner of a cube to the first corner to see if it's colliding with anything
+function Schema.util.TracePointsHit(points, filter, drawDebug)
+	for k, corner in ipairs(points) do
+		local trace = util.TraceLine({
+			start = corner,
+			endpos = points[1],
+			filter = filter
+		})
+
+		if (drawDebug) then
+			debugoverlay.Line(corner, trace.HitPos, 5, trace.Hit and Color(255, 0, 0) or Color(0, 255, 0), true)
+		end
+
+		if (trace.Hit) then
+			return trace
+		end
+	end
+end
+
 if (CLIENT) then
 	function Schema.util.RunInventoryAction(itemID, inventoryID, action, data)
 		net.Start("ixInventoryAction")

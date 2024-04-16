@@ -125,8 +125,18 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 		structure.entity:SetPos(weapon.expLastStructurePosition)
 		structure.entity:SetAngles(weapon.expLastStructureAngles)
 
+		local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
+		local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(), structure.entity:GetAngles())
+		local canPlace = not Schema.util.TracePointsHit(cube)
+		weapon.expLastCanPlace = canPlace
+
 		render.SuppressEngineLighting(true)
 		render.MaterialOverride(wireframeMaterial)
+		if (canPlace) then
+			render.SetColorModulation(1, 1, 1)
+		else
+			render.SetColorModulation(1, 0, 0)
+		end
 		structure.entity:DrawModel()
 		render.MaterialOverride()
 		render.SuppressEngineLighting(false)
@@ -207,6 +217,11 @@ end
 
 function SWEP:PrimaryAttack()
 	if (SERVER) then
+		return
+	end
+
+	if (not self.expLastCanPlace) then
+		self.Owner:Notify("Cannot place this structure here.")
 		return
 	end
 

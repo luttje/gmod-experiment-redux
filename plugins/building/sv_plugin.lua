@@ -6,9 +6,8 @@ function PLUGIN:BuildStructure(client, item, position, angles)
 	local structureBaseEntity = ents.Create("exp_structure")
 	structureBaseEntity:SetStructure(client, item, position, angles)
 	structureBaseEntity:Spawn()
-	structureBaseEntity:EmitSound("physics/wood/wood_box_impact_soft3.wav", 75, 70)
 
-	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
+	return structureBaseEntity
 end
 
 net.Receive("ixBuildingRequestBuildStructure", function(_, client)
@@ -44,8 +43,13 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 		end
 	end
 
+	local structure = PLUGIN:BuildStructure(client, item, position, angles)
+
 	item:Unequip(client, false, true)
-	PLUGIN:BuildStructure(client, item, position, angles)
+
+	structure:EmitSound("physics/wood/wood_box_impact_soft3.wav", 75, 70)
+
+	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
 end)
 
 function PLUGIN:StructureDestroyed(client, structure)
