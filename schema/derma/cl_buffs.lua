@@ -36,14 +36,14 @@ function PANEL:RefreshBuffs()
 
 	local buffAmount = 0
 
-	for localKey, buff in ipairs(buffs) do
+	for key, buff in ipairs(buffs) do
 		local active = buff.activeUntil > CurTime()
 
 		if (active) then
-			self:AddBuff(buff, localKey)
+			self:AddBuff(buff, key)
 			buffAmount = buffAmount + 1
 		else
-			self:RemoveBuff(localKey)
+			self:RemoveBuff(key)
 		end
 	end
 
@@ -59,25 +59,26 @@ function PANEL:RefreshBuffs()
 	self:InvalidateLayout(true)
 end
 
-function PANEL:AddBuff(buff, localKey)
+function PANEL:AddBuff(buff, key)
 	local panel = self:Add("expBuffIcon")
 	panel:SetVisible(true)
-	panel:SetBuff(buff, localKey)
+	panel:SetBuff(buff, key)
 
 	self.buffs[#self.buffs + 1] = panel
-	self.buffsLookup[localKey] = panel
+	self.buffsLookup[key] = panel
 	self:Sort()
 
 	return panel
 end
 
-function PANEL:RemoveBuff(index)
-	local panel = self.buffsLookup[index]
+function PANEL:RemoveBuff(key)
+	local panel = self.buffsLookup[key]
 
 	if (IsValid(panel)) then
 		panel:Remove()
 	end
 
+	Schema.buff.RemoveLocalActive(key)
 	self:Sort()
 end
 
@@ -147,10 +148,10 @@ function PANEL:Init()
 	self:SetSize(48, 48 + 16)
 end
 
-function PANEL:SetBuff(buff, localKey)
+function PANEL:SetBuff(buff, key)
 	self.buffTable = Schema.buff.Get(buff.index)
 	self.buffData = buff.data
-	self.localKey = localKey
+	self.buffKey = key
 
 	self:SetActiveUntil(buff.activeUntil)
 
@@ -158,7 +159,7 @@ function PANEL:SetBuff(buff, localKey)
 
 	for _, panel in ipairs(panels) do
 		panel:SetHelixTooltip(function(tooltip)
-			Schema.buff.PopulateTooltip(tooltip, self.buffTable, self.buffData)
+			Schema.buff.PopulateTooltip(tooltip, self.buffTable, buff)
 		end)
 	end
 
@@ -179,7 +180,7 @@ function PANEL:Think()
 	local duration = self:GetActiveUntil() - CurTime()
 
 	if (duration <= 0) then
-		Schema.buff.RemoveLocalActive(self.localKey)
+		Schema.buff.RemoveLocalActive(self.buffKey)
 		return
 	end
 

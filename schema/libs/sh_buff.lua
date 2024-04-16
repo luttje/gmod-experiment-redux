@@ -1,4 +1,5 @@
 Schema.buff = ix.util.GetOrCreateCommonLibrary("Buff", function() return setmetatable({}, Schema.meta.buff) end)
+Schema.buff.nextActiveBuffKey = 1
 
 --[[
 	A buff is a temporary effect that can be applied to a player.
@@ -10,21 +11,27 @@ Schema.buff = ix.util.GetOrCreateCommonLibrary("Buff", function() return setmeta
 --]]
 
 ---@class ActiveBuff
----@field index string|number The index of the buff, pointing to a type of buff.
+---@field key number A unique key for the active buff (allowing for stacking buffs and removing them by key)
+---@field index number The index of the buff, pointing to a type of buff.
 ---@field activeUntil number The time the buff will expire (server time, CurTime()).
 ---@field data? table Optional data that can be stored in the buff.
 
 --- Creates information about an active buff.
----@param buffIndex string|number
+---@param buffIndex number
 ---@param activeUntil number
 ---@param buffData? table
 ---@return ActiveBuff
 function Schema.buff.MakeActive(buffIndex, activeUntil, buffData)
-	return {
+	local active = {
+		key = Schema.buff.nextActiveBuffKey,
 		index = buffIndex,
 		activeUntil = activeUntil,
 		data = buffData
 	}
+
+	Schema.buff.nextActiveBuffKey = Schema.buff.nextActiveBuffKey + 1
+
+	return active
 end
 
 if (SERVER) then
@@ -38,34 +45,73 @@ if (SERVER) then
 	---@param buffData? table
 	function Schema.buff.SetActive(client, buffIndex, activeUntil, buffData)
 		local buffTable = Schema.buff.Get(buffIndex)
-
-		if (not buffTable) then
-			error("Buff with index " .. buffIndex .. " does not exist.")
-			return
-		end
-
 		local character = client:GetCharacter()
 		local buffs = character.expBuffs or {}
 		character.expBuffs = buffs
 
 		activeUntil = activeUntil or (CurTime() + buffTable:GetDurationInSeconds(client))
-		local buff = Schema.buff.MakeActive(buffIndex, activeUntil, buffData)
+		local buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
 		local buffKey = #buffs + 1
 		buffs[buffKey] = buff
 
 		hook.Run("PlayerBuffActivated", client, buffTable, buff)
 
 		Schema.buff.Setup(client, buffTable, buff)
-		Schema.buff.Network(client, buffTable, buff)
+		Schema.buff.Network(client, buffTable.index, buff)
+	end
+
+	--- Checks if a buff is active for a client. Optionally checking if the buff has a specific data.
+	---@param client Player
+	---@param buffIndex string|number
+	---@param data? table
+	---@return boolean, ActiveBuff
+	function Schema.buff.GetActive(client, buffIndex, data)
+		local character = client:GetCharacter()
+
+		if (not character) then
+			return false
+		end
+
+		local buffTable = Schema.buff.Get(buffIndex)
+		local buffs = character.expBuffs or {}
+
+		for _, buff in ipairs(buffs) do
+			if (buff.index ~= buffIndex and buffTable.uniqueID ~= buffIndex) then
+				continue
+			end
+
+			if (data) then
+				local itemData = buff.data
+				local found = true
+
+				for dataKey, dataVal in pairs(data) do
+					if (itemData[dataKey] ~= dataVal) then
+						found = false
+						break
+					end
+				end
+
+				if (not found) then
+					continue
+				end
+
+				return true, buff
+			end
+
+			return true, buff
+		end
+
+		return false
 	end
 
 	--- Network the buff to the client.
 	---@param client Player
-	---@param buffTable Buff
+	---@param buffIndex number
 	---@param buff ActiveBuff
-	function Schema.buff.Network(client, buffTable, buff)
+	function Schema.buff.Network(client, buffIndex, buff)
 		net.Start("exp_BuffUpdated")
-		net.WriteUInt(buffTable.index, 32)
+		net.WriteUInt(buff.key, 32)
+		net.WriteUInt(buffIndex, 32)
 		net.WriteUInt(buff.activeUntil, 32)
 		net.WriteBool(buff.data and true or false)
 		if (buff.data) then
@@ -140,12 +186,6 @@ if (SERVER) then
 
 		for buffKey, buff in ipairs(buffs) do
 			local buffTable = Schema.buff.Get(buff.index)
-
-			if (not buffTable) then
-				ErrorNoHalt("Buff with index " .. buff.index .. " does not exist (player: " .. client:Name() .. ")\n")
-				continue
-			end
-
 			local storeKey = #buffsToStore + 1
 			buffsToStore[storeKey] = Schema.buff.MakeStored(client, buff.index, buff.activeUntil - curTime, buff.data)
 
@@ -168,10 +208,9 @@ if (SERVER) then
 		end
 
 		local buffs = character.expBuffs or {}
+		local curTime = CurTime()
 
 		if (not expireChecker) then
-			local curTime = CurTime()
-
 			expireChecker = function(client, buffTable, buff)
 				return buff.activeUntil <= curTime
 			end
@@ -184,12 +223,6 @@ if (SERVER) then
 		for buffKey = #buffs, 1, -1 do
 			local buff = buffs[buffKey]
 			local buffTable = Schema.buff.Get(buff.index)
-
-			if (not buffTable) then
-				ErrorNoHalt("Buff with index " .. buff.index .. " does not exist.\n")
-				continue
-			end
-
 			local expired = expireChecker(client, buffTable, buff)
 
 			if (not expired) then
@@ -204,7 +237,7 @@ if (SERVER) then
 			end
 
 			table.remove(buffs, buffKey)
-			Schema.buff.Network(client, buffTable, buff)
+			Schema.buff.Network(client, buff.index, buff)
 			expiredCount = expiredCount + 1
 		end
 
@@ -225,11 +258,6 @@ if (SERVER) then
 		for buffKey, buff in pairs(buffs) do
 			local buffTable = Schema.buff.Get(buff.index)
 
-			if (not buffTable) then
-				ErrorNoHalt("Buff with index " .. buff.index .. " does not exist.\n")
-				continue
-			end
-
 			if (buffTable.OnLoadout) then
 				buffTable:OnLoadout(client, buff)
 			end
@@ -244,6 +272,32 @@ if (SERVER) then
 
 	hook.Add("PlayerLoadout", "expBuffsCallLoadout", function(client)
 		Schema.buff.CallLoadout(client)
+	end)
+
+	hook.Add("PlayerSecondElapsed", "expBuffsSecondElapsed", function(client)
+		local character = client:GetCharacter()
+
+		if (not character) then
+			return
+		end
+
+		local buffs = character.expBuffs or {}
+
+		-- We traverse in reverse order, so if the hook removes a buff, it doesn't affect the loop.
+		for buffKey = #buffs, 1, -1 do
+			local buff = buffs[buffKey]
+			local buffTable = Schema.buff.Get(buff.index)
+
+			if (buffTable.OnPlayerSecondElapsed) then
+				local canStayActive = buffTable:OnPlayerSecondElapsed(client, buff)
+
+				if (canStayActive == false) then
+					buff.activeUntil = CurTime() - 1
+					table.remove(buffs, buffKey)
+					Schema.buff.Network(client, buff.index, buff)
+				end
+			end
+		end
 	end)
 else
 	Schema.buff.localActive = Schema.buff.localActive or {}
@@ -275,35 +329,34 @@ else
 		end
 	end
 
-	function Schema.buff.AddLocalActive(index, activeUntil, data)
-		local newLocalKey = #Schema.buff.localActive + 1
-
-		Schema.buff.localActive[newLocalKey] = {
+	function Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
+		Schema.buff.localActive[key] = {
+			key = key,
 			index = index,
 			activeUntil = activeUntil,
 			data = data
 		}
 	end
 
-	function Schema.buff.RemoveLocalActive(localKey)
-		Schema.buff.localActive[localKey] = nil
+	function Schema.buff.RemoveLocalActive(key)
+		Schema.buff.localActive[key] = nil
 	end
 
 	function Schema.buff.GetAllLocalActive()
 		return Schema.buff.localActive
 	end
 
-	function Schema.buff.PopulateTooltip(tooltip, buffTable, buffData)
+	function Schema.buff.PopulateTooltip(tooltip, buffTable, buff)
 		local name = tooltip:AddRow("name")
 		name:SetImportant()
-		name:SetText(buffTable:GetName(LocalPlayer(), buffData))
-		name:SetBackgroundColor(buffTable:GetBackgroundColor(LocalPlayer(), buffData))
+		name:SetText(buffTable:GetName(LocalPlayer(), buff))
+		name:SetBackgroundColor(buffTable:GetBackgroundColor(LocalPlayer(), buff))
 		name:SizeToContents()
 
 		local description = tooltip:AddRow("description")
-		description:SetText(buffTable:GetDescription(LocalPlayer(), buffData))
+		description:SetText(buffTable:GetDescription(LocalPlayer(), buff))
 		description:SizeToContents()
-		local attributeBoosts = buffTable:GetAttributeBoosts(LocalPlayer(), buffData)
+		local attributeBoosts = buffTable:GetAttributeBoosts(LocalPlayer(), buff)
 
 		if (attributeBoosts) then
 			for attributeKey, boostAmount in pairs(attributeBoosts) do
@@ -319,19 +372,13 @@ else
 	end
 
 	net.Receive("exp_BuffUpdated", function()
+		local key = net.ReadUInt(32)
 		local index = net.ReadUInt(32)
 		local activeUntil = net.ReadUInt(32)
 		local hasData = net.ReadBool()
 		local data = hasData and net.ReadTable() or nil
-		local buffTable = Schema.buff.Get(index)
 
-		if (not buffTable) then
-			error("Buff with index " .. index .. " does not exist.")
-			return
-		end
-
-		Schema.buff.AddLocalActive(index, activeUntil, data)
-
+		Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
 		Schema.buff.RefreshPanel()
 	end)
 
@@ -341,7 +388,8 @@ else
 		Schema.buff.localActive = {}
 
 		for _, buff in ipairs(buffs) do
-			Schema.buff.AddLocalActive(
+			Schema.buff.UpdateLocalActive(
+				buff.key,
 				buff.index,
 				buff.activeUntil,
 				buff.data

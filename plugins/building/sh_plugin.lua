@@ -4,6 +4,17 @@ PLUGIN.name = "Building"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Restricts construction to only allowed props. Requiring blueprints and materials to build."
 
+ix.util.Include("sv_plugin.lua")
+
+if (CLIENT) then
+	function PLUGIN:RequestBuildStructure(position, angles)
+		net.Start("ixBuildingRequestBuildStructure")
+		net.WriteVector(position)
+		net.WriteAngle(angles)
+		net.SendToServer()
+	end
+end
+
 function PLUGIN:InitializedPlugins()
 	local helperMetaTable = {}
 	helperMetaTable.__index = helperMetaTable
@@ -40,61 +51,6 @@ function PLUGIN:GetPlacementTrace(client)
 	})
 
 	return trace.HitPos, Angle(0, client:EyeAngles().y, 0)
-end
-
-if (SERVER) then
-    util.AddNetworkString("ixBuildingRequestBuildStructure")
-
-    function PLUGIN:BuildStructure(client, item, position, angles)
-        local structureBaseEntity = ents.Create("exp_structure")
-        structureBaseEntity:SetStructure(client, item, position, angles)
-        structureBaseEntity:Spawn()
-		structureBaseEntity:EmitSound("physics/wood/wood_box_impact_soft3.wav", 75, 70)
-
-        client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
-    end
-
-	net.Receive("ixBuildingRequestBuildStructure", function(_, client)
-		local position = net.ReadVector()
-        local angles = net.ReadAngle()
-
-        if (Schema.util.Throttle("BuildStructure", 2, client)) then
-            return
-        end
-
-        local weapon = client:GetActiveWeapon()
-
-        if (not IsValid(weapon) or weapon:GetClass() ~= "exp_structure_builder") then
-            client:Notify("You must have the blueprint equipped.")
-            return
-        end
-
-		local item = weapon.ixItem
-
-        if (not item) then
-			client:Notify("You do not have the required blueprint.")
-			return
-		end
-
-        local structures = ents.FindByClass("exp_structure")
-
-		for _, structure in ipairs(structures) do
-			if (IsValid(structure.expClient) and structure.expClient == client and structure:GetUnderConstruction()) then
-				client:Notify("You are already building a structure. Finish that first.")
-				return
-			end
-		end
-
-		item:Unequip(client, false, true)
-		PLUGIN:BuildStructure(client, item, position, angles)
-	end)
-else
-	function PLUGIN:RequestBuildStructure(position, angles)
-		net.Start("ixBuildingRequestBuildStructure")
-		net.WriteVector(position)
-		net.WriteAngle(angles)
-		net.SendToServer()
-	end
 end
 
 function PLUGIN:AdjustAllowedProps(allowedProps)

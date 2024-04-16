@@ -2,6 +2,8 @@
 ---@field index number
 ---@field uniqueID string
 ---@field name string
+---@field stackedName? string
+---@field maxStacks? number
 ---@field backgroundImage string
 ---@field backgroundColor Color
 ---@field foregroundImage string
@@ -22,7 +24,13 @@ end
 ---@param buff ActiveBuff
 ---@return string
 function META:GetName(client, buff)
-    return self.name
+	local stacks = buff.data and buff.data.stacks or 1
+
+	if (not stacks or not self.stackedName) then
+		return self.name
+	end
+
+	return string.format(self.stackedName, stacks)
 end
 
 ---@param client Player
@@ -95,6 +103,13 @@ end
 
 ---@param client Player
 ---@param buff ActiveBuff
+---@return boolean? Return false to remove the buff
+function META:OnPlayerSecondElapsed(client, buff)
+
+end
+
+---@param client Player
+---@param buff ActiveBuff
 ---@param expiredThroughDeath boolean
 function META:OnExpire(client, buff, expiredThroughDeath)
     local attributeBoosts = self:GetAttributeBoosts(client, buff)
@@ -106,4 +121,20 @@ function META:OnExpire(client, buff, expiredThroughDeath)
 			character:RemoveBoost("buff#"..self.uniqueID, attribute)
 		end
 	end
+end
+
+--- Stacks the buff if possible
+---@param client any
+---@param buff any
+function META:Stack(client, buff)
+	local maxStacks = self.maxStacks or 1
+	local currentStacks = buff.data.stacks or 1
+
+	if (currentStacks >= maxStacks) then
+		return
+	end
+
+	buff.data.stacks = math.min(currentStacks + 1, maxStacks)
+	buff.activeUntil = CurTime() + self:GetDurationInSeconds(client)
+	Schema.buff.Network(client, buff.index, buff)
 end

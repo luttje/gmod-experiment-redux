@@ -121,6 +121,8 @@ if (not SERVER) then
 	return
 end
 
+AccessorFunc(ENT, "expClient", "Client")
+
 function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetSolid(SOLID_NONE)
@@ -129,7 +131,7 @@ end
 
 function ENT:SetStructure(client, item, position, angles)
 	self.expItem = item
-    self.expClient = client
+    self:SetClient(client)
 
 	client:RegisterEntityToRemoveOnLeave(self)
 
@@ -272,7 +274,7 @@ function ENT:FinishConstruction(client)
 end
 
 function ENT:Think()
-    local client = self.expClient
+    local client = self:GetClient()
 
 	if (not IsValid(client) or not client:Alive()) then
 		self:Remove()
@@ -290,6 +292,7 @@ function ENT:OnTakeDamage(damageInfo)
 	-- TODO: Change color of the structure parts to indicate damage
 
 	if (self:Health() <= 0) then
+		hook.Run("StructureDestroyed", damageInfo:GetAttacker(), self)
 		self:RemoveWithEffect()
 	end
 end
