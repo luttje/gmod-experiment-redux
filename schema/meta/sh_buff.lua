@@ -1,3 +1,14 @@
+---@class Buff
+---@field index number
+---@field uniqueID string
+---@field name string
+---@field backgroundImage string
+---@field backgroundColor Color
+---@field foregroundImage string
+---@field description string
+---@field durationInSeconds number
+---@field persistThroughDeath boolean
+---@field attributeBoosts? table<string, number>
 local META = Schema.meta.buff or {}
 Schema.meta.buff = META
 
@@ -7,41 +18,91 @@ function META:__tostring()
     return "buff[" .. self.uniqueID .. "]"
 end
 
-function META:GetUniqueID()
-    return self.uniqueID
-end
-
-function META:GetName()
+---@param client Player
+---@param buff ActiveBuff
+---@return string
+function META:GetName(client, buff)
     return self.name
 end
 
-function META:GetDescription()
+---@param client Player
+---@param buff ActiveBuff
+---@return string
+function META:GetBackgroundImage(client, buff)
+	return self.backgroundImage
+end
+
+---@param client Player
+---@param buff ActiveBuff
+---@return Color
+function META:GetBackgroundColor(client, buff)
+    return self.backgroundColor
+end
+
+---@param client Player
+---@param buff ActiveBuff
+---@return string
+function META:GetForegroundImage(client, buff)
+	return self.foregroundImage
+end
+
+---@param client Player
+---@param buff ActiveBuff
+---@return string
+function META:GetDescription(client, buff)
     return self.description
 end
 
-function META:GetDurationInSeconds()
+---@param client Player
+---@return number
+function META:GetDurationInSeconds(client)
     return self.durationInSeconds
 end
 
-function META:OnSetup(client, activeUntil)
-    if (self.attributeBoosts) then
+---@param client Player
+---@param buff ActiveBuff
+---@return boolean
+function META:ShouldPersistThroughDeath(client, buff)
+    return self.persistThroughDeath
+end
+
+---@param client Player
+---@param buff ActiveBuff
+---@return table<string, number>?
+function META:GetAttributeBoosts(client, buff)
+	return self.attributeBoosts
+end
+
+---@param client Player
+---@param buff ActiveBuff
+function META:OnSetup(client, buff)
+    local attributeBoosts = self:GetAttributeBoosts(client, buff)
+
+    if (attributeBoosts) then
         local character = client:GetCharacter()
 
-		for attribute, boostAmount in pairs(self.attributeBoosts) do
+		for attribute, boostAmount in pairs(attributeBoosts) do
 			character:AddBoost("buff#"..self.uniqueID, attribute, boostAmount)
 		end
 	end
 end
 
-function META:OnLoadout(client, activeUntil)
+---@param client Player
+---@param buff ActiveBuff
+function META:OnLoadout(client, buff)
 
 end
 
-function META:OnExpire(client, expiredThroughDeath)
-	if (self.attributeBoosts) then
+---@param client Player
+---@param buff ActiveBuff
+---@param expiredThroughDeath boolean
+function META:OnExpire(client, buff, expiredThroughDeath)
+    local attributeBoosts = self:GetAttributeBoosts(client, buff)
+
+	if (attributeBoosts) then
         local character = client:GetCharacter()
 
-		for attribute, boostAmount in pairs(self.attributeBoosts) do
+		for attribute, boostAmount in pairs(attributeBoosts) do
 			character:RemoveBoost("buff#"..self.uniqueID, attribute)
 		end
 	end

@@ -8,7 +8,7 @@ ix.util._existingLibraries = ix.util._existingLibraries or {}
 --- Schema.achievement = ix.util.GetOrCreateCommonLibrary("Achievement")
 ---@param libraryName string The unique name of the library.
 ---@param constructor? fun(): table The constructor function for an object.
----@return table The library table.
+---@return table # The library table.
 function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
     local existingLibrary = ix.util._existingLibraries[libraryName]
 

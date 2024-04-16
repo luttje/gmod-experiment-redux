@@ -11,7 +11,6 @@ function PANEL:Init()
 	self:SetStretchWidth(false)
 	self:SetStretchHeight(true)
 
-	self.buffs = {}
 	self.padding = 2
 
 	self:RefreshBuffs()
@@ -23,6 +22,7 @@ end
 
 function PANEL:Clear()
 	self.buffs = {}
+	self.buffsLookup = {}
 
 	for _, panel in ipairs(self:GetChildren()) do
 		panel:Remove()
@@ -30,20 +30,20 @@ function PANEL:Clear()
 end
 
 function PANEL:RefreshBuffs()
-	local buffs = Schema.buff.localActiveUntil
+	local buffs = Schema.buff.GetAllLocalActive()
 
 	self:Clear()
 
 	local buffAmount = 0
 
-	for index, activeUntil in pairs(buffs) do
-		local active = activeUntil > CurTime()
+	for localKey, buff in ipairs(buffs) do
+		local active = buff.activeUntil > CurTime()
 
 		if (active) then
-			self:AddBuff(index, activeUntil)
+			self:AddBuff(buff, localKey)
 			buffAmount = buffAmount + 1
 		else
-			self:RemoveBuff(index)
+			self:RemoveBuff(localKey)
 		end
 	end
 
@@ -59,26 +59,23 @@ function PANEL:RefreshBuffs()
 	self:InvalidateLayout(true)
 end
 
-function PANEL:AddBuff(index, activeUntil)
+function PANEL:AddBuff(buff, localKey)
 	local panel = self:Add("expBuffIcon")
 	panel:SetVisible(true)
-	panel:SetBuff(index)
-	panel:SetActiveUntil(activeUntil)
+	panel:SetBuff(buff, localKey)
 
 	self.buffs[#self.buffs + 1] = panel
+	self.buffsLookup[localKey] = panel
 	self:Sort()
 
 	return panel
 end
 
 function PANEL:RemoveBuff(index)
-	for k, buffPanel in ipairs(self.buffs) do
-		if (buffPanel.buff.index == index) then
-			buffPanel:Remove()
+	local panel = self.buffsLookup[index]
 
-			table.remove(self.buffs, k)
-			break
-		end
+	if (IsValid(panel)) then
+		panel:Remove()
 	end
 
 	self:Sort()
@@ -132,7 +129,7 @@ vgui.Register("expBuffManager", PANEL, "DIconLayout")
 
 PANEL = {}
 
-AccessorFunc(PANEL, "expActiveUntil", "ActiveUntil")
+AccessorFunc(PANEL, "expActiveUntil", "ActiveUntil", FORCE_NUMBER)
 
 function PANEL:Init()
 	self.icon = self:Add("expDynamicIcon")
@@ -150,28 +147,39 @@ function PANEL:Init()
 	self:SetSize(48, 48 + 16)
 end
 
-function PANEL:SetBuff(buffID)
-	self.buff = Schema.buff.Get(buffID)
+function PANEL:SetBuff(buff, localKey)
+	self.buffTable = Schema.buff.Get(buff.index)
+	self.buffData = buff.data
+	self.localKey = localKey
+
+	self:SetActiveUntil(buff.activeUntil)
 
 	local panels = { self, self.label, self.icon }
 
 	for _, panel in ipairs(panels) do
 		panel:SetHelixTooltip(function(tooltip)
-			Schema.buff.PopulateTooltip(tooltip, self.buff)
+			Schema.buff.PopulateTooltip(tooltip, self.buffTable, self.buffData)
 		end)
 	end
 
 	local opacity = 255
 
-	self.icon:SetBack(self.buff.backgroundImage, self.buff.backgroundColor, opacity)
-	self.icon:SetSymbol(self.buff.foregroundImage, opacity)
+	self.icon:SetBack(
+		self.buffTable:GetBackgroundImage(LocalPlayer(), self.buffData),
+		self.buffTable:GetBackgroundColor(LocalPlayer(), self.buffData),
+		opacity
+	)
+	self.icon:SetSymbol(
+		self.buffTable:GetForegroundImage(LocalPlayer(), self.buffData),
+		opacity
+	)
 end
 
 function PANEL:Think()
 	local duration = self:GetActiveUntil() - CurTime()
 
 	if (duration <= 0) then
-		Schema.buff.localActiveUntil[self.buff.index] = nil
+		Schema.buff.RemoveLocalActive(self.localKey)
 		return
 	end
 
@@ -179,7 +187,14 @@ function PANEL:Think()
 		self.icon.opacity = 100 + (155 * math.abs(math.sin(RealTime() * 2)))
 	end
 
-	local text = Schema.util.GetNiceShortTime(duration)
+	local text
+
+	if (self.buffTable.GetDurationText) then
+		text = self.buffTable:GetDurationText(LocalPlayer(), self.buffData, duration)
+	else
+		text = Schema.util.GetNiceShortTime(duration)
+	end
+
 	self.label:SetTextColor(Color(255, 255, 255, self.icon.opacity))
 
 	if (text ~= self.label:GetText()) then

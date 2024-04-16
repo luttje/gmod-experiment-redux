@@ -21,7 +21,13 @@ function Schema:CharacterPreSave(character)
 end
 
 function Schema:PlayerSecondElapsed(client)
-	client:CheckQueuedBoostRemovals()
+	local character = client:GetCharacter()
+
+	if (not character) then
+		return
+	end
+
+	client:CheckQueuedBoostRemovals(character)
 	Schema.buff.CheckExpired(client)
 end
 

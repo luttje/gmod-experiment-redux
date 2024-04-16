@@ -285,9 +285,9 @@ do
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, buffID)
-		if (not Schema.buff.Exists(buffID)) then
-			ix.util.Notify("Invalid buff ID!", client)
+	function COMMAND:OnRun(client, buffUniqueID)
+		if (not Schema.buff.Exists(buffUniqueID)) then
+			ix.util.Notify("Invalid Buff Unique ID!", client)
 			return
 		end
 
@@ -298,29 +298,30 @@ do
 		local target = util.TraceLine(data).Entity
 
 		if (IsValid(target) and target:IsPlayer()) then
-			Schema.buff.SetActive(target, buffID)
 			ix.util.Notify("Buff applied to " .. target:GetName() .. ".", client)
 		else
-			Schema.buff.SetActive(client, buffID)
+			target = client
 			ix.util.Notify("Buff applied to yourself.", client)
 		end
+
+		Schema.buff.SetActive(target, buffUniqueID)
 	end
 
-	ix.command.Add("CharBuffApply", COMMAND)
+	ix.command.Add("CharBuffActivate", COMMAND)
 end
 
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Immediately removes a buff from yourself or the character you are looking at."
+	COMMAND.description = "Immediately removes all buffs of a certain type from yourself or the character you are looking at."
 	COMMAND.arguments = {
 		ix.type.string,
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, buffID)
-		if (not Schema.buff.Exists(buffID)) then
-			ix.util.Notify("Invalid buff ID!", client)
+	function COMMAND:OnRun(client, buffUniqueID)
+		if (not Schema.buff.Exists(buffUniqueID)) then
+			ix.util.Notify("Invalid Buff Unique ID!", client)
 			return
 		end
 
@@ -329,16 +330,18 @@ do
 		data.endpos = data.start + client:GetAimVector() * 96
 		data.filter = client
 		local target = util.TraceLine(data).Entity
-		local curTime = CurTime()
 
 		if (IsValid(target) and target:IsPlayer()) then
-			Schema.buff.SetActive(target, buffID, curTime)
 			ix.util.Notify("Buff removed from " .. target:GetName() .. ".", client)
 		else
-			Schema.buff.SetActive(client, buffID, curTime)
+			target = client
 			ix.util.Notify("Buff removed from yourself.", client)
 		end
+
+		Schema.buff.CheckExpired(target, function(client, buffTable, buff)
+			return buffTable.uniqueID == buffUniqueID
+		end)
 	end
 
-	ix.command.Add("CharBuffRemove", COMMAND)
+	ix.command.Add("CharBuffExpire", COMMAND)
 end

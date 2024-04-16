@@ -71,13 +71,7 @@ function playerMeta:QueueBoostRemove(boostID, attribID, delay)
     character:SetVar("boostsToRemove", boostsToRemove)
 end
 
-function playerMeta:CheckQueuedBoostRemovals()
-    local character = self:GetCharacter()
-
-    if (not character) then
-        return
-    end
-
+function playerMeta:CheckQueuedBoostRemovals(character)
     local boostsToRemove = character:GetVar("boostsToRemove", {})
     local curTime = CurTime()
 
