@@ -13,22 +13,11 @@ BUFF.description = "After destroying a structure belonging to '%s' with a crowba
 ---@param buff ActiveBuff
 ---@return string
 function BUFF:GetDescription(client, buff)
-	local victim = buff.data.victim
 	local victimName = "someone"
 
-	if (IsValid(victim)) then
-		victimName = victim:Name()
+	if (buff.data.victimName) then
+		victimName = buff.data.victimName
 	end
 
 	return string.format(self.description, victimName, victimName)
-end
-
----@param client Player
----@param buff ActiveBuff
----@return boolean?
-function BUFF:OnPlayerSecondElapsed(client, buff)
-	if (not IsValid(buff.data.victim)) then
-		-- The victim has left the server, so remove the buff
-		return false
-	end
 end

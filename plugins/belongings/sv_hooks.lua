@@ -33,7 +33,7 @@ function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
 	removeIfEmpty(sourceInventory)
 end
 
-function Schema:CharacterVarChanged(character, key, oldValue, value)
+function PLUGIN:CharacterVarChanged(character, key, oldValue, value)
 	if (key ~= "money") then
 		return
 	end

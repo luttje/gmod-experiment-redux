@@ -1,7 +1,7 @@
 ix.currency.symbol = ""
 ix.currency.singular = "bolt"
 ix.currency.plural = "bolts"
-ix.currency.model = "models/props_lab/exp01a.mdl"
+ix.currency.model = "models/props_lab/box01a.mdl"
 
 ix.config.SetDefault("intro", false)
 ix.config.SetDefault("music", "music/HL2_song23_SuitSong3.mp3")

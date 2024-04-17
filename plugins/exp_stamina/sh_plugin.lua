@@ -105,7 +105,7 @@ if (SERVER) then
 		end)
 	end
 
-	function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
+	function PLUGIN:CharacterAttributeUpdated(client, character, attributeKey, value)
 		if (attributeKey == "endurance") then
 			local requiredAttribute = Schema.achievement.GetProperty("enduring_spirit", "requiredAttribute")
 

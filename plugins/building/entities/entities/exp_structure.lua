@@ -121,7 +121,10 @@ if (not SERVER) then
 	return
 end
 
-AccessorFunc(ENT, "expClient", "Client")
+AccessorFunc(ENT, "expBuilder", "Builder")
+AccessorFunc(ENT, "expBuilderName", "BuilderName")
+AccessorFunc(ENT, "expBuilderAlliance", "BuilderAlliance")
+AccessorFunc(ENT, "expBuilderSteamID64", "BuilderSteamID64")
 
 function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_NONE)
@@ -130,8 +133,12 @@ function ENT:Initialize()
 end
 
 function ENT:SetStructure(client, item, position, angles)
-	self.expItem = item
-    self:SetClient(client)
+    self.expItem = item
+
+    self:SetBuilder(client)
+    self:SetBuilderName(client:Name())
+    self:SetBuilderAlliance(client:GetAlliance())
+	self:SetBuilderSteamID64(client:SteamID64())
 
 	client:RegisterEntityToRemoveOnLeave(self)
 
@@ -277,12 +284,75 @@ function ENT:FinishConstruction(client)
 end
 
 function ENT:Think()
-    local client = self:GetClient()
+    local client = self:GetBuilder()
 
-	if (not IsValid(client) or not client:Alive()) then
-		self:Remove()
-		return
+    if (not IsValid(client) or not client:Alive()) then
+        self:Remove()
+        return
+    end
+end
+
+---Checks if the client has an active siege surge buff against the builder or their alliance
+---@param client any
+---@return boolean|ActiveBuff, Buff
+function ENT:HasSiegeSurgeActive(client)
+	local victimData = {
+		victimID = self:GetBuilderSteamID64(),
+	}
+
+	local buff, buffTable = Schema.buff.GetActive(client, "siege_surge", victimData)
+	local allianceID = self:GetBuilderAlliance()
+
+	if (not buff and allianceID) then
+		victimData.alliance = allianceID
+		buff, buffTable = Schema.buff.GetActive(client, "siege_surge", victimData)
 	end
+
+	return buff, buffTable
+end
+
+function ENT:HandleSiegeSurgeDamage(damageInfo)
+	local attacker = damageInfo:GetAttacker()
+
+    if (not IsValid(attacker) or not attacker:IsPlayer()) then
+        return
+    end
+
+	local buff, buffTable = self:HasSiegeSurgeActive(attacker)
+
+    if (not buff) then
+        return
+    end
+
+	local stacks = buffTable:GetStacks(attacker, buff)
+
+	local oldDamage = damageInfo:GetDamage()
+	damageInfo:ScaleDamage(1 + stacks)
+	print("Damage increased by " .. stacks .. "x (was: " .. oldDamage .. ", now: " .. damageInfo:GetDamage() .. ")")
+end
+
+function ENT:HandleSiegeSurgeStack(client)
+    if (not IsValid(client) or not client:IsPlayer()) then
+        return
+    end
+
+	local buff, buffTable = self:HasSiegeSurgeActive(client)
+
+    if (not buff) then
+		local victimData = {
+            victimID = self:GetBuilderSteamID64(),
+			victimName = self:GetBuilderName(),
+		}
+
+        if (self:GetBuilderAlliance()) then
+            victimData.alliance = self:GetBuilderAlliance()
+        end
+
+		Schema.buff.SetActive(client, "siege_surge", nil, victimData)
+        return
+    end
+
+	buffTable:Stack(client, buff)
 end
 
 function ENT:OnTakeDamage(damageInfo)
@@ -290,33 +360,17 @@ function ENT:OnTakeDamage(damageInfo)
 		return
 	end
 
-	local damage = damageInfo:GetDamage()
-	local attacker = damageInfo:GetAttacker()
+	self:HandleSiegeSurgeDamage(damageInfo)
 
-	if (IsValid(attacker) and attacker:IsPlayer()) then
-		local structureBuilder = self:GetClient()
-
-		if (IsValid(structureBuilder)) then
-			local victimData = {
-				victim = structureBuilder
-			}
-			local buff, buffTable = Schema.buff.GetActive(attacker, "siege_surge", victimData)
-
-			if (buff) then
-				local stacks = buffTable:GetStacks(attacker, buff)
-
-				damage = damage * stacks
-				print("Damage increased by " .. stacks .. "x (was: " .. damageInfo:GetDamage() .. ", now: " .. damage .. ")")
-			end
-		end
-	end
-
-	self:SetHealth(self:Health() - damage)
+	self:SetHealth(self:Health() - damageInfo:GetDamage())
 
 	-- TODO: Change color of the structure parts to indicate damage
 
 	if (self:Health() <= 0) then
-		hook.Run("StructureDestroyed", damageInfo:GetAttacker(), self)
+        hook.Run("StructureDestroyed", damageInfo:GetAttacker(), self)
+
+		self:HandleSiegeSurgeStack(damageInfo:GetAttacker())
+
 		self:RemoveWithEffect()
 	end
 end

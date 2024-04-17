@@ -26,7 +26,7 @@ end
 function META:GetName(client, buff)
 	local stacks = buff.data and buff.data.stacks or 1
 
-	if (not stacks or not self.stackedName) then
+	if (not stacks or not self.stackedName or stacks == 1) then
 		return self.name
 	end
 

@@ -51,8 +51,7 @@ if (SERVER) then
 
 		activeUntil = activeUntil or (CurTime() + buffTable:GetDurationInSeconds(client))
 		local buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
-		local buffKey = #buffs + 1
-		buffs[buffKey] = buff
+		buffs[buff.key] = buff
 
 		hook.Run("PlayerBuffActivated", client, buffTable, buff)
 
@@ -140,8 +139,7 @@ if (SERVER) then
 
 			local activeUntil = curTime + storedBuff.activeRemaining
 			local buff = Schema.buff.MakeActive(storedBuff.index, activeUntil, storedBuff.data)
-			local buffKey = #character.expBuffs + 1
-			character.expBuffs[buffKey] = buff
+			character.expBuffs[buff.key] = buff
 
 			Schema.buff.Setup(client, buffTable, buff)
 		end
@@ -265,6 +263,12 @@ if (SERVER) then
 	end
 
 	hook.Add("PostPlayerDeath", "expBuffsRemoveOnDeath", function(client)
+		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
+			return not buffTable:ShouldPersistThroughDeath(client, buff)
+		end)
+    end)
+
+	hook.Add("PlayerDisconnected", "expBuffsRemoveOnDisconnect", function(client)
 		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
 			return not buffTable:ShouldPersistThroughDeath(client, buff)
 		end)

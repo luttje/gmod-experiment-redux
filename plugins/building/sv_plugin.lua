@@ -35,7 +35,7 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	local structures = ents.FindByClass("exp_structure")
 
 	for _, structure in ipairs(structures) do
-		local structureBuilder = structure:GetClient()
+		local structureBuilder = structure:GetBuilder()
 
 		if (IsValid(structureBuilder) and structureBuilder == client and structure:GetUnderConstruction()) then
 			client:Notify("You are already building a structure. Finish that first.")
@@ -51,27 +51,3 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 
 	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
 end)
-
-function PLUGIN:StructureDestroyed(client, structure)
-	if (not IsValid(client)) then
-		return
-	end
-
-	local structureBuilder = structure:GetClient()
-
-	if (not IsValid(structureBuilder)) then
-		return
-	end
-
-	local victimData = {
-		victim = structureBuilder
-	}
-	local buff, buffTable = Schema.buff.GetActive(client, "siege_surge", victimData)
-
-	if (not buff) then
-		Schema.buff.SetActive(client, "siege_surge", nil, victimData)
-		return
-	end
-
-	buffTable:Stack(client, buff)
-end

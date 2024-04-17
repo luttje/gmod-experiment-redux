@@ -54,6 +54,9 @@ function PLUGIN:GetPlacementTrace(client)
 end
 
 function PLUGIN:AdjustAllowedProps(allowedProps)
+	--[[
+		Plastic props
+	--]]
 	allowedProps:AddProp({
 		uniqueID = "blue_barrel",
 		name = "Blue Barrel",
@@ -65,8 +68,11 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 			["material_plastic"] = 5,
 			["material_metal"] = 1
 		}
-	})
+    })
 
+	--[[
+		Hard metal props
+	--]]
 	allowedProps:AddProp({
 		uniqueID = "storefront_bars",
 		name = "Storefront Bars",
@@ -77,8 +83,35 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		materials = {
 			["material_metal"] = 10
 		}
+    })
+
+    allowedProps:AddProp({
+        uniqueID = "blast_door",
+        name = "Blast Door",
+        description = "A blast door to protect your base.",
+        priceOfBlueprint = 200,
+        health = 200,
+        model = "models/props_lab/blastdoor001b.mdl",
+		materials = {
+			["material_metal"] = 15
+		}
+    })
+
+	allowedProps:AddProp({
+		uniqueID = "blast_door_double",
+		name = "Welded Double Blast Door",
+		description = "Double blast doors welded together.",
+		priceOfBlueprint = 400,
+		health = 400,
+		model = "models/props_lab/blastdoor001c.mdl",
+		materials = {
+			["material_metal"] = 25
+		}
 	})
 
+	--[[
+		Wooden props
+	--]]
 	allowedProps:AddProp({
 		uniqueID = "furniture_shelf",
 		name = "Shelf",
