@@ -134,17 +134,18 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		}
     })
 
-	allowedProps:AddProp({
-		uniqueID = "blast_door_double",
-		name = "Welded Double Blast Door",
-		description = "Double blast doors welded together.",
-		priceOfBlueprint = 400,
-		health = 400,
-		model = "models/props_lab/blastdoor001c.mdl",
-		materials = {
-			["material_metal"] = 25
-		}
-	})
+	-- Commented because we should only provide small to medium props (in order to prevent prop climbing to high places)
+	-- allowedProps:AddProp({
+	-- 	uniqueID = "blast_door_double",
+	-- 	name = "Welded Double Blast Door",
+	-- 	description = "Double blast doors welded together.",
+	-- 	priceOfBlueprint = 400,
+	-- 	health = 400,
+	-- 	model = "models/props_lab/blastdoor001c.mdl",
+	-- 	materials = {
+	-- 		["material_metal"] = 25
+	-- 	}
+	-- })
 
 	--[[
 		Wooden props
