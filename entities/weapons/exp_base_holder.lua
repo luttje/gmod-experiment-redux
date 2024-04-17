@@ -87,23 +87,19 @@ local function hideBonesIfNeeded(weapon, entity)
 		end)
 	end
 
-    local bonesBefore = {}
+    local hiddenBones = {}
 
     for _, bone in ipairs(weapon.HiddenBones) do
         local boneIndex = entity:LookupBone(bone)
 
-        if (boneIndex) then
-            bonesBefore[boneIndex] = {
-                scale = entity:GetManipulateBoneScale(boneIndex),
-                position = entity:GetManipulateBonePosition(boneIndex)
-            }
-
+		if (boneIndex) then
+			hiddenBones[#hiddenBones + 1] = boneIndex
             entity:ManipulateBoneScale(boneIndex, Vector(0, 0, 0))
             entity:ManipulateBonePosition(boneIndex, Vector(0, 0, -100))
         end
     end
 
-    weapon.expBonesHidden = bonesBefore
+    weapon.expBonesHidden = hiddenBones
 	weapon.expBonesHiddenOnEntity = entity
 end
 
@@ -160,9 +156,9 @@ local function cleanupHoldingAndBones(weapon)
     local entity = weapon.expBonesHiddenOnEntity
 
     if (weapon.expBonesHidden and IsValid(entity)) then
-        for boneIndex, data in pairs(weapon.expBonesHidden) do
-            entity:ManipulateBoneScale(boneIndex, data.scale)
-            entity:ManipulateBonePosition(boneIndex, data.position)
+        for _, boneIndex in ipairs(weapon.expBonesHidden) do
+            entity:ManipulateBoneScale(boneIndex, Vector(1, 1, 1))
+			entity:ManipulateBonePosition(boneIndex, Vector(0, 0, 0))
         end
     end
 
@@ -179,17 +175,18 @@ function SWEP:PreDrawViewModel(entity, weapon, client)
 end
 
 function SWEP:OnRemove()
-    if (CLIENT and IsValid(self.Owner)) then
+    if (CLIENT) then
 		cleanupHoldingAndBones(self)
     end
 end
 
 function SWEP:Holster()
-	self:SendWeaponAnim(ACT_VM_HOLSTER)
-
-    if (CLIENT and IsValid(self.Owner)) then
+    if (CLIENT) then
 		cleanupHoldingAndBones(self)
     end
+
+	-- This will glitch out the next weapon, so dont anim holster
+	-- self:SendWeaponAnim(ACT_VM_HOLSTER)
 
 	return true
 end
