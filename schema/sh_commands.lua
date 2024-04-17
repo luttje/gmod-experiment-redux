@@ -331,16 +331,15 @@ do
 		data.filter = client
 		local target = util.TraceLine(data).Entity
 
-		if (IsValid(target) and target:IsPlayer()) then
-			ix.util.Notify("Buff removed from " .. target:GetName() .. ".", client)
-		else
+		if (not IsValid(target) or not target:IsPlayer()) then
 			target = client
-			ix.util.Notify("Buff removed from yourself.", client)
 		end
 
-		Schema.buff.CheckExpired(target, function(client, buffTable, buff)
+		local expiredCount = Schema.buff.CheckExpired(target, function(client, buffTable, buff)
 			return buffTable.uniqueID == buffUniqueID
 		end)
+
+		ix.util.Notify("Removed " .. expiredCount .. " buffs of type '" .. buffUniqueID .. "' from " .. target:GetName() .. ".", client)
 	end
 
 	ix.command.Add("CharBuffExpire", COMMAND)

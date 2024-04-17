@@ -214,14 +214,14 @@ if (SERVER) then
 			end
 		end
 
-		local expiredCount = 0
+        local expiredCount = 0
 
 		-- for buffKey, buff in ipairs(buffs) do
 		-- We traverse in reverse order, so that we can remove elements without affecting the loop, whilst also shifting the indexes.
 		for buffKey = #buffs, 1, -1 do
 			local buff = buffs[buffKey]
 			local buffTable = Schema.buff.Get(buff.index)
-			local expired = expireChecker(client, buffTable, buff)
+            local expired = expireChecker(client, buffTable, buff)
 
 			if (not expired) then
 				continue
@@ -333,17 +333,34 @@ else
 		end
 	end
 
-	function Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
-		Schema.buff.localActive[key] = {
-			key = key,
-			index = index,
-			activeUntil = activeUntil,
-			data = data
-		}
+    function Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
+        local found = nil
+
+        for _, activeBuff in ipairs(Schema.buff.localActive) do
+            if (activeBuff.key == key) then
+                found = activeBuff
+                break
+            end
+        end
+
+		if (not found) then
+			found = {}
+			Schema.buff.localActive[#Schema.buff.localActive + 1] = found
+		end
+
+        found.key = key
+        found.index = index
+        found.activeUntil = activeUntil
+		found.data = data
 	end
 
 	function Schema.buff.RemoveLocalActive(key)
-		Schema.buff.localActive[key] = nil
+		for k, v in ipairs(Schema.buff.localActive) do
+			if (v.key == key) then
+				table.remove(Schema.buff.localActive, k)
+				break
+			end
+		end
 	end
 
 	function Schema.buff.GetAllLocalActive()
