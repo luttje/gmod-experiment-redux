@@ -31,8 +31,18 @@ function ENT:GetEntityMenu(client)
     local parent = self:GetParent()
 
     if (IsValid(parent)) then
-		return parent:GetEntityMenu(client)
+        return parent:GetEntityMenu(client)
     end
+end
+
+function ENT:GetGroundLevel()
+	local parent = self:GetParent()
+
+	if (IsValid(parent)) then
+		return parent:GetGroundLevel()
+	end
+
+	return 0
 end
 
 if (SERVER) then
@@ -63,7 +73,12 @@ if (SERVER) then
 		end
 	end
 
-	function ENT:Touch(entity)
+    function ENT:Touch(entity)
+		-- Allow parts to only clip eachother
+        if (entity.IsStructure or entity.IsStructurePart) then
+            return
+        end
+
 		self.expIsTouched = true
 	end
 else

@@ -11,7 +11,8 @@ ENT.PopulateEntityInfo = true
 
 function ENT:SetupDataTables()
 	self:NetworkVar("String", "ItemID")
-	self:NetworkVar("Bool", "UnderConstruction")
+    self:NetworkVar("Bool", "UnderConstruction")
+	self:NetworkVar("Int", "GroundLevel")
 end
 
 function ENT:GetItemTable()

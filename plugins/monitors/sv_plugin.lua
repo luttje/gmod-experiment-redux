@@ -93,6 +93,10 @@ end
 function PLUGIN:LoadData()
 	local data = self:GetData()
 
+	if (not data) then
+		return
+	end
+
 	-- Place the parent entities
 	local parentEntities = {}
 

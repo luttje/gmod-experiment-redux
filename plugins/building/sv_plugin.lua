@@ -43,7 +43,16 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 		end
 	end
 
-	local structure = PLUGIN:BuildStructure(client, item, position, angles)
+    local isPlacementValid, otherStructure = PLUGIN:GetPlacementValid(client, position, angles)
+
+	if (not isPlacementValid) then
+		client:Notify("You cannot build this far off the ground.")
+		return
+	end
+
+    local structure = PLUGIN:BuildStructure(client, item, position, angles)
+	local otherStructureGroundLevel = IsValid(otherStructure) and otherStructure:GetGroundLevel() or 0
+	structure:SetGroundLevel(otherStructureGroundLevel + 1)
 
 	item:Unequip(client, false, true)
 

@@ -6,6 +6,11 @@ PLUGIN.description = "Restricts construction to only allowed props. Requiring bl
 
 ix.util.Include("sv_plugin.lua")
 
+ix.config.Add("maxBuildGroundLevel", 2, "The maximum distance from the ground players can build (in structures on top of structures).", nil, {
+	data = {min = 0, max = 100, decimals = 0},
+	category = "Building"
+})
+
 if (CLIENT) then
 	function PLUGIN:RequestBuildStructure(position, angles)
 		net.Start("ixBuildingRequestBuildStructure")
@@ -42,15 +47,47 @@ function PLUGIN:InitializedPlugins()
 end
 
 function PLUGIN:GetPlacementTrace(client)
-	local maxDistance = 100
-	local eyesPosition = client:EyePos()
-	local trace = util.TraceLine({
-		start = eyesPosition,
-		endpos = eyesPosition + (client:GetAimVector() * maxDistance),
+    local maxDistance = 100
+    local eyesPosition = client:EyePos()
+    local trace = util.TraceLine({
+        start = eyesPosition,
+        endpos = eyesPosition + (client:GetAimVector() * maxDistance),
+        filter = client
+    })
+
+    return trace.HitPos, Angle(0, client:EyeAngles().y, 0)
+end
+
+function PLUGIN:GetPlacementValid(client, position, angles)
+	-- Allow buildings to clip by a margin
+	local clipMargin = 10
+    local maxDistance = clipMargin + 10
+	local groundTrace = util.TraceLine({
+		start = position + Vector(0, 0, clipMargin),
+		endpos = position - Vector(0, 0, maxDistance),
 		filter = client
 	})
 
-	return trace.HitPos, Angle(0, client:EyeAngles().y, 0)
+    if (groundTrace.HitWorld) then
+        return true
+    end
+
+    if (IsValid(groundTrace.Entity) and (groundTrace.Entity.IsStructure or groundTrace.Entity.IsStructurePart)) then
+		-- Limit how far up players can build upon structures
+        local maxBuildGroundLevel = ix.config.Get("maxBuildGroundLevel")
+
+		if (groundTrace.Entity.IsStructure or groundTrace.Entity.IsStructurePart) then
+			local groundLevel = groundTrace.Entity:GetGroundLevel()
+
+			if (groundLevel >= maxBuildGroundLevel) then
+				return false
+			end
+		end
+
+		return true, groundTrace.Entity
+	end
+
+	return false
 end
 
 function PLUGIN:AdjustAllowedProps(allowedProps)

@@ -92,6 +92,7 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
     end
 
     local position, angles = PLUGIN:GetPlacementTrace(client)
+	local isPlacementValid = PLUGIN:GetPlacementValid(client, position, angles)
     weapon.expRotation = weapon.expRotation or angles
 
     -- if (weapon.expPositionOffset) then
@@ -123,16 +124,30 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 		weapon.expLastStructureAngles = structureAngles
 
 		structure.entity:SetPos(weapon.expLastStructurePosition)
-		structure.entity:SetAngles(weapon.expLastStructureAngles)
+        structure.entity:SetAngles(weapon.expLastStructureAngles)
 
-		local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
-		local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(), structure.entity:GetAngles())
-		local canPlace = not Schema.util.TracePointsHit(cube)
-		weapon.expLastCanPlace = canPlace
+		local placeError = nil
+
+        if (not isPlacementValid) then
+            placeError = "You cannot build this far off the ground."
+        else
+            local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
+            local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(),
+                structure.entity:GetAngles())
+            local canPlace = not Schema.util.TracePointsHit(cube, function(e)
+                return not (e.IsStructure or e.IsStructurePart)
+            end)
+
+            if (not canPlace) then
+                placeError = "You cannot build here."
+            end
+        end
+
+		weapon.expLastCanPlaceError = placeError
 
 		render.SuppressEngineLighting(true)
 		render.MaterialOverride(wireframeMaterial)
-		if (canPlace) then
+		if (weapon.expLastCanPlaceError == nil) then
 			render.SetColorModulation(1, 1, 1)
 		else
 			render.SetColorModulation(1, 0, 0)
@@ -220,8 +235,8 @@ function SWEP:PrimaryAttack()
 		return
 	end
 
-	if (not self.expLastCanPlace) then
-		self.Owner:Notify("Cannot place this structure here.")
+	if (self.expLastCanPlaceError) then
+		self.Owner:Notify(self.expLastCanPlaceError)
 		return
 	end
 
