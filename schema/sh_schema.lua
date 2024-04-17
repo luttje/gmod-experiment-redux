@@ -19,7 +19,10 @@ Schema.disabledPlugins = {
 	"strength",
 
 	-- We don't want player positions to be saved, they can only spawn at the spawn points
-	"spawnsaver",
+    "spawnsaver",
+
+    -- We disable the default spawn point system, because we want players to select one from a list
+	"spawns",
 }
 
 ix.util.Include("libs/thirdparty/sh_netstream2.lua")
@@ -50,6 +53,7 @@ Schema.achievement.LoadFromDir(Schema.folder .. "/schema/achievements")
 Schema.buff.LoadFromDir(Schema.folder .. "/schema/buffs")
 Schema.perk.LoadFromDir(Schema.folder .. "/schema/perks")
 Schema.npc.LoadFromDir(Schema.folder .. "/schema/npcs")
+Schema.map.LoadFromDir(Schema.folder .. "/schema/maps")
 
 ix.chat.Register("achievement", {
 	OnChatAdd = function(self, speaker, text)

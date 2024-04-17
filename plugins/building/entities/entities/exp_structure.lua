@@ -329,7 +329,6 @@ function ENT:HandleSiegeSurgeDamage(damageInfo)
 
 	local oldDamage = damageInfo:GetDamage()
 	damageInfo:ScaleDamage(1 + stacks)
-	print("Damage increased by " .. stacks .. "x (was: " .. oldDamage .. ", now: " .. damageInfo:GetDamage() .. ")")
 end
 
 function ENT:HandleSiegeSurgeStack(client)

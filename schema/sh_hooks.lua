@@ -8,6 +8,7 @@ function Schema:DoPluginIncludes(path, plugin)
 	Schema.buff.LoadFromDir(path .. "/buffs")
 	Schema.perk.LoadFromDir(path .. "/perks")
 	Schema.npc.LoadFromDir(path .. "/npcs")
+	Schema.map.LoadFromDir(path .. "/maps")
 end
 
 function Schema:PlayerTick(client, moveData)
