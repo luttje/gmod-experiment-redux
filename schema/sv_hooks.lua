@@ -114,7 +114,7 @@ local function handleBeanbagWeaponDamage(client, attacker, damageInfo)
 
 	local ammo = game.GetAmmoName(weapon:GetPrimaryAmmoType())
 
-	if (ammo:lower() ~= Schema.ammo.ConvertToAmmo("beanbag")) then
+	if (not ammo or ammo:lower() ~= Schema.ammo.ConvertToAmmo("beanbag")) then
 		return
 	end
 
@@ -184,13 +184,13 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 		if (attacker:IsPlayer()) then
 			local weaponIsSilenced = IsValid(weapon) and weapon.ixItem and weapon.ixItem.isSilenced
 			local attackerIsStealthed = attacker:HasStealthActivated()
-			local hasAssassinsCreedPerk = Schema.perk.GetOwned("assassinscreed", attacker)
+			local hasAssassinsCreedPerk = Schema.perk.GetOwned("assassins_creed", attacker)
 
 			if (weaponIsSilenced and attackerIsStealthed and hasAssassinsCreedPerk) then
-				local chance = Schema.perk.GetProperty("assassinscreed", "chance")
+				local chance = Schema.perk.GetProperty("assassins_creed", "chance")
 
 				if (math.random() < chance) then
-					local bonusDamage = Schema.perk.GetProperty("assassinscreed", "bonusDamage")
+					local bonusDamage = Schema.perk.GetProperty("assassins_creed", "bonusDamage")
 
 					damageInfo:ScaleDamage(bonusDamage)
 				end

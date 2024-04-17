@@ -15,7 +15,7 @@ function PLUGIN:CanTransferItem(item, sourceInventory, targetInventory)
 end
 
 -- If there's no money or items left in the belongings, remove it.
-local function removeIfEmpty(inventory)
+function PLUGIN:RemoveIfEmpty(inventory)
 	if (not inventory.vars or not IsValid(inventory.vars.isBelongings)) then
 		return
 	end
@@ -30,30 +30,7 @@ local function removeIfEmpty(inventory)
 end
 
 function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
-	removeIfEmpty(sourceInventory)
-end
-
-function PLUGIN:CharacterVarChanged(character, key, oldValue, value)
-	if (key ~= "money") then
-		return
-	end
-
-	local client = character:GetPlayer()
-
-	if (not IsValid(client)) then
-		return
-	end
-
-	local inventory = client.ixOpenStorage
-
-	if (not inventory or not inventory.vars.isBelongings) then
-		return
-	end
-
-	-- Wait a tick until the storage has it's money set as well.
-	timer.Simple(0, function()
-		removeIfEmpty(inventory)
-	end)
+	self:RemoveIfEmpty(sourceInventory)
 end
 
 function PLUGIN:CreatePlayerDropItemsContainerEntity(client, character, dropInfo)

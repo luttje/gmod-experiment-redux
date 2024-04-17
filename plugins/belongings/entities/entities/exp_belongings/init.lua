@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
@@ -40,6 +42,7 @@ end
 
 function ENT:SetMoney(amount)
 	self.money = math.max(0, math.Round(tonumber(amount) or 0))
+	PLUGIN:RemoveIfEmpty(self:GetInventory())
 end
 
 function ENT:GetMoney()
@@ -84,9 +87,12 @@ function ENT:OpenInventory(activator)
 		searchTime = ix.config.Get("containerOpenTime", 0.7),
 		data = { money = self:GetMoney() },
 		OnPlayerOpen = function()
+			hook.Run("PlayerOpenedBelongings", activator, self, inventory)
+			PLUGIN:RemoveIfEmpty(inventory)
 		end,
 		OnPlayerClose = function()
-
+			hook.Run("PlayerClosedBelongings", activator, self, inventory)
+			PLUGIN:RemoveIfEmpty(inventory)
 			ix.log.Add(activator, "closeContainer", name, inventory:GetID())
 		end
 	})

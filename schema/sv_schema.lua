@@ -189,8 +189,8 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 			fractionToLose = fractionToLose * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
 		end
 
-		character:TakeMoney(fractionToLose, "Death")
-		dropInfo.money = math.ceil(math.random(1, money))
+		dropInfo.money = math.floor(math.random(1, money))
+		character:TakeMoney(dropInfo.money)
 
 		if (character:GetMoney() == 0) then
 			Schema.achievement.Progress(client, "boltless_wanderer", 1)
