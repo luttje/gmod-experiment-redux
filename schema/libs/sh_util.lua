@@ -141,11 +141,14 @@ if (CLIENT) then
     function Schema.util.LookupBinding(bind)
         local binding = input.LookupBinding(bind)
 
-        if (not binding) then
-            return nil
-        end
+		if (not binding) then
+			return nil
+		end
 
-        return binding:upper()
+		local translationKey = "bind_" .. binding:lower()
+		local name = L(translationKey)
+
+        return name ~= translationKey and name or binding:upper()
     end
 
     --- Finds bindings surrounded by curly braces and replaces them with their actual key.
