@@ -9,6 +9,10 @@ if (not SERVER) then
 end
 
 function PLUGIN:PlayerSwitchFlashlight(client, on)
+	if (Schema.util.Throttle("FlashlightToggle", 0.5, client)) then
+		return false
+	end
+
 	if (not on) then
 		return
 	end
