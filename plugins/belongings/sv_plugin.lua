@@ -8,7 +8,7 @@ function PLUGIN:LoadBelongings()
 		local inventoryID = tonumber(belongingsData.inventoryID)
 
 		entity:SetAngles(belongingsData.angles)
-		entity:SetDisplayName(belongingsData.displayName)
+		entity:SetDisplayName(belongingsData.displayName or "")
 		entity:SetMoney(belongingsData.money)
 		entity:SetPos(belongingsData.position)
 		entity:Spawn()
@@ -34,26 +34,10 @@ end
 function PLUGIN:SaveBelongings()
 	local belongings = {}
 
-	-- TODO: Test this, I don't think I implemented it (nor is it implemented by Helix?)
-	for _, ragdoll in pairs(ents.FindByClass("prop_ragdoll")) do
-		if (ragdoll.areBelongings) then
-			if (ragdoll.money > 0 or table.Count(ragdoll.inventory) > 0) then
-				belongings[#belongings + 1] = {
-					cash = ragdoll.money,
-					angles = Angle(0, 0, -90),
-					moveable = true,
-					position = ragdoll:GetPos() + Vector(0, 0, 32),
-					inventory = ragdoll.inventory,
-					displayName = ragdoll:GetDisplayName(),
-				}
-			end
-		end
-	end
-
 	for _, entity in pairs(ents.FindByClass("exp_belongings")) do
 		local inventory = entity:GetInventory()
 
-		-- TODO: Sometimes (like when shutting the server down) inventory.GetItems is nil
+		-- TODO: Sometimes (like when shutting the server down) inventory.GetItems is nil, why?
 		-- if (entity:GetMoney() == 0 and table.Count(inventory:GetItems()) == 0) then
 		-- 	local index = inventory:GetID()
 
@@ -76,7 +60,7 @@ function PLUGIN:SaveBelongings()
         end
 
         if (not inventory.GetSize) then
-			-- TODO: Im doing something wrong, find out why inventories are not complete
+			ErrorNoHaltWithStack("TODO: Im doing something wrong, find out why inventories are not complete\n")
 			continue
 		end
 
@@ -90,6 +74,7 @@ function PLUGIN:SaveBelongings()
 			inventoryID = inventory:GetID(),
 			invWidth = width,
 			invHeight = height,
+			displayName = entity:GetDisplayName(),
 		}
 	end
 

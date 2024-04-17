@@ -10,5 +10,6 @@ PERK.foregroundImage = {
 	y = 16,
 	size = 32,
 }
+PERK.modifyLoseChance = 0.4
 PERK.description = "Dropping too much when killed? Try some confusing pockets you'll be sure to lose less than you usually do!"
 

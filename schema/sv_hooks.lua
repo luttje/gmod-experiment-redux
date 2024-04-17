@@ -236,6 +236,8 @@ end
 
 function Schema:PlayerDeath(client, inflictor, attacker)
 	Schema.achievement.Progress(client, "favored_target")
+
+	Schema.PlayerDropRandomItems(client)
 end
 
 function Schema:PlayerUse(client, entity)

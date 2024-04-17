@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 PLUGIN.name = "Legs"
 PLUGIN.author = "Valkyrie & blackops7799"
 PLUGIN.description = "Renders the characters legs to the local player."
@@ -29,10 +31,10 @@ if (CLIENT) then
 		category = "legs"
 	})
 
-	local Legs = {}
-	Legs.LegEnt = nil
+	PLUGIN.legs = PLUGIN.legs or {}
+	PLUGIN.legs.legEnt = PLUGIN.legs.legEnt or nil
 
-	function Legs:CheckDrawVehicle()
+	function PLUGIN.legs:CheckDrawVehicle()
 		if (LocalPlayer():InVehicle()) then
 			if (ix.option.Get("legsEnabled", true) and ! ix.option.Get("legsInVehicle", true)) then
 				return true
@@ -49,69 +51,69 @@ if (CLIENT) then
 
 		if (ix.option.Get("legsEnabled", true)) then
 			local client = LocalPlayer()
-			return IsValid(Legs.LegEnt) and
+			return IsValid(PLUGIN.legs.legEnt) and
 				(client:Alive() or (client.IsGhosted and client:IsGhosted())) and
-				! Legs:CheckDrawVehicle() and GetViewEntity() == client and
+				! PLUGIN.legs:CheckDrawVehicle() and GetViewEntity() == client and
 				! client:ShouldDrawLocalPlayer() and ! IsValid(client:GetObserverTarget()) and
 				! client:GetNoDraw() and ! client.ShouldDisableLegs
 		end
 	end
 
-	function Legs:Setup(model)
+	function PLUGIN.legs:Setup(model)
 		model = model or LocalPlayer():GetModel()
 
-		if (! IsValid(self.LegEnt)) then
-			self.LegEnt = ClientsideModel(model, RENDER_GROUP_OPAQUE_ENTITY)
+		if (! IsValid(self.legEnt)) then
+			self.legEnt = ClientsideModel(model, RENDER_GROUP_OPAQUE_ENTITY)
 		else
-			self.LegEnt:SetModel(model)
+			self.legEnt:SetModel(model)
 		end
 
-		self.LegEnt:SetNoDraw(true)
+		self.legEnt:SetNoDraw(true)
 
 		for _, v in pairs(LocalPlayer():GetBodyGroups()) do
 			local current = LocalPlayer():GetBodygroup(v.id)
-			self.LegEnt:SetBodygroup(v.id, current)
+			self.legEnt:SetBodygroup(v.id, current)
 		end
 
 		for k, _ in ipairs(LocalPlayer():GetMaterials()) do
-			self.LegEnt:SetSubMaterial(k - 1, LocalPlayer():GetSubMaterial(k - 1))
+			self.legEnt:SetSubMaterial(k - 1, LocalPlayer():GetSubMaterial(k - 1))
 		end
 
-		self.LegEnt:SetSkin(LocalPlayer():GetSkin())
-		self.LegEnt:SetMaterial(LocalPlayer():GetMaterial())
-		self.LegEnt:SetColor(LocalPlayer():GetColor())
-		self.LegEnt.GetPlayerColor = function()
+		self.legEnt:SetSkin(LocalPlayer():GetSkin())
+		self.legEnt:SetMaterial(LocalPlayer():GetMaterial())
+		self.legEnt:SetColor(LocalPlayer():GetColor())
+		self.legEnt.GetPlayerColor = function()
 			return LocalPlayer():GetPlayerColor()
 		end
 
-		self.LegEnt.Anim = nil
+		self.legEnt.Anim = nil
 		self.PlaybackRate = 1
 		self.Sequence = nil
 		self.Velocity = 0
 		self.BonesToRemove = {}
-		self.LegEnt.LastTick = 0
+		self.legEnt.LastTick = 0
 
 		self:Update(0)
 	end
 
-	Legs.PlaybackRate = 1
-	Legs.Sequence = nil
-	Legs.Velocity = 0
-	Legs.BonesToRemove = {}
-	Legs.BreathScale = 0.5
-	Legs.NextBreath = 0
+	PLUGIN.legs.PlaybackRate = 1
+	PLUGIN.legs.Sequence = nil
+	PLUGIN.legs.Velocity = 0
+	PLUGIN.legs.BonesToRemove = {}
+	PLUGIN.legs.BreathScale = 0.5
+	PLUGIN.legs.NextBreath = 0
 
-	function Legs:Think(maxSeqGroundSpeed)
+	function PLUGIN.legs:Think(maxSeqGroundSpeed)
 		if (! LocalPlayer():Alive()) then
-			Legs:Setup()
+			PLUGIN.legs:Setup()
 			return
 		end
 
 		self:Update(maxSeqGroundSpeed)
 	end
 
-	function Legs:Update(maxSeqGroundSpeed)
-		if (IsValid(self.LegEnt)) then
+	function PLUGIN.legs:Update(maxSeqGroundSpeed)
+		if (IsValid(self.legEnt)) then
 			self.Velocity = LocalPlayer():GetVelocity():Length2D()
 
 			self.PlaybackRate = 1
@@ -125,48 +127,48 @@ if (CLIENT) then
 				end
 			end
 
-			self.LegEnt:SetPlaybackRate(self.PlaybackRate)
+			self.legEnt:SetPlaybackRate(self.PlaybackRate)
 
 			self.Sequence = LocalPlayer():GetSequence()
 
-			if (self.LegEnt.Anim != self.Sequence) then
-				self.LegEnt.Anim = self.Sequence
-				self.LegEnt:ResetSequence(self.Sequence)
+			if (self.legEnt.Anim != self.Sequence) then
+				self.legEnt.Anim = self.Sequence
+				self.legEnt:ResetSequence(self.Sequence)
 			end
 
-			self.LegEnt:FrameAdvance(CurTime() - self.LegEnt.LastTick)
-			self.LegEnt.LastTick = CurTime()
+			self.legEnt:FrameAdvance(CurTime() - self.legEnt.LastTick)
+			self.legEnt.LastTick = CurTime()
 
-			Legs.BreathScale = sharpeye and sharpeye.GetStamina and
+			PLUGIN.legs.BreathScale = sharpeye and sharpeye.GetStamina and
 			math.Clamp(math.floor(sharpeye.GetStamina() * 5 * 10) / 10, 0.5, 5) or 0.5
 
-			if (Legs.NextBreath <= CurTime()) then
-				Legs.NextBreath = CurTime() + 1.95 / Legs.BreathScale
-				self.LegEnt:SetPoseParameter("breathing", Legs.BreathScale)
+			if (PLUGIN.legs.NextBreath <= CurTime()) then
+				PLUGIN.legs.NextBreath = CurTime() + 1.95 / PLUGIN.legs.BreathScale
+				self.legEnt:SetPoseParameter("breathing", PLUGIN.legs.BreathScale)
 			end
 
-			self.LegEnt:SetPoseParameter("move_x", (LocalPlayer():GetPoseParameter("move_x") * 2) - 1) -- Translate the walk x direction
-			self.LegEnt:SetPoseParameter("move_y", (LocalPlayer():GetPoseParameter("move_y") * 2) - 1) -- Translate the walk y direction
-			self.LegEnt:SetPoseParameter("move_yaw", (LocalPlayer():GetPoseParameter("move_yaw") * 360) - 180) -- Translate the walk direction
-			self.LegEnt:SetPoseParameter("body_yaw", (LocalPlayer():GetPoseParameter("body_yaw") * 180) - 90) -- Translate the body yaw
-			self.LegEnt:SetPoseParameter("spine_yaw", (LocalPlayer():GetPoseParameter("spine_yaw") * 180) - 90) -- Translate the spine yaw
+			self.legEnt:SetPoseParameter("move_x", (LocalPlayer():GetPoseParameter("move_x") * 2) - 1) -- Translate the walk x direction
+			self.legEnt:SetPoseParameter("move_y", (LocalPlayer():GetPoseParameter("move_y") * 2) - 1) -- Translate the walk y direction
+			self.legEnt:SetPoseParameter("move_yaw", (LocalPlayer():GetPoseParameter("move_yaw") * 360) - 180) -- Translate the walk direction
+			self.legEnt:SetPoseParameter("body_yaw", (LocalPlayer():GetPoseParameter("body_yaw") * 180) - 90) -- Translate the body yaw
+			self.legEnt:SetPoseParameter("spine_yaw", (LocalPlayer():GetPoseParameter("spine_yaw") * 180) - 90) -- Translate the spine yaw
 
 			if (LocalPlayer():InVehicle()) then
-				self.LegEnt:SetPoseParameter("vehicle_steer",
+				self.legEnt:SetPoseParameter("vehicle_steer",
 					(LocalPlayer():GetVehicle():GetPoseParameter("vehicle_steer") * 2) - 1)                               -- Translate the vehicle steering
 			end
 		end
 	end
 
-	Legs.RenderAngle = nil
-	Legs.BiaisAngle = nil
-	Legs.RadAngle = nil
-	Legs.RenderPos = nil
-	Legs.RenderColor = {}
-	Legs.ClipVector = vector_up * -1
-	Legs.ForwardOffset = -24
+	PLUGIN.legs.RenderAngle = nil
+	PLUGIN.legs.BiaisAngle = nil
+	PLUGIN.legs.RadAngle = nil
+	PLUGIN.legs.RenderPos = nil
+	PLUGIN.legs.RenderColor = {}
+	PLUGIN.legs.ClipVector = vector_up * -1
+	PLUGIN.legs.ForwardOffset = -24
 
-	function Legs:DoFinalRender()
+	function PLUGIN.legs:DoFinalRender()
 		cam.Start3D(EyePos(), EyeAngles())
 		if (ShouldDrawLegs()) then
 			self.RenderPos = LocalPlayer():GetPos()
@@ -198,12 +200,12 @@ if (CLIENT) then
 			render.PushCustomClipPlane(self.ClipVector, self.ClipVector:Dot(EyePos()))
 			render.SetColorModulation(self.RenderColor.r / 255, self.RenderColor.g / 255, self.RenderColor.b / 255)
 			render.SetBlend(self.RenderColor.a / 255)
-			self.LegEnt:SetRenderOrigin(self.RenderPos)
-			self.LegEnt:SetRenderAngles(self.RenderAngle)
-			self.LegEnt:SetupBones()
-			self.LegEnt:DrawModel()
-			self.LegEnt:SetRenderOrigin()
-			self.LegEnt:SetRenderAngles()
+			self.legEnt:SetRenderOrigin(self.RenderPos)
+			self.legEnt:SetRenderAngles(self.RenderAngle)
+			self.legEnt:SetupBones()
+			self.legEnt:DrawModel()
+			self.legEnt:SetRenderOrigin()
+			self.legEnt:SetRenderAngles()
 			render.SetBlend(1)
 			render.SetColorModulation(1, 1, 1)
 			render.PopCustomClipPlane()
@@ -212,10 +214,10 @@ if (CLIENT) then
 		cam.End3D()
 	end
 
-	function Legs:FixBones()
-		for i = 0, self.LegEnt:GetBoneCount() do
-			self.LegEnt:ManipulateBoneScale(i, Vector(1, 1, 1))
-			self.LegEnt:ManipulateBonePosition(i, vector_origin)
+	function PLUGIN.legs:FixBones()
+		for i = 0, self.legEnt:GetBoneCount() do
+			self.legEnt:ManipulateBoneScale(i, Vector(1, 1, 1))
+			self.legEnt:ManipulateBonePosition(i, vector_origin)
 		end
 
 		self.BonesToRemove =
@@ -271,49 +273,49 @@ if (CLIENT) then
 		end
 
 		for _, v in pairs(self.BonesToRemove) do
-			local bone = self.LegEnt:LookupBone(v)
+			local bone = self.legEnt:LookupBone(v)
 			if (bone) then
-				self.LegEnt:ManipulateBoneScale(bone, vector_origin)
+				self.legEnt:ManipulateBoneScale(bone, vector_origin)
 				if (! LocalPlayer():InVehicle()) then
-					self.LegEnt:ManipulateBonePosition(bone, Vector(0, -100, 0))
-					self.LegEnt:ManipulateBoneAngles(bone, angle_zero)
+					self.legEnt:ManipulateBonePosition(bone, Vector(0, -100, 0))
+					self.legEnt:ManipulateBoneAngles(bone, angle_zero)
 				end
 			end
 		end
 	end
 
 	function PLUGIN:PlayerWeaponChanged(client, weapon)
-		if (client == LocalPlayer() and IsValid(Legs.LegEnt)) then
-			Legs:FixBones()
+		if (client == LocalPlayer() and IsValid(PLUGIN.legs.legEnt)) then
+			PLUGIN.legs:FixBones()
 		end
 	end
 
 	function PLUGIN:UpdateAnimation(client, velocity, maxSeqGroundSpeed)
 		if (client == LocalPlayer()) then
-			if (IsValid(Legs.LegEnt)) then
-				Legs:Think(maxSeqGroundSpeed)
+			if (IsValid(PLUGIN.legs.legEnt)) then
+				PLUGIN.legs:Think(maxSeqGroundSpeed)
 			else
-				Legs:Setup()
+				PLUGIN.legs:Setup()
 			end
 		end
 	end
 
 	function PLUGIN:PlayerModelChanged(client, model)
 		if (client == LocalPlayer()) then
-			Legs:Setup(model)
-			Legs:FixBones()
+			PLUGIN.legs:Setup(model)
+			PLUGIN.legs:FixBones()
 		end
 	end
 
 	function PLUGIN:PostDrawTranslucentRenderables()
 		if (LocalPlayer() and ! LocalPlayer():InVehicle()) then
-			Legs:DoFinalRender()
+			PLUGIN.legs:DoFinalRender()
 		end
 	end
 
 	function PLUGIN:RenderScreenspaceEffects()
 		if (LocalPlayer():InVehicle()) then
-			Legs:DoFinalRender()
+			PLUGIN.legs:DoFinalRender()
 		end
 	end
 end

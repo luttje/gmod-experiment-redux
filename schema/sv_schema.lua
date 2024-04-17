@@ -149,19 +149,27 @@ function Schema.BustDownDoor(client, door, force)
 end
 
 function Schema.PlayerDropRandomItems(client, evenEquipped)
-	local confusingPockets = Schema.perk.GetOwned("confusingpockets", client)
+	local hasConfusingPockets = Schema.perk.GetOwned("confusing_pockets", client)
 	local character = client:GetCharacter()
 	local inventory = character:GetInventory()
-	local cash = character:GetMoney()
+	local money = character:GetMoney()
 	local dropInfo = {
 		inventory = {},
-		cash = cash
+		money = money
 	}
 
-	for _, item in pairs(inventory:GetItems(false)) do
-		local losesItem = (confusingPockets and math.random() <= 0.5) or (not confusingPockets and math.random() <= 0.75)
+	for _, item in pairs(inventory:GetItems()) do
+		if (item.noDrop) then
+			continue
+		end
 
-		if (not losesItem) then
+		local loseItemChance = 0.75
+
+		if (hasConfusingPockets) then
+			loseItemChance = loseItemChance * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
+		end
+
+		if (math.random() > loseItemChance) then
 			continue
 		end
 
@@ -174,15 +182,15 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 		dropInfo.inventory[#dropInfo.inventory + 1] = item
 	end
 
-	if (cash > 0) then
-		local amount = math.ceil(math.max(math.random(1, cash), cash / 8))
+	if (money > 0) then
+		local fractionToLose = 0.75
 
-		if (confusingPockets) then
-			amount = math.ceil(math.max(math.random(1, cash * 0.75), cash / 8))
+		if (hasConfusingPockets) then
+			fractionToLose = fractionToLose * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
 		end
 
-		character:TakeMoney(amount, "Death")
-		dropInfo.money = amount
+		character:TakeMoney(fractionToLose, "Death")
+		dropInfo.money = math.ceil(math.random(1, money))
 
 		if (character:GetMoney() == 0) then
 			Schema.achievement.Progress(client, "boltless_wanderer", 1)
@@ -193,16 +201,20 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 	client:GetCharacter():Save()
 end
 
-function Schema.PlayerDropAllItems(client, evenEquipped, disconnectPenalty)
+function Schema.PlayerDropAllItems(client, evenEquipped)
 	local character = client:GetCharacter()
 	local inventory = character:GetInventory()
-	local cash = character:GetMoney()
+	local money = character:GetMoney()
 	local dropInfo = {
 		inventory = {},
-		cash = cash
+		money = money
 	}
 
-	for _, item in pairs(inventory:GetItems(false)) do
+	for _, item in pairs(inventory:GetItems()) do
+		if (item.noDrop) then
+			continue
+		end
+
 		if (item:GetData("equip") and not evenEquipped) then
 			continue
 		end
@@ -212,8 +224,8 @@ function Schema.PlayerDropAllItems(client, evenEquipped, disconnectPenalty)
 		dropInfo.inventory[#dropInfo.inventory + 1] = item
 	end
 
-	if (cash > 0) then
-		local amount = cash
+	if (money > 0) then
+		local amount = money
 
 		character:TakeMoney(amount, "Death")
 		dropInfo.money = amount

@@ -3,7 +3,7 @@ local PLUGIN = PLUGIN
 PLUGIN.name = "Bonemerge Hands Fix"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Will make sure hands look like the player model, by bonemerging."
-PLUGIN.fakeHandsIndex = -1
+PLUGIN.fakeHandsIndex = PLUGIN.fakeHandsIndex or -1
 
 if (SERVER) then
 	return
@@ -144,7 +144,7 @@ end
 
 -- When the player model changes, we check if we get default hands. If we do, we enable the fake hands.
 function PLUGIN:PlayerModelChanged(client, model, oldModel)
-	if (not IsValid(client)) then
+	if (not IsValid(client) or client ~= LocalPlayer()) then
 		return
 	end
 

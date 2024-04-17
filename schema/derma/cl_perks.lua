@@ -62,7 +62,12 @@ function PANEL:Update()
 	local opacity = 255
 
 	if (Schema.perk.GetOwned(self.perk.uniqueID)) then
-		self.icon:SetBadge("experiment-redux/symbol/check", derma.GetColor("Success", self))
+        self.icon:SetBadge({
+			spritesheet = Material("experiment-redux/flatmsicons32.png"),
+			x = 29,
+			y = 5,
+			size = 32,
+		}, derma.GetColor("Success", self))
 		self.costLabel:SetText("")
 	else
 		opacity = 20
