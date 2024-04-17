@@ -51,7 +51,7 @@ if (SERVER) then
 
 		activeUntil = activeUntil or (CurTime() + buffTable:GetDurationInSeconds(client))
 		local buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
-		buffs[buff.key] = buff
+		buffs[#buffs + 1] = buff
 
 		hook.Run("PlayerBuffActivated", client, buffTable, buff)
 
@@ -126,7 +126,8 @@ if (SERVER) then
 		local storedBuffs = character:GetData("buffs", {})
 		local curTime = CurTime()
 
-		character.expBuffs = {}
+		local buffs = {}
+		character.expBuffs = buffs
 
 		for k, storedBuff in ipairs(storedBuffs) do
 			local buffTable = Schema.buff.Get(storedBuff.index)
@@ -139,7 +140,7 @@ if (SERVER) then
 
 			local activeUntil = curTime + storedBuff.activeRemaining
 			local buff = Schema.buff.MakeActive(storedBuff.index, activeUntil, storedBuff.data)
-			character.expBuffs[buff.key] = buff
+			buffs[#buffs + 1] = buff
 
 			Schema.buff.Setup(client, buffTable, buff)
 		end
@@ -147,7 +148,7 @@ if (SERVER) then
 		character:SetData("buffs", nil)
 
 		net.Start("exp_BuffsLoaded")
-		net.WriteTable(character.expBuffs)
+		net.WriteTable(buffs)
 		net.Send(client)
 	end
 
@@ -292,10 +293,10 @@ if (SERVER) then
 			local buff = buffs[buffKey]
 			local buffTable = Schema.buff.Get(buff.index)
 
-			if (buffTable.OnPlayerSecondElapsed) then
-				local canStayActive = buffTable:OnPlayerSecondElapsed(client, buff)
+			if (buffTable.OnShouldExpire) then
+				local shouldExpire = buffTable:OnShouldExpire(client, buff)
 
-				if (canStayActive == false) then
+				if (shouldExpire == true) then
 					buff.activeUntil = CurTime() - 1
 					table.remove(buffs, buffKey)
 					Schema.buff.Network(client, buff.index, buff)

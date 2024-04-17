@@ -6,8 +6,8 @@ PERK.backgroundImage = "experiment-redux/symbol_background"
 PERK.backgroundColor = Color(255,212,0,255)
 PERK.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
-	x = 21,
-	y = 30,
+	x = 22,
+	y = 24,
 	size = 32,
 }
 PERK.damageScale = 0.5
