@@ -126,8 +126,8 @@ local function handleBeanbagWeaponDamage(client, attacker, damageInfo)
 
 	local luck = 0.9
 
-	if (Schema.perk.GetOwned("jamesdaniels", client)) then
-		luck = luck * Schema.perk.GetProperty("jamesdaniels", "chance")
+	if (Schema.perk.GetOwned("thick_skin", client)) then
+		luck = luck * Schema.perk.GetProperty("thick_skin", "chance")
 	end
 
 	local gotLucky = math.random() < luck

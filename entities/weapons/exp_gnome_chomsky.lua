@@ -8,8 +8,7 @@ DEFINE_BASECLASS("exp_base_holder")
 
 SWEP.Base = "exp_base_holder"
 SWEP.PrintName = "Gnome Chomsky"
-SWEP.Instructions = ""
-SWEP.Purpose = "Hold and cherish, not much else."
+SWEP.Instructions = "Hold and cherish, not much else."
 
 SWEP.Primary.Delay = 1
 

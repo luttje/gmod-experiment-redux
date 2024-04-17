@@ -8,7 +8,7 @@ DEFINE_BASECLASS("exp_base_holder")
 
 SWEP.Base = "exp_base_holder"
 SWEP.PrintName = "Blueprint Builder"
-SWEP.Instructions = "Primary Fire: Build.\nSecondary Fire: Rotate (Hold Sprint-button to snap)."
+SWEP.Instructions = "{+attack}: Build.\n{+attack2}: Rotate (Hold {+speed}-button to snap)."
 SWEP.Purpose = "Construct structures."
 
 SWEP.HoldingModel = "models/props_lab/clipboard.mdl"

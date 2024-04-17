@@ -56,9 +56,20 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 					resource.AddFile("materials/" .. _G[libraryGlobalName].backgroundImage .. ".vmt")
 				end
 
-				if (_G[libraryGlobalName].foregroundImage) then
+				if (isstring(_G[libraryGlobalName].foregroundImage)) then
 					resource.AddFile("materials/" .. _G[libraryGlobalName].foregroundImage .. ".vtf")
-					resource.AddFile("materials/" .. _G[libraryGlobalName].foregroundImage .. ".vmt")
+                    resource.AddFile("materials/" .. _G[libraryGlobalName].foregroundImage .. ".vmt")
+                elseif (istable(_G[libraryGlobalName].foregroundImage)) then
+                    local spritesheetData = _G[libraryGlobalName].foregroundImage
+
+					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vtf")
+					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
+				end
+            else
+				if (istable(_G[libraryGlobalName].foregroundImage)) then
+                    local spritesheetData = _G[libraryGlobalName].foregroundImage
+
+					spritesheetData.spritesheet = Material(spritesheetData.spritesheet)
 				end
 			end
 

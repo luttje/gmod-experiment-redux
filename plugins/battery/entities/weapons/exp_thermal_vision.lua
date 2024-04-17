@@ -12,7 +12,7 @@ if (CLIENT) then
 	SWEP.DrawCrosshair = true
 end
 
-SWEP.Instructions = "Primary Fire: Toggle."
+SWEP.Instructions = "{+attack}: Toggle."
 SWEP.Purpose = "See everyone clear as day, even if they've activated stealth cammo."
 SWEP.Contact = ""
 SWEP.Author = "Experiment Redux"

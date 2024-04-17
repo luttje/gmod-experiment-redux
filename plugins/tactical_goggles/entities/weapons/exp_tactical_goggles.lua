@@ -12,7 +12,7 @@ if (CLIENT) then
 	SWEP.DrawCrosshair = true
 end
 
-SWEP.Instructions = "Primary Fire: Toggle."
+SWEP.Instructions = "{+attack}: Toggle."
 SWEP.Purpose = "Stay connected with your team through radio frequencies, enhancing coordination with real-time updates."
 SWEP.Contact = ""
 SWEP.Author	= ""

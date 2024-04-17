@@ -49,7 +49,7 @@ end
 
 ---@param client Player
 ---@param buff ActiveBuff
----@return string
+---@return string|table
 function META:GetForegroundImage(client, buff)
 	return self.foregroundImage
 end

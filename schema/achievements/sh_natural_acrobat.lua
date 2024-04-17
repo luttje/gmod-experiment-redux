@@ -3,7 +3,12 @@ local ACHIEVEMENT = ACHIEVEMENT
 ACHIEVEMENT.name = "Natural Acrobat"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
 ACHIEVEMENT.backgroundColor = Color(48,93,124,255)
-ACHIEVEMENT.foregroundImage = "experiment-redux/symbol/handstand"
+ACHIEVEMENT.foregroundImage = {
+	spritesheet = "experiment-redux/flatmsicons32.png",
+	x = 10,
+	y = 45,
+	size = 32,
+}
 ACHIEVEMENT.reward = 960
 ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.requiredAttribute = 100

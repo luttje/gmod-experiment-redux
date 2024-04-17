@@ -6,7 +6,7 @@ DEFINE_BASECLASS("exp_base_holder")
 
 SWEP.Base = "exp_base_holder"
 SWEP.PrintName = "Flashlight"
-SWEP.Instructions = "Primary Fire: Toggle."
+SWEP.Instructions = "{+attack}: Toggle."
 SWEP.Purpose = "Helps you see better dark areas."
 
 SWEP.HoldingModel = "models/maxofs2d/lamp_flashlight.mdl"

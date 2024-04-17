@@ -10,7 +10,7 @@ if (CLIENT) then
 end
 
 SWEP.PrintName = "Grenade"
-SWEP.Instructions = "Primary Fire: Throw."
+SWEP.Instructions = "{+attack}: Throw."
 SWEP.Purpose = ""
 SWEP.Contact = ""
 SWEP.Author	= ""
