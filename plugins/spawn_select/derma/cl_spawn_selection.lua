@@ -127,15 +127,8 @@ function PANEL:Rebuild()
 end
 
 function PANEL:Paint(w, h)
-	local background = PLUGIN:GetMainBackgroundMaterial()
-
-	if (not background) then
-		return
-	end
-
-	surface.SetDrawColor(255, 255, 255, 255)
-	surface.SetMaterial(background)
-	surface.DrawTexturedRect(0, 0, w, h)
+	surface.SetDrawColor(0, 0, 0, 255)
+	surface.DrawRect(0, 0, w, h)
 end
 
 vgui.Register("expSpawnSelection", PANEL, "EditablePanel")

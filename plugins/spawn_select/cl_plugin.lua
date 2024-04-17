@@ -1,13 +1,5 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:GetMainBackgroundMaterial()
-	if (self.mainBackgroundMaterial) then
-		return self.mainBackgroundMaterial
-	end
-
-	self.mainBackgroundMaterial = Material("experiment-redux/background_zonda.png")
-end
-
 net.Receive("expSpawnSelectOpen", function()
 	local spawns = net.ReadTable()
 	local panel = vgui.Create("expSpawnSelection")

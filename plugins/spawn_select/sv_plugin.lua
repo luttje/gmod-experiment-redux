@@ -6,8 +6,6 @@ util.AddNetworkString("expSpawnSelectOpen")
 util.AddNetworkString("expSpawnRequestSelect")
 util.AddNetworkString("expSpawnSelectResponse")
 
-resource.AddFile("materials/experiment-redux/background_zonda.png")
-
 net.Receive("expSpawnRequestSelect", function(len, client)
 	local index = net.ReadUInt(8)
 	local spawn = PLUGIN.spawns[index]
