@@ -25,3 +25,24 @@ function META:GetItemsByNestedBase(baseID, bOnlyMain)
 
 	return items
 end
+
+-- Overrides GetItemCount in gamemode/core/meta/sh_inventory.lua
+-- Source: https://github.com/Bilwin/helix-plugins/blob/main/stacks/sh_meta.lua
+function META:GetItemCount(uniqueID, onlyMain)
+	local i = 0
+    local stacks
+
+	for _, v in pairs(self:GetItems(onlyMain)) do
+		if (v.uniqueID == uniqueID) then
+            stacks = v.data.stacks
+
+            if (stacks and stacks >= 2) then
+                i = i + stacks
+            else
+                i = i + 1
+            end
+		end
+	end
+
+	return i
+end

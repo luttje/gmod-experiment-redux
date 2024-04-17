@@ -1,5 +1,6 @@
 local ITEM = ITEM
 
+ITEM.base = "base_stackable"
 ITEM.name = "Raw Material"
 ITEM.model = "models/gibs/metal_gib4.mdl"
 ITEM.width = 1

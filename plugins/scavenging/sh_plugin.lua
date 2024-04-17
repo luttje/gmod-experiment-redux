@@ -27,11 +27,6 @@ ix.config.Add("scavengeSourceMaxFillPercentage", 30, "What percentage of the sca
 	category = "scavenging"
 })
 
-ix.config.Add("scrapAmalgamAmount", 5, "How much scrap it takes to make a scrap amalgam.", nil, {
-	data = {min = 0, max = 100, decimals = 0},
-	category = "scavenging"
-})
-
 ix.inventory.Register("scavenging:base", 5, 1)
 
 if (SERVER) then
