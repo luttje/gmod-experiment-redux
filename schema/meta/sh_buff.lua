@@ -15,6 +15,7 @@ local META = Schema.meta.buff or {}
 Schema.meta.buff = META
 
 META.__index = META
+META.hooks = META.hooks or {}
 
 function META:__tostring()
     return "buff[" .. self.uniqueID .. "]"
@@ -104,7 +105,7 @@ end
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return boolean? Return false to remove the buff
-function META:OnPlayerSecondElapsed(client, buff)
+function META:OnShouldExpire(client, buff)
 
 end
 

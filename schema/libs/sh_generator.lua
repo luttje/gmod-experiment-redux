@@ -1,7 +1,5 @@
-if(Schema.generator == nil)then
-	Schema.generator = {}
-	Schema.generator.stored = {}
-end
+Schema.generator = Schema.generator or {}
+Schema.generator.stored = Schema.generator.stored or {}
 
 function Schema.generator.Register(name, power, health, produce, uniqueID, upgrades)
 	Schema.generator.stored[uniqueID] = {

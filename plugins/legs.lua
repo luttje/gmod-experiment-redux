@@ -96,12 +96,12 @@ if (CLIENT) then
 		self:Update(0)
 	end
 
-	PLUGIN.legs.PlaybackRate = 1
-	PLUGIN.legs.Sequence = nil
-	PLUGIN.legs.Velocity = 0
-	PLUGIN.legs.BonesToRemove = {}
-	PLUGIN.legs.BreathScale = 0.5
-	PLUGIN.legs.NextBreath = 0
+	PLUGIN.legs.PlaybackRate = PLUGIN.legs.PlaybackRate or 1
+	PLUGIN.legs.Sequence = PLUGIN.legs.Sequence or nil
+	PLUGIN.legs.Velocity = PLUGIN.legs.Velocity or 0
+	PLUGIN.legs.BonesToRemove = PLUGIN.legs.BonesToRemove or {}
+	PLUGIN.legs.BreathScale = PLUGIN.legs.BreathScale or 0.5
+	PLUGIN.legs.NextBreath = PLUGIN.legs.NextBreath or 0
 
 	function PLUGIN.legs:Think(maxSeqGroundSpeed)
 		if (! LocalPlayer():Alive()) then
@@ -160,13 +160,13 @@ if (CLIENT) then
 		end
 	end
 
-	PLUGIN.legs.RenderAngle = nil
-	PLUGIN.legs.BiaisAngle = nil
-	PLUGIN.legs.RadAngle = nil
-	PLUGIN.legs.RenderPos = nil
-	PLUGIN.legs.RenderColor = {}
-	PLUGIN.legs.ClipVector = vector_up * -1
-	PLUGIN.legs.ForwardOffset = -24
+	PLUGIN.legs.RenderAngle = PLUGIN.legs.RenderAngle or nil
+	PLUGIN.legs.BiaisAngle = PLUGIN.legs.BiaisAngle or nil
+	PLUGIN.legs.RadAngle = PLUGIN.legs.RadAngle or nil
+	PLUGIN.legs.RenderPos = PLUGIN.legs.RenderPos or nil
+	PLUGIN.legs.RenderColor = PLUGIN.legs.RenderColor or {}
+	PLUGIN.legs.ClipVector = PLUGIN.legs.ClipVector or (vector_up * -1)
+	PLUGIN.legs.ForwardOffset = PLUGIN.legs.ForwardOffset or -24
 
 	function PLUGIN.legs:DoFinalRender()
 		cam.Start3D(EyePos(), EyeAngles())

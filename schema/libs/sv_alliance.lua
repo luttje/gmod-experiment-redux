@@ -9,9 +9,7 @@ util.AddNetworkString("AllianceUpdateMembers")
 util.AddNetworkString("AllianceRequestSetRank")
 util.AddNetworkString("AllianceRequestKick")
 
-if (Schema.alliance == nil) then
-	Schema.alliance = {}
-end
+Schema.alliance = Schema.alliance or {}
 
 function Schema.alliance.LoadTables()
 	local query

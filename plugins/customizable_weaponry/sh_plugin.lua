@@ -64,7 +64,7 @@ for conVarName, value in pairs(conVarsToSet) do
 	end
 end
 
-PLUGIN.compatibleItemsLookup = {}
+PLUGIN.compatibleItemsLookup = PLUGIN.compatibleItemsLookup or {}
 
 function PLUGIN:GetCompatibleItems(attachmentId)
 	local attachment = TacRP.GetAttTable(attachmentId)

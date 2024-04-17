@@ -1,13 +1,8 @@
-Schema.stunEffects = {}
+Schema.stunEffects = Schema.stunEffects or {}
+Schema.CachedTextSizes = Schema.CachedTextSizes or {}
 
 function Schema.GetCachedTextSize(font, text)
-	if (not Schema.CachedTextSizes) then
-		Schema.CachedTextSizes = {}
-	end
-
-	if (not Schema.CachedTextSizes[font]) then
-		Schema.CachedTextSizes[font] = {}
-	end
+	Schema.CachedTextSizes[font] = Schema.CachedTextSizes[font] or {}
 
 	if (not Schema.CachedTextSizes[font][text]) then
 		surface.SetFont(font)

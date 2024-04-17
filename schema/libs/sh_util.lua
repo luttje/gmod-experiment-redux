@@ -1,8 +1,6 @@
-if (Schema.util == nil) then
-	Schema.util = {}
-	Schema.util.transactions = {}
-	Schema.util.throttles = {}
-end
+Schema.util = Schema.util or {}
+Schema.util.transactions = Schema.util.transactions or {}
+Schema.util.throttles = Schema.util.throttles or {}
 
 --- Converts Source Engine units (1 unit = 1 inch) to centimeters (1 unit = 2.54 cm)
 ---@param unit any

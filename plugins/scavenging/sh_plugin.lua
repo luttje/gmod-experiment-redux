@@ -3,7 +3,7 @@ local PLUGIN = PLUGIN
 PLUGIN.name = "Scavenging"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Scatter items around the map for players to find."
-PLUGIN.junkChances = {}
+PLUGIN.junkChances = PLUGIN.junkChances or {}
 
 ix.util.Include("sh_commands.lua")
 
