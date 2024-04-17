@@ -181,11 +181,11 @@ function ENT:SpeakSound(sound)
 end
 
 function ENT:Use(activator, caller)
-	if (not Schema.util.Throttle("npcInteract", 2, activator)) then
+	if (not Schema.util.Throttle("NpcInteract", 2, activator)) then
 		Schema.npc.StartInteraction(activator, self)
 	end
 
-	if (Schema.util.Throttle("npcSpeak", 2, self)) then
+	if (Schema.util.Throttle("NpcSpeak", 2, self)) then
 		return
 	end
 

@@ -144,12 +144,12 @@ end
 
 -- When the player model changes, we check if we get default hands. If we do, we enable the fake hands.
 function PLUGIN:PlayerModelChanged(client, model, oldModel)
-    if (not IsValid(client)) then
-        return
-    end
+	if (not IsValid(client)) then
+		return
+	end
 
 	local playerHands = getClientHands(client)
-    local modelFitsWithDefaultHands = model:lower():StartsWith("models/humans/group0")
+	local modelFitsWithDefaultHands = model:lower():StartsWith("models/humans/group0")
 
 	if (playerHands.isDefault and not modelFitsWithDefaultHands) then
 		self.fakeHandsIndex = self.fakeHandsIndex + 1
@@ -158,4 +158,15 @@ function PLUGIN:PlayerModelChanged(client, model, oldModel)
 
 	-- If the hands fit the model, disable the fake hands.
 	self.fakeHandsIndex = -1
+end
+
+-- Also when we load ensure we have the correct hands.
+function PLUGIN:CharacterLoaded(character)
+	local client = character:GetPlayer()
+
+	if (not IsValid(client)) then
+		return
+	end
+
+	self:PlayerModelChanged(client, client:GetModel(), nil)
 end
