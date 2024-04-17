@@ -10,20 +10,13 @@ ix.util._existingLibraries = ix.util._existingLibraries or {}
 ---@param constructor? fun(): table The constructor function for an object.
 ---@return table # The library table.
 function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
-    local existingLibrary = ix.util._existingLibraries[libraryName]
-
-	if (existingLibrary) then
-		return existingLibrary
-	end
-
-	-- Convert to SCREAMING_SNAKE_CASE
     local libraryGlobalName = libraryName:gsub("%s+", "_"):upper()
 
-	local library = {}
+	local library = ix.util._existingLibraries[libraryName] or {}
     ix.util._existingLibraries[libraryName] = library
 
-	library.stored = {}
-	library.buffer = {}
+	library.stored = library.stored or {}
+	library.buffer = library.buffer or {}
 
 	library.GetBuffer = function()
 		return library.buffer
@@ -37,44 +30,57 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 		local oldGlobal = _G[libraryGlobalName]
 
 		for _, fileName in ipairs(file.Find(directory .. "/*.lua", "LUA")) do
-            local uniqueID = string.lower(fileName:sub(4, -5))
+			local uniqueID = string.lower(fileName:sub(4, -5))
+			local LIBRARY
 
-            if (constructor) then
-                _G[libraryGlobalName] = library.stored[uniqueID] or constructor()
-            else
-                _G[libraryGlobalName] = library.stored[uniqueID] or {}
-            end
+			if (constructor) then
+				LIBRARY = library.stored[uniqueID] or constructor()
+			else
+				LIBRARY = library.stored[uniqueID] or {}
+			end
 
-			_G[libraryGlobalName].uniqueID = uniqueID
-			_G[libraryGlobalName].index = tonumber(util.CRC(uniqueID))
+			_G[libraryGlobalName] = LIBRARY
+
+			LIBRARY.uniqueID = uniqueID
+			LIBRARY.index = tonumber(util.CRC(uniqueID))
 
 			ix.util.Include(directory .. "/" .. fileName, "shared")
 
 			if (SERVER) then
-				if (_G[libraryGlobalName].backgroundImage) then
-					resource.AddFile("materials/" .. _G[libraryGlobalName].backgroundImage .. ".vtf")
-					resource.AddFile("materials/" .. _G[libraryGlobalName].backgroundImage .. ".vmt")
+				if (LIBRARY.backgroundImage) then
+					resource.AddFile("materials/" .. LIBRARY.backgroundImage .. ".vtf")
+					resource.AddFile("materials/" .. LIBRARY.backgroundImage .. ".vmt")
 				end
 
-				if (isstring(_G[libraryGlobalName].foregroundImage)) then
-					resource.AddFile("materials/" .. _G[libraryGlobalName].foregroundImage .. ".vtf")
-                    resource.AddFile("materials/" .. _G[libraryGlobalName].foregroundImage .. ".vmt")
-                elseif (istable(_G[libraryGlobalName].foregroundImage)) then
-                    local spritesheetData = _G[libraryGlobalName].foregroundImage
+				if (isstring(LIBRARY.foregroundImage)) then
+					resource.AddFile("materials/" .. LIBRARY.foregroundImage .. ".vtf")
+					resource.AddFile("materials/" .. LIBRARY.foregroundImage .. ".vmt")
+				elseif (istable(LIBRARY.foregroundImage)) then
+					local spritesheetData = LIBRARY.foregroundImage
 
 					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vtf")
 					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
 				end
-            else
-				if (istable(_G[libraryGlobalName].foregroundImage)) then
-                    local spritesheetData = _G[libraryGlobalName].foregroundImage
+			else
+				if (istable(LIBRARY.foregroundImage)) then
+					local spritesheetData = LIBRARY.foregroundImage
 
 					spritesheetData.spritesheet = Material(spritesheetData.spritesheet)
 				end
 			end
 
-			library.stored[_G[libraryGlobalName].uniqueID] = _G[libraryGlobalName]
-			library.buffer[_G[libraryGlobalName].index] = _G[libraryGlobalName]
+			-- Let libraries listen to hooks
+			if (LIBRARY.hooks) then
+				for hookName, hookCallback in pairs(LIBRARY.hooks) do
+					if (isfunction(hookCallback)) then
+						HOOKS_CACHE[hookName] = HOOKS_CACHE[hookName] or {}
+						HOOKS_CACHE[hookName][LIBRARY] = hookCallback
+					end
+				end
+			end
+
+			library.stored[LIBRARY.uniqueID] = LIBRARY
+			library.buffer[LIBRARY.index] = LIBRARY
 		end
 
 		_G[libraryGlobalName] = oldGlobal
