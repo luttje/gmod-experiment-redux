@@ -157,7 +157,7 @@ if (SERVER) then
 			end
 
 			local activeUntil = curTime + storedBuff.activeRemaining
-			local buff = Schema.buff.MakeActive(storedBuff.index, activeUntil, storedBuff.data)
+			local buff = Schema.buff.MakeActive(buffTable.index, activeUntil, storedBuff.data)
 			buffs[#buffs + 1] = buff
 
 			Schema.buff.Setup(client, buffTable, buff)
@@ -180,6 +180,12 @@ if (SERVER) then
 		end
 	end
 
+	--- Create a buff to store in the character's data.
+	---@param client Player
+	---@param buffIndex number
+	---@param activeRemaining number
+	---@param data? table
+	---@return table
 	function Schema.buff.MakeStored(client, buffIndex, activeRemaining, data)
 		if (not activeRemaining) then
 			local buffTable = Schema.buff.Get(buffIndex)
@@ -352,15 +358,26 @@ else
 		end
 	end
 
+	--- Updates the local active buffs table so they display on screen and in the YOU menu.
+	---@param key any
+	---@param index any
+	---@param activeUntil any
+	---@param data any
     function Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
         local found = nil
 
-        for _, activeBuff in ipairs(Schema.buff.localActive) do
-            if (activeBuff.key == key) then
-                found = activeBuff
-                break
-            end
-        end
+		for k, activeBuff in ipairs(Schema.buff.localActive) do
+			if (activeBuff.key == key) then
+				if (activeUntil <= CurTime()) then
+					table.remove(Schema.buff.localActive, k)
+					Schema.buff.RefreshPanel()
+					return
+				end
+
+				found = activeBuff
+				break
+			end
+		end
 
         if (not found) then
 			found = {}
