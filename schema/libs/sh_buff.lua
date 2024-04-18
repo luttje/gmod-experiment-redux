@@ -49,11 +49,29 @@ if (SERVER) then
 		local buffs = character.expBuffs or {}
 		character.expBuffs = buffs
 
-		activeUntil = activeUntil or (CurTime() + buffTable:GetDurationInSeconds(client))
-		local buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
-		buffs[#buffs + 1] = buff
+        activeUntil = activeUntil or (CurTime() + buffTable:GetDurationInSeconds(client))
+        local buff
 
-		hook.Run("PlayerBuffActivated", client, buffTable, buff)
+        if (buffTable:ShouldResetOnDuplicate(client)) then
+            for _, activeBuff in ipairs(buffs) do
+                if (activeBuff.index == buffTable.index) then
+                    buff = activeBuff
+                    buff.activeUntil = activeUntil
+                    break
+                end
+            end
+
+            if (buff) then
+                hook.Run("PlayerBuffReset", client, buffTable, buff)
+            end
+        end
+
+		if (not buff) then
+			buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
+            buffs[#buffs + 1] = buff
+
+			hook.Run("PlayerBuffActivated", client, buffTable, buff)
+		end
 
 		Schema.buff.Setup(client, buffTable, buff)
 		Schema.buff.Network(client, buffTable.index, buff)
@@ -107,7 +125,7 @@ if (SERVER) then
 	---@param client Player
 	---@param buffIndex number
 	---@param buff ActiveBuff
-	function Schema.buff.Network(client, buffIndex, buff)
+    function Schema.buff.Network(client, buffIndex, buff)
 		net.Start("exp_BuffUpdated")
 		net.WriteUInt(buff.key, 32)
 		net.WriteUInt(buffIndex, 32)
@@ -344,7 +362,7 @@ else
             end
         end
 
-		if (not found) then
+        if (not found) then
 			found = {}
 			Schema.buff.localActive[#Schema.buff.localActive + 1] = found
 		end
@@ -352,7 +370,7 @@ else
         found.key = key
         found.index = index
         found.activeUntil = activeUntil
-		found.data = data
+        found.data = data
 	end
 
 	function Schema.buff.RemoveLocalActive(key)
