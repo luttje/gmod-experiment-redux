@@ -31,41 +31,22 @@ function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
 	end
 end
 
-function BUFF.hooks:PlayerDisconnected(client)
-	if (client:SteamID() == nil or client:SteamID64() == nil) then
-		--[[
-		From the wiki:
-		"
-			NEED TO VALIDATE
-			Player:SteamID, Player:SteamID64, and the like can return nil here.
-		"
-		https://wiki.facepunch.com/gmod/GM:PlayerDisconnected
+function BUFF.hooks:OnCharacterDisconnect(client, character)
+	if (not Schema.buff.GetActive(client, self.index)) then
+		return
+	end
 
-		Let's return the favor and validate whether nil is ever returned.
-		--]]
-		local playerData = {
-			time = os.time(),
-			version = VERSION,
-			versionStr = VERSIONSTR,
-			jitVersion = jit.version,
-			jitVersionNum = jit.version_num,
-			steamID = tostring(client:SteamID()),
-			steamID64 = tostring(client:SteamID64()),
-			steamName = tostring(client:SteamName()),
-		}
-		ErrorNoHaltWithStack("Player disconnected (wiki bug/issue validation): " .. util.TableToJSON(playerData) .. "\n")
-		file.Write("disconnect_validation.txt", util.TableToJSON(playerData) .. "\n")
+	Schema.PlayerDropCharacterItems(client, character, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
+end
+
+function BUFF.hooks:PlayerLoadedCharacter(client, character, oldCharacter)
+	if (not oldCharacter) then
+		return
 	end
 
 	if (not Schema.buff.GetActive(client, self.index)) then
 		return
 	end
 
-	local character = client:GetCharacter()
-
-	if (not character) then
-		return
-	end
-
-	Schema.PlayerDropAllItems(client, true)
+	Schema.PlayerDropCharacterItems(client, oldCharacter, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
 end

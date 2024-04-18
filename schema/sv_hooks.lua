@@ -235,9 +235,15 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 end
 
 function Schema:PlayerDeath(client, inflictor, attacker)
+	local character = client:GetCharacter()
+
+	if (not character) then
+		return
+	end
+
 	Schema.achievement.Progress(client, "favored_target")
 
-	Schema.PlayerDropRandomItems(client)
+	Schema.PlayerDropCharacterItems(client, character, Schema.dropMode.RANDOM)
 end
 
 function Schema:PlayerUse(client, entity)
@@ -366,16 +372,31 @@ function Schema:CharacterAttributeUpdated(client, character, attributeKey, value
 	end
 end
 
-function Schema:OnCharacterDisconnect(client, character)
-	Schema.CheckCharacterDisconnectPenalty(client, character)
-end
+function Schema:PlayerDisconnected(client)
+	if (client:SteamID() == nil or client:SteamID64() == nil) then
+		--[[
+		From the wiki:
+		"
+			NEED TO VALIDATE
+			Player:SteamID, Player:SteamID64, and the like can return nil here.
+		"
+		https://wiki.facepunch.com/gmod/GM:PlayerDisconnected
 
-function Schema:PlayerLoadedCharacter(client, character, oldCharacter)
-	if (not oldCharacter) then
-		return
+		Let's return the favor and validate whether nil is ever returned.
+		--]]
+		local playerData = {
+			time = os.time(),
+			version = VERSION,
+			versionStr = VERSIONSTR,
+			jitVersion = jit.version,
+			jitVersionNum = jit.version_num,
+			steamID = tostring(client:SteamID()),
+			steamID64 = tostring(client:SteamID64()),
+			steamName = tostring(client:SteamName()),
+		}
+		ErrorNoHaltWithStack("Player disconnected (wiki bug/issue validation): " .. util.TableToJSON(playerData) .. "\n")
+		file.Write("disconnect_validation.txt", util.TableToJSON(playerData) .. "\n")
 	end
-
-	Schema.CheckCharacterDisconnectPenalty(client, oldCharacter)
 end
 
 function Schema:GetSalaryAmount(client, faction)

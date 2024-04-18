@@ -148,11 +148,25 @@ function Schema.BustDownDoor(client, door, force)
 	end)
 end
 
-function Schema.PlayerDropRandomItems(client, evenEquipped)
-	local hasConfusingPockets = Schema.perk.GetOwned("confusing_pockets", client)
-	local character = client:GetCharacter()
+Schema.dropMode = {
+	RANDOM = 1,
+	ALL = 2,
+	WITH_EQUIPPED = 4
+}
+
+--- Example usage:
+--- Schema.PlayerDropCharacterItems(client, client:GetCharacter(), bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
+--- Or simply:
+--- Schema.PlayerDropCharacterItems(client, client:GetCharacter(), Schema.dropMode.RANDOM)
+---@param client Player The player to drop items for.
+---@param character table The character to drop items for.
+---@param dropMode number The drop mode to use.
+function Schema.PlayerDropCharacterItems(client, character, dropMode)
 	local inventory = character:GetInventory()
 	local money = character:GetMoney()
+	local hasConfusingPockets = Schema.perk.GetOwned("confusing_pockets", client)
+	local evenEquipped = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED) == Schema.dropMode.WITH_EQUIPPED
+	local dropModeIsRandom = bit.band(dropMode, Schema.dropMode.RANDOM) == Schema.dropMode.RANDOM
 	local dropInfo = {
 		inventory = {},
 		money = money
@@ -163,34 +177,52 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 			continue
 		end
 
-		local loseItemChance = 0.75
-
-		if (hasConfusingPockets) then
-			loseItemChance = loseItemChance * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
-		end
-
-		if (math.random() > loseItemChance) then
-			continue
-		end
-
 		if (item:GetData("equip") and not evenEquipped) then
 			continue
 		end
 
-		item.invID = 0
-		inventory:Remove(item.id, false, true)
-		dropInfo.inventory[#dropInfo.inventory + 1] = item
+		local shouldDropItem = false
+
+		if (dropModeIsRandom) then
+			local loseItemChance = 0.75
+
+			if (hasConfusingPockets) then
+				loseItemChance = loseItemChance * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
+			end
+
+			shouldDropItem = (math.random() > loseItemChance)
+		else
+			shouldDropItem = true
+		end
+
+		if (shouldDropItem) then
+			if (item.hooks["drop"]) then
+				item.player = client
+				item.hooks["drop"](item)
+				item.player = nil
+			end
+
+			item.invID = 0
+			inventory:Remove(item.id, false, true)
+			dropInfo.inventory[#dropInfo.inventory + 1] = item
+		end
 	end
 
 	if (money > 0) then
-		local fractionToLose = 0.75
+		local amountToLose = money
 
-		if (hasConfusingPockets) then
-			fractionToLose = fractionToLose * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
+		if (dropModeIsRandom) then
+			local fractionToLose = 0.75
+
+			if (hasConfusingPockets) then
+				fractionToLose = fractionToLose * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
+			end
+
+			amountToLose = math.floor(math.random(1, money * fractionToLose))
 		end
 
-		dropInfo.money = math.floor(math.random(1, money))
-		character:TakeMoney(dropInfo.money)
+		character:TakeMoney(amountToLose)
+		dropInfo.money = amountToLose
 
 		if (character:GetMoney() == 0) then
 			Schema.achievement.Progress(client, "boltless_wanderer", 1)
@@ -198,43 +230,7 @@ function Schema.PlayerDropRandomItems(client, evenEquipped)
 	end
 
 	hook.Run("CreatePlayerDropItemsContainerEntity", client, character, dropInfo)
-	client:GetCharacter():Save()
-end
-
-function Schema.PlayerDropAllItems(client, evenEquipped)
-	local character = client:GetCharacter()
-	local inventory = character:GetInventory()
-	local money = character:GetMoney()
-	local dropInfo = {
-		inventory = {},
-		money = money
-	}
-
-	for _, item in pairs(inventory:GetItems()) do
-		if (item.noDrop) then
-			continue
-		end
-
-		if (item:GetData("equip") and not evenEquipped) then
-			continue
-		end
-
-		item.invID = 0
-		inventory:Remove(item.id, false, true)
-		dropInfo.inventory[#dropInfo.inventory + 1] = item
-	end
-
-	if (money > 0) then
-		local amount = money
-
-		character:TakeMoney(amount, "Death")
-		dropInfo.money = amount
-
-		Schema.achievement.Progress(client, "boltless_wanderer", 1)
-	end
-
-	hook.Run("CreatePlayerDropItemsContainerEntity", client, character, dropInfo)
-	client:GetCharacter():Save()
+	character:Save()
 end
 
 function Schema.SearchPlayer(client, target)
@@ -324,16 +320,4 @@ function Schema.DecayEntity(entity, seconds, callback)
 		entity:Remove()
 		timer.Remove(name)
 	end)
-end
-
-function Schema.CheckCharacterDisconnectPenalty(client, character)
-	local requiredGraceAfterDamage = ix.config.Get("requiredGraceAfterDamage")
-	local lastTakeDamage = client.expLastDamage
-	local curTime = CurTime()
-
-	if (not lastTakeDamage or curTime - lastTakeDamage > requiredGraceAfterDamage) then
-		return
-	end
-
-	Schema.PlayerDropAllItems(client, nil, nil, true)
 end
