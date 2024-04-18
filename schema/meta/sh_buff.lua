@@ -9,13 +9,13 @@
 ---@field foregroundImage string
 ---@field description string
 ---@field durationInSeconds number
----@field persistThroughDeath boolean
+---@field persistThroughDeath? boolean
 ---@field attributeBoosts? table<string, number>
+---@field resetOnDuplicate? boolean
 local META = Schema.meta.buff or {}
 Schema.meta.buff = META
 
 META.__index = META
-META.hooks = META.hooks or {}
 
 function META:__tostring()
     return "buff[" .. self.uniqueID .. "]"
@@ -28,7 +28,7 @@ function META:GetName(client, buff)
 	local stacks = buff.data and buff.data.stacks or 1
 
 	if (not stacks or not self.stackedName or stacks == 1) then
-		return self.name
+		return self.name or "Unknown"
 	end
 
 	return string.format(self.stackedName, stacks)
@@ -59,27 +59,33 @@ end
 ---@param buff ActiveBuff
 ---@return string
 function META:GetDescription(client, buff)
-    return self.description
+    return self.description or ""
 end
 
 ---@param client Player
 ---@return number
 function META:GetDurationInSeconds(client)
-    return self.durationInSeconds
+    return self.durationInSeconds or 60
 end
 
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return boolean
 function META:ShouldPersistThroughDeath(client, buff)
-    return self.persistThroughDeath
+    return self.persistThroughDeath or false
 end
 
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return table<string, number>?
 function META:GetAttributeBoosts(client, buff)
-	return self.attributeBoosts
+    return self.attributeBoosts
+end
+
+---@param client Player
+---@return boolean
+function META:ShouldResetOnDuplicate(client)
+	return self.resetOnDuplicate or false
 end
 
 ---@param client Player
@@ -104,7 +110,7 @@ end
 
 ---@param client Player
 ---@param buff ActiveBuff
----@return boolean? Return false to remove the buff
+---@return boolean? # Return true to remove the buff
 function META:OnShouldExpire(client, buff)
 
 end
@@ -132,7 +138,7 @@ function META:GetStacks(client, buff)
 	return buff.data and buff.data.stacks or 1
 end
 
---- Stacks the buff if possible
+--- Stacks the buff if it has not reached the maximum stack count
 ---@param client any
 ---@param buff any
 function META:Stack(client, buff)

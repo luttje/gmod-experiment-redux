@@ -33,11 +33,13 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 			local uniqueID = string.lower(fileName:sub(4, -5))
 			local LIBRARY
 
-			if (constructor) then
-				LIBRARY = library.stored[uniqueID] or constructor()
-			else
-				LIBRARY = library.stored[uniqueID] or {}
-			end
+            if (constructor) then
+                LIBRARY = library.stored[uniqueID] or constructor()
+            else
+                LIBRARY = library.stored[uniqueID] or {}
+            end
+
+			LIBRARY.hooks = LIBRARY.hooks or {}
 
 			_G[libraryGlobalName] = LIBRARY
 
@@ -70,12 +72,10 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 			end
 
 			-- Let libraries listen to hooks
-			if (LIBRARY.hooks) then
-				for hookName, hookCallback in pairs(LIBRARY.hooks) do
-					if (isfunction(hookCallback)) then
-						HOOKS_CACHE[hookName] = HOOKS_CACHE[hookName] or {}
-						HOOKS_CACHE[hookName][LIBRARY] = hookCallback
-					end
+			for hookName, hookCallback in pairs(LIBRARY.hooks) do
+				if (isfunction(hookCallback)) then
+					HOOKS_CACHE[hookName] = HOOKS_CACHE[hookName] or {}
+					HOOKS_CACHE[hookName][LIBRARY] = hookCallback
 				end
 			end
 
