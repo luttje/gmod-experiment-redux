@@ -32,7 +32,7 @@ function BUFF.hooks:PlayerSpawn(client)
 end
 
 function BUFF.hooks:PlayerShouldTakeDamage(client, attacker)
-	if (Schema.buff.GetActive(client, self.index)) then
+    if (Schema.buff.GetActive(client, self.index)) then
 		return false
 	end
 end

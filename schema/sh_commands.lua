@@ -143,6 +143,8 @@ do
 		Schema:ScalePlayerDamage(target, hitGroup, damageInfo)
 
 		target:TakeDamageInfo(damageInfo)
+
+		ix.util.Notify("You have damaged " .. target:GetName() .. "'s " .. bodyPart .. " for " .. amount .. " damage.", client)
 	end
 
 	ix.command.Add("CharTakeDamage", COMMAND)

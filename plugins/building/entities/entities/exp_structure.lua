@@ -326,8 +326,6 @@ function ENT:HandleSiegeSurgeDamage(damageInfo)
     end
 
 	local stacks = buffTable:GetStacks(attacker, buff)
-
-	local oldDamage = damageInfo:GetDamage()
 	damageInfo:ScaleDamage(1 + stacks)
 end
 
