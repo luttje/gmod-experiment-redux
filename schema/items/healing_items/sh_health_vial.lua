@@ -6,6 +6,6 @@ ITEM.model = "models/healthvial.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Medical"
-ITEM.description = "A strange vial filled with green liquid, be careful."
+ITEM.description = "A strange vial filled with healing liquid. It'll get you going again for a bit."
 ITEM.healAmount = 10
 ITEM.healSound = "items/medshot4.wav"
