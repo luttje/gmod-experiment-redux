@@ -16,26 +16,27 @@ if (SERVER) then
     resource.AddWorkshop("3031604368")
 end
 
+local bodygroups = "052000000"
+
 FACTION.models = {
-	"models/hl2rp/citizens/male_01.mdl",
-	"models/hl2rp/citizens/female_01.mdl",
-	"models/hl2rp/citizens/male_02.mdl",
-	"models/hl2rp/citizens/female_04.mdl",
-	"models/hl2rp/citizens/male_03.mdl",
-	"models/hl2rp/citizens/male_09.mdl",
-	"models/hl2rp/citizens/female_02.mdl",
-	"models/hl2rp/citizens/male_06.mdl",
-	"models/hl2rp/citizens/female_03.mdl",
-	"models/hl2rp/citizens/male_05.mdl",
-	"models/hl2rp/citizens/female_06.mdl",
-	"models/hl2rp/citizens/male_04.mdl",
-	"models/hl2rp/citizens/male_07.mdl",
-	"models/hl2rp/citizens/male_08.mdl",
+	{ "models/hl2rp/citizens/male_01.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/female_01.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_02.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/female_04.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_03.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_09.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/female_02.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_06.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/female_03.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_05.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/female_06.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_04.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_07.mdl", 0, bodygroups },
+	{ "models/hl2rp/citizens/male_08.mdl", 0, bodygroups },
 }
 
-for _, model in ipairs(FACTION.models) do
-    ix.anim.SetModelClass(model, "player")
-	print("Added model "..model.." to class player.")
+for _, modelData in ipairs(FACTION.models) do
+    ix.anim.SetModelClass(modelData[1], "player")
 end
 
 FACTION_CIVILIAN = FACTION.index

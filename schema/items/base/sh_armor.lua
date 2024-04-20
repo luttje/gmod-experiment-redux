@@ -51,26 +51,30 @@ if (CLIENT) then
 	end
 
 	-- Only show the armor on the client (not for dropping item entity)
+    function ITEM:GetModel()
+        if (self.replacement or (self.replacements and isstring(self.replacements))) then
+            return self.replacement or self.replacements
+        end
+
+        if (istable(self.replacements)) then
+            local model = (self.player or LocalPlayer()):GetModel()
+
+            for _, v in ipairs(self.replacements) do
+                if (model:find(v[1])) then
+                    return model:gsub(v[1], v[2])
+                end
+            end
+        end
+
+        if (self.model) then
+            return self.model
+        end
+
+        error("Failed to get model for item " .. self.uniqueID)
+    end
+else
 	function ITEM:GetModel()
-		if (self.replacement or (self.replacements and isstring(self.replacements))) then
-			return self.replacement or self.replacements
-		end
-
-		if (istable(self.replacements)) then
-			local model = (self.player or LocalPlayer()):GetModel()
-
-			for _, v in ipairs(self.replacements) do
-				if (model:find(v[1])) then
-					return model:gsub(v[1], v[2])
-				end
-			end
-		end
-
-		if (self.model) then
-			return self.model
-		end
-
-		error("Failed to get model for item " .. self.uniqueID)
+		return "models/props_c17/suitcase_passenger_physics.mdl"
 	end
 end
 
