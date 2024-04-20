@@ -55,7 +55,7 @@ end
 ---@param scope string
 ---@param delay number
 ---@param entity Entity? If provided, the throttle will be unique to the entity.
----@return boolean
+---@return boolean, number?
 function Schema.util.Throttle(scope, delay, entity)
 	local scopeTable = Schema.util.throttles
 
@@ -73,10 +73,12 @@ function Schema.util.Throttle(scope, delay, entity)
 	local throttled = scopeTable[scope] > CurTime()
 
 	if (not throttled) then
-		scopeTable[scope] = CurTime() + delay
+        scopeTable[scope] = CurTime() + delay
+
+		return false
 	end
 
-	return throttled
+	return throttled, math.ceil(scopeTable[scope] - CurTime())
 end
 
 --- Expands the bounds of a cube to a list of points.
@@ -250,8 +252,7 @@ if (CLIENT) then
         end
 
 		if (#arguments < 1) then
-			ErrorNoHalt("You need to provide a spritesheet path, e.g: `debug_spritesheet_picker \"experiment-redux/flatmsicons32.png\"`\n")
-			return
+			arguments[1] = "experiment-redux/flatmsicons32.png"
 		end
 
 		local spritesheetPath = arguments[1]

@@ -8,6 +8,28 @@ function Schema:OnPhysgunFreeze(weapon, physObj, entity, client)
 	end
 end
 
+function Schema:AdjustHealAmount(client, amount)
+	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
+
+	if (buff) then
+		local stacks = buffTable:GetStacks(client, buff)
+		local totalHealModify = math.pow(buffTable.healModifyPerStack, stacks)
+
+		return amount * totalHealModify
+	end
+end
+
+function Schema:PlayerHealed(client, target, item)
+	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
+
+	if (not buff) then
+		Schema.buff.SetActive(client, "waning_ward")
+		return
+	end
+
+	buffTable:Stack(client, buff)
+end
+
 function Schema:CharacterLoaded(character)
 	local client = character:GetPlayer()
 

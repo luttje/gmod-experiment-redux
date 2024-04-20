@@ -14,18 +14,16 @@ ITEM.functions.ApplySelf = {
 	tip = "Use this item to heal yourself.",
 	icon = "icon16/heart.png",
 	OnRun = function(item)
-		local client = item.player
+        local client = item.player
+		local throttled, remaining = Schema.util.Throttle("allowHeal", 10, client)
 
-		if (client._NextAllowedHeal and client._NextAllowedHeal > CurTime()) then
-			client:Notify("You can't use this for another " ..
-				math.ceil(client._NextAllowedHeal - CurTime()) .. " second(s)!")
+		if (throttled) then
+			client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
 			return false
 		end
 
-		client._NextAllowedHeal = CurTime() + 10
-
 		client:SetHealth(
-			math.Clamp(client:Health() + Schema.GetHealAmount(client:GetCharacter(), item.healAmount), 0,
+			math.Clamp(client:Health() + Schema.GetHealAmount(client, item.healAmount), 0,
 				client:GetMaxHealth())
 		)
 
@@ -43,10 +41,10 @@ ITEM.functions.ApplyLookAt = {
 	icon = "icon16/heart.png",
 	OnRun = function(item)
 		local client = item.player
+		local throttled, remaining = Schema.util.Throttle("allowHeal", 10, client)
 
-		if (client._NextAllowedHeal and client._NextAllowedHeal > CurTime()) then
-			client:Notify("You can't use this for another " ..
-				math.ceil(client._NextAllowedHeal - CurTime()) .. " second(s)!")
+		if (throttled) then
+			client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
 			return false
 		end
 
@@ -69,7 +67,7 @@ ITEM.functions.ApplyLookAt = {
 		client._NextAllowedHeal = CurTime() + 10
 
 		client:SetHealth(
-			math.Clamp(client:Health() + Schema.GetHealAmount(client:GetCharacter(), item.healAmount), 0,
+			math.Clamp(client:Health() + Schema.GetHealAmount(client, item.healAmount), 0,
 				client:GetMaxHealth())
 		)
 

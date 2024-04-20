@@ -10,7 +10,7 @@
 ---@field foregroundImage string
 ---@field description string
 ---@field durationInSeconds number
----@field persistThroughDeath? boolean
+---@field persistThroughRespawn? boolean
 ---@field attributeBoosts? table<string, number>
 ---@field resetOnDuplicate? boolean
 local META = Schema.meta.buff or {}
@@ -28,11 +28,13 @@ end
 function META:GetName(client, buff)
     local stacks = buff.data and buff.data.stacks or 1
 
-    if (not stacks or not self.stackedName or stacks == 1) then
+    if (not stacks or stacks == 1) then
         return self.name or "Unknown"
     end
 
-    return string.format(self.stackedName, stacks)
+	local stackedName = self.stackedName or (self.name .. " (x%d)")
+
+    return string.format(stackedName, stacks)
 end
 
 ---@param client Player
@@ -83,8 +85,8 @@ end
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return boolean
-function META:ShouldPersistThroughDeath(client, buff)
-    return self.persistThroughDeath or false
+function META:ShouldPersistThroughRespawn(client, buff)
+    return self.persistThroughRespawn or false
 end
 
 ---@param client Player
@@ -157,10 +159,11 @@ function META:Stack(client, buff)
 	local maxStacks = self.maxStacks or 1
 	local currentStacks = self:GetStacks(client, buff)
 
-	if (currentStacks >= maxStacks) then
-		return
-	end
+    if (currentStacks >= maxStacks) then
+        return
+    end
 
+	buff.data = buff.data or {}
 	buff.data.stacks = math.min(currentStacks + 1, maxStacks)
 	buff.activeUntil = CurTime() + self:GetDurationInSeconds(client)
 	Schema.buff.Network(client, buff.index, buff)

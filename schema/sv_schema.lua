@@ -99,12 +99,16 @@ function Schema.MakeExplosion(position, scale)
 	util.Effect("explosion", effectData, true, true)
 end
 
-function Schema.GetHealAmount(character, amount)
-	return amount * Schema.GetAttributeFraction(character, "medical")
+function Schema.GetHealAmount(client, amount)
+	local healAmount = amount * (1 + Schema.GetAttributeFraction(client:GetCharacter(), "medical"))
+
+	healAmount = hook.Run("AdjustHealAmount", client, healAmount) or healAmount
+
+	return healAmount
 end
 
-function Schema.GetDexterityTime(character, time)
-	return time * Schema.GetAttributeFraction(character, "dexterity")
+function Schema.GetDexterityTime(client, time)
+	return time * Schema.GetAttributeFraction(client:GetCharacter(), "dexterity")
 end
 
 function Schema.BustDownDoor(client, door, force)

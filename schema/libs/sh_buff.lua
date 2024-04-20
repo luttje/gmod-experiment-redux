@@ -92,8 +92,12 @@ if (SERVER) then
 		local buffTable = Schema.buff.Get(buffIndex)
 		local buffs = character.expBuffs or {}
 
+		if (isstring(buffIndex)) then
+			buffIndex = buffTable.index
+		end
+
 		for _, buff in ipairs(buffs) do
-			if (buff.index ~= buffIndex and buffTable.uniqueID ~= buffIndex) then
+			if (buff.index ~= buffIndex) then
 				continue
 			end
 
@@ -368,7 +372,6 @@ else
 			if (activeBuff.key == key) then
 				if (activeUntil <= CurTime()) then
 					table.remove(Schema.buff.localActive, k)
-					Schema.buff.RefreshPanel()
 					return
 				end
 
