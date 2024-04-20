@@ -30,10 +30,12 @@ ITEM.functions.Scrap = {
 		local character = client:GetCharacter()
         local scrapMaterials = item:GetScrapMaterials(client)
 
-		client:Notify("You scrapped the item for materials.")
+        for materialItem, amount in pairs(scrapMaterials) do
+            character:GetInventory():Add(materialItem, amount)
+        end
 
-		for materialItem, amount in pairs(scrapMaterials) do
-			character:GetInventory():Add(materialItem, amount)
-		end
+        client:Notify("You scrapped the item for materials.")
+
+		client:EmitSound("ambient/materials/clang1.wav", 30, math.random(150, 200))
 	end
 }

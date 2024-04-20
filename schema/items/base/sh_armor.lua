@@ -109,6 +109,7 @@ function ITEM:OnLoadout()
 	if (self:GetData("equip")) then
 		local client = self.player
 		local character = client:GetCharacter()
+
 		Schema.armor.SetArmor(character, self.id)
 	end
 end
