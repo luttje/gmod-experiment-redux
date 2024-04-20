@@ -4,7 +4,6 @@ local BUFF = BUFF
 BUFF.name = "Siege Surge"
 BUFF.stackedName = "Siege Surge (x%d)"
 BUFF.backgroundImage = "experiment-redux/symbol_background"
-BUFF.backgroundColor = Color(48, 93, 124, 255)
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 4,

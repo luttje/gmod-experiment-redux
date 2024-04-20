@@ -2,7 +2,6 @@ local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Archivist"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
-ACHIEVEMENT.backgroundColor = Color(48, 93, 124, 255)
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 29,

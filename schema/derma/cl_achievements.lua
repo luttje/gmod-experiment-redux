@@ -101,7 +101,7 @@ function PANEL:Update()
 
 	self.achievedOpacity = opacity
 
-	self.icon:SetBack(self.achievement.backgroundImage, self.achievement.backgroundColor, opacity)
+	self.icon:SetBack(self.achievement.backgroundImage, self.achievement.backgroundColor or Color(48, 93, 124, 255), opacity)
 	self.icon:SetSymbol(self.achievement.foregroundImage, opacity)
 
 	local whiteOpacity = Color(color_white.r, color_white.g, color_white.b, opacity)

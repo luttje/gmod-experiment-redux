@@ -2,7 +2,6 @@ local BUFF = BUFF
 
 BUFF.name = "Quantum Buffer"
 BUFF.backgroundImage = "experiment-redux/symbol_background"
-BUFF.backgroundColor = Color(48, 93, 124, 255)
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 23,

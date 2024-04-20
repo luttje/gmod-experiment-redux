@@ -3,6 +3,7 @@
 ---@field uniqueID string
 ---@field name string
 ---@field stackedName? string
+---@field isNegative? boolean
 ---@field maxStacks? number
 ---@field backgroundImage string
 ---@field backgroundColor Color
@@ -25,13 +26,20 @@ end
 ---@param buff ActiveBuff
 ---@return string
 function META:GetName(client, buff)
-	local stacks = buff.data and buff.data.stacks or 1
+    local stacks = buff.data and buff.data.stacks or 1
 
-	if (not stacks or not self.stackedName or stacks == 1) then
-		return self.name or "Unknown"
-	end
+    if (not stacks or not self.stackedName or stacks == 1) then
+        return self.name or "Unknown"
+    end
 
-	return string.format(self.stackedName, stacks)
+    return string.format(self.stackedName, stacks)
+end
+
+---@param client Player
+---@param buff ActiveBuff
+---@return boolean
+function META:IsNegative(client, buff)
+	return self.isNegative or false
 end
 
 ---@param client Player
@@ -45,7 +53,11 @@ end
 ---@param buff ActiveBuff
 ---@return Color
 function META:GetBackgroundColor(client, buff)
-    return self.backgroundColor
+    return self.backgroundColor or (
+        self:IsNegative(client, buff)
+        and Color(124, 48, 55, 255)
+		or Color(48, 93, 124, 255)
+	)
 end
 
 ---@param client Player

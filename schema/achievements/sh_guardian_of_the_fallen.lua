@@ -2,7 +2,6 @@ local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Guardian of the Fallen"
 ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
-ACHIEVEMENT.backgroundColor = Color(48, 93, 124, 255)
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 31,
