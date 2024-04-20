@@ -148,7 +148,11 @@ if (SERVER) then
 		character.expBuffs = buffs
 
 		for k, storedBuff in ipairs(storedBuffs) do
-			local buffTable = Schema.buff.Get(storedBuff.index)
+            local buffTable = Schema.buff.Get(storedBuff.index)
+
+			if (not buffTable:ShouldPersistThroughDeath(client, buff)) then
+				continue
+			end
 
 			if (not buffTable) then
 				ErrorNoHalt("Buff with index " ..
@@ -221,7 +225,7 @@ if (SERVER) then
 	--- Checks which buffs are expired, calls the OnExpire function and removes them from the character's data.
 	--- Optionally uses a custom expiry callback.
 	---@param client Player
-	---@param expireChecker? fun(client: Player, buffTable: Buff, buff: ActiveBuff): boolean
+    ---@param expireChecker? fun(client: Player, buffTable: Buff, buff: ActiveBuff): boolean
 	---@return number # The amount of expired buffs.
 	function Schema.buff.CheckExpired(client, expireChecker)
 		local character = client:GetCharacter()
@@ -292,12 +296,6 @@ if (SERVER) then
 			return not buffTable:ShouldPersistThroughDeath(client, buff)
 		end)
     end)
-
-	hook.Add("PlayerDisconnected", "expBuffsRemoveOnDisconnect", function(client)
-		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
-			return not buffTable:ShouldPersistThroughDeath(client, buff)
-		end)
-	end)
 
 	hook.Add("PlayerLoadout", "expBuffsCallLoadout", function(client)
 		Schema.buff.CallLoadout(client)

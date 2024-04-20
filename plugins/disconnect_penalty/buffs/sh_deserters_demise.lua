@@ -39,14 +39,14 @@ function BUFF.hooks:OnCharacterDisconnect(client, character)
 	Schema.PlayerDropCharacterItems(client, character, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
 end
 
-function BUFF.hooks:PlayerLoadedCharacter(client, character, oldCharacter)
+function BUFF.hooks:PrePlayerLoadedCharacter(client, character, oldCharacter)
 	if (not oldCharacter) then
 		return
 	end
 
-	if (not Schema.buff.GetActive(client, self.index)) then
-		return
-	end
+    if (not Schema.buff.GetActive(client, self.index)) then
+        return
+    end
 
 	Schema.PlayerDropCharacterItems(client, oldCharacter, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
 end

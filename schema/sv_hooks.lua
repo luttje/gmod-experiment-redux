@@ -268,7 +268,7 @@ function Schema:PlayerUse(client, entity)
 	end
 end
 
-function Schema:PlayerLoadedCharacter(client, curChar, prevChar)
+function Schema:PrePlayerLoadedCharacter(client, curChar, prevChar)
 	if (prevChar) then
 		local informers = prevChar:GetVar("boltInformers") or {}
 		local inventory = prevChar:GetInventory()

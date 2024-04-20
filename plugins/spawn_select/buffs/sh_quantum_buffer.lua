@@ -23,11 +23,7 @@ function BUFF:OnShouldExpire(client, buff)
 	end
 end
 
-function BUFF.hooks:PlayerSpawn(client)
-	if (not client:GetCharacter()) then
-		return
-	end
-
+function BUFF.hooks:PlayerLoadedCharacter(client, character, oldCharacter)
 	Schema.buff.SetActive(client, "quantum_buffer")
 end
 
