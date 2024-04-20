@@ -133,7 +133,7 @@ function ENT:OnEarned(money)
 		self:SetHeldBolts(heldBolts + money)
 	end
 
-	self:EmitSound("npc/scanner/scanner_scan1.wav", 75)
+	self:EmitSound("ambient/levels/labs/coinslot1.wav", 75)
 
 	ix.log.Add(client, "generatorEarn", money)
 end

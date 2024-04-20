@@ -4,14 +4,18 @@ ITEM.price = 14000
 ITEM.name = "Freedom Exoskeleton"
 ITEM.description =
 "A Freedom branded exoskeleton. Provides you with bullet resistance."
-ITEM.maxArmor = 500
+ITEM.width = 2
+ITEM.height = 1
+ITEM.replacement = "models/stalkertnb/exo_free.mdl"
 ITEM.hasTearGasProtection = true
 ITEM.attribBoosts = {
 	["medical"] = 35,
 }
-ITEM.width = 2
-ITEM.height = 1
-ITEM.replacement = "models/stalkertnb/exo_free.mdl"
+ITEM.maxArmor = 500
+ITEM.repairMaterials = {
+	["material_fabric"] = 2,
+	["material_metal"] = 2,
+}
 
 local footstepSounds = {
 	"npc/metropolice/gear1.wav",
@@ -28,3 +32,11 @@ ITEM.footstepSounds = {
 }
 
 ix.anim.SetModelClass(ITEM.replacement, "player")
+
+function ITEM:CanRepair()
+    if (not self.baseTable.CanRepair(self)) then
+        return false
+    end
+
+	return Schema.perk.GetOwned("armadillo", self.player)
+end

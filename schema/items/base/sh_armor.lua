@@ -9,8 +9,10 @@ ITEM.maxArmor = 0
 ITEM.noArmor = false
 ITEM.removeOnDestroy = false
 ITEM.hasTearGasProtection = false
-
--- ITEM.forceRender = true
+-- ITEM.repairMaterials = {
+--     ["material_fabric"] = 2,
+--     ["material_metal"] = 1,
+-- }
 ITEM.iconCam = {
 	pos = Vector(60.86, -19.83, 66.5),
 	ang = Angle(2.88, 160.64, -0.59),
@@ -102,17 +104,72 @@ function ITEM:OnUnequipped()
 end
 
 function ITEM:Repair(amount)
-	self:SetData("armor", math.Clamp(self:GetData("armor", 0) + amount, 0, self.maxArmor))
+    self:SetData("armor", math.Clamp(self:GetData("armor", 0) + amount, 0, self.maxArmor))
+end
+
+function ITEM:CanRepair()
+	if (self.repairMaterials == nil or self.player == nil) then
+		return false
+	end
+
+    if (not self.noArmor and self:GetData("armor", self.maxArmor) >= self.maxArmor) then
+        return false
+    end
+
+    local client = self.player
+
+    for material, amount in pairs(self.repairMaterials) do
+        if (client:GetCharacter():GetInventory():GetItemCount(material) < amount) then
+            return false
+        end
+    end
+
+    return true
+end
+
+function ITEM:OnRepair()
+	local client = self.player
+	local character = client:GetCharacter()
+
+	for material, amount in pairs(self.repairMaterials) do
+		for i = 1, amount do
+			local item = character:GetInventory():HasItem(material)
+
+			if (item) then
+				item:Remove()
+			end
+		end
+	end
+
+    if (not self.noArmor) then
+        self:Repair(self.maxArmor * .5)
+    end
+
+	client:EmitSound("ambient/levels/labs/machine_stop1.wav", 25, 1000)
 end
 
 function ITEM:OnLoadout()
-	if (self:GetData("equip")) then
-		local client = self.player
-		local character = client:GetCharacter()
+    if (self:GetData("equip")) then
+        local client = self.player
+        local character = client:GetCharacter()
 
-		Schema.armor.SetArmor(character, self.id)
-	end
+        Schema.armor.SetArmor(character, self.id)
+    end
 end
+
+ITEM.functions.Repair = {
+	name = "Repair",
+	tip = "Repairs the armor.",
+	icon = "icon16/wrench.png",
+	OnRun = function(item)
+		item:OnRepair()
+
+		return false
+	end,
+	OnCanRun = function(item)
+		return item:CanRepair()
+	end
+}
 
 -- The `ix_dev_icon` command doesnt help us and the code below also isn't user friendly... Find a better way
 -- local function updateIconCam(itemTable, data)
