@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/experiment-redux/ammo/45acp"
+	"$bumpmap" "models/experiment-redux/ammo/45acp_normal"
+}
