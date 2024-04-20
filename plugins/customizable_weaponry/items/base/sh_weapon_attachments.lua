@@ -7,25 +7,6 @@ ITEM.model = "models/weapons/tacint/addons/optic_rmr_hq.mdl"
 ITEM.attachmentId = "optic_rmr"
 ITEM.category = "Weapon Attachments"
 
--- TODO: This is too cluttered
--- if (CLIENT) then
---     function ITEM:PopulateTooltip(tooltip)
--- 		local compatibleItems = PLUGIN:GetCompatibleItems(self.attachmentId)
--- 		local compatibleItemsString = ""
-
--- 		for _, item in ipairs(compatibleItems) do
--- 			compatibleItemsString = compatibleItemsString .. item.name .. ", "
--- 		end
-
---         local panel = tooltip:AddRowAfter("name", "compatibleItems")
---         panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
---         panel:SetText("Compatible with: " .. compatibleItemsString)
--- 		panel:SizeToContents()
-
--- 		return tooltip
--- 	end
--- end
-
 function ITEM:GetModel()
 	if (SERVER) then
 		-- Attachments are really small, so to prevent them glitching, show a bigger model when spawning the item on the server
@@ -205,9 +186,7 @@ ITEM.functions.Attach = {
 		}
 		weaponItem:SetData("attachments", attachments)
 
-		local inventory = ix.inventory.Get(attachmentItem.invID)
-		attachmentItem.invID = 0
-		inventory:Remove(attachmentItem.id, false, true)
+		attachmentItem:Transfer(0, nil, nil, nil, false, true)
 
 		if (swep.Attachments[foundAttachmentSlot] and swep.Attachments[foundAttachmentSlot].DetachSound) then
 			client:EmitSound(swep.Attachments[foundAttachmentSlot].AttachSound)

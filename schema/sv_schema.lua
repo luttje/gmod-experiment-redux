@@ -206,8 +206,7 @@ function Schema.PlayerDropCharacterItems(client, character, dropMode)
 				item.player = nil
 			end
 
-			item.invID = 0
-			inventory:Remove(item.id, false, true)
+			item:Transfer(0, nil, nil, nil, false, true)
 			dropInfo.inventory[#dropInfo.inventory + 1] = item
 		end
 	end

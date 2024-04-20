@@ -13,18 +13,62 @@ function ITEM:GetFilters()
 end
 
 function ITEM:OnEquipWeapon(client, weapon)
-	local attachments = self:GetData("attachments", {})
+    local attachments = self:GetData("attachments", {})
 
-	if (not IsValid(weapon)) then
-		return
+    if (not IsValid(weapon)) then
+        return
+    end
+
+    for attachmentSlotId, attachmentData in pairs(attachments) do
+        weapon:Attach(attachmentSlotId, attachmentData.id, true, true)
+    end
+
+    weapon:NetworkWeapon()
+    TacRP:PlayerSendAttInv(client)
+end
+
+function ITEM:OnRestored()
+    -- Attachment items attached to this weapon exist, but aren't automatically loaded into ix.item.instances
+    -- So let's do that manually
+    local attachments = self:GetData("attachments", {})
+	local itemIds = {}
+
+	for _, attachmentData in pairs(attachments) do
+		table.insert(itemIds, attachmentData.itemID)
 	end
 
-	for attachmentSlotId, attachmentData in pairs(attachments) do
-		weapon:Attach(attachmentSlotId, attachmentData.id, true, true)
-	end
+    if (#itemIds == 0) then
+        return
+    end
 
-	weapon:NetworkWeapon()
-	TacRP:PlayerSendAttInv(client)
+	local query = mysql:Select("ix_items")
+	query:Select("item_id")
+	query:Select("unique_id")
+	query:Select("data")
+	query:WhereIn("item_id", itemIds)
+	query:Callback(function(result)
+		if (not istable(result)) then
+			return
+		end
+
+		for _, storedItem in ipairs(result) do
+			local itemID = tonumber(storedItem.item_id)
+			local data = util.JSONToTable(storedItem.data or "[]")
+			local uniqueID = storedItem.unique_id
+			local itemTable = ix.item.list[uniqueID]
+
+            if (not itemTable or not itemID) then
+                ErrorNoHalt("Attached item with ID " .. itemID .. " has no item table. Unique ID: " .. uniqueID .. "\n")
+				return
+			end
+
+			local item = ix.item.New(uniqueID, itemID)
+			item.data = data or {}
+			item.invID = 0
+			ix.item.instances[itemID] = item
+		end
+	end)
+	query:Execute()
 end
 
 ITEM.functions.DetachAttachment = {
@@ -39,7 +83,7 @@ ITEM.functions.DetachAttachment = {
 			local attachment = TacRP.GetAttTable(attachmentData.id)
 
 			options[attachmentSlotId] = {
-				name = "Remove " .. attachment.PrintName,
+				name = "Remove " .. TacRP:GetPhrase(attachment.PrintName),
 				data = {
 					attachmentSlotId = attachmentSlotId,
 				},
@@ -143,7 +187,7 @@ if (CLIENT) then
 
             local panel = tooltip:AddRowAfter("ammo", "attachments" .. attachmentSlotId)
             panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-            panel:SetText(attachment.PrintName)
+            panel:SetText(TacRP:GetPhrase(attachment.PrintName))
             panel:SizeToContents()
         end
 

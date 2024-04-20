@@ -232,8 +232,7 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 
 			damageInfo:ScaleDamage(item.damageScale)
 			character:SetData("helmet", nil)
-			local inventory = ix.item.inventories[item.invID]
-			inventory:Remove(helmetItemId, false, true)
+			item:Remove()
 			client:EmitSound("physics/body/body_medium_impact_soft" .. math.random(1, 7) .. ".wav")
 		end
 	end

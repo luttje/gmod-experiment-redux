@@ -154,7 +154,7 @@ if (SERVER) then
 		for k, storedBuff in ipairs(storedBuffs) do
             local buffTable = Schema.buff.Get(storedBuff.index)
 
-			if (not buffTable:ShouldPersistThroughDeath(client, buff)) then
+			if (not buffTable:ShouldPersistThroughRespawn(client, buff)) then
 				continue
 			end
 
@@ -297,7 +297,7 @@ if (SERVER) then
 
 	hook.Add("PostPlayerDeath", "expBuffsRemoveOnDeath", function(client)
 		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
-			return not buffTable:ShouldPersistThroughDeath(client, buff)
+			return not buffTable:ShouldPersistThroughRespawn(client, buff)
 		end)
     end)
 

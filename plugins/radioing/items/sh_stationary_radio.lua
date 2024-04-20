@@ -57,9 +57,10 @@ ITEM.functions.Place = {
 		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
 
-		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
-		local inventory = ix.item.inventories[item.invID]
-		inventory:Remove(item.id, false, true)
+        item:Transfer(0, nil, nil, nil, false, true)
+
+        -- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
+		-- For this reason we manually transfer the item to the world(0)
 		return false
 	end
 }

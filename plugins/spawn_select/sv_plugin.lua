@@ -34,7 +34,7 @@ function PLUGIN:PlayerLoadout(client)
 	end
 
 	if (#PLUGIN.spawns == 0) then
-		ErrorNoHalt("[Experiment Redux] No spawn points have been set! Spawning without spawn selection.\n")
+		print("[Experiment Redux] No spawn points have been set! Spawning without spawn selection.\n")
 		return
 	end
 
