@@ -1,6 +1,8 @@
 -- Source: https://github.com/Bilwin/helix-plugins/blob/main/stacks/items/base/sh_stackable.lua
 local ITEM = ITEM
 
+-- This file is named sh__stackable.lua so it's loaded before sh_materials.lua (which depends on this base item)
+ITEM.uniqueID = "base_stackable"
 ITEM.name = "Stackable Items Base"
 ITEM.description = "Stackable Item"
 ITEM.category = "Stackable"
