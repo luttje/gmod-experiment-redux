@@ -8,4 +8,5 @@ PERK.foregroundImage = {
 	y = 40,
 	size = 32,
 }
+PERK.healthPenaltyFactor = 0.5
 PERK.description = "You'll be able to resurrect the dead at the cost of half of your health."

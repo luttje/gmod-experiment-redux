@@ -6,6 +6,12 @@ PLUGIN.description = "Lets players resurrect other players."
 
 ix.lang.AddTable("english", {
 	resurrect = "Resurrect",
+	resurrecting = "Resurrecting...",
+	beingResurrected = "You are being resurrected...",
+})
+
+ix.config.Add("resurrectTimeInSeconds", 5, "The time in seconds that it takes to resurrect a player.", nil, {
+	data = {min = 0, max = 60, decimals = 0},
 })
 
 if (CLIENT) then
@@ -47,6 +53,38 @@ if (not SERVER) then
 	return
 end
 
+function PLUGIN:ResurrectPlayer(client, target, entity)
+	entity:RemoveWithEffect()
+	target:SetNetVar("deathTime", nil)
+	target:Spawn()
+	target:SetPos(entity:GetPos())
+
+	if (target:IsStuck()) then
+		entity:DropToFloor()
+		target:SetPos(entity:GetPos() + Vector(0, 0, 16))
+
+		local positions = ix.util.FindEmptySpace(target, { entity, target })
+
+		for _, v in ipairs(positions) do
+			target:SetPos(v)
+
+			if (not target:IsStuck()) then
+				return
+			end
+		end
+	end
+
+	Schema.achievement.Progress(client, "paramedic")
+
+	local alliance = client:GetAlliance()
+
+	if (alliance ~= nil and alliance == target:GetAlliance()) then
+		Schema.achievement.Progress(client, "guardian_of_the_fallen")
+	end
+
+	hook.Run("PlayerResurrectedTarget", client, target)
+end
+
 function PLUGIN:CanPlayerSearchCorpse(client, corpse)
 	if (Schema.perk.GetOwned("phoenix_tamer", client)) then
 		-- Disable searching through USE, since we'll be using the entity menu
@@ -59,9 +97,13 @@ function PLUGIN:PlayerInteractEntity(client, entity, option, data)
 		return
 	end
 
-	if (not Schema.perk.GetOwned("phoenix_tamer", client)) then
+	local hasPhoenixTamer, phoenixTamerPerkTable = Schema.perk.GetOwned("phoenix_tamer", client)
+
+	if (not hasPhoenixTamer) then
 		return
 	end
+
+	local healthPenaltyFactor = phoenixTamerPerkTable.healthPenaltyFactor
 
 	entity.OnOptionSelected = function(entity, client, option, data)
 		if (option == L("searchCorpse", client) and entity.StartSearchCorpse) then
@@ -86,21 +128,33 @@ function PLUGIN:PlayerInteractEntity(client, entity, option, data)
 			return
 		end
 
-		-- Resurrect the player
-		entity:RemoveWithEffect()
-		target:SetNetVar("deathTime", nil)
-		target:SetPos(entity:GetPos())
-		target:Spawn()
-		target:SetPos(entity:GetPos())
+		local resurrectTimeInSeconds = ix.config.Get("resurrectTimeInSeconds")
 
-		Schema.achievement.Progress(client, "paramedic")
+		target:SetAction("@beingResurrected", resurrectTimeInSeconds)
+		client:SetAction("@resurrecting", resurrectTimeInSeconds)
+		client:DoStaredAction(entity, function()
+			if (not IsValid(target) or target:Alive() or not IsValid(client)) then
+				return
+			end
 
-		local alliance = client:GetAlliance()
+			self:ResurrectPlayer(client, target, entity)
 
-		if (alliance ~= nil and alliance == target:GetAlliance()) then
-			Schema.achievement.Progress(client, "guardian_of_the_fallen")
-		end
+			if (healthPenaltyFactor) then
+				local damageInfo = DamageInfo()
+				damageInfo:SetDamage(client:Health() * healthPenaltyFactor)
+				damageInfo:SetAttacker(client)
+				damageInfo:SetInflictor(client:GetActiveWeapon())
+				damageInfo:SetDamageType(DMG_BURN)
+				client:TakeDamageInfo(damageInfo)
+			end
+		end, resurrectTimeInSeconds, function()
+			if (IsValid(client)) then
+				client:SetAction()
+			end
 
-		hook.Run("PlayerResurrectedTarget", client, target)
+			if (IsValid(target)) then
+				target:SetAction()
+			end
+		end)
 	end
 end

@@ -193,10 +193,12 @@ function Schema:EntityTakeDamage(entity, damageInfo)
 
 	entity.expLastDamage = CurTime()
 
-	local damage = damageInfo:GetDamage()
-	damage = Schema.armor.DamageAfterArmor(character, damage)
+	if (damageInfo:IsDamageType(Schema.armorAffectedTypes)) then
+		local damage = damageInfo:GetDamage()
+		damage = Schema.armor.DamageAfterArmor(character, damage)
 
-	damageInfo:SetDamage(damage)
+		damageInfo:SetDamage(damage)
+	end
 end
 
 function Schema:PlayerHurt(client, attacker, health, damage)

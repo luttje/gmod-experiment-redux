@@ -27,6 +27,8 @@ ix.config.Add("teleportGeneratorEarnings", false,
 		category = "income"
 	})
 
+Schema.armorAffectedTypes = DMG_BULLET + DMG_SLASH + DMG_CLUB
+
 ix.config.Add("armorEffectiveness", 0.75,
 	"How much damage armor will prevent, for example 0.75 will let a quarter of the damage through.", nil, {
 	data = { min = 0, max = 1, decimals = 2 }
