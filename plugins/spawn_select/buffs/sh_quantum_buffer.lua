@@ -15,9 +15,16 @@ if (not SERVER) then
 	return
 end
 
+local function bufferSound(client)
+	if (not Schema.util.Throttle("QuantumBufferDamageSound", 0.5, client)) then
+		client:EmitSound("ambient/energy/zap7.wav", 45, 100 + math.random(0, 100))
+	end
+end
+
 function BUFF:OnShouldExpire(client, buff)
 	if (client.expQuantumBufferShouldExpire) then
 		client.expQuantumBufferShouldExpire = nil
+		client:EmitSound("ambient/energy/whiteflash.wav", 35, 250)
 		return true
 	end
 end
@@ -30,7 +37,9 @@ function BUFF.hooks:PostPlayerLoadout(client)
 end
 
 function BUFF.hooks:PlayerShouldTakeDamage(client, attacker)
-    if (Schema.buff.GetActive(client, self.index)) then
+	if (Schema.buff.GetActive(client, self.index)) then
+		bufferSound(client)
+
 		return false
 	end
 end

@@ -197,7 +197,7 @@ function Schema.HandlePlayerDeathCorpse(client)
 
 	entity:RemoveCallOnRemove("fixer")
 	entity:CallOnRemove("expPersistentCorpse", function(ragdoll)
-		if (IsValid(client) and ! client:Alive()) then
+		if (IsValid(client) and not client:Alive()) then
 			client:SetLocalVar("ragdoll", nil)
 		end
 
@@ -226,11 +226,13 @@ function Schema.HandlePlayerDeathCorpse(client)
 		hook.Run("OnPlayerCorpseRemoved", client, ragdoll)
 	end)
 
-	-- Start decay process only if we have a time set
+	decayTime = 20
 	if (decayTime > 0) then
-		timer.Create(uniqueID, decayTime, 1, function()
+		local visualDecayTime = math.max(decayTime * .1, math.min(10, decayTime))
+
+		timer.Create(uniqueID, decayTime - visualDecayTime, 1, function()
 			if (IsValid(entity)) then
-				entity:Remove()
+				Schema.DecayEntity(entity, visualDecayTime)
 			else
 				timer.Remove(uniqueID)
 			end
@@ -254,7 +256,7 @@ function Schema.HandlePlayerDeathCorpse(client)
 end
 
 function Schema.SearchPlayer(client, target)
-	if (! target:GetCharacter() or ! target:GetCharacter():GetInventory()) then
+	if (not target:GetCharacter() or not target:GetCharacter():GetInventory()) then
 		return false
 	end
 
@@ -314,6 +316,8 @@ function Schema.DecayEntity(entity, seconds, callback)
 		index = tostring({}) -- will be unique
 		entity.decaying = index
 	end
+
+	entity:SetRenderMode(RENDERMODE_TRANSALPHA)
 
 	local name = "Decay: " .. index
 

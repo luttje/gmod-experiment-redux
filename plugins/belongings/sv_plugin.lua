@@ -46,29 +46,18 @@ function PLUGIN:SaveBelongings()
 	for _, entity in pairs(entities) do
 		local inventory = entity:GetInventory()
 
-		-- TODO: Sometimes (like when shutting the server down) inventory.GetItems is nil, why?
-		-- if (entity:GetMoney() == 0 and table.Count(inventory:GetItems()) == 0) then
-		-- 	local index = inventory:GetID()
-
-		-- 	local query = mysql:Delete("ix_items")
-		-- 		query:Where("inventory_id", index)
-		-- 	query:Execute()
-
-		-- 	query = mysql:Delete("ix_inventories")
-		-- 		query:Where("inventory_id", index)
-		-- 	query:Execute()
-
-		-- 	continue
-		-- end
+		if (self:RemoveIfEmpty(inventory)) then
+			continue
+		end
 
 		local physicsObject = entity:GetPhysicsObject()
 		local moveable
 
-        if (IsValid(physicsObject)) then
-            moveable = physicsObject:IsMoveable()
-        end
+		if (IsValid(physicsObject)) then
+			moveable = physicsObject:IsMoveable()
+		end
 
-        if (not inventory.GetSize) then
+		if (not inventory.GetSize) then
 			ErrorNoHaltWithStack("TODO: Im doing something wrong, find out why inventories are not complete\n")
 			continue
 		end
@@ -92,19 +81,49 @@ function PLUGIN:SaveBelongings()
 	self:SetData(belongings)
 end
 
+--- If there's no money or items left in the belongings, remove it.
+---@param inventory table
+function PLUGIN:RemoveIfEmpty(inventory)
+	if (not inventory.vars or not IsValid(inventory.vars.isBelongings)) then
+		return false
+	end
+
+	local entity = inventory.vars.isBelongings
+
+	if (entity:GetMoney() > 0 or table.Count(entity:GetInventory():GetItems()) > 0) then
+		return false
+	end
+
+	entity:RemoveWithEffect()
+
+	ix.storage.Close(inventory)
+
+	local index = inventory:GetID()
+
+	local query = mysql:Delete("ix_items")
+	query:Where("inventory_id", index)
+	query:Execute()
+
+	query = mysql:Delete("ix_inventories")
+	query:Where("inventory_id", index)
+	query:Execute()
+
+	return true
+end
+
 function PLUGIN:CreateBelongings(client, storageEntity)
 	local character = client.expCorpseCharacter or client:GetCharacter()
 	local inventory = storageEntity and storageEntity.ixInventory or nil
 	local entity = ents.Create("exp_belongings")
 
-	if (not inventory)then
+	if (not inventory) then
 		local characterInventory = character:GetInventory()
 		local width, height = characterInventory:GetSize()
 
 		inventory = ix.inventory.Create(width, height, os.time())
 
 		hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
-	elseif(storageEntity) then
+	elseif (storageEntity) then
 		entity:SetMoney(storageEntity:GetMoney())
 	end
 

@@ -131,7 +131,7 @@ if (CLIENT) then
 
 			self.Sequence = LocalPlayer():GetSequence()
 
-			if (self.legEnt.Anim != self.Sequence) then
+			if (self.legEnt.Anim ~= self.Sequence) then
 				self.legEnt.Anim = self.Sequence
 				self.legEnt:ResetSequence(self.Sequence)
 			end
