@@ -1,7 +1,6 @@
 local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Go Thermal"
-ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 10,

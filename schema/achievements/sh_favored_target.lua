@@ -1,7 +1,6 @@
 local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Favored Target"
-ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 5,

@@ -1,7 +1,6 @@
 local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Titan's Strength"
-ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 31,

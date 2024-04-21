@@ -81,7 +81,11 @@ function PANEL:Update()
 		end
 	end
 
-	self.icon:SetBack(self.perk.backgroundImage, self.perk.backgroundColor or Color(240, 211, 66, 255), opacity)
+	self.icon:SetBack(
+		self.perk.backgroundImage or "experiment-redux/symbol_background",
+		self.perk.backgroundColor or Color(240, 211, 66, 255),
+		opacity
+	)
 	self.icon:SetSymbol(self.perk.foregroundImage, opacity)
 
 	local whiteOpacity = Color(color_white.r, color_white.g, color_white.b, opacity)

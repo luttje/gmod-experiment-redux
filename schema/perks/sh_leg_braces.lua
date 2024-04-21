@@ -2,7 +2,6 @@ local PERK = PERK
 
 PERK.name = "Leg Braces"
 PERK.price = 9000
-PERK.backgroundImage = "experiment-redux/symbol_background"
 PERK.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 22,

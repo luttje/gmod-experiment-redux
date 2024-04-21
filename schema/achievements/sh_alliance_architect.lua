@@ -1,7 +1,6 @@
 local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Alliance Architect"
-ACHIEVEMENT.backgroundImage = "experiment-redux/symbol_background"
 ACHIEVEMENT.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 26,
