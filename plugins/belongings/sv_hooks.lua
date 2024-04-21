@@ -33,29 +33,18 @@ function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
 	self:RemoveIfEmpty(sourceInventory)
 end
 
-function PLUGIN:CreatePlayerDropItemsContainerEntity(client, character, dropInfo)
-	if (table.Count(dropInfo.inventory) == 0 and dropInfo.money == 0) then
+function PLUGIN:OnPlayerCorpseNotCreated(client)
+	self:CreateBelongings(client)
+end
+
+function PLUGIN:OnPlayerCorpseRemoved(client, corpse)
+	if (not corpse.ixInventory and (not corpse.GetMoney or corpse:GetMoney() == 0)) then
 		return
 	end
 
-	local entity = ents.Create("exp_belongings")
+	self:CreateBelongings(client, corpse)
+end
 
-	entity:SetAngles(Angle(0, 0, -90))
-	entity:SetDisplayName(character:GetName() .. "'s Belongings")
-	entity:SetMoney(dropInfo.money)
-	entity:SetPos(client:GetPos() + Vector(0, 0, 48))
-	entity:Spawn()
-
-	ix.inventory.New(0, self:GetPerfectFitInventoryType(dropInfo.inventory), function(inventory)
-		if (IsValid(entity)) then
-			for _, item in ipairs(dropInfo.inventory) do
-				inventory:Add(item.id, 1, item.data)
-			end
-
-			entity:SetInventory(inventory)
-		end
-
-		-- Set this after all the items have been added.
-		inventory.vars.isBelongings = entity
-	end)
+function PLUGIN:OnPlayerCorpseCreated(client, corpse)
+	corpse.expIsBelongings = true
 end

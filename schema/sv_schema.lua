@@ -3,6 +3,13 @@ util.AddNetworkString("exp_TearGassed")
 
 local L = Format
 
+Schema.corpses = Schema.corpses or {}
+Schema.dropMode = {
+	RANDOM = 1,
+	ALL = 2,
+	WITH_EQUIPPED = 4
+}
+
 ix.log.AddType("perkBought", function(client, ...)
 	local arg = { ... }
 	return L("%s bought the perk '%s'", client:Name(), arg[1])
@@ -152,88 +159,98 @@ function Schema.BustDownDoor(client, door, force)
 	end)
 end
 
-Schema.dropMode = {
-	RANDOM = 1,
-	ALL = 2,
-	WITH_EQUIPPED = 4
-}
+function Schema.CleanupCorpses(maxCorpses)
+	maxCorpses = maxCorpses or ix.config.Get("corpseMax", 8)
+	local toRemove = {}
 
---- Example usage:
---- Schema.PlayerDropCharacterItems(client, client:GetCharacter(), bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
---- Or simply:
---- Schema.PlayerDropCharacterItems(client, client:GetCharacter(), Schema.dropMode.RANDOM)
----@param client Player The player to drop items for.
----@param character table The character to drop items for.
----@param dropMode number The drop mode to use.
-function Schema.PlayerDropCharacterItems(client, character, dropMode)
-	local inventory = character:GetInventory()
-	local money = character:GetMoney()
-	local hasConfusingPockets = Schema.perk.GetOwned("confusing_pockets", client)
-	local evenEquipped = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED) == Schema.dropMode.WITH_EQUIPPED
-	local dropModeIsRandom = bit.band(dropMode, Schema.dropMode.RANDOM) == Schema.dropMode.RANDOM
-	local dropInfo = {
-		inventory = {},
-		money = money
-	}
-
-	for _, item in pairs(inventory:GetItems()) do
-		if (item.noDrop) then
-			continue
-		end
-
-		if (item:GetData("equip") and not evenEquipped) then
-			continue
-		end
-
-		local shouldDropItem = false
-
-		if (dropModeIsRandom) then
-			local loseItemChance = 0.75
-
-			if (hasConfusingPockets) then
-				loseItemChance = loseItemChance * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
+	if (#Schema.corpses > maxCorpses) then
+		for k, corpse in ipairs(Schema.corpses) do
+			if (! IsValid(corpse)) then
+				toRemove[#toRemove + 1] = k
+			elseif (#Schema.corpses - #toRemove > maxCorpses) then
+				corpse:Remove()
+				toRemove[#toRemove + 1] = k
 			end
-
-			shouldDropItem = (math.random() > loseItemChance)
-		else
-			shouldDropItem = true
-		end
-
-		if (shouldDropItem) then
-			if (item.hooks["drop"]) then
-				item.player = client
-				item.hooks["drop"](item)
-				item.player = nil
-			end
-
-			item:Transfer(0, nil, nil, nil, false, true)
-			dropInfo.inventory[#dropInfo.inventory + 1] = item
 		end
 	end
 
-	if (money > 0) then
-		local amountToLose = money
+	for k, _ in ipairs(toRemove) do
+		table.remove(Schema.corpses, k)
+	end
+end
 
-		if (dropModeIsRandom) then
-			local fractionToLose = 0.75
-
-			if (hasConfusingPockets) then
-				fractionToLose = fractionToLose * Schema.perk.GetProperty("confusing_pockets", "modifyLoseChance")
-			end
-
-			amountToLose = math.floor(math.random(1, money * fractionToLose))
-		end
-
-		character:TakeMoney(amountToLose)
-		dropInfo.money = amountToLose
-
-		if (character:GetMoney() == 0) then
-			Schema.achievement.Progress(client, "boltless_wanderer", 1)
-		end
+function Schema.HandlePlayerDeathCorpse(client)
+	if (hook.Run("ShouldSpawnPlayerCorpse") == false) then
+		return
 	end
 
-	hook.Run("CreatePlayerDropItemsContainerEntity", client, character, dropInfo)
-	character:Save()
+	local maxCorpses = ix.config.Get("corpseMax", 8)
+
+	if (maxCorpses == 0) then
+		hook.Run("OnPlayerCorpseNotCreated", client)
+		return
+	end
+
+	local entity = IsValid(client.ixRagdoll) and client.ixRagdoll or client:CreateServerRagdoll()
+	local decayTime = ix.config.Get("corpseDecayTime", 60)
+	local uniqueID = "ixCorpseDecay" .. entity:EntIndex()
+
+	entity:RemoveCallOnRemove("fixer")
+	entity:CallOnRemove("expPersistentCorpse", function(ragdoll)
+		if (IsValid(client) and ! client:Alive()) then
+			client:SetLocalVar("ragdoll", nil)
+		end
+
+		local index
+
+		for k, v in ipairs(Schema.corpses) do
+			if (v == ragdoll) then
+				index = k
+				break
+			end
+		end
+
+		if (index) then
+			table.remove(Schema.corpses, index)
+		end
+
+		if (timer.Exists(uniqueID)) then
+			timer.Remove(uniqueID)
+		end
+
+		if (not client.expCorpseCharacter and not client:GetCharacter()) then
+			-- Can happen when the server is shutting down, removing all ents
+			return
+		end
+
+		hook.Run("OnPlayerCorpseRemoved", client, ragdoll)
+	end)
+
+	-- Start decay process only if we have a time set
+	if (decayTime > 0) then
+		timer.Create(uniqueID, decayTime, 1, function()
+			if (IsValid(entity)) then
+				entity:Remove()
+			else
+				timer.Remove(uniqueID)
+			end
+		end)
+	end
+
+	-- Remove reference to ragdoll so it isn't removed on spawn when SetRagdolled is called
+	client.ixRagdoll = nil
+	-- Remove reference to the player so no more damage can be dealt
+	entity.ixPlayer = nil
+
+	Schema.corpses[#Schema.corpses + 1] = entity
+
+	if (#Schema.corpses >= maxCorpses) then
+		Schema.CleanupCorpses(maxCorpses)
+	end
+
+	client:SetLocalVar("ragdoll", entity:EntIndex())
+
+	hook.Run("OnPlayerCorpseCreated", client, entity)
 end
 
 function Schema.SearchPlayer(client, target)

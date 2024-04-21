@@ -7,6 +7,6 @@ ITEM.description = "A bandit uniform with a mandatory hood and trenchcoat."
 ITEM.width = 2
 ITEM.height = 1
 
-ITEM.replacements = "models/stalkertnb/banditboss1.mdl"
+ITEM.replacement = "models/stalkertnb/banditboss1.mdl"
 
-ix.anim.SetModelClass(ITEM.replacements, "player")
+ix.anim.SetModelClass(ITEM.replacement, "player")

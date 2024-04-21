@@ -43,6 +43,7 @@ LANGUAGE = {
 	beingTied = "They are being tied up.",
 	beingUntied = "They are being untied.",
 	searchingCorpse = "Searching corpse...",
+	resurrectingCorpse = "Resurrecting corpse...",
 	radioNotOn = "Your radio isn't on!",
 	radioRequired = "You need a radio to do this.",
 	radioAlreadyOn = "You already have a radio that is turned on!",

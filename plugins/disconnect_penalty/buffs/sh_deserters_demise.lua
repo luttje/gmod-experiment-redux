@@ -36,7 +36,9 @@ function BUFF.hooks:OnCharacterDisconnect(client, character)
 		return
 	end
 
-	Schema.PlayerDropCharacterItems(client, character, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
+	client.expDropMode = bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED)
+	client.expCorpseCharacter = character
+	Schema.HandlePlayerDeathCorpse(client)
 end
 
 function BUFF.hooks:PrePlayerLoadedCharacter(client, character, oldCharacter)
@@ -48,5 +50,7 @@ function BUFF.hooks:PrePlayerLoadedCharacter(client, character, oldCharacter)
         return
     end
 
-	Schema.PlayerDropCharacterItems(client, oldCharacter, bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED))
+	client.expDropMode = bit.bor(Schema.dropMode.ALL, Schema.dropMode.WITH_EQUIPPED)
+	client.expCorpseCharacter = oldCharacter
+	Schema.HandlePlayerDeathCorpse(client)
 end

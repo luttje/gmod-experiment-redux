@@ -100,8 +100,6 @@ ITEM.functions.DetachAttachment = {
 		local attachmentData = attachments[attachmentSlotId]
 
 		if (not attachmentData) then
-			client:Notify("This attachment is not attached to the weapon.")
-
 			return false
 		end
 

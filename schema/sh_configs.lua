@@ -66,6 +66,27 @@ ix.config.Add("strengthMultiplier", 0.3, "The strength multiplier scale", nil, {
 	category = "attributes"
 })
 
+Schema.hardCorpseMax = 64
+
+ix.config.Add("corpseMax", 64, "Maximum number of corpses that are allowed to be spawned.", nil, {
+	data = {min = 0, max = Schema.hardCorpseMax},
+	category = "Persistent Corpses"
+})
+
+ix.config.Add("corpseDecayTime", 60, "How long it takes for a corpse to decay in seconds. Set to 0 to never decay.", nil, {
+	data = {min = 0, max = 1800},
+	category = "Persistent Corpses"
+})
+
+ix.config.Add("corpseSearchTime", 1, "How long it takes to search a corpse.", nil, {
+	data = {min = 0, max = 60},
+	category = "Persistent Corpses"
+})
+
+ix.config.Add("dropItemsOnDeath", true, "Whether or not to drop specific items on death.", nil, {
+	category = "Persistent Corpses"
+})
+
 Schema.implantPacData = {
 	[1] = {
 		["children"] = {

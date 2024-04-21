@@ -15,7 +15,7 @@ local function checkHasPerk(perks, perkTable, client)
 		end
 	end
 
-	return hasPerk
+	return hasPerk, perkTable
 end
 
 if (SERVER) then

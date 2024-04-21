@@ -1,33 +1,26 @@
+--[[
+
+	Organization, loading, saving and tick hooks
+
+--]]
+
 function Schema:GetGameDescription()
 	return Schema.name
 end
 
-function Schema:OnPhysgunFreeze(weapon, physObj, entity, client)
-	if (not IsValid(physObj)) then
-		return false
+function Schema:PrePlayerLoadedCharacter(client, curChar, prevChar)
+	if (prevChar) then
+		local informers = prevChar:GetVar("boltInformers") or {}
+		local inventory = prevChar:GetInventory()
+
+		for _, v in ipairs(informers) do
+			if (IsValid(v)) then
+				v:Remove()
+			end
+		end
+
+		prevChar:SetVar("boltInformers", nil)
 	end
-end
-
-function Schema:AdjustHealAmount(client, amount)
-	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
-
-	if (buff) then
-		local stacks = buffTable:GetStacks(client, buff)
-		local totalHealModify = math.pow(buffTable.healModifyPerStack, stacks)
-
-		return amount * totalHealModify
-	end
-end
-
-function Schema:PlayerHealed(client, target, item)
-	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
-
-	if (not buff) then
-		Schema.buff.SetActive(client, "waning_ward")
-		return
-	end
-
-	buffTable:Stack(client, buff)
 end
 
 function Schema:CharacterLoaded(character)
@@ -36,10 +29,6 @@ function Schema:CharacterLoaded(character)
 	Schema.perk.LoadOwned(client, character)
 	Schema.buff.LoadActive(client, character)
 	Schema.achievement.LoadProgress(client, character)
-end
-
-function Schema:CharacterPreSave(character)
-	Schema.buff.PrepareSaveActive(character:GetPlayer(), character)
 end
 
 function Schema:PlayerSecondElapsed(client)
@@ -52,6 +41,135 @@ function Schema:PlayerSecondElapsed(client)
 	client:CheckQueuedBoostRemovals(character)
 	Schema.buff.CheckExpired(client)
 end
+
+function Schema:CharacterPreSave(character)
+	Schema.buff.PrepareSaveActive(character:GetPlayer(), character)
+end
+
+function Schema:PlayerDisconnected(client)
+	local character = client:GetCharacter()
+
+	if (character) then
+		local doors = character:GetVar("doors") or {}
+
+		for _, v in ipairs(doors) do
+			if (IsValid(v) and v:IsDoor() and v:GetDTEntity(0) == client) then
+				v:RemoveDoorAccessData()
+			end
+		end
+
+		character:SetVar("doors", nil)
+	end
+
+	if (client:SteamID() == nil or client:SteamID64() == nil) then
+		--[[
+		From the wiki:
+		"
+			NEED TO VALIDATE
+			Player:SteamID, Player:SteamID64, and the like can return nil here.
+		"
+		https://wiki.facepunch.com/gmod/GM:PlayerDisconnected
+
+		Let's return the favor and validate whether nil is ever returned.
+		--]]
+		local playerData = {
+			time = os.time(),
+			version = VERSION,
+			versionStr = VERSIONSTR,
+			jitVersion = jit.version,
+			jitVersionNum = jit.version_num,
+			steamID = tostring(client:SteamID()),
+			steamID64 = tostring(client:SteamID64()),
+			steamName = tostring(client:SteamName()),
+		}
+		ErrorNoHaltWithStack("Player disconnected (wiki bug/issue validation): " .. util.TableToJSON(playerData) .. "\n")
+		file.Write("disconnect_validation.txt", util.TableToJSON(playerData) .. "\n")
+	end
+end
+
+function Schema:CharacterVarChanged(character, key, oldValue, value)
+	if (key == "money") then
+		local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
+
+		if (value > requiredMoney) then
+			Schema.achievement.Progress(character:GetPlayer(), "northern_rock")
+		end
+	end
+end
+
+function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
+	if (attributeKey == "strength") then
+		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
+
+		if (value >= requiredAttribute) then
+			Schema.achievement.Progress(client, "titans_strength")
+		end
+	elseif (attributeKey == "dexterity") then
+		local requiredAttribute = Schema.achievement.GetProperty("dextrous_rogue", "requiredAttribute")
+
+		if (value >= requiredAttribute) then
+			Schema.achievement.Progress(client, "dextrous_rogue")
+		end
+	elseif (attributeKey == "acrobatics") then
+		local requiredAttribute = Schema.achievement.GetProperty("natural_acrobat", "requiredAttribute")
+
+		if (value >= requiredAttribute) then
+			Schema.achievement.Progress(client, "natural_acrobat")
+		end
+	elseif (attributeKey == "agility") then
+		local requiredAttribute = Schema.achievement.GetProperty("agile_shadow", "requiredAttribute")
+
+		if (value >= requiredAttribute) then
+			Schema.achievement.Progress(client, "agile_shadow")
+		end
+	end
+end
+
+function Schema:GetSalaryAmount(client, faction)
+	local salary = faction.pay
+
+	if (ix.config.Get("incomeMultiplier") ~= 1) then
+		salary = salary * ix.config.Get("incomeMultiplier")
+	end
+
+	return salary
+end
+
+--[[
+
+	Sandbox hooks (context/spawnmenu, spawning props, etc.)
+
+--]]
+
+function Schema:OnPhysgunFreeze(weapon, physObj, entity, client)
+	if (not IsValid(physObj)) then
+		return false
+	end
+end
+
+--[[
+
+	Spawning hooks
+
+--]]
+
+function Schema:PlayerInitialSpawn(client)
+	Schema.CleanupCorpses()
+end
+
+function Schema:PlayerSpawn(client)
+	client:SetLocalVar("ragdoll", nil)
+
+	-- Reset these so they don't interfere the next time the player dies
+	client.expCorpseCharacter = nil
+	client.expDropMode = nil
+end
+
+--[[
+
+	Damage hooks
+
+--]]
 
 function Schema:GetPlayerPunchDamage(client, damage, context)
 	if (not client:GetCharacter()) then
@@ -255,6 +373,181 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 	end
 end
 
+function Schema:PlayerDestroyGenerator(client, entity, generator)
+	if (entity.PlayerDestroyGenerator and entity:PlayerDestroyGenerator(client, generator) ~= nil) then
+		return
+	end
+
+	if (Schema.perk.GetOwned("payback", client)) then
+		client:GetCharacter():GiveMoney(generator.price)
+
+		return
+	end
+
+	client:GetCharacter():GiveMoney((generator.price * .75))
+end
+
+--[[
+
+	Healing hooks
+
+--]]
+
+function Schema:AdjustHealAmount(client, amount)
+	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
+
+	if (buff) then
+		local stacks = buffTable:GetStacks(client, buff)
+		local totalHealModify = math.pow(buffTable.healModifyPerStack, stacks)
+
+		return amount * totalHealModify
+	end
+end
+
+function Schema:PlayerHealed(client, target, item)
+	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
+
+	if (not buff) then
+		Schema.buff.SetActive(client, "waning_ward")
+		return
+	end
+
+	buffTable:Stack(client, buff)
+end
+
+--[[
+
+	Death hooks
+
+--]]
+
+function Schema:ShouldSpawnClientRagdoll(client)
+	return false
+end
+
+function Schema:ShouldRemoveRagdollOnDeath(client)
+	return false
+end
+
+function Schema:OnPlayerCorpseNotCreated(client)
+end
+
+function Schema:OnPlayerCorpseCreated(client, entity)
+	if (not ix.config.Get("dropItemsOnDeath", false) or not client:GetCharacter()) then
+		return
+	end
+
+	local character = client.expCorpseCharacter or client:GetCharacter()
+	local characterInventory = character:GetInventory()
+	local width, height = characterInventory:GetSize()
+
+	local inventory = ix.inventory.Create(width, height, os.time())
+	entity.ixInventory = inventory
+
+	entity.GetDisplayName = function(corpse)
+		local name = "Someone"
+
+		if (IsValid(client)) then
+			name = client:Name()
+		end
+
+		return name .. "'s Corpse"
+	end
+
+	entity.GetInventory = function(corpse)
+		return corpse.ixInventory
+	end
+
+	entity.SetMoney = function(corpse, amount)
+		corpse.ixMoney = amount
+	end
+
+	entity.GetMoney = function(corpse)
+		return corpse.ixMoney or 0
+	end
+
+	hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
+end
+
+function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
+	local character = client.expCorpseCharacter or client:GetCharacter()
+	local dropMode = client.expDropMode or Schema.dropMode.RANDOM
+	local characterInventory = character:GetInventory()
+	local money = character:GetMoney()
+
+	local hasConfusingPockets, confusingPocketsPerkTable = Schema.perk.GetOwned("confusing_pockets", client)
+	local evenEquipped = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED) == Schema.dropMode.WITH_EQUIPPED
+	local dropModeIsRandom = bit.band(dropMode, Schema.dropMode.RANDOM) == Schema.dropMode.RANDOM
+
+	for _, slot in pairs(characterInventory.slots) do
+		for _, item in pairs(slot) do
+			if (item.noDrop) then
+				continue
+			end
+
+			if (item:GetData("equip") and not evenEquipped) then
+				continue
+			end
+
+			local shouldDropItem = false
+
+			if (dropModeIsRandom) then
+				local loseItemChance = 0.75
+
+				if (hasConfusingPockets) then
+					loseItemChance = loseItemChance * confusingPocketsPerkTable.modifyLoseChance
+				end
+
+				shouldDropItem = (math.random() > loseItemChance)
+			else
+				shouldDropItem = true
+			end
+
+			if (shouldDropItem) then
+				if (item.hooks["drop"]) then
+					item.player = client
+					item.hooks["drop"](item)
+					item.player = nil
+				end
+
+				item:Transfer(corpseInventory:GetID(), item.gridX, item.gridY, nil, false, true)
+			end
+		end
+	end
+
+	if (money > 0) then
+		local amountToLose = money
+
+		if (dropModeIsRandom) then
+			local fractionToLose = 0.75
+
+			if (hasConfusingPockets) then
+				fractionToLose = fractionToLose * confusingPocketsPerkTable.modifyLoseChance
+			end
+
+			amountToLose = math.floor(math.random(1, money * fractionToLose))
+		end
+
+		character:TakeMoney(amountToLose)
+
+		if (not entity.SetMoney) then
+			error("Attempt to set money on an entity that doesn't support it: " .. tostring(entity))
+		end
+
+		entity:SetMoney(amountToLose)
+
+		if (character:GetMoney() == 0) then
+			Schema.achievement.Progress(client, "boltless_wanderer", 1)
+		end
+	end
+
+	-- character:Save()
+end
+
+function Schema:DoPlayerDeath(client, attacker, damageinfo)
+	Schema.HandlePlayerDeathCorpse(client)
+end
+
 function Schema:PlayerDeath(client, inflictor, attacker)
 	local character = client:GetCharacter()
 
@@ -263,12 +556,16 @@ function Schema:PlayerDeath(client, inflictor, attacker)
 	end
 
 	Schema.achievement.Progress(client, "favored_target")
-
-	Schema.PlayerDropCharacterItems(client, character, Schema.dropMode.RANDOM)
 end
 
+--[[
+
+	Interaction hooks
+
+--]]
+
 function Schema:PlayerUse(client, entity)
-	if (! client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and ! entity:GetNetVar("untying")) then
+	if (not client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and not entity:GetNetVar("untying")) then
 		entity:SetAction("@beingUntied", 5)
 		entity:SetNetVar("untying", true)
 
@@ -287,51 +584,17 @@ function Schema:PlayerUse(client, entity)
 			end
 		end)
 	end
-end
 
-function Schema:PrePlayerLoadedCharacter(client, curChar, prevChar)
-	if (prevChar) then
-		local informers = prevChar:GetVar("boltInformers") or {}
-		local inventory = prevChar:GetInventory()
+	if (entity:GetClass() == "prop_ragdoll" and entity.ixInventory and not ix.storage.InUse(entity.ixInventory)) then
+		ix.storage.Open(client, entity.ixInventory, {
+			entity = entity,
+			name = "Corpse",
+			searchText = "@searchingCorpse",
+			searchTime = ix.config.Get("corpseSearchTime", 1)
+		})
 
-		for _, v in ipairs(informers) do
-			if (IsValid(v)) then
-				v:Remove()
-			end
-		end
-
-		prevChar:SetVar("boltInformers", nil)
+		return false
 	end
-end
-
-function Schema:PlayerDisconnected(client)
-	local character = client:GetCharacter()
-
-	if (character) then
-		local doors = character:GetVar("doors") or {}
-
-		for _, v in ipairs(doors) do
-			if (IsValid(v) and v:IsDoor() and v:GetDTEntity(0) == client) then
-				v:RemoveDoorAccessData()
-			end
-		end
-
-		character:SetVar("doors", nil)
-	end
-end
-
-function Schema:PlayerDestroyGenerator(client, entity, generator)
-	if (entity.PlayerDestroyGenerator and entity:PlayerDestroyGenerator(client, generator) ~= nil) then
-		return
-	end
-
-	if (Schema.perk.GetOwned("payback", client)) then
-		client:GetCharacter():GiveMoney(generator.price)
-
-		return
-	end
-
-	client:GetCharacter():GiveMoney((generator.price * .75))
 end
 
 function Schema:PlayerPerkBought(client, perk)
@@ -353,79 +616,4 @@ function Schema:CreateShipment(client, shipmentEntity)
 			break
 		end
 	end
-end
-
-function Schema:CharacterVarChanged(character, key, oldValue, value)
-	if (key == "money") then
-		local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
-
-		if (value > requiredMoney) then
-			Schema.achievement.Progress(character:GetPlayer(), "northern_rock")
-		end
-	end
-end
-
-function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
-	if (attributeKey == "strength") then
-		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
-
-		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "titans_strength")
-		end
-	elseif (attributeKey == "dexterity") then
-		local requiredAttribute = Schema.achievement.GetProperty("dextrous_rogue", "requiredAttribute")
-
-		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "dextrous_rogue")
-		end
-	elseif (attributeKey == "acrobatics") then
-		local requiredAttribute = Schema.achievement.GetProperty("natural_acrobat", "requiredAttribute")
-
-		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "natural_acrobat")
-		end
-	elseif (attributeKey == "agility") then
-		local requiredAttribute = Schema.achievement.GetProperty("agile_shadow", "requiredAttribute")
-
-		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "agile_shadow")
-		end
-	end
-end
-
-function Schema:PlayerDisconnected(client)
-	if (client:SteamID() == nil or client:SteamID64() == nil) then
-		--[[
-		From the wiki:
-		"
-			NEED TO VALIDATE
-			Player:SteamID, Player:SteamID64, and the like can return nil here.
-		"
-		https://wiki.facepunch.com/gmod/GM:PlayerDisconnected
-
-		Let's return the favor and validate whether nil is ever returned.
-		--]]
-		local playerData = {
-			time = os.time(),
-			version = VERSION,
-			versionStr = VERSIONSTR,
-			jitVersion = jit.version,
-			jitVersionNum = jit.version_num,
-			steamID = tostring(client:SteamID()),
-			steamID64 = tostring(client:SteamID64()),
-			steamName = tostring(client:SteamName()),
-		}
-		ErrorNoHaltWithStack("Player disconnected (wiki bug/issue validation): " .. util.TableToJSON(playerData) .. "\n")
-		file.Write("disconnect_validation.txt", util.TableToJSON(playerData) .. "\n")
-	end
-end
-
-function Schema:GetSalaryAmount(client, faction)
-	local salary = faction.pay
-
-	if (ix.config.Get("incomeMultiplier") ~= 1) then
-		salary = salary * ix.config.Get("incomeMultiplier")
-	end
-
-	return salary
 end

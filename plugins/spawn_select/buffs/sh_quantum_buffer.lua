@@ -22,8 +22,11 @@ function BUFF:OnShouldExpire(client, buff)
 	end
 end
 
-function BUFF.hooks:PlayerLoadedCharacter(client, character, oldCharacter)
-	Schema.buff.SetActive(client, "quantum_buffer")
+function BUFF.hooks:PostPlayerLoadout(client)
+	if (Schema.buff.GetActive(client, self.index)) then
+		return
+	end
+	Schema.buff.SetActive(client, self.index)
 end
 
 function BUFF.hooks:PlayerShouldTakeDamage(client, attacker)

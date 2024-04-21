@@ -32,9 +32,18 @@ function PLUGIN:LoadBelongings()
 end
 
 function PLUGIN:SaveBelongings()
+	local entities = ents.FindByClass("exp_belongings")
 	local belongings = {}
 
-	for _, entity in pairs(ents.FindByClass("exp_belongings")) do
+	for _, ragdoll in pairs(ents.FindByClass("prop_ragdoll")) do
+		if (not ragdoll.expIsBelongings) then
+			continue
+		end
+
+		entities[#entities + 1] = ragdoll
+	end
+
+	for _, entity in pairs(entities) do
 		local inventory = entity:GetInventory()
 
 		-- TODO: Sometimes (like when shutting the server down) inventory.GetItems is nil, why?
@@ -67,16 +76,44 @@ function PLUGIN:SaveBelongings()
 		local width, height = inventory:GetSize()
 
 		belongings[#belongings + 1] = {
-			money = entity:GetMoney(),
-			angles = entity:GetAngles(),
-			moveable = moveable,
-			position = entity:GetPos(),
 			inventoryID = inventory:GetID(),
 			invWidth = width,
 			invHeight = height,
+			money = entity:GetMoney(),
+
 			displayName = entity:GetDisplayName(),
+
+			position = entity:GetPos(),
+			angles = entity:GetAngles(),
+			moveable = moveable,
 		}
 	end
 
 	self:SetData(belongings)
+end
+
+function PLUGIN:CreateBelongings(client, storageEntity)
+	local character = client.expCorpseCharacter or client:GetCharacter()
+	local inventory = storageEntity and storageEntity.ixInventory or nil
+	local entity = ents.Create("exp_belongings")
+
+	if (not inventory)then
+		local characterInventory = character:GetInventory()
+		local width, height = characterInventory:GetSize()
+
+		inventory = ix.inventory.Create(width, height, os.time())
+
+		hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
+	elseif(storageEntity) then
+		entity:SetMoney(storageEntity:GetMoney())
+	end
+
+	entity.ixInventory = inventory
+	inventory.vars.isBelongings = entity
+
+	entity:SetInventory(inventory)
+	entity:SetAngles(storageEntity and storageEntity:GetAngles() or Angle(0, 0, -90))
+	entity:SetDisplayName(character:GetName() .. "'s Belongings")
+	entity:SetPos((storageEntity and storageEntity:GetPos() or client:GetPos()) + Vector(0, 0, 48))
+	entity:Spawn()
 end
