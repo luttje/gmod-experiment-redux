@@ -53,11 +53,12 @@ if (not SERVER) then
 	return
 end
 
-function PLUGIN:ResurrectPlayer(client, target, entity)
+function PLUGIN:ResurrectPlayer(client, target, entity, newHealth)
 	entity:RemoveWithEffect()
 	target:SetNetVar("deathTime", nil)
 	target:Spawn()
 	target:SetPos(entity:GetPos())
+	target:SetHealth(newHealth or target:GetMaxHealth())
 
 	if (target:IsStuck()) then
 		entity:DropToFloor()
@@ -137,16 +138,19 @@ function PLUGIN:PlayerInteractEntity(client, entity, option, data)
 				return
 			end
 
-			self:ResurrectPlayer(client, target, entity)
+			local newHealth
 
 			if (healthPenaltyFactor) then
+				newHealth = client:Health() * healthPenaltyFactor
 				local damageInfo = DamageInfo()
-				damageInfo:SetDamage(client:Health() * healthPenaltyFactor)
+				damageInfo:SetDamage(newHealth)
 				damageInfo:SetAttacker(client)
 				damageInfo:SetInflictor(client:GetActiveWeapon())
 				damageInfo:SetDamageType(DMG_BURN)
 				client:TakeDamageInfo(damageInfo)
 			end
+
+			self:ResurrectPlayer(client, target, entity, newHealth)
 		end, resurrectTimeInSeconds, function()
 			if (IsValid(client)) then
 				client:SetAction()
