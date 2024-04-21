@@ -1,8 +1,3 @@
-function Schema:PostGamemodeLoaded()
-	baseclass.Set("exp_buff_meta", Schema.meta.buff)
-	baseclass.Set("exp_npc_meta", Schema.meta.npc)
-end
-
 function Schema:DoPluginIncludes(path, plugin)
 	Schema.achievement.LoadFromDir(path .. "/achievements")
 	Schema.buff.LoadFromDir(path .. "/buffs")

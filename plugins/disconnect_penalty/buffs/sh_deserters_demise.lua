@@ -3,7 +3,6 @@ local BUFF = BUFF
 
 BUFF.name = "Deserter's Demise"
 BUFF.isNegative = true
-BUFF.backgroundImage = "experiment-redux/symbol_background"
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 4,

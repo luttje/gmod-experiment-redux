@@ -48,7 +48,7 @@ end
 ---@param buff ActiveBuff
 ---@return string
 function META:GetBackgroundImage(client, buff)
-	return self.backgroundImage
+	return self.backgroundImage or "experiment-redux/symbol_background"
 end
 
 ---@param client Player
@@ -114,12 +114,6 @@ function META:OnSetup(client, buff)
 			character:AddBoost("buff#"..self.uniqueID, attribute, boostAmount)
 		end
 	end
-end
-
----@param client Player
----@param buff ActiveBuff
-function META:OnLoadout(client, buff)
-
 end
 
 ---@param client Player

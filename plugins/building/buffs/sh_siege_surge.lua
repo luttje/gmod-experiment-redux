@@ -2,7 +2,6 @@ local PLUGIN = PLUGIN
 local BUFF = BUFF
 
 BUFF.name = "Siege Surge"
-BUFF.backgroundImage = "experiment-redux/symbol_background"
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 4,

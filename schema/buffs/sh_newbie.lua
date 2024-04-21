@@ -1,7 +1,6 @@
 local BUFF = BUFF
 
 BUFF.name = "Newbie"
-BUFF.backgroundImage = "experiment-redux/symbol_background"
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
 	x = 14,

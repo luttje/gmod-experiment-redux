@@ -4,57 +4,103 @@ PLUGIN.name = "Resurrection"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Lets players resurrect other players."
 
--- if (CLIENT) then
--- 	function PLUGIN:NetworkEntityCreated(entity)
--- 		if (entity:GetClass() ~= "prop_ragdoll") then
--- 			return
--- 		end
+ix.lang.AddTable("english", {
+	resurrect = "Resurrect",
+})
 
--- 		entity.GetEntityMenu = function(entity, options)
--- 			local player = entity:GetNetVar("player", NULL)
+if (CLIENT) then
+	function PLUGIN:NetworkEntityCreated(entity)
+		local client = LocalPlayer()
 
--- 			if (not IsValid(player) or player:Alive()) then
--- 				return
--- 			end
+		if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
+			return
+		end
 
--- 			-- TODO: Guard for if they haven't recently been resurrected (are debuff-ed)
--- 			local options = {}
+		if (not Schema.perk.GetOwned("phoenix_tamer")) then
+			return
+		end
 
--- 			options["resurrect"] = {
--- 				text = "Resurrect",
--- 				icon = "icon16/heart.png",
--- 			}
+		entity.GetEntityMenu = function(entity, options)
+			local target = entity:GetNetVar("player", NULL)
+			local options = {}
 
--- 			return options
--- 		end
+			options[L("searchCorpse")] = true
 
--- 		print(entity.GetEntityMenu)
--- 	end
--- end
+			if (not IsValid(target) or target:Alive()) then
+				return options
+			end
 
-if (not SERVER) then
-    return
+			local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
+
+			if (not canResurrect) then
+				return options
+			end
+
+			options[L("resurrect")] = true
+
+			return options
+		end
+	end
 end
 
--- function PLUGIN:PlayerInteractEntity(client, entity, option, data)
--- 	if (entity:GetClass() ~= "prop_ragdoll" or option ~= "resurrect") then
--- 		return
--- 	end
+if (not SERVER) then
+	return
+end
 
--- 	entity.OnOptionSelected = function(entity, client, option, data)
--- 		if (option ~= "resurrect") then
--- 			return
--- 		end
+function PLUGIN:CanPlayerSearchCorpse(client, corpse)
+	if (Schema.perk.GetOwned("phoenix_tamer", client)) then
+		-- Disable searching through USE, since we'll be using the entity menu
+		return false
+	end
+end
 
--- 		local player = entity:GetNetVar("player")
+function PLUGIN:PlayerInteractEntity(client, entity, option, data)
+	if (entity:GetClass() ~= "prop_ragdoll") then
+		return
+	end
 
--- 		if (not IsValid(player) or player:Alive()) then
--- 			client:Notify("This corpse is beyond saving!")
--- 		end
+	if (not Schema.perk.GetOwned("phoenix_tamer", client)) then
+		return
+	end
 
--- 		-- TODO: Guard for if they haven't recently been resurrected (are debuff-ed)
+	entity.OnOptionSelected = function(entity, client, option, data)
+		if (option == L("searchCorpse", client) and entity.StartSearchCorpse) then
+			entity:StartSearchCorpse(client)
+		end
 
--- 		-- TODO: Resurrect the player
--- 		print("todo", player, "resurrecting")
--- 	end
--- end
+		if (option ~= L("resurrect", client)) then
+			return
+		end
+
+		local target = entity:GetNetVar("player")
+
+		if (not IsValid(target) or target:Alive()) then
+			client:Notify("This corpse is beyond saving!")
+			return
+		end
+
+		local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
+
+		if (not canResurrect) then
+			client:Notify("This corpse is blocked from being resurrected!")
+			return
+		end
+
+		-- Resurrect the player
+		entity:RemoveWithEffect()
+		target:SetNetVar("deathTime", nil)
+		target:SetPos(entity:GetPos())
+		target:Spawn()
+		target:SetPos(entity:GetPos())
+
+		Schema.achievement.Progress(client, "paramedic")
+
+		local alliance = client:GetAlliance()
+
+		if (alliance ~= nil and alliance == target:GetAlliance()) then
+			Schema.achievement.Progress(client, "guardian_of_the_fallen")
+		end
+
+		hook.Run("PlayerResurrectedTarget", client, target)
+	end
+end

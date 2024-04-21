@@ -394,14 +394,6 @@ end
 --]]
 
 function Schema:AdjustHealAmount(client, amount)
-	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
-
-	if (buff) then
-		local stacks = buffTable:GetStacks(client, buff)
-		local totalHealModify = math.pow(buffTable.healModifyPerStack, stacks)
-
-		return amount * totalHealModify
-	end
 end
 
 function Schema:PlayerHealed(client, target, item)
@@ -443,6 +435,19 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 
 	local inventory = ix.inventory.Create(width, height, os.time())
 	entity.ixInventory = inventory
+
+	entity.StartSearchCorpse = function(corpse, client)
+		if (not IsValid(client)) then
+			return
+		end
+
+		ix.storage.Open(client, entity.ixInventory, {
+			entity = entity,
+			name = "Corpse",
+			searchText = "@searchingCorpse",
+			searchTime = ix.config.Get("corpseSearchTime", 1)
+		})
+	end
 
 	entity.GetDisplayName = function(corpse)
 		local name = "Someone"
@@ -585,13 +590,18 @@ function Schema:PlayerUse(client, entity)
 		end)
 	end
 
-	if (entity:GetClass() == "prop_ragdoll" and entity.ixInventory and not ix.storage.InUse(entity.ixInventory)) then
-		ix.storage.Open(client, entity.ixInventory, {
-			entity = entity,
-			name = "Corpse",
-			searchText = "@searchingCorpse",
-			searchTime = ix.config.Get("corpseSearchTime", 1)
-		})
+	if (entity:GetClass() ~= "prop_ragdoll") then
+		return
+	end
+
+	if (entity.ixInventory and not ix.storage.InUse(entity.ixInventory) and entity.StartSearchCorpse) then
+		local canSearch = hook.Run("CanPlayerSearchCorpse", client, entity) ~= false
+
+		if (not canSearch) then
+			return
+		end
+
+		entity:StartSearchCorpse(client)
 
 		return false
 	end

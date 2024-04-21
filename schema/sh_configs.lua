@@ -8,6 +8,9 @@ ix.config.SetDefault("music", "music/HL2_song23_SuitSong3.mp3")
 ix.config.SetDefault("maxAttributes", 100)
 ix.config.SetDefault("communityURL", "")
 
+-- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
+ix.config.SetDefault("spawnTime", 60)
+
 ix.config.Add("allianceCost", 10000, "How much an alliance costs to create.", nil, {
 	data = { min = 0, max = 1000000 },
 	category = "alliances"

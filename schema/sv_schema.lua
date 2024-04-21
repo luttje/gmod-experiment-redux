@@ -226,7 +226,6 @@ function Schema.HandlePlayerDeathCorpse(client)
 		hook.Run("OnPlayerCorpseRemoved", client, ragdoll)
 	end)
 
-	decayTime = 20
 	if (decayTime > 0) then
 		local visualDecayTime = math.max(decayTime * .1, math.min(10, decayTime))
 

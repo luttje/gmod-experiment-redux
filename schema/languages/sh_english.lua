@@ -42,6 +42,7 @@ LANGUAGE = {
 	fUntied = "You have been untied.",
 	beingTied = "They are being tied up.",
 	beingUntied = "They are being untied.",
+	searchCorpse = "Search corpse",
 	searchingCorpse = "Searching corpse...",
 	resurrectingCorpse = "Resurrecting corpse...",
 	radioNotOn = "Your radio isn't on!",

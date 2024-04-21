@@ -275,35 +275,11 @@ if (SERVER) then
 		return expiredCount
 	end
 
-	--- Called on loadout to call events on buffs that need to setup stuff on player spawn/loadout
-	---@param client Player
-	function Schema.buff.CallLoadout(client)
-		local character = client:GetCharacter()
-
-		if (not character) then
-			return
-		end
-
-		local buffs = character.expBuffs or {}
-
-		for buffKey, buff in pairs(buffs) do
-			local buffTable = Schema.buff.Get(buff.index)
-
-			if (buffTable.OnLoadout) then
-				buffTable:OnLoadout(client, buff)
-			end
-		end
-	end
-
 	hook.Add("PostPlayerDeath", "expBuffsRemoveOnDeath", function(client)
 		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
 			return not buffTable:ShouldPersistThroughRespawn(client, buff)
 		end)
     end)
-
-	hook.Add("PlayerLoadout", "expBuffsCallLoadout", function(client)
-		Schema.buff.CallLoadout(client)
-	end)
 
 	hook.Add("PlayerSecondElapsed", "expBuffsSecondElapsed", function(client)
 		local character = client:GetCharacter()
