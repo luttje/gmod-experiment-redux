@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Tutorial</title>
+
+    <!--
+        Reminder to self: Garry's Mod's HTML is based on Awesomium, which is based on Chromium 18.
+        This means that some modern features are not supported. So no fancy ES6 features like let,
+        const, etc. And no CSS features like flexbox, grid, etc.
+    -->
+
+    <style>
+        @font-face {
+            font-family: "LightsOut";
+            src: url(asset://garrysmod/resource/fonts/lightout.woff)
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: black;
+            color: white;
+            font-family: "LightsOut";
+            font-size: 32px;
+            padding: 1em;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 0;
+        }
+
+        h2 {
+            color: red;
+            font-size: 2em;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section {
+            position: relative;
+            min-height: 80%;
+            margin-top: 2em;
+        }
+
+        img {
+            position: relative;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 1em 0 0 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        ul li::before {
+            content: "•";
+            color: red;
+            display: inline-block;
+            margin: 0.5em;
+        }
+
+        .frame {
+            position: absolute;
+            display: inline-block;
+            max-width: 512px;
+            max-height: 512px;
+            width: 50%;
+            z-index: 0;
+        }
+        .frame::after {
+            position: absolute;
+            content: "";
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url(asset://garrysmod/materials/experiment-redux/illustrations/vignette.png);
+            background-size: 100% 100%;
+        }
+
+        .aside {
+            padding: 2em;
+            position: absolute;
+            z-index: 1;
+            height: 100%;
+        }
+
+        .aside::before {
+            position: absolute;
+            content: "";
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-image: url(asset://garrysmod/materials/experiment-redux/illustrations/gradient.png);
+            background-size: 100% 100%;
+            background-repeat: repeat-y;
+        }
+
+        .left .frame {
+            left: 1em;
+        }
+        .left h2 {
+            text-align: right;
+        }
+        .left ul {
+            text-indent: 2em;
+        }
+        .left .aside {
+            right: 0;
+        }
+        .left .aside::before {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+        }
+
+        .right .frame {
+            right: 1em;
+        }
+        .right h2 {
+            text-align: left;
+        }
+        .right ul {
+            text-align: left;
+        }
+
+        .button {
+            position: fixed;
+            bottom: 1em;
+            left: 50%;
+            transform: translateX(-50%);
+            -webkit-transform: translateX(-50%);
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .button img {
+            filter: drop-shadow(0 0 0.2em red);
+            -webkit-filter: drop-shadow(0 0 0.2em red);
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="section left">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/scavenging.png"></div>
+        <div class="aside">
+            <h2>THROUGH ECHOES OF RUIN,<br>SCRAP TO SURVIVE</h2>
+            <ul>
+                <li>Scavenge the city for useful items.</li>
+                <li>You'll also find scrap and other materials.</li>
+                <li>Beware of hostile entities.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section right">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/generator.png"></div>
+        <div class="aside">
+            <h2>WITH PATIENCE AND TIME,<br>STRENGTH WILL GROW</h2>
+            <ul>
+                <li>Bolt Generators will produce Bolts over time.</li>
+                <li>Scrap will power your Bolt Generator.</li>
+                <li>Bolts are used to purchase stronger equipment.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section left">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/apartment.png"></div>
+        <div class="aside">
+            <h2>A FORTRESS OF SOLACE<BR>AMIDST DESPAIR</h2>
+            <ul>
+                <li>Rent an apartment to house your Bolt Generator.</li>
+                <li>You can lock your door as a first line of defense.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section right">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/raiding.png"></div>
+        <div class="aside">
+            <h2>THE VIGILANT EVADE<BR>THE SHADOWS’ THROWS</h2>
+            <ul>
+                <li>Doors can be broken down by hostile entities.</li>
+                <li>Defend your apartment from raiders.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section left">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/the-business.png"></div>
+        <div class="aside">
+            <h2>WITH BOLTS IN HAND,<BR>POWER WILL BE YOURS</h2>
+            <ul>
+                <li>Visit The Business to purchase powerful equipment.</li>
+                <li>Weapons, armor, and other items are available.</li>
+                <li>Be wary of the price of power.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="section right">
+        <div class="frame"><img src="asset://garrysmod/materials/experiment-redux/illustrations/death.png"></div>
+        <div class="aside">
+            <h2>IN DEATH, A NEW BEGINNING</h2>
+            <ul>
+                <li>When you die, you risk losing your items.</li>
+                <li>Use your experience to survive longer.</li>
+            </ul>
+        </div>
+    </div>
+    <a class="button" id="nextButton" href="javascript:nextSection()">
+        <img src="asset://garrysmod/materials/experiment-redux/illustrations/arrow-down.png">
+    </a>
+    <a class="button hidden" id="closeButton" href="javascript:close()">
+        <img src="asset://garrysmod/materials/experiment-redux/illustrations/close.png">
+    </a>
+
+    <script>
+        var requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
+
+        function smoothScrollTo(element, onFinished) {
+            var targetPosition = element.getBoundingClientRect().top;
+            var startPosition = window.pageYOffset;
+            var distance = targetPosition;
+            var duration = 800;
+            var startTime = null;
+
+            function animation(currentTime) {
+                if (startTime === null) {
+                    startTime = currentTime;
+                }
+                var timeElapsed = currentTime - startTime;
+                var run = easeInOutQuad(timeElapsed, startPosition, distance, duration);
+
+                window.scrollTo(0, run);
+
+                if (timeElapsed < duration) {
+                    requestAnimationFrame(animation);
+                } else {
+                    startTime = null;
+                    if (onFinished) {
+                        onFinished();
+                    }
+                }
+            }
+
+            function easeInOutQuad(t, b, c, d) {
+                t /= d / 2;
+                if (t < 1) return c / 2 * t * t + b;
+                t--;
+                return -c / 2 * (t * (t - 2) - 1) + b;
+            }
+
+            requestAnimationFrame(animation);
+        }
+    </script>
+
+    <script>
+        var sections = document.querySelectorAll('.section');
+        var currentSection = 0;
+
+        function close() {
+            console.log('CLOSE_READABLE');
+        }
+
+        function setButtonHidden(id, hidden) {
+            document.getElementById(id).classList.toggle('hidden', hidden);
+        }
+
+        function nextSection() {
+            if (currentSection < sections.length - 1) {
+                // sections[++currentSection].scrollIntoView({ behavior: 'smooth' });
+                currentSection++;
+
+                setButtonHidden('nextButton', true);
+                smoothScrollTo(sections[currentSection], function () {
+                    setButtonHidden('nextButton', false);
+                });
+            }
+        }
+
+        var flip = false;
+        document.addEventListener('scroll', function (event) {
+            var scrollY = window.scrollY + 1;
+            var windowHeight = window.innerHeight;
+
+            for (var i = 0; i < sections.length; i++) {
+                var section = sections[i];
+                var sectionTop = section.offsetTop;
+                var sectionHeight = section.offsetHeight;
+
+                if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+                    currentSection = i;
+                    break;
+                }
+            }
+
+            // If the scroll is at the bottom of the page, show the close button
+            if (scrollY + windowHeight >= document.body.scrollHeight - 200) {
+                setButtonHidden('nextButton', true);
+                setButtonHidden('closeButton', false);
+                flip = true;
+            } else if (flip) {
+                setButtonHidden('nextButton', false);
+                setButtonHidden('closeButton', true);
+                flip = false;
+            }
+        });
+
+        document.addEventListener('keyup', function (event) {
+            if (event.keyCode === 27) {
+                close();
+            }
+        });
+    </script>
+
+    <script>
+        // Garry's Mod's HTML panel doesn't support Array.from, so the following code only loads in the browser
+        // we do this so we can test HTML in the browser without having to load Garry's Mod. Then in Garry's Mod we can
+        // use the exact same HTML and this code will happily be ignored.
+        if (Array.from) {
+            document.addEventListener('DOMContentLoaded', function (event) {
+                var newPath = "../../content/";
+
+                document.querySelectorAll('img').forEach(function (img) {
+                    if (img.src.includes('asset://garrysmod/')) {
+                        img.src = img.src.replace('asset://garrysmod/', newPath);
+                    }
+                });
+
+                document.querySelectorAll('style').forEach(function (style) {
+                    var cssText = style.innerHTML;
+                    var assetRegex = /asset:\/\/garrysmod\/(\S+)/g;
+
+                    cssText = cssText.replace(assetRegex, function (match, path) {
+                        return newPath + path;
+                    });
+
+                    style.innerHTML = cssText;
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

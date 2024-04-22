@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 7,
 	size = 32,
 }
-PERK.description = "You will receive 150% extra from your BCU base rate every payday"
+PERK.description = "You will receive 150% extra from your Bolt Generator base rate every payday"
 

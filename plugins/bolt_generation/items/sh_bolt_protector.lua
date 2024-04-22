@@ -1,13 +1,13 @@
 local ITEM = ITEM
 
-ITEM.name = "BCU Protector"
+ITEM.name = "Bolt Generator Protector"
 ITEM.price = 200
 ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Protection"
-ITEM.description = "When placed near a BCU it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
+ITEM.description = "When placed near a Bolt Generator it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
 ITEM.maximum = 5
 
 if (CLIENT) then

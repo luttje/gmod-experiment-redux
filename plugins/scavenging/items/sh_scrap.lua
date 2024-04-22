@@ -6,7 +6,7 @@ ITEM.model = "models/gibs/metal_gib4.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.noBusiness = true
-ITEM.description = "This is scrap, it can power Bolt Control Units."
+ITEM.description = "This is scrap, it can power Bolt Generators."
 ITEM.maxStacks = 8
 
 function ITEM:GetFilters()

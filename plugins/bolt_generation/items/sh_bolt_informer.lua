@@ -1,6 +1,6 @@
 local ITEM = ITEM
 
-ITEM.name = "BCU Informer"
+ITEM.name = "Bolt Generator Informer"
 ITEM.price = 200
 ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1

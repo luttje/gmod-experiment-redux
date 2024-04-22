@@ -1,6 +1,6 @@
 local ITEM = ITEM
 
-ITEM.name = "BCU 'Bolt Control Unit'"
+ITEM.name = "Bolt Generator"
 ITEM.model = "models/props_combine/suit_charger001.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -17,7 +17,7 @@ if (CLIENT) then
 		if (self:GetData("placed")) then
 			local panel = tooltip:AddRowAfter("name", "maximum")
 			panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-			panel:SetText("Your BCU is placed in the world!")
+			panel:SetText("Your Bolt Generator is placed in the world!")
 			panel:SizeToContents()
 		end
 
@@ -34,7 +34,7 @@ ITEM.generator = {
     health = 200,
 	produce = 100, -- Base production
 	power = 4,
-	name = "Bolt Control Unit",
+	name = "Bolt Generator",
 	upgrades = {
 		{
 			name = "Minor Augmentation",

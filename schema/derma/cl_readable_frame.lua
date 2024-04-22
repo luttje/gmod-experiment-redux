@@ -1,5 +1,3 @@
-local PLUGIN = PLUGIN
-
 local PANEL = {}
 
 local widthClasses = ""
@@ -9,19 +7,24 @@ for i = 1, 96 do
 end
 
 function PANEL:Init()
-    if (IsValid(PLUGIN.panel)) then
-        PLUGIN.panel:Remove()
+    if (IsValid(ix.gui.expReadableFrame)) then
+        ix.gui.expReadableFrame:Remove()
     end
 
     self:SetSize(350, 400)
     self:Center()
+    self:SetSizable(false)
+    self:ShowCloseButton(false)
     self:SetBackgroundBlur(true)
     self:SetDeleteOnClose(true)
     self:SetTitle(L("paper"))
+    self:SetKeyboardInputEnabled(true)
 
     self.close = self:Add("DButton")
     self.close:Dock(BOTTOM)
     self.close:DockMargin(0, 4, 0, 0)
+    self.close:SetTall(32)
+    self.close:SetFont("ixSmallFont")
     self.close:SetText(L("close"))
     self.close.DoClick = function()
         self:Close()
@@ -30,19 +33,36 @@ function PANEL:Init()
     self.html = self:Add("HTML")
     self.html:Dock(FILL)
 
+    self.html.ConsoleMessage = function(html, message, file, line)
+        if (not isstring(message)) then
+            message = "*js variable*"
+        end
+		print(message)
+
+        if (message == "CLOSE_READABLE") then
+            self:Close()
+        end
+    end
+
     self:MakePopup()
 
-    PLUGIN.panel = self
+    ix.gui.expReadableFrame = self
 end
 
 function PANEL:ReplaceNewLines(text)
-	return text:gsub("\n", "<br>")
+    return text:gsub("\n", "<br>")
 end
 
-function PANEL:SetText(text)
+function PANEL:SetText(text, isFullHtml)
+    if (isFullHtml) then
+        self.html:SetHTML(text)
+		self.html:RequestFocus()
+        return
+    end
+
     text = self:ReplaceNewLines(text)
 
-	self.html:SetHTML([[
+    self.html:SetHTML([[
 		<html>
 			<head>
 				<style>
@@ -72,10 +92,23 @@ function PANEL:SetText(text)
 			</body>
 		</html>
 	]])
+	self.html:RequestFocus()
+end
+
+function PANEL:HideTitleBar()
+    self:SetDraggable(false)
+    self.lblTitle:SetVisible(false)
+    self.btnClose:SetVisible(false)
+    self.close:DockMargin(0, 0, 0, 0)
+    self:DockPadding(0, 0, 0, 0)
+end
+
+function PANEL:HideCloseButton()
+	self.close:SetVisible(false)
 end
 
 function PANEL:OnRemove()
-	PLUGIN.panel = nil
+    ix.gui.expReadableFrame = nil
 end
 
-vgui.Register("expLoreFrame", PANEL, "DFrame")
+vgui.Register("expReadableFrame", PANEL, "DFrame")
