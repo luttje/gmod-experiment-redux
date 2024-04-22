@@ -193,11 +193,19 @@ end
 
 -- Also when we load ensure we have the correct hands.
 function PLUGIN:CharacterLoaded(character)
-	local client = character:GetPlayer()
+    local client = character:GetPlayer()
 
-	if (not IsValid(client)) then
-		return
-	end
+    if (not IsValid(client)) then
+        return
+    end
 
+    self:PlayerModelChanged(client, client:GetModel(), nil)
+end
+
+function PLUGIN:PlayerBodyGroupChanged(client, index, value, oldValue)
+	self:PlayerModelChanged(client, client:GetModel(), nil)
+end
+
+function PLUGIN:PlayerBodyGroupsChanged(client, bodygroups, oldBodygroups)
 	self:PlayerModelChanged(client, client:GetModel(), nil)
 end

@@ -34,6 +34,13 @@ function ITEM:CanEquipOutfit()
 	return IsValid(client) and client:GetModel():lower():StartsWith("models/hl2rp/citizens/")
 end
 
+-- Called when the item first appears for a client.
+function ITEM:OnSendData()
+	self.expNoEquipSound = true
+	self:AddOutfit(self.player)
+	self.expNoEquipSound = false
+end
+
 function ITEM:AddOutfit(client)
 	local character = client:GetCharacter()
 
@@ -47,12 +54,15 @@ function ITEM:AddOutfit(client)
 	end
 
 	if (istable(self.bodyGroups)) then
+		PrintTable(self.bodyGroups)
 		for bodyGroupName, value in pairs(self.bodyGroups) do
 			local index = client:FindBodygroupByName(bodyGroupName)
 
 			if (index > -1) then
 				client:SetBodygroup(index, value)
 			end
+
+			print("Setting bodygroup", index, bodyGroupName, value)
 		end
 	end
 

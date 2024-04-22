@@ -1,20 +1,20 @@
-local playerMeta = FindMetaTable("Player")
+local META = FindMetaTable("Player")
 
-function playerMeta:IsLeader()
+function META:IsLeader()
 	return self:GetCharacter():GetData("rank") == RANK_GEN
 end
 
-function playerMeta:IsCoLeader()
+function META:IsCoLeader()
 	return self:GetCharacter():GetData("rank") == RANK_COL
 end
 
-function playerMeta:GetAllianceRank()
+function META:GetAllianceRank()
 	local rank = self:GetCharacter():GetData("rank")
 
 	return rank
 end
 
-function playerMeta:GetAllianceRankString()
+function META:GetAllianceRankString()
 	local rank = self:GetAllianceRank()
 
 	if (rank == RANK_PVT) then
@@ -36,13 +36,13 @@ function playerMeta:GetAllianceRankString()
 	end
 end
 
-function playerMeta:GetAllianceCanManageRoster()
+function META:GetAllianceCanManageRoster()
 	local rank = self:GetAllianceRank()
 
 	return rank >= RANK_LT
 end
 
-function playerMeta:GetAlliance()
+function META:GetAlliance()
 	local character = self:GetCharacter()
 
 	if (not character) then
@@ -55,7 +55,7 @@ function playerMeta:GetAlliance()
 end
 
 if (SERVER) then
-    function playerMeta:PruneInvalidObjects()
+    function META:PruneInvalidObjects()
 		local character = self:GetCharacter()
 
         if (not character) then
@@ -87,7 +87,7 @@ if (SERVER) then
 		client:PruneInvalidObjects()
 	end)
 
-	function playerMeta:AddLimitedObject(objectType, object)
+	function META:AddLimitedObject(objectType, object)
 		local character = self:GetCharacter()
 		local limitedObjects = character:GetVar("limitedObjects", {})
 		local objects = limitedObjects[objectType] or {}
@@ -99,7 +99,7 @@ if (SERVER) then
 	end
 end
 
-function playerMeta:IsObjectLimited(objectType, limit)
+function META:IsObjectLimited(objectType, limit)
 	local character = self:GetCharacter()
 
 	if (not character) then
@@ -112,7 +112,7 @@ function playerMeta:IsObjectLimited(objectType, limit)
 	return #objects >= limit
 end
 
-function playerMeta:TryTraceInteractAtDistance(distance)
+function META:TryTraceInteractAtDistance(distance)
     local trace = self:GetEyeTraceNoCursor()
 	distance = ix.config.Get("maxInteractionDistance", distance)
 
@@ -129,7 +129,7 @@ end
 
 -- Helpers to ensure networked variables are only set for the specified character.
 -- The networked vars will be set to their default values when the character changes
-function playerMeta:SetCharacterNetVar(key, value)
+function META:SetCharacterNetVar(key, value)
 	local character = self:GetCharacter()
 
 	if (not character) then
@@ -148,7 +148,7 @@ function playerMeta:SetCharacterNetVar(key, value)
 	self:SetNetVar(key, value)
 end
 
-function playerMeta:GetCharacterNetVar(key, default)
+function META:GetCharacterNetVar(key, default)
 	local character = self:GetCharacter()
 
 	if (not character) then

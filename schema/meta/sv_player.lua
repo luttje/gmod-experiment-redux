@@ -1,17 +1,17 @@
 util.AddNetworkString("AllianceRankSet")
 util.AddNetworkString("AllianceMemberLeft")
 
-local playerMeta = FindMetaTable("Player")
+local META = FindMetaTable("Player")
 
-function playerMeta:IsLeader()
+function META:IsLeader()
 	return self:GetCharacter():GetData("rank") == RANK_GEN
 end
 
-function playerMeta:IsCoLeader()
+function META:IsCoLeader()
 	return self:GetCharacter():GetData("rank") == RANK_COL
 end
 
-function playerMeta:SetAllianceRank(rank)
+function META:SetAllianceRank(rank)
 	local character = self:GetCharacter()
 	local alliance = character:GetData("alliance")
 	character:SetData("rank", rank)
@@ -23,7 +23,7 @@ function playerMeta:SetAllianceRank(rank)
 	net.Send(Schema.alliance.GetOnlineMembers(alliance.id))
 end
 
-function playerMeta:SetAlliance(alliance)
+function META:SetAlliance(alliance)
 	local isValidAlliance = type(alliance) == "table" and alliance.id ~= nil and alliance.name ~= nil
 
 	if (alliance ~= nil and not isValidAlliance) then
@@ -44,7 +44,7 @@ function playerMeta:SetAlliance(alliance)
 	character:SetData("alliance", alliance)
 end
 
-function playerMeta:GetAlliance()
+function META:GetAlliance()
 	local character = self:GetCharacter()
 
 	if (not character) then
@@ -56,7 +56,7 @@ function playerMeta:GetAlliance()
 	return alliance
 end
 
-function playerMeta:QueueBoostRemove(boostID, attribID, delay)
+function META:QueueBoostRemove(boostID, attribID, delay)
     local character = self:GetCharacter()
 
     if (not character) then
@@ -71,7 +71,7 @@ function playerMeta:QueueBoostRemove(boostID, attribID, delay)
     character:SetVar("boostsToRemove", boostsToRemove)
 end
 
-function playerMeta:CheckQueuedBoostRemovals(character)
+function META:CheckQueuedBoostRemovals(character)
     local boostsToRemove = character:GetVar("boostsToRemove", {})
     local curTime = CurTime()
 
@@ -87,7 +87,7 @@ function playerMeta:CheckQueuedBoostRemovals(character)
     character:SetVar("boostsToRemove", boostsToRemove)
 end
 
-function playerMeta:RegisterEntityToRemoveOnLeave(entity)
+function META:RegisterEntityToRemoveOnLeave(entity)
     local character = self:GetCharacter()
 	local characterEntities = character:GetVar("charEnts") or {}
 	table.insert(characterEntities, entity)

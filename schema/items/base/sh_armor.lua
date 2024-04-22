@@ -85,7 +85,11 @@ function ITEM:OnEquipped()
 	local character = client:GetCharacter()
 	local armor = self:GetData("armor", self.maxArmor)
 	self:SetData("armor", armor)
-	Schema.armor.SetArmor(character, self.id)
+    Schema.armor.SetArmor(character, self.id)
+
+	if (self.expNoEquipSound) then
+		return
+	end
 
 	client:EmitSound("physics/body/body_medium_impact_soft5.wav", 25, 50)
 end
