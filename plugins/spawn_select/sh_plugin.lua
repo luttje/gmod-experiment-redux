@@ -5,6 +5,13 @@ PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Allows players to select their spawn point from a list of available spawn points."
 PLUGIN.registeredMaps = PLUGIN.registeredMaps or {}
 
+PLUGIN.spawnStatus = {
+	SAFE = 0,
+	DANGER = 1,
+	LOCKED = 2,
+	CHAOS = 3,
+}
+
 PLUGIN.spawnResult = {
 	OK = 0,
 	FAIL = 1,

@@ -41,89 +41,103 @@ function PANEL:GetMapMaterial()
 end
 
 function PANEL:Rebuild()
-	if (not self.spawns) then return end
+    if (not self.spawns) then return end
 
-	local scrW = ScrW()
-	local scrH = ScrH()
+    self:Clear()
+    self:SetLoading(false)
 
-	local mapHeight = scrH * .75
-	local mapScale = mapHeight / self.mapDetails.backgroundOriginalHeight
-	local mapWidth = self.mapDetails.backgroundOriginalWidth * mapScale
+    local scrW = ScrW()
+    local scrH = ScrH()
 
-	self.infoLabel = self:Add("DLabel")
-	self.infoLabel:SetText("Choose your spawn location")
-	self.infoLabel:SetFont("ixMediumFont")
-	self.infoLabel:SizeToContents()
-	self.infoLabel:SetPos(
-		(scrW * .5) - (self.infoLabel:GetWide() * .5),
-		(scrH * .5) - (mapHeight * .5) - self.infoLabel:GetTall() - 20
-	)
+    local mapHeight = scrH * .75
+    local mapScale = mapHeight / self.mapDetails.backgroundOriginalHeight
+    local mapWidth = self.mapDetails.backgroundOriginalWidth * mapScale
 
-	self.mapBackground = self:Add("EditablePanel")
-	self.mapBackground:SetSize(mapWidth, mapHeight)
-	self.mapBackground:SetPos((scrW * .5) - (mapWidth * .5), (scrH * .5) - (mapHeight * .5))
-	self.mapBackground.Paint = function(panel, w, h)
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.SetMaterial(self:GetMapMaterial())
-		surface.DrawTexturedRect(0, 0, w, h)
-	end
+    self.infoLabel = self:Add("DLabel")
+    self.infoLabel:SetText("Choose your spawn location")
+    self.infoLabel:SetFont("ixMediumFont")
+    self.infoLabel:SizeToContents()
+    self.infoLabel:SetPos(
+        (scrW * .5) - (self.infoLabel:GetWide() * .5),
+        (scrH * .5) - (mapHeight * .5) - self.infoLabel:GetTall() - 20
+    )
 
-	self.spawnLocationPanels = {}
+    self.mapBackground = self:Add("EditablePanel")
+    self.mapBackground:SetSize(mapWidth, mapHeight)
+    self.mapBackground:SetPos((scrW * .5) - (mapWidth * .5), (scrH * .5) - (mapHeight * .5))
+    self.mapBackground.Paint = function(panel, w, h)
+        surface.SetDrawColor(255, 255, 255, 255)
+        surface.SetMaterial(self:GetMapMaterial())
+        surface.DrawTexturedRect(0, 0, w, h)
+    end
 
-	for spawnKey, spawn in pairs(self.spawns) do
-		local index = #self.spawnLocationPanels + 1
-		local spawnIcon = self.mapBackground:Add("DButton")
-		self.spawnLocationPanels[index] = spawnIcon
-		local icon, color
+    self.spawnLocationPanels = {}
 
-		-- TODO:
-		if (spawn.status == "safe") then
-			icon = Material("icon16/flag_green.png")
-			color = Color(150, 255, 150, 255)
-		else
-			icon = Material("icon16/flag_red.png")
-			color = Color(255, 150, 150, 255)
-		end
+    for spawnKey, spawn in pairs(self.spawns) do
+        local index = #self.spawnLocationPanels + 1
+        local spawnIcon = self.mapBackground:Add("DButton")
+        self.spawnLocationPanels[index] = spawnIcon
+        local status, icon, color
 
-		local x, y = 0, 0
+        if (spawn.status == PLUGIN.spawnStatus.SAFE) then
+            icon = Material("icon16/flag_green.png")
+            color = Color(150, 255, 150, 255)
+            status = "Its safe, you can spawn here."
+        elseif (spawn.status == PLUGIN.spawnStatus.CHAOS) then
+            icon = Material("icon16/flag_orange.png")
+            color = Color(226, 120, 49, 255)
+            status = "Its chaos, you can spawn here but be careful!"
+        else
+            icon = Material("icon16/flag_red.png")
+            color = Color(255, 150, 150, 255)
+            status = "This location is unsafe, you cannot spawn here."
+        end
 
-		if (self.mapDetails.TransformSpawnPositionToUI) then
-			x, y = self.mapDetails:TransformSpawnPositionToUI(spawn.position, mapWidth, mapHeight)
-		end
+        local x, y = 0, 0
 
-		spawnIcon:SetText("")
-		spawnIcon:SetPos(x - ICON_SIZE_HALF, y - ICON_SIZE_HALF)
-		spawnIcon:SetSize(ICON_SIZE + ICON_SIZE_PADDING_DOUBLE, ICON_SIZE + ICON_SIZE_PADDING_DOUBLE)
-		spawnIcon:SetTooltip(spawn.name)
+        if (self.mapDetails.TransformSpawnPositionToUI) then
+            x, y = self.mapDetails:TransformSpawnPositionToUI(spawn.position, mapWidth, mapHeight)
+        end
 
-		spawnIcon.Paint = function(panel, w, h)
-			local pulse = math.sin(CurTime()) * .1 + 1
-			local radius = (w * .5) * pulse
-			surface.SetDrawColor(color)
-			draw.NoTexture()
-			Schema.util.DrawCircle(w * .5, h * .5, radius, 5)
+        spawnIcon:SetText("")
+        spawnIcon:SetPos(x - ICON_SIZE_HALF, y - ICON_SIZE_HALF)
+        spawnIcon:SetSize(ICON_SIZE + ICON_SIZE_PADDING_DOUBLE, ICON_SIZE + ICON_SIZE_PADDING_DOUBLE)
+        spawnIcon:SetHelixTooltip(function(tooltip)
+            local name = tooltip:AddRow("name")
+            name:SetImportant()
+            name:SetText(spawn.name)
+            name:SetBackgroundColor(color)
+            name:SizeToContents()
 
-			surface.SetDrawColor(color_white)
-			surface.SetMaterial(icon)
-			surface.DrawTexturedRect(ICON_SIZE_PADDING, ICON_SIZE_PADDING, ICON_SIZE, ICON_SIZE)
-		end
+            local description = tooltip:AddRow("description")
+            description:SetText(status)
+            description:SizeToContents()
+        end)
 
-		spawnIcon.DoClick = function(button)
-			self.mapBackground:Remove()
+        spawnIcon.Paint = function(panel, w, h)
+            local pulse = math.sin(CurTime()) * .1 + 1
+            local radius = (w * .5) * pulse
+            surface.SetDrawColor(color)
+            draw.NoTexture()
+            Schema.util.DrawCircle(w * .5, h * .5, radius, 5)
 
-			self.infoLabel:SetText("Spawning you at " .. spawn.name)
-			self.infoLabel:SizeToContents()
-			self.infoLabel:SetPos(
-				(scrW * .5) - (self.infoLabel:GetWide() * .5),
-				(scrH * .5) - (mapHeight * .5) - self.infoLabel:GetTall() - 20
-			)
+            surface.SetDrawColor(color_white)
+            surface.SetMaterial(icon)
+            surface.DrawTexturedRect(ICON_SIZE_PADDING, ICON_SIZE_PADDING, ICON_SIZE, ICON_SIZE)
+        end
 
-			surface.PlaySound("weapons/physcannon/physcannon_charge.wav")
-			net.Start("expSpawnRequestSelect")
-			net.WriteUInt(spawnKey, 8)
-			net.SendToServer()
-		end
-	end
+        spawnIcon.DoClick = function(button)
+            self:SetLoading(true)
+
+            net.Start("expSpawnRequestSelect")
+            net.WriteUInt(spawnKey, 8)
+            net.SendToServer()
+        end
+    end
+end
+
+function PANEL:SetLoading(loading)
+
 end
 
 function PANEL:Paint(w, h)

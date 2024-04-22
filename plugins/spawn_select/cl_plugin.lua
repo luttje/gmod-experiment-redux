@@ -13,9 +13,8 @@ net.Receive("expSpawnSelectResponse", function()
 		if (IsValid(ix.gui.spawnSelection)) then
 			ix.gui.spawnSelection:Remove()
 		end
-	elseif (status == PLUGIN.spawnResult.INVALID) then
-		-- ix.gui.spawnSelection:Notify("This spawn point is invalid!")
-		ErrorNoHalt("[Experiment Redux] This spawn point is invalid! (TODO)\n")
+    elseif (status == PLUGIN.spawnResult.FAIL) then
+		ix.gui.spawnSelection:Rebuild()
 	else
 		ErrorNoHalt("[Experiment Redux] An unknown error occurred. (TODO)\n")
 	end
