@@ -1,5 +1,15 @@
+local helixSkin = derma.GetNamedSkin("helix")
+
 -- Make tooltips better readable by reducing the opacity of the background
-derma.GetNamedSkin("helix").Colours.DarkerBackground.a = 200
+helixSkin.Colours.DarkerBackground.a = 200
+
+-- TODO: Find different place to show credits.
+-- For now I just don't like the way credits are presented to players, it breaks immersion.
+hook.Remove("PopulateHelpMenu", "ixCredits")
+
+-- There's no need to bother players with technical details on the schema. It breaks immersion.
+helixSkin.DrawHelixCurved = function() end
+hook.Remove("CreateMenuButtons", "ixHelpMenu")
 
 function Schema:LoadFonts(font, genericFont)
     surface.CreateFont("expTinyFont", {
@@ -28,9 +38,99 @@ function Schema:LoadFonts(font, genericFont)
         font = font,
         size = math.max(ScreenScale(6), 12),
         extended = true,
-		shadow = true,
+        shadow = true,
         weight = 600,
     })
+end
+
+-- Copied from gamemode/core/derma/cl_help.lua to only show a tab with commands
+function Schema:CreateMenuButtons(tabs)
+    tabs["help"] = function(container)
+        local info = container:Add("DLabel")
+        info:SetFont("ixSmallFont")
+        info:SetText(L("helpCommands"))
+        info:SetContentAlignment(5)
+        info:SetTextColor(color_white)
+        info:SetExpensiveShadow(1, color_black)
+        info:Dock(TOP)
+        info:DockMargin(0, 0, 0, 8)
+        info:SizeToContents()
+        info:SetTall(info:GetTall() + 16)
+
+        info.Paint = function(_, width, height)
+            surface.SetDrawColor(ColorAlpha(derma.GetColor("Info", info), 160))
+            surface.DrawRect(0, 0, width, height)
+        end
+
+        for uniqueID, command in SortedPairs(ix.command.list) do
+            if (command.OnCheckAccess and not command:OnCheckAccess(LocalPlayer())) then
+                continue
+            end
+
+            local bIsAlias = false
+            local aliasText = ""
+
+            -- we want to show aliases in the same entry for better readability
+            if (command.alias) then
+                local alias = istable(command.alias) and command.alias or { command.alias }
+
+                for _, v in ipairs(alias) do
+                    if (v:lower() == uniqueID) then
+                        bIsAlias = true
+                        break
+                    end
+
+                    aliasText = aliasText .. ", /" .. v
+                end
+
+                if (bIsAlias) then
+                    continue
+                end
+            end
+
+            local title = container:Add("DLabel")
+            title:SetFont("ixMediumLightFont")
+            title:SetText("/" .. command.name .. aliasText)
+            title:Dock(TOP)
+            title:SetTextColor(ix.config.Get("color"))
+            title:SetExpensiveShadow(1, color_black)
+            title:SizeToContents()
+
+            local syntaxText = command.syntax
+            local syntax
+
+            if (syntaxText ~= "" and syntaxText ~= "[none]") then
+                syntax = container:Add("DLabel")
+                syntax:SetFont("ixMediumLightFont")
+                syntax:SetText(syntaxText)
+                syntax:Dock(TOP)
+                syntax:SetTextColor(color_white)
+                syntax:SetExpensiveShadow(1, color_black)
+                syntax:SetWrap(true)
+                syntax:SetAutoStretchVertical(true)
+                syntax:SizeToContents()
+            end
+
+            local descriptionText = command:GetDescription()
+
+            if (descriptionText ~= "") then
+                local description = container:Add("DLabel")
+                description:SetFont("ixSmallFont")
+                description:SetText(descriptionText)
+                description:Dock(TOP)
+                description:SetTextColor(color_white)
+                description:SetExpensiveShadow(1, color_black)
+                description:SetWrap(true)
+                description:SetAutoStretchVertical(true)
+                description:SizeToContents()
+                description:DockMargin(0, 0, 0, 8)
+            elseif (syntax) then
+                syntax:DockMargin(0, 0, 0, 8)
+            else
+                title:DockMargin(0, 0, 0, 8)
+            end
+        end
+    end
 end
 
 function Schema:InitPostEntity()

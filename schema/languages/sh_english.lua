@@ -1,10 +1,11 @@
 LANGUAGE = {
-	schemaName = "Experiment Redux",
+    schemaName = "Experiment Redux",
 
 	achievements = "Achievements",
 	alliance = "Alliance",
 	buffs = "Nano Buffs",
 	perks = "Perks",
+    scoreboard = "Player List",
 
 	noBuffs = "No active nano buffs.",
 

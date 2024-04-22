@@ -1,3 +1,18 @@
+-- ! Hack to disable other languages for now.
+-- TODO: Write translations for other languages than English
+local function hackEnglishOnly()
+	timer.Simple(0, function()
+		ix.option.stored["language"].populate = function()
+			return {
+				["english"] = "English"
+			}
+		end
+	end)
+end
+
+hook.Add("InitializedSchema", "hackEnglishOnlyInitialize", hackEnglishOnly)
+hook.Add("OnReloaded", "hackEnglishOnlyOnReloaded", hackEnglishOnly)
+
 function Schema:DoPluginIncludes(path, plugin)
 	Schema.achievement.LoadFromDir(path .. "/achievements")
 	Schema.buff.LoadFromDir(path .. "/buffs")
