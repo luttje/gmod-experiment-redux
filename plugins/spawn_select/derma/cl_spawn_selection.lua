@@ -82,15 +82,20 @@ function PANEL:Rebuild()
         if (spawn.status == PLUGIN.spawnStatus.SAFE) then
             icon = Material("icon16/flag_green.png")
             color = Color(150, 255, 150, 255)
-            status = "Its safe, you can spawn here."
+            status = "It should be safe to spawn here."
         elseif (spawn.status == PLUGIN.spawnStatus.CHAOS) then
             icon = Material("icon16/flag_orange.png")
             color = Color(226, 120, 49, 255)
-            status = "Its chaos, you can spawn here but be careful!"
+            status = "Its chaos. You can spawn here but be careful for hostile denizens."
         else
             icon = Material("icon16/flag_red.png")
             color = Color(255, 150, 150, 255)
             status = "This location is unsafe, you cannot spawn here."
+
+			if (spawn.unsafeUntil) then
+                status = status .. "\n\nThis location will become safe in at most "
+                    .. string.NiceTime(spawn.unsafeUntil - CurTime()) .. "."
+			end
         end
 
         local x, y = 0, 0

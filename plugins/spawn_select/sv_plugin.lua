@@ -1,7 +1,9 @@
 local PLUGIN = PLUGIN
 
 PLUGIN.spawns = PLUGIN.spawns or {}
+
 PLUGIN.spawnNearDeathRange = 4096
+PLUGIN.spawnNearDeathAfterSeconds = 60 * 5
 
 util.AddNetworkString("expSpawnSelectOpen")
 util.AddNetworkString("expSpawnRequestSelect")
@@ -80,30 +82,39 @@ end
 function PLUGIN:PlayerDeath(client, inflictor, attacker)
     local character = client:GetCharacter()
 
-	if (not character) then
-		return
-	end
+    if (not character) then
+        return
+    end
 
     -- Store this vector so we can use it to determine if the player can spawn at a spawn point.
-	character:SetData("lastDeathPosition", client:GetPos())
+    character:SetData("lastDeathPosition", client:GetPos())
+	character:SetData("lastDeathTime", os.time())
 end
 
 function PLUGIN:GetAvailableSpawns(client)
     local character = client:GetCharacter()
     local lastDeathPosition = character:GetData("lastDeathPosition")
+	local lastDeathTime = character:GetData("lastDeathTime")
     local spawnNearDeathRange = self.spawnNearDeathRange * self.spawnNearDeathRange
+	local canSpawnNearDeath = not lastDeathTime or (os.time() - lastDeathTime) > self.spawnNearDeathAfterSeconds
     local safeCount = 0
     local spawns = {}
 
     for k, spawn in ipairs(self.spawns) do
         local status = self.spawnStatus.SAFE
+		local unsafeUntil
 
         -- Filter out spawns where the player recently died.
-        if (lastDeathPosition and lastDeathPosition:DistToSqr(spawn.position) < spawnNearDeathRange) then
-            status = self.spawnStatus.LOCKED
-        else
-            -- TODO: Unsafe because of nearby players activity
+        if (not canSpawnNearDeath and lastDeathPosition) then
+            local distance = spawn.position:DistToSqr(lastDeathPosition)
+
+            if (distance < spawnNearDeathRange) then
+                status = self.spawnStatus.LOCKED
+				unsafeUntil = CurTime() + (self.spawnNearDeathAfterSeconds - (os.time() - lastDeathTime))
+            end
         end
+
+		-- TODO: Unsafe because of nearby players activity
 
         if (status == self.spawnStatus.SAFE) then
             safeCount = safeCount + 1
@@ -113,7 +124,8 @@ function PLUGIN:GetAvailableSpawns(client)
             position = spawn.position,
             angles = spawn.angles,
             name = spawn.name,
-            status = status
+            status = status,
+			unsafeUntil = unsafeUntil
         }
     end
 
