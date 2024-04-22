@@ -42,6 +42,7 @@ local function getClientHands(client)
 	local playerHands = player_manager.TranslatePlayerHands(playerModelName)
 
 	playerHands.isDefault = playerHands.model == "models/weapons/c_arms_citizen.mdl"
+		or playerHands.model == "models/weapons/c_arms_refugee.mdl"
 
 	return playerHands
 end
@@ -66,17 +67,31 @@ local function setupFakeHandsHidingReal(hands, viewModel, client)
 		end
 	end
 
-	hands.expHandsModifiedBones = modifiedBones
-	PLUGIN.handsModelOverlayClientsideModel = ClientsideModel(client:GetModel())
+    hands.expHandsModifiedBones = modifiedBones
 
-	function PLUGIN.handsModelOverlayClientsideModel:GetPlayerColor()
-		return client:GetPlayerColor()
+    local replacementHands = ClientsideModel(client:GetModel())
+	PLUGIN.handsModelOverlayClientsideModel = replacementHands
+
+	for _, bodygroupInfo in pairs(client:GetBodyGroups()) do
+		local current = client:GetBodygroup(bodygroupInfo.id)
+		replacementHands:SetBodygroup(bodygroupInfo.id, current)
 	end
 
-	PLUGIN.handsModelOverlayClientsideModel:SetNoDraw(true)
-	PLUGIN.handsModelOverlayClientsideModel:SetParent(viewModel)
-	PLUGIN.handsModelOverlayClientsideModel:AddEffects(EF_BONEMERGE)
-	PLUGIN.handsModelOverlayClientsideModel:AddEffects(EF_PARENT_ANIMATES)
+	for k, _ in ipairs(client:GetMaterials()) do
+		replacementHands:SetSubMaterial(k - 1, client:GetSubMaterial(k - 1))
+	end
+
+	replacementHands:SetSkin(client:GetSkin())
+	replacementHands:SetMaterial(client:GetMaterial())
+	replacementHands:SetColor(client:GetColor())
+    replacementHands.GetPlayerColor = function()
+        return client:GetPlayerColor()
+    end
+
+	replacementHands:SetNoDraw(true)
+	replacementHands:SetParent(viewModel)
+	replacementHands:AddEffects(EF_BONEMERGE)
+	replacementHands:AddEffects(EF_PARENT_ANIMATES)
 
 	local buildBonePositions = function(fakeHands, bonesCount)
 		for i = 0, bonesCount - 1 do
@@ -93,17 +108,32 @@ local function setupFakeHandsHidingReal(hands, viewModel, client)
 		end
 	end
 
-	PLUGIN.handsModelOverlayClientsideModel:AddCallback("BuildBonePositions", buildBonePositions)
+	replacementHands:AddCallback("BuildBonePositions", buildBonePositions)
 end
 
-function cleanupFakeHandsRestoringReal(hands, client)
-	hands.expActiveBonemergedHandsIndex = false
+local function cleanupFakeHandsRestoringReal(hands, client)
+    hands.expActiveBonemergedHandsIndex = false
 
-	hands:SetModel(getClientHands(client).model)
+	local defaultHands = getClientHands(client)
 
-	if IsValid(PLUGIN.handsModelOverlayClientsideModel) then
-		PLUGIN.handsModelOverlayClientsideModel:Remove()
-	end
+	hands:SetModel(defaultHands.model)
+    hands:SetSkin(defaultHands.skin)
+
+	local modelHandsBodygroup = client:FindBodygroupByName("hands")
+    local handsGlovesBodygroup = 1
+
+    if (modelHandsBodygroup > -1) then
+        local hasGloves = client:GetBodygroup(modelHandsBodygroup) > 0
+        hands:SetBodygroup(handsGlovesBodygroup, hasGloves and 1 or 0)
+    else
+		hands:SetBodygroup(handsGlovesBodygroup, 0)
+    end
+
+    if IsValid(PLUGIN.handsModelOverlayClientsideModel) then
+        PLUGIN.handsModelOverlayClientsideModel:Remove()
+    end
+
+	client.expHandsInitialized = true
 end
 
 function PLUGIN:PreDrawPlayerHands(hands, viewModel, client, weapon)
@@ -128,7 +158,7 @@ function PLUGIN:PreDrawPlayerHands(hands, viewModel, client, weapon)
 
 	local handsAreOutdated = initializedIndex ~= self.fakeHandsIndex
 
-	if ((not enabled and initializedIndex) or (enabled and handsAreOutdated)) then
+	if (not client.expHandsInitialized or (not enabled and initializedIndex) or (enabled and handsAreOutdated)) then
 		cleanupFakeHandsRestoringReal(hands, client)
 		return
 	end
@@ -149,15 +179,16 @@ function PLUGIN:PlayerModelChanged(client, model, oldModel)
 	end
 
 	local playerHands = getClientHands(client)
-	local modelFitsWithDefaultHands = model:lower():StartsWith("models/humans/group0")
+    local modelFitsWithDefaultHands = model:lower():StartsWith("models/hl2rp/citizens/")
+	client.expHandsInitialized = false
 
-	if (playerHands.isDefault and not modelFitsWithDefaultHands) then
+    if (playerHands.isDefault and not modelFitsWithDefaultHands) then
 		self.fakeHandsIndex = self.fakeHandsIndex + 1
 		return
 	end
 
 	-- If the hands fit the model, disable the fake hands.
-	self.fakeHandsIndex = -1
+    self.fakeHandsIndex = -1
 end
 
 -- Also when we load ensure we have the correct hands.
