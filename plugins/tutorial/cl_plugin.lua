@@ -10,15 +10,6 @@ PLUGIN.currentTutorial = PLUGIN.currentTutorial or 0
 PLUGIN.currentFade = PLUGIN.currentFade or 0
 PLUGIN.undimmedRectsCache = PLUGIN.undimmedRectsCache or {}
 
--- TODO: Remove this
-function debugSetTutorial(tutorialIndex)
-	for _, tutorial in pairs(PLUGIN.tutorials) do
-		tutorial.active = false
-	end
-
-	PLUGIN.currentTutorial = tutorialIndex
-end
-
 local function importantText(text)
 	return {
 		important = true,
@@ -108,99 +99,6 @@ function PLUGIN:DrawUndimmedRect(x, y, w, h, a)
 
 	surface.SetDrawColor(255, 255, 255, a)
 	surface.DrawOutlinedRect(x, y, w, h)
-end
-
---- Finds all rectangles that cover the given area, without overlapping the given rectangles.
----@param rects table
----@param areaWidth number
----@param areaHeight number
----@return table
-function PLUGIN:GetCoveringRects(rects, areaWidth, areaHeight)
-	local coveringRects = {}
-    local covered = {}
-    for i = 1, areaWidth do
-        covered[i] = {}
-        for j = 1, areaHeight do
-            covered[i][j] = false
-        end
-    end
-
-    -- Mark the rectangles in 'rects' as covered
-    for _, rect in ipairs(rects) do
-        for x = rect.x, math.min(rect.x + rect.width - 1, areaWidth) do
-            for y = rect.y, math.min(rect.y + rect.height - 1, areaHeight) do
-                covered[x][y] = true
-            end
-        end
-    end
-
-    -- Find uncovered areas and cover them with new rectangles
-    for x = 1, areaWidth do
-        for y = 1, areaHeight do
-            if not covered[x][y] then
-                local maxWidth = 0
-                -- Determine maxWidth where all cells are uncovered
-                repeat
-                    maxWidth = maxWidth + 1
-                until x + maxWidth > areaWidth or covered[x + maxWidth][y]
-
-                local maxHeight = 0
-                local valid = true
-                -- Determine maxHeight for the current maxWidth
-                repeat
-                    maxHeight = maxHeight + 1
-                    for testX = x, x + maxWidth - 1 do
-                        if y + maxHeight > areaHeight or covered[testX][y + maxHeight] then
-                            valid = false
-                            break
-                        end
-                    end
-                until not valid or y + maxHeight > areaHeight
-
-                -- Add the new rectangle
-                table.insert(coveringRects, {x = x, y = y, width = maxWidth, height = maxHeight})
-
-                -- Mark the new rectangle as covered
-                for coverX = x, x + maxWidth - 1 do
-                    for coverY = y, y + maxHeight - 1 do
-                        covered[coverX][coverY] = true
-                    end
-                end
-            end
-        end
-    end
-
-    return coveringRects
-end
-
---- Draws dimmed rectangles everywhere except for the specified rectangles.
---- Useful to draw attention to multiple areas.
----@param rects table
----@param a number
----@param cacheKey string
-function PLUGIN:DrawUndimmedRects(rects, a, cacheKey)
-	local coveringRects = PLUGIN.undimmedRectsCache[cacheKey]
-
-	if (not coveringRects) then
-		coveringRects = self:GetCoveringRects(rects, ScrW(), ScrH())
-		PLUGIN.undimmedRectsCache[cacheKey] = coveringRects
-	end
-
-	surface.SetDrawColor(0, 0, 0, a)
-
-	for _, rect in ipairs(coveringRects) do
-		local x, y, w, h = rect.x, rect.y, rect.width, rect.height
-
-		surface.DrawRect(x, y, w, h)
-	end
-
-	surface.SetDrawColor(255, 255, 255, a)
-
-	for _, rect in ipairs(rects) do
-		local x, y, w, h = rect.x, rect.y, rect.width, rect.height
-
-		surface.DrawOutlinedRect(x, y, w, h)
-	end
 end
 
 local lastOrder = PLUGIN:AddTutorial(1, {
@@ -339,23 +237,15 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		local w, h = tutorial.buffsPanel:GetSize()
 
 		local inventoryX, inventoryY = inventoryButton:LocalToScreen(0, 0)
-		local inventoryW, inventoryH = inventoryButton:GetSize()
+		local combinedW, combinedH = w + (x - inventoryX), h + (y - inventoryY)
 
-		-- PLUGIN:DrawUndimmedRect(x, y, w, h, alpha)
-		PLUGIN:DrawUndimmedRects({
-			{
-				x = x,
-				y = y,
-				width = w,
-				height = h,
-			},
-			{
-				x = inventoryX,
-				y = inventoryY,
-				width = inventoryW,
-				height = inventoryH,
-			},
-		}, alpha, scrW .. scrH)
+		PLUGIN:DrawUndimmedRect(
+			math.min(x, inventoryX),
+			math.min(y, inventoryY),
+			combinedW,
+			combinedH,
+			alpha
+		)
 	end,
 
 	GetText = function(tutorial)
@@ -370,13 +260,16 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 
 		local x, y = tutorial.buffsPanel:LocalToScreen(0, 0)
 		local w, h = tutorial.buffsPanel:GetSize()
+		local combinedW, combinedH = w, h
 
 		if (IsValid(tutorial.inventoryButton)) then
 			local inventoryX, inventoryY = tutorial.inventoryButton:LocalToScreen(0, 0)
-			local inventoryW, inventoryH = tutorial.inventoryButton:GetSize()
 
-			y = math.max(inventoryY, y)
-			x = (inventoryX + inventoryW + x) * .5
+			combinedW = w + (x - inventoryX)
+			combinedH = h + (y - inventoryY)
+
+			x = math.min(x, inventoryX)
+			y = math.min(y, inventoryY)
 		end
 
 		return {
@@ -384,7 +277,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			"Hovering over a buff will show more information.",
 			importantText("Hover over your buffs to view what they do."),
 			importantText("Next, click on the inventory tab to continue."),
-		}, x, y, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM
+		}, x + (combinedW * .5), y + combinedH, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP
 	end,
 })
 
@@ -524,9 +417,9 @@ function PLUGIN:DrawOverlay()
 	local scrW, scrH = ScrW(), ScrH()
 
 	if (currentTutorial.DrawFocusAreas) then
-		currentTutorial:DrawFocusAreas(scrW, scrH, self.currentFade * 200)
+		currentTutorial:DrawFocusAreas(scrW, scrH, self.currentFade * 230)
 	else
-		surface.SetDrawColor(0, 0, 0, self.currentFade * 200)
+		surface.SetDrawColor(0, 0, 0, self.currentFade * 230)
 		surface.DrawRect(0, 0, scrW, scrH)
 	end
 
