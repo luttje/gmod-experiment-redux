@@ -10,4 +10,3 @@ PERK.foregroundImage = {
 }
 PERK.priceModifier = 0.9
 PERK.description = "Fancy yourself as a merchant? With this perk, you will receive ten percent off all business items."
-

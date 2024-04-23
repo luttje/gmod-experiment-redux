@@ -9,4 +9,3 @@ PERK.foregroundImage = {
 	size = 32,
 }
 PERK.description = "Grants you the ability to mutilate corpses for health."
-

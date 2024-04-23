@@ -9,4 +9,3 @@ PERK.foregroundImage = {
 	size = 32,
 }
 PERK.description = "Does the enemy hear you coming? With light step your foosteps cannot be heard while you are walking!"
-

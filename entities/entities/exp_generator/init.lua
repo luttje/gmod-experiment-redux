@@ -295,7 +295,7 @@ end
 function ENT:AdjustDamage(damageInfo)
 	local owner = self:GetItemOwner()
 
-	if (IsValid(owner) and Schema.perk.GetOwned("steelsheets", owner)) then
+	if (IsValid(owner) and Schema.perk.GetOwned("steel_sheets", owner)) then
 		damageInfo:ScaleDamage(0.25)
 	end
 

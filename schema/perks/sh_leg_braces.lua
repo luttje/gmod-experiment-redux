@@ -10,4 +10,3 @@ PERK.foregroundImage = {
 }
 PERK.damageScale = 0.5
 PERK.description = "This perk will reduce your falling damage by 50%."
-

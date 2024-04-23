@@ -9,4 +9,3 @@ PERK.foregroundImage = {
 	size = 32,
 }
 PERK.description = "You can see through other character's skull masks."
-

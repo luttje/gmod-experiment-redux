@@ -114,7 +114,7 @@ function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter
 
 	local mode = client:IsRunning() and "run" or "walk"
 
-	if (mode == "walk" and Schema.perk.GetOwned("lightstep", client)) then
+	if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
 		return true
 	end
 

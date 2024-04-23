@@ -10,4 +10,3 @@ PERK.foregroundImage = {
 }
 PERK.chance = 0.5
 PERK.description = "With this hard hitting perk, you have a fifty percent chance to block a beanbag attack at the cost of health."
-

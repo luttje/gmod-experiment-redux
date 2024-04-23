@@ -1,6 +1,6 @@
 local PERK = PERK
 
-PERK.name = "Quickhands"
+PERK.name = "Quick Hands"
 PERK.price = 10000
 PERK.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",

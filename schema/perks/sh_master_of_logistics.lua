@@ -8,5 +8,4 @@ PERK.foregroundImage = {
 	y = 9,
 	size = 32,
 }
-PERK.description = "With this brilliant perk, you can create one more of each bolt creator."
-
+PERK.description = "With this brilliant perk, you can upgrade your bolt generator further."

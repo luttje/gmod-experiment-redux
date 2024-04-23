@@ -9,4 +9,3 @@ PERK.foregroundImage = {
 	size = 32,
 }
 PERK.description = "You will receive 200% extra from your Bolt Generator base rate every payday"
-

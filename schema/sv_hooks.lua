@@ -368,8 +368,8 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 
 	-- Adjust fall damage based on perks and items.
 	if (damageInfo:IsFallDamage()) then
-		if (Schema.perk.GetOwned("legbraces", client)) then
-			local damageScale = Schema.perk.GetProperty("legbraces", "damageScale")
+		if (Schema.perk.GetOwned("leg_braces", client)) then
+			local damageScale = Schema.perk.GetProperty("leg_braces", "damageScale")
 			damageInfo:ScaleDamage(damageScale)
 		end
 	end
