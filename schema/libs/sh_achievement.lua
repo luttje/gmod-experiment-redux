@@ -12,18 +12,17 @@ if (SERVER) then
 	---@return boolean
 	function Schema.achievement.Progress(client, achievement, progress)
 		local achievementTable = Schema.achievement.Get(achievement)
-		local character = client:GetCharacter()
-        local achievements = character:GetData("achievements", {})
+        local achievements = client:GetData("achievements", {})
 
 		if (isstring(progress)) then
-            local achievementProgressKeys = character:GetData("achievementProgressKeys", {})
+            local achievementProgressKeys = client:GetData("achievementProgressKeys", {})
 
             if (achievementProgressKeys[progress]) then
                 return false
             end
 
             achievementProgressKeys[progress] = true
-            character:SetData("achievementProgressKeys", achievementProgressKeys)
+            client:SetData("achievementProgressKeys", achievementProgressKeys)
 
 			progress = 1
 		end
@@ -43,9 +42,12 @@ if (SERVER) then
 			return false
 		end
 
-		achievements[achievementTable.uniqueID] = math.Clamp(currentAchievement + progress, 0,
-			achievementTable.maximum)
-		character:SetData("achievements", achievements)
+        achievements[achievementTable.uniqueID] = math.Clamp(
+            currentAchievement + progress,
+			0,
+            achievementTable.maximum
+		)
+		client:SetData("achievements", achievements)
 
 		if (achievements[achievementTable.uniqueID] < achievementTable.maximum) then
 			if (achievementTable.OnProgress) then
@@ -55,7 +57,7 @@ if (SERVER) then
 			ix.chat.Send(client, "achievement", achievementTable.name)
 
 			if (achievementTable.reward) then
-				character:GiveMoney(achievementTable.reward)
+				client:GetCharacter():GiveMoney(achievementTable.reward)
 			end
 
 			if (achievementTable.OnAchieved) then
@@ -72,7 +74,7 @@ if (SERVER) then
 	end
 
 	function Schema.achievement.LoadProgress(client, character)
-		local achievements = character:GetData("achievements", {})
+		local achievements = client:GetData("achievements", {})
 
 		net.Start("exp_AchievementsLoad")
 		net.WriteTable(achievements)
