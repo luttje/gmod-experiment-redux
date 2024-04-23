@@ -35,6 +35,14 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 		return
 	end
 
+	-- If the door isn't locked, it'll always be vulnerable.
+	if (not entity:IsLocked()) then
+		Schema.ImpactEffect(damagePosition, 8, false)
+		self:EntityBreached(entity, damageInfo:GetAttacker())
+
+		return
+	end
+
 	local attacker = damageInfo:GetAttacker()
 
 	if (not IsValid(attacker) or not attacker:IsPlayer()) then

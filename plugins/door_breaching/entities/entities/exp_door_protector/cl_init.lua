@@ -9,6 +9,6 @@ function ENT:OnPopulateEntityInfo(tooltip)
 	name:SizeToContents()
 
 	local description = tooltip:AddRow("description")
-	description:SetText("This is protecting " .. guarding .. " door(s).")
+	description:SetText("This is protecting " .. guarding .. " locked door(s).")
 	description:SizeToContents()
 end

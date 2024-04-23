@@ -33,7 +33,7 @@ function ENT:Think()
 	local position = self:GetPos()
 
     for _, entity in ipairs(ents.FindInSphere(position, PLUGIN.doorProtectorRange)) do
-        if (string.lower(entity:GetClass()) == "prop_door_rotating") then
+        if (string.lower(entity:GetClass()) == "prop_door_rotating" and entity:IsLocked()) then
             doorCount = doorCount + 1
         end
     end

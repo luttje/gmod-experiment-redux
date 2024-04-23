@@ -10,6 +10,7 @@ function PLUGIN:OpenDoor(entity, client, noSound)
 	-- entity:BlastDoor(velocityAwayFromBreach)
 
 	local origin = client:GetShootPos()
+	entity:Fire("Unlock")
 
 	if (origin and string.lower(entity:GetClass()) == "prop_door_rotating") then
 		local target = ents.Create("info_target")
