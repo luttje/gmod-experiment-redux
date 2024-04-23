@@ -425,10 +425,13 @@ function Schema:CreateCharacterInfo(panel)
 
 	local buffManager = panel.buffs:Add("expBuffManager")
 	buffManager:Dock(TOP)
-	buffManager:RefreshBuffs()
+    buffManager:RefreshBuffs()
+	buffManager.characterPanel = panel
 	panel.buffs.manager = buffManager
 
-	panel.buffs:SizeToContents()
+    panel.buffs:SizeToContents()
+
+	hook.Run("CreateCharacterBuffInfo", panel, panel.buffs)
 end
 
 function Schema:UpdateCharacterInfo(panel, character)
