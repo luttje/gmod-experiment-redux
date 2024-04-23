@@ -175,7 +175,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 	client:SetColor(Color(0, 0, 255, 75))
 	client:EmitSound(
 		"ambient/levels/labs/teleport_preblast_suckin1.wav",
-		75 * math.Rand(.5, 1),
+		50 * math.Rand(.5, 1),
 		100 * math.Rand(.75, 1.25)
 	)
 
@@ -205,7 +205,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		client:SetNetVar("expChoosingSpawn", false)
 		client:SetRenderMode(RENDERMODE_TRANSCOLOR)
 		client:SetColor(Color(255, 255, 255, 255))
-		client:EmitSound(table.Random(teleportSounds), 75 * math.Rand(.5, 1), 100 * math.Rand(.75, 1.25))
+		client:EmitSound(table.Random(teleportSounds), 50 * math.Rand(.5, 1), 100 * math.Rand(.75, 1.25))
 
 		effectData = EffectData()
 		effectData:SetOrigin(spawnPosition)

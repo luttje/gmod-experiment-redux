@@ -18,17 +18,17 @@ For more information, please refer to <http://unlicense.org/>
 ix.lang.AddTable("english", {
 	legs = "Legs",
 
-	optLegsEnabled = "Enable legs",
+	optLegsEnabled = "Enable legs (when looking down at yourself)",
 	optLegsInVehicle = "Enable legs in vehicles"
 })
 
 if (CLIENT) then
 	ix.option.Add("legsEnabled", ix.type.bool, true, {
-		category = "legs"
+		category = "general"
 	})
 
 	ix.option.Add("legsInVehicle", ix.type.bool, true, {
-		category = "legs"
+		category = "general"
 	})
 
 	PLUGIN.legs = PLUGIN.legs or {}

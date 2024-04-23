@@ -80,27 +80,27 @@ function PLUGIN:OnCharacterMenuCreated(panel)
     end
 
     -- I don't like that stencil effect on the main panel, so I'm removing it
-	panel.loadCharacterPanel.carousel.Paint = function(self, width, height)
-		cam.Start3D(self.cameraPosition, self.cameraAngle, modelFOV, x, y, width, height)
-		render.SuppressEngineLighting(true)
-		render.SetLightingOrigin(self.activeCharacter:GetPos())
-		render.SetModelLighting(0, 1.5, 1.5, 1.5)
+	-- panel.loadCharacterPanel.carousel.Paint = function(self, width, height)
+	-- 	cam.Start3D(self.cameraPosition, self.cameraAngle, modelFOV, x, y, width, height)
+	-- 	render.SuppressEngineLighting(true)
+	-- 	render.SetLightingOrigin(self.activeCharacter:GetPos())
+	-- 	render.SetModelLighting(0, 1.5, 1.5, 1.5)
 
-		for i = 1, 4 do
-			render.SetModelLighting(i, 0.4, 0.4, 0.4)
-		end
+	-- 	for i = 1, 4 do
+	-- 		render.SetModelLighting(i, 0.4, 0.4, 0.4)
+	-- 	end
 
-		render.SetModelLighting(5, 0.04, 0.04, 0.04)
+	-- 	render.SetModelLighting(5, 0.04, 0.04, 0.04)
 
-		self:LayoutEntity(self.activeCharacter)
-		self.activeCharacter:DrawModel()
+	-- 	self:LayoutEntity(self.activeCharacter)
+	-- 	self.activeCharacter:DrawModel()
 
-		render.SetScissorRect(0, 0, 0, 0, false)
-		render.SuppressEngineLighting(false)
-		cam.End3D()
+	-- 	render.SetScissorRect(0, 0, 0, 0, false)
+	-- 	render.SuppressEngineLighting(false)
+	-- 	cam.End3D()
 
-		self.lastPaint = RealTime()
-	end
+	-- 	self.lastPaint = RealTime()
+	-- end
 
     showCorrectPanel()
 end

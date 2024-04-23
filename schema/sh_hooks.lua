@@ -8,9 +8,18 @@ local function hackOptionRestrictions()
 			}
 		end
 
+		local function hide()
+			return true
+		end
+
+		ix.option.stored["language"].hidden = hide
+
 		if (CLIENT) then
 			-- ! Hack to not show option for enabling intro
-			ix.option.stored["showIntro"].hidden = true
+			ix.option.stored["showIntro"].hidden = hide
+
+			-- ! This options doesn't work I think
+			ix.option.stored["altLower"].hidden = hide
 		end
 	end)
 end

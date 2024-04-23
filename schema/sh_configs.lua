@@ -22,6 +22,24 @@ hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 	ix.config.Set("genericFont", "Roman Antique")
 end)
 
+if (CLIENT) then
+	ix.option.Add("accessibilityFont", ix.type.bool, false, {
+		category = "appearance",
+		OnChanged = function()
+			hook.Run("LoadFonts", ix.config.Get("font"), ix.config.Get("genericFont"))
+		end,
+	})
+	ix.option.Add("accessibilityFontScale", ix.type.number, 1, {
+		category = "appearance",
+		min = 0.5,
+		max = 1.5,
+		decimals = 2,
+		OnChanged = function()
+			hook.Run("LoadFonts", ix.config.Get("font"), ix.config.Get("genericFont"))
+		end,
+	})
+end
+
 -- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
 ix.config.SetDefault("spawnTime", 60)
 

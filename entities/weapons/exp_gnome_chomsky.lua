@@ -1,5 +1,3 @@
-local PLUGIN = PLUGIN
-
 if (SERVER) then
 	AddCSLuaFile()
 end

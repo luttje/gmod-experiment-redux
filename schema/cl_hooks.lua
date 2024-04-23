@@ -12,23 +12,34 @@ helixSkin.DrawHelixCurved = function() end
 hook.Remove("CreateMenuButtons", "ixHelpMenu")
 
 function Schema:LoadFonts(headingFont, readableFont)
+	local enabledAccessibilityFont = ix.option.Get("accessibilityFont", false)
+	local accessibilityFontScale = ix.option.Get("accessibilityFontScale", 1)
+
+	local function scaleFont(size)
+		return size * accessibilityFontScale
+	end
+
+	if (enabledAccessibilityFont) then
+		readableFont = "Arial"
+	end
+
 	surface.CreateFont("expTinyFont", {
 		font = readableFont,
-        size = math.max(ScreenScale(4), 16),
+        size = scaleFont(math.max(ScreenScale(4), 16)),
 		extended = true,
 		weight = 600
 	})
 
 	surface.CreateFont("expSmallerFont", {
 		font = readableFont,
-        size = math.max(ScreenScale(6), 24),
+        size = scaleFont(math.max(ScreenScale(6), 24)),
 		extended = true,
 		weight = 400
 	})
 
 	surface.CreateFont("expSmallItalicFont", {
 		font = readableFont,
-        size = math.max(ScreenScale(6), 26),
+        size = scaleFont(math.max(ScreenScale(6), 26)),
 		extended = true,
 		weight = 400,
 		italic = true
@@ -36,7 +47,7 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 	surface.CreateFont("expSmallOutlinedFont", {
 		font = readableFont,
-        size = math.max(ScreenScale(6), 24),
+        size = scaleFont(math.max(ScreenScale(6), 24)),
 		extended = true,
 		shadow = true,
 		weight = 600,
@@ -69,43 +80,43 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixTitleFont", {
 			font = headingFont,
-			size = ScreenScale(30),
+			size = scaleFont(ScreenScale(30)),
 			extended = true,
 			weight = 600
 		})
 
 		surface.CreateFont("ixSubTitleFont", {
 			font = headingFont,
-			size = math.max(ScreenScale(16), 24),
+			size = scaleFont(math.max(ScreenScale(16), 24)),
 			extended = true,
 			weight = 400
 		})
 
 		surface.CreateFont("ixMenuMiniFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(4), 24),
+			size = scaleFont(math.max(ScreenScale(4), 24)),
 			weight = 300,
 		})
 
 		surface.CreateFont("ixMenuButtonFont", {
 			font = readableFont,
-			size = ScreenScale(14),
+			size = scaleFont(ScreenScale(14)),
 			extended = true,
-			weight = 400
+			weight = 100
 		})
 
 		surface.CreateFont("ixMenuButtonFontSmall", {
 			font = readableFont,
-			size = ScreenScale(10),
+			size = scaleFont(ScreenScale(10)),
 			extended = true,
-			weight = 400
+			weight = 100
 		})
 
 		surface.CreateFont("ixMenuButtonFontThick", {
 			font = readableFont,
-			size = ScreenScale(14),
+			size = scaleFont(ScreenScale(14)),
 			extended = true,
-			weight = 300
+			weight = 600
 		})
 
 		surface.CreateFont("ixMenuButtonLabelFont", {
@@ -117,72 +128,72 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixMenuButtonHugeFont", {
 			font = headingFont,
-			size = ScreenScale(24),
+			size = scaleFont(ScreenScale(24)),
 			extended = true,
 			weight = 400
 		})
 
-		surface.CreateFont("ixToolTipText", {
+		surface.CreateFont("ixToolTipText", { -- Never used
 			font = readableFont,
-			size = 20,
+			size = scaleFont(20),
 			extended = true,
 			weight = 600
 		})
 
 		surface.CreateFont("ixMonoSmallFont", {
 			font = "Consolas",
-			size = 12,
+			size = scaleFont(12),
 			extended = true,
 			weight = 800
 		})
 
 		surface.CreateFont("ixMonoMediumFont", {
 			font = "Consolas",
-			size = 22,
+			size = scaleFont(22),
 			extended = true,
 			weight = 800
 		})
 
 		surface.CreateFont("ixBigFont", {
 			font = headingFont,
-			size = 36,
+			size = scaleFont(36),
 			extended = true,
 			weight = 4000
 		})
 
 		surface.CreateFont("ixMediumFont", {
 			font = readableFont,
-			size = 25,
+			size = scaleFont(25),
 			extended = true,
 			weight = 4000
 		})
 
 		surface.CreateFont("ixNoticeFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(8), 24),
+			size = scaleFont(math.max(ScreenScale(8), 24)),
 			weight = 400,
 			extended = true,
 			antialias = true
 		})
 
 		surface.CreateFont("ixMediumLightFont", {
-			font = readableFont,
-			size = math.max(ScreenScale(8), 25),
+			font = headingFont,
+			size = scaleFont(math.max(ScreenScale(8), 22)),
 			extended = true,
-			weight = 400
+			weight = 600
 		})
 
 		surface.CreateFont("ixMediumLightBlurFont", {
-			font = readableFont,
-			size = 25,
+			font = headingFont,
+			size = scaleFont(math.max(ScreenScale(8), 22)),
 			extended = true,
-			weight = 400,
+			weight = 600,
 			blursize = 4
 		})
 
 		surface.CreateFont("ixGenericFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(7), 24),
+			size = scaleFont(math.max(ScreenScale(7), 24)),
 			extended = true,
 			weight = 400
 		})
@@ -206,28 +217,28 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixSmallTitleFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(12), 26),
+			size = scaleFont(math.max(ScreenScale(12), 26)),
 			extended = true,
 			weight = 400
 		})
 
 		surface.CreateFont("ixMinimalTitleFont", {
 			font = headingFont,
-			size = math.max(ScreenScale(8), 26),
+			size = scaleFont(math.max(ScreenScale(8), 26)),
 			extended = true,
 			weight = 800
 		})
 
 		surface.CreateFont("ixSmallFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(6), 24),
+			size = scaleFont(math.max(ScreenScale(6), 24)),
 			extended = true,
 			weight = 400
 		})
 
 		surface.CreateFont("ixItemDescFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(6), 24),
+			size = scaleFont(math.max(ScreenScale(6), 24)),
 			extended = true,
 			shadow = true,
 			weight = 400
@@ -235,7 +246,7 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixSmallBoldFont", {
 			font = readableFont,
-			size = math.max(ScreenScale(8), 22),
+			size = scaleFont(math.max(ScreenScale(8), 22)),
 			extended = true,
 			weight = 800
 		})
@@ -243,21 +254,21 @@ function Schema:LoadFonts(headingFont, readableFont)
 		surface.CreateFont("ixItemBoldFont", {
 			font = readableFont,
 			shadow = true,
-			size = math.max(ScreenScale(8), 20),
+			size = scaleFont(math.max(ScreenScale(8), 20)),
 			extended = true,
 			weight = 800
 		})
 
 		surface.CreateFont("ixIntroTitleFont", {
 			font = headingFont,
-			size = math.min(ScreenScale(128), 128),
+			size = scaleFont(math.min(ScreenScale(128), 128)),
 			extended = true,
 			weight = 400
 		})
 
 		surface.CreateFont("ixIntroTitleBlurFont", {
 			font = headingFont,
-			size = math.min(ScreenScale(128), 128),
+			size = scaleFont(math.min(ScreenScale(128), 128)),
 			extended = true,
 			weight = 400,
 			blursize = 4
@@ -265,14 +276,14 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixIntroSubtitleFont", {
 			font = headingFont,
-			size = ScreenScale(28),
+			size = scaleFont(ScreenScale(28)),
 			extended = true,
 			weight = 400
 		})
 
 		surface.CreateFont("ixIntroSmallFont", {
 			font = headingFont,
-			size = ScreenScale(24),
+			size = scaleFont(ScreenScale(24)),
 			extended = true,
 			weight = 400
 		})

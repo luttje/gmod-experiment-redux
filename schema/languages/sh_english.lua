@@ -1,11 +1,17 @@
 LANGUAGE = {
-    schemaName = "Experiment Redux",
+	schemaName = "Experiment Redux",
+
+	optAccessibilityFont = "Enable more readable font",
+	optdAccessibilityFont =
+	"Enables a more readable font for those who have trouble reading the default font.",
+	optAccessibilityFontScale = "Font scaling",
+	optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
 
 	achievements = "Achievements",
 	alliance = "Alliance",
 	buffs = "Nano Buffs",
 	perks = "Perks",
-    scoreboard = "Player List",
+	scoreboard = "Player List",
 	skills = "Attributes",
 	chooseSkills = "Distribute your attribute points.",
 

@@ -150,12 +150,28 @@
 
         .button {
             position: fixed;
-            bottom: 1em;
+            width: 64px;
+            height: 64px;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .button.center {
             left: 50%;
             transform: translateX(-50%);
             -webkit-transform: translateX(-50%);
-            z-index: 1;
-            cursor: pointer;
+        }
+        .button.top {
+            top: 1em;
+        }
+        .button.right {
+            right: 1em;
+        }
+        .button.bottom {
+            bottom: 1em;
+        }
+        .button.left {
+            left: 1em;
         }
 
         .button img {
@@ -233,15 +249,16 @@
             </ul>
         </div>
     </div>
-    <a class="button" id="nextButton" href="javascript:nextSection()">
+    <a class="button bottom center" id="nextButton" href="javascript:nextSection()">
         <img src="asset://garrysmod/materials/experiment-redux/illustrations/arrow-down.png">
     </a>
-    <a class="button hidden" id="closeButton" href="javascript:close()">
+    <a class="button top right" id="closeButton" href="javascript:close()">
         <img src="asset://garrysmod/materials/experiment-redux/illustrations/close.png">
     </a>
 
     <script>
         var requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || window.mozRequestAnimationFrame;
+        var autoScrolling = false;
 
         function smoothScrollTo(element, onFinished) {
             var targetPosition = element.getBoundingClientRect().top;
@@ -249,6 +266,8 @@
             var distance = targetPosition;
             var duration = 800;
             var startTime = null;
+
+            autoScrolling = true;
 
             function animation(currentTime) {
                 if (startTime === null) {
@@ -263,6 +282,8 @@
                     requestAnimationFrame(animation);
                 } else {
                     startTime = null;
+                    autoScrolling = false;
+
                     if (onFinished) {
                         onFinished();
                     }
@@ -289,24 +310,33 @@
         }
 
         function setButtonHidden(id, hidden) {
-            document.getElementById(id).classList.toggle('hidden', hidden);
+            if (hidden) {
+                document.getElementById(id).classList.add('hidden');
+            } else {
+                document.getElementById(id).classList.remove('hidden');
+            }
         }
 
         function nextSection() {
-            if (currentSection < sections.length - 1) {
-                // sections[++currentSection].scrollIntoView({ behavior: 'smooth' });
-                currentSection++;
+            currentSection++;
 
+            if (currentSection < sections.length) {
+                // sections[++currentSection].scrollIntoView({ behavior: 'smooth' });
                 setButtonHidden('nextButton', true);
                 smoothScrollTo(sections[currentSection], function () {
-                    setButtonHidden('nextButton', false);
+                    if (currentSection < sections.length - 1) {
+                        setButtonHidden('nextButton', false);
+                    }
                 });
             }
         }
 
-        var flip = false;
         document.addEventListener('scroll', function (event) {
-            var scrollY = window.scrollY + 1;
+            if (autoScrolling) {
+                return;
+            }
+
+            var scrollY = window.scrollY + 5;
             var windowHeight = window.innerHeight;
 
             for (var i = 0; i < sections.length; i++) {
@@ -320,15 +350,8 @@
                 }
             }
 
-            // If the scroll is at the bottom of the page, show the close button
-            if (scrollY + windowHeight >= document.body.scrollHeight - 200) {
-                setButtonHidden('nextButton', true);
-                setButtonHidden('closeButton', false);
-                flip = true;
-            } else if (flip) {
+            if (currentSection < sections.length - 1) {
                 setButtonHidden('nextButton', false);
-                setButtonHidden('closeButton', true);
-                flip = false;
             }
         });
 
