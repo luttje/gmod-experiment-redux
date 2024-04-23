@@ -11,7 +11,7 @@ end
 
 hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 	ix.config.Set("intro", false)
-	ix.config.Set("music", "music/HL2_song23_SuitSong3.mp3")
+	ix.config.Set("music", "music/HL2_song26.mp3")
 	ix.config.Set("maxAttributes", 100)
 	ix.config.Set("communityURL", "")
 
