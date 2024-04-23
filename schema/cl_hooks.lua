@@ -163,7 +163,7 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 		surface.CreateFont("ixMediumFont", {
 			font = readableFont,
-			size = scaleFont(25),
+			size = scaleFont(28),
 			extended = true,
 			weight = 4000
 		})

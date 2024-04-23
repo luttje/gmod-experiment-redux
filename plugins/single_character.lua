@@ -76,31 +76,32 @@ function PLUGIN:OnCharacterMenuCreated(panel)
 
     panel.OnCharacterDeleted = function(character)
         panel.loadCharacterPanel:SlideDown()
-        panel.newCharacterPanel:SlideUp(0)
+        panel.newCharacterPanel:SlideUp()
     end
 
-    -- I don't like that stencil effect on the main panel, so I'm removing it
-	-- panel.loadCharacterPanel.carousel.Paint = function(self, width, height)
-	-- 	cam.Start3D(self.cameraPosition, self.cameraAngle, modelFOV, x, y, width, height)
-	-- 	render.SuppressEngineLighting(true)
-	-- 	render.SetLightingOrigin(self.activeCharacter:GetPos())
-	-- 	render.SetModelLighting(0, 1.5, 1.5, 1.5)
+    -- The default Helix stencil effect bugs out if there's not more than 1 character
+	panel.loadCharacterPanel.carousel.Paint = function(self, width, height)
+		local x, y = self:LocalToScreen(0, 0)
+		local modelFOV = (ScrW() > ScrH() * 1.8) and 92 or 70
 
-	-- 	for i = 1, 4 do
-	-- 		render.SetModelLighting(i, 0.4, 0.4, 0.4)
-	-- 	end
+		cam.Start3D(self.cameraPosition, self.cameraAngle, modelFOV, x, y, width, height)
+			render.SuppressEngineLighting(true)
+			render.SetLightingOrigin(self.activeCharacter:GetPos())
 
-	-- 	render.SetModelLighting(5, 0.04, 0.04, 0.04)
+			render.SetModelLighting(0, 1.5, 1.5, 1.5)
 
-	-- 	self:LayoutEntity(self.activeCharacter)
-	-- 	self.activeCharacter:DrawModel()
+			for i = 1, 4 do
+				render.SetModelLighting(i, 0.4, 0.4, 0.4)
+			end
 
-	-- 	render.SetScissorRect(0, 0, 0, 0, false)
-	-- 	render.SuppressEngineLighting(false)
-	-- 	cam.End3D()
+			render.SetModelLighting(5, 0.04, 0.04, 0.04)
 
-	-- 	self.lastPaint = RealTime()
-	-- end
+			self.activeCharacter:DrawModel()
+			render.SuppressEngineLighting(false)
+		cam.End3D()
+
+		self.lastPaint = RealTime()
+	end
 
     showCorrectPanel()
 end

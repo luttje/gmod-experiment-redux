@@ -51,9 +51,11 @@ if (CLIENT) then
         -- NOTE: Books are expected to handle closing themselves. For this they need
 		-- to take full control of the frame with HTML (by returning true as the second
 		-- result of ITEM:GetText() and console.log("CLOSE_READABLE") from JavaScript).
-		if (item.hideFrameCloseButton) then
-			frame:HideCloseButton()
-		end
+        if (item.hideFrameCloseButton) then
+            frame:HideCloseButton()
+        end
+
+		hook.Run("OnPlayerItemRead", item, frame)
     end)
 end
 

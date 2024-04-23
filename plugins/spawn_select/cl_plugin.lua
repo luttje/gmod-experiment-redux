@@ -10,9 +10,11 @@ net.Receive("expSpawnSelectResponse", function()
 	local status = net.ReadUInt(4)
 
 	if (status == PLUGIN.spawnResult.OK) then
-		if (IsValid(ix.gui.spawnSelection)) then
-			ix.gui.spawnSelection:Remove()
-		end
+        if (IsValid(ix.gui.spawnSelection)) then
+            ix.gui.spawnSelection:Remove()
+        end
+
+		hook.Run("OnSpawnSelectSuccess")
     elseif (status == PLUGIN.spawnResult.FAIL) then
 		ix.gui.spawnSelection:Rebuild()
 	else

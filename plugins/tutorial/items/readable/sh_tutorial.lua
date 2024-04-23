@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.name = "An Introduction"
@@ -8,7 +9,7 @@ ITEM.hideFrameTitleBar = true
 ITEM.hideFrameCloseButton = true
 
 function ITEM:GetText()
-    local html = file.Read(Schema.folder .. "/schema/html/tutorial.html", "LUA")
+    local html = file.Read(PLUGIN.folder .. "/html/tutorial.html", "LUA")
 
 	return html, true
 end

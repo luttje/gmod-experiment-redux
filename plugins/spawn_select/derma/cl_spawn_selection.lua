@@ -54,8 +54,9 @@ function PANEL:Rebuild()
     local mapWidth = self.mapDetails.backgroundOriginalWidth * mapScale
 
     self.infoLabel = self:Add("DLabel")
-    self.infoLabel:SetText("Choose your spawn location")
-    self.infoLabel:SetFont("ixMediumFont")
+    self.infoLabel:SetText("Spawn Selection")
+    self.infoLabel:SetFont("ixBigFont")
+	self.infoLabel:SetTextColor(ix.config.Get("color"))
     self.infoLabel:SizeToContents()
     self.infoLabel:SetPos(
         (scrW * .5) - (self.infoLabel:GetWide() * .5),
