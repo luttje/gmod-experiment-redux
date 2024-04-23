@@ -6,6 +6,8 @@ LANGUAGE = {
 	buffs = "Nano Buffs",
 	perks = "Perks",
     scoreboard = "Player List",
+	skills = "Attributes",
+	chooseSkills = "Distribute your attribute points.",
 
 	noBuffs = "No active nano buffs.",
 

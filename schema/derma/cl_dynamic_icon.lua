@@ -3,6 +3,7 @@ local PANEL = {}
 PANEL.padding = 32
 
 function PANEL:Init()
+	self:SetSize(64, 64)
 end
 
 function PANEL:PerformLayout(width, height)

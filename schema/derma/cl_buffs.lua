@@ -143,9 +143,10 @@ function PANEL:Init()
 	self.label:SetFont("expSmallOutlinedFont")
 	self.label:SetTextColor(color_white)
 	self.label:SetExpensiveShadow(1, color_black)
-	self.label:SetText("")
+	self.label:SetText(" ")
+	self.label:SizeToContents()
 
-	self:SetSize(48, 48 + 16)
+	self:SetSize(48, 48 + self.label:GetTall())
 end
 
 function PANEL:SetBuff(buff, key)

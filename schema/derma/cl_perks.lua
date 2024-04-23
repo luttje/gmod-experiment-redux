@@ -26,15 +26,15 @@ function PANEL:Init()
 	self.name:Dock(TOP)
 	self.name:SetFont("ixGenericFont")
 
-	self.description = self:Add("DLabel")
-	self.description:DockMargin(4, 4, 0, 0)
-	self.description:Dock(TOP)
-	self.description:SetFont("ixSmallFont")
-
 	self.costLabel = vgui.Create("DLabel", self)
 	self.costLabel:DockMargin(0, 0, 4, 4)
 	self.costLabel:Dock(RIGHT)
 	self.costLabel:SetFont("ixSmallFont")
+
+	self.description = self:Add("DLabel")
+	self.description:DockMargin(4, 4, 0, 0)
+	self.description:Dock(TOP)
+	self.description:SetFont("ixSmallFont")
 
 	self.paintFunction = rowPaintFunctions[1]
 end

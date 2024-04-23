@@ -11,126 +11,386 @@ hook.Remove("PopulateHelpMenu", "ixCredits")
 helixSkin.DrawHelixCurved = function() end
 hook.Remove("CreateMenuButtons", "ixHelpMenu")
 
-function Schema:LoadFonts(font, genericFont)
-    surface.CreateFont("expTinyFont", {
-        font = font,
-        size = math.max(ScreenScale(4), 12),
-        extended = true,
-        weight = 400
-    })
+function Schema:LoadFonts(headingFont, readableFont)
+	surface.CreateFont("expTinyFont", {
+		font = readableFont,
+        size = math.max(ScreenScale(4), 16),
+		extended = true,
+		weight = 600
+	})
 
-    surface.CreateFont("expSmallerFont", {
-        font = font,
-        size = math.max(ScreenScale(6), 12),
-        extended = true,
-        weight = 400
-    })
+	surface.CreateFont("expSmallerFont", {
+		font = readableFont,
+        size = math.max(ScreenScale(6), 24),
+		extended = true,
+		weight = 400
+	})
 
-    surface.CreateFont("expSmallItalicFont", {
-        font = font,
-        size = math.max(ScreenScale(6), 17),
-        extended = true,
-        weight = 400,
-        italic = true
-    })
+	surface.CreateFont("expSmallItalicFont", {
+		font = readableFont,
+        size = math.max(ScreenScale(6), 26),
+		extended = true,
+		weight = 400,
+		italic = true
+	})
 
-    surface.CreateFont("expSmallOutlinedFont", {
-        font = font,
-        size = math.max(ScreenScale(6), 12),
-        extended = true,
-        shadow = true,
-        weight = 600,
-    })
+	surface.CreateFont("expSmallOutlinedFont", {
+		font = readableFont,
+        size = math.max(ScreenScale(6), 24),
+		extended = true,
+		shadow = true,
+		weight = 600,
+	})
+
+	--[[
+		Override default Helix fonts
+	--]]
+	timer.Simple(0, function()
+		surface.CreateFont("ix3D2DFont", {
+			font = headingFont,
+			size = 128,
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ix3D2DMediumFont", {
+			font = headingFont,
+			size = 48,
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ix3D2DSmallFont", {
+			font = headingFont,
+			size = 24,
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixTitleFont", {
+			font = headingFont,
+			size = ScreenScale(30),
+			extended = true,
+			weight = 600
+		})
+
+		surface.CreateFont("ixSubTitleFont", {
+			font = headingFont,
+			size = math.max(ScreenScale(16), 24),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMenuMiniFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(4), 24),
+			weight = 300,
+		})
+
+		surface.CreateFont("ixMenuButtonFont", {
+			font = readableFont,
+			size = ScreenScale(14),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMenuButtonFontSmall", {
+			font = readableFont,
+			size = ScreenScale(10),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMenuButtonFontThick", {
+			font = readableFont,
+			size = ScreenScale(14),
+			extended = true,
+			weight = 300
+		})
+
+		surface.CreateFont("ixMenuButtonLabelFont", {
+			font = readableFont,
+			size = 28,
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMenuButtonHugeFont", {
+			font = headingFont,
+			size = ScreenScale(24),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixToolTipText", {
+			font = readableFont,
+			size = 20,
+			extended = true,
+			weight = 600
+		})
+
+		surface.CreateFont("ixMonoSmallFont", {
+			font = "Consolas",
+			size = 12,
+			extended = true,
+			weight = 800
+		})
+
+		surface.CreateFont("ixMonoMediumFont", {
+			font = "Consolas",
+			size = 22,
+			extended = true,
+			weight = 800
+		})
+
+		surface.CreateFont("ixBigFont", {
+			font = headingFont,
+			size = 36,
+			extended = true,
+			weight = 4000
+		})
+
+		surface.CreateFont("ixMediumFont", {
+			font = readableFont,
+			size = 25,
+			extended = true,
+			weight = 4000
+		})
+
+		surface.CreateFont("ixNoticeFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(8), 24),
+			weight = 400,
+			extended = true,
+			antialias = true
+		})
+
+		surface.CreateFont("ixMediumLightFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(8), 25),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMediumLightBlurFont", {
+			font = readableFont,
+			size = 25,
+			extended = true,
+			weight = 400,
+			blursize = 4
+		})
+
+		surface.CreateFont("ixGenericFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(7), 24),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixChatFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(7), 24) * ix.option.Get("chatFontScale", 1),
+			extended = true,
+			weight = 600,
+			antialias = true
+		})
+
+		surface.CreateFont("ixChatFontItalics", {
+			font = readableFont,
+			size = math.max(ScreenScale(7), 24) * ix.option.Get("chatFontScale", 1),
+			extended = true,
+			weight = 600,
+			antialias = true,
+			italic = true
+		})
+
+		surface.CreateFont("ixSmallTitleFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(12), 26),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixMinimalTitleFont", {
+			font = headingFont,
+			size = math.max(ScreenScale(8), 26),
+			extended = true,
+			weight = 800
+		})
+
+		surface.CreateFont("ixSmallFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(6), 24),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixItemDescFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(6), 24),
+			extended = true,
+			shadow = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixSmallBoldFont", {
+			font = readableFont,
+			size = math.max(ScreenScale(8), 22),
+			extended = true,
+			weight = 800
+		})
+
+		surface.CreateFont("ixItemBoldFont", {
+			font = readableFont,
+			shadow = true,
+			size = math.max(ScreenScale(8), 20),
+			extended = true,
+			weight = 800
+		})
+
+		surface.CreateFont("ixIntroTitleFont", {
+			font = headingFont,
+			size = math.min(ScreenScale(128), 128),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixIntroTitleBlurFont", {
+			font = headingFont,
+			size = math.min(ScreenScale(128), 128),
+			extended = true,
+			weight = 400,
+			blursize = 4
+		})
+
+		surface.CreateFont("ixIntroSubtitleFont", {
+			font = headingFont,
+			size = ScreenScale(28),
+			extended = true,
+			weight = 400
+		})
+
+		surface.CreateFont("ixIntroSmallFont", {
+			font = headingFont,
+			size = ScreenScale(24),
+			extended = true,
+			weight = 400
+		})
+	end)
+end
+
+-- We override the default main menu so we can customize it
+function Schema:ScoreboardShow()
+	if (LocalPlayer():GetCharacter()) then
+		vgui.Create("expMenu")
+
+		-- We MUST return true to prevent default Helix behavior
+		return true
+	end
 end
 
 -- Copied from gamemode/core/derma/cl_help.lua to only show a tab with commands
 function Schema:CreateMenuButtons(tabs)
-    tabs["help"] = function(container)
-        local info = container:Add("DLabel")
-        info:SetFont("ixSmallFont")
-        info:SetText(L("helpCommands"))
-        info:SetContentAlignment(5)
-        info:SetTextColor(color_white)
-        info:SetExpensiveShadow(1, color_black)
-        info:Dock(TOP)
-        info:DockMargin(0, 0, 0, 8)
-        info:SizeToContents()
-        info:SetTall(info:GetTall() + 16)
+	tabs["help"] = function(parentContainer)
+		local backgroundColor = Color(0, 0, 0, 66)
+		local container = parentContainer:Add("DScrollPanel")
+		container:Dock(FILL)
+		container:DockMargin(8, 0, 0, 0)
+		container.Paint = function(_, width, height)
+			surface.SetDrawColor(backgroundColor)
+			surface.DrawRect(0, 0, width, height)
+		end
+		container.DisableScrolling = function()
+			container:GetCanvas():SetVisible(false)
+			container:GetVBar():SetVisible(false)
+			container.OnChildAdded = function() end
+		end
 
-        info.Paint = function(_, width, height)
-            surface.SetDrawColor(ColorAlpha(derma.GetColor("Info", info), 160))
-            surface.DrawRect(0, 0, width, height)
-        end
+		local info = container:Add("DLabel")
+		info:SetFont("ixSmallFont")
+		info:SetText(L("helpCommands"))
+		info:SetContentAlignment(5)
+		info:SetTextColor(color_white)
+		info:SetExpensiveShadow(1, color_black)
+		info:Dock(TOP)
+		info:DockMargin(0, 0, 0, 8)
+		info:SizeToContents()
+		info:SetTall(info:GetTall() + 16)
 
-        for uniqueID, command in SortedPairs(ix.command.list) do
-            if (command.OnCheckAccess and not command:OnCheckAccess(LocalPlayer())) then
-                continue
-            end
+		info.Paint = function(_, width, height)
+			surface.SetDrawColor(ColorAlpha(derma.GetColor("Info", info), 160))
+			surface.DrawRect(0, 0, width, height)
+		end
 
-            local bIsAlias = false
-            local aliasText = ""
+		for uniqueID, command in SortedPairs(ix.command.list) do
+			if (command.OnCheckAccess and not command:OnCheckAccess(LocalPlayer())) then
+				continue
+			end
 
-            -- we want to show aliases in the same entry for better readability
-            if (command.alias) then
-                local alias = istable(command.alias) and command.alias or { command.alias }
+			local bIsAlias = false
+			local aliasText = ""
 
-                for _, v in ipairs(alias) do
-                    if (v:lower() == uniqueID) then
-                        bIsAlias = true
-                        break
-                    end
+			-- we want to show aliases in the same entry for better readability
+			if (command.alias) then
+				local alias = istable(command.alias) and command.alias or { command.alias }
 
-                    aliasText = aliasText .. ", /" .. v
-                end
+				for _, v in ipairs(alias) do
+					if (v:lower() == uniqueID) then
+						bIsAlias = true
+						break
+					end
 
-                if (bIsAlias) then
-                    continue
-                end
-            end
+					aliasText = aliasText .. ", /" .. v
+				end
 
-            local title = container:Add("DLabel")
-            title:SetFont("ixMediumLightFont")
-            title:SetText("/" .. command.name .. aliasText)
-            title:Dock(TOP)
-            title:SetTextColor(ix.config.Get("color"))
-            title:SetExpensiveShadow(1, color_black)
-            title:SizeToContents()
+				if (bIsAlias) then
+					continue
+				end
+			end
 
-            local syntaxText = command.syntax
-            local syntax
+			local title = container:Add("DLabel")
+			title:SetFont("ixSmallBoldFont")
+			title:SetText("/" .. command.name .. aliasText)
+			title:Dock(TOP)
+			title:SetTextColor(ix.config.Get("color"))
+			title:SetExpensiveShadow(1, color_black)
+			title:SizeToContents()
 
-            if (syntaxText ~= "" and syntaxText ~= "[none]") then
-                syntax = container:Add("DLabel")
-                syntax:SetFont("ixMediumLightFont")
-                syntax:SetText(syntaxText)
-                syntax:Dock(TOP)
-                syntax:SetTextColor(color_white)
-                syntax:SetExpensiveShadow(1, color_black)
-                syntax:SetWrap(true)
-                syntax:SetAutoStretchVertical(true)
-                syntax:SizeToContents()
-            end
+			local syntaxText = command.syntax
+			local syntax
 
-            local descriptionText = command:GetDescription()
+			if (syntaxText ~= "" and syntaxText ~= "[none]") then
+				syntax = container:Add("DLabel")
+				syntax:SetFont("ixMediumLightFont")
+				syntax:SetText(syntaxText)
+				syntax:Dock(TOP)
+				syntax:SetTextColor(color_white)
+				syntax:SetExpensiveShadow(1, color_black)
+				syntax:SetWrap(true)
+				syntax:SetAutoStretchVertical(true)
+				syntax:SizeToContents()
+			end
 
-            if (descriptionText ~= "") then
-                local description = container:Add("DLabel")
-                description:SetFont("ixSmallFont")
-                description:SetText(descriptionText)
-                description:Dock(TOP)
-                description:SetTextColor(color_white)
-                description:SetExpensiveShadow(1, color_black)
-                description:SetWrap(true)
-                description:SetAutoStretchVertical(true)
-                description:SizeToContents()
-                description:DockMargin(0, 0, 0, 8)
-            elseif (syntax) then
-                syntax:DockMargin(0, 0, 0, 8)
-            else
-                title:DockMargin(0, 0, 0, 8)
-            end
-        end
-    end
+			local descriptionText = command:GetDescription()
+
+			if (descriptionText ~= "") then
+				local description = container:Add("DLabel")
+				description:SetFont("ixSmallFont")
+				description:SetText(descriptionText)
+				description:Dock(TOP)
+				description:SetTextColor(color_white)
+				description:SetExpensiveShadow(1, color_black)
+				description:SetWrap(true)
+				description:SetAutoStretchVertical(true)
+				description:SizeToContents()
+				description:DockMargin(0, 0, 0, 8)
+			elseif (syntax) then
+				syntax:DockMargin(0, 0, 0, 8)
+			else
+				title:DockMargin(0, 0, 0, 8)
+			end
+		end
+	end
 end
 
 function Schema:InitPostEntity()
@@ -138,7 +398,7 @@ function Schema:InitPostEntity()
 end
 
 function Schema:CharacterLoaded(character)
-    Schema.buff.CreateHUDPanel()
+	Schema.buff.CreateHUDPanel()
 end
 
 function Schema:ScreenResolutionChanged(oldWidth, oldHeight)
@@ -291,7 +551,8 @@ function Schema:PostPlayerDraw(client)
 		end
 
 		local matrix = client:GetBoneMatrix(boneID)
-		local position, angles = LocalToWorld(itemTable.attachmentOffsetVector, itemTable.attachmentOffsetAngles, matrix:GetTranslation(), matrix:GetAngles())
+		local position, angles = LocalToWorld(itemTable.attachmentOffsetVector, itemTable.attachmentOffsetAngles,
+			matrix:GetTranslation(), matrix:GetAngles())
 
 		model:SetPos(position)
 		model:SetAngles(angles)

@@ -1,17 +1,22 @@
--- ! Hack to disable other languages for now.
--- TODO: Write translations for other languages than English
-local function hackEnglishOnly()
+local function hackOptionRestrictions()
 	timer.Simple(0, function()
+		-- ! Hack to disable other languages for now.
+		-- TODO: Write translations for other languages than English
 		ix.option.stored["language"].populate = function()
 			return {
 				["english"] = "English"
 			}
 		end
+
+		if (CLIENT) then
+			-- ! Hack to not show option for enabling intro
+			ix.option.stored["showIntro"].hidden = true
+		end
 	end)
 end
 
-hook.Add("InitializedSchema", "hackEnglishOnlyInitialize", hackEnglishOnly)
-hook.Add("OnReloaded", "hackEnglishOnlyOnReloaded", hackEnglishOnly)
+hook.Add("InitializedSchema", "hackEnglishOnlyInitialize", hackOptionRestrictions)
+hook.Add("OnReloaded", "hackEnglishOnlyOnReloaded", hackOptionRestrictions)
 
 function Schema:DoPluginIncludes(path, plugin)
 	Schema.achievement.LoadFromDir(path .. "/achievements")

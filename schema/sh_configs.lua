@@ -3,10 +3,24 @@ ix.currency.singular = "bolt"
 ix.currency.plural = "bolts"
 ix.currency.model = "models/props_lab/box01a.mdl"
 
-ix.config.SetDefault("intro", false)
-ix.config.SetDefault("music", "music/HL2_song23_SuitSong3.mp3")
-ix.config.SetDefault("maxAttributes", 100)
-ix.config.SetDefault("communityURL", "")
+if (SERVER) then
+    resource.AddFile("resource/fonts/lightout.woff")
+    resource.AddFile("resource/fonts/RomanAntique.ttf")
+    resource.AddFile("resource/fonts/RomanAntique-Italic.ttf")
+end
+
+hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
+	ix.config.Set("intro", false)
+	ix.config.Set("music", "music/HL2_song23_SuitSong3.mp3")
+	ix.config.Set("maxAttributes", 100)
+	ix.config.Set("communityURL", "")
+
+    ix.config.Set("color", Color(160, 78, 69, 255))
+
+	-- TODO: Check if players find this font hard to read.
+	ix.config.Set("font", "Lights Out BRK")
+	ix.config.Set("genericFont", "Roman Antique")
+end)
 
 -- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
 ix.config.SetDefault("spawnTime", 60)
