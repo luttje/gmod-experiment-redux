@@ -23,7 +23,8 @@ end, FLAG_SUCCESS)
 
 ix.log.AddType("generatorDestroy", function(client, ...)
 	local arg = { ... }
-	return L("%s destroyed a generator belonging to %s", IsValid(client) and client:Name() or "an unknown player", IsValid(arg[1]) and arg[1]:Name() or "an unknown player")
+	return L("%s destroyed a generator belonging to %s", IsValid(client) and client:Name() or "an unknown player",
+		IsValid(arg[1]) and arg[1]:Name() or "an unknown player")
 end, FLAG_WARNING)
 
 ix.log.AddType("achievementAchieved", function(client, ...)
@@ -62,7 +63,7 @@ ix.log.AddType("allianceRankSet", function(client, ...)
 end, FLAG_WARNING)
 
 ix.log.AddType("schemaDebug", function(client, ...)
-	local arg = {...}
+	local arg = { ... }
 	return L("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
 end, FLAG_DANGER)
 
@@ -88,6 +89,37 @@ function Schema.ImpactEffect(position, scale, withSound)
 	if (withSound) then
 		sound.Play("physics/body/body_medium_impact_soft" .. math.random(1, 7) .. ".wav", position)
 	end
+end
+
+function Schema.BloodEffect(entity, position, scale, force)
+	if (not scale) then
+		scale = 0.5
+	end
+
+	if (not force) then
+		force = VectorRand() * 80
+	end
+
+	local effectData = EffectData()
+	effectData:SetOrigin(position)
+	effectData:SetNormal(force)
+	effectData:SetScale(scale)
+	util.Effect("exp_blood_smoke", effectData, true, true)
+
+	local effectData = EffectData()
+	effectData:SetOrigin(position)
+	effectData:SetEntity(entity)
+	effectData:SetStart(position)
+	effectData:SetScale(scale)
+	util.Effect("BloodImpact", effectData, true, true)
+
+	local trace = {}
+	trace.start = position
+	trace.endpos = trace.start
+	trace.filter = entity
+	trace = util.TraceLine(trace)
+
+	util.Decal("Blood", trace.HitPos + trace.HitNormal, trace.HitPos - trace.HitNormal)
 end
 
 function Schema.TiePlayer(client)

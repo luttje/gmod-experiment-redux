@@ -62,6 +62,10 @@ LANGUAGE = {
 	searchingCorpse = "Searching corpse...",
 	resurrectingCorpse = "Resurrecting corpse...",
 
+	mutilateCorpse = "Mutilate corpse",
+	mutilatingCorpse = "Mutilating corpse...",
+	mutilatedCorpse = "You have mutilated the corpse.",
+
 	radioNotOn = "Your radio isn't on!",
 	radioRequired = "You need a radio to do this.",
 	radioAlreadyOn = "You already have a radio that is turned on!",

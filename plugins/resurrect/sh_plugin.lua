@@ -15,37 +15,24 @@ ix.config.Add("resurrectTimeInSeconds", 5, "The time in seconds that it takes to
 })
 
 if (CLIENT) then
-	function PLUGIN:NetworkEntityCreated(entity)
+	function PLUGIN:AdjustPlayerCorpseEntityMenu(options, target, corpse)
 		local client = LocalPlayer()
-
-		if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
-			return
-		end
 
 		if (not Schema.perk.GetOwned("phoenix_tamer")) then
 			return
 		end
 
-		entity.GetEntityMenu = function(entity, options)
-			local target = entity:GetNetVar("player", NULL)
-			local options = {}
-
-			options[L("searchCorpse")] = true
-
-			if (not IsValid(target) or target:Alive()) then
-				return options
-			end
-
-			local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
-
-			if (not canResurrect) then
-				return options
-			end
-
-			options[L("resurrect")] = true
-
-			return options
+		if (not IsValid(target) or target:Alive()) then
+			return
 		end
+
+		local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, corpse) ~= false
+
+		if (not canResurrect) then
+			return
+		end
+
+		options[L("resurrect")] = true
 	end
 end
 
@@ -93,8 +80,8 @@ function PLUGIN:CanPlayerSearchCorpse(client, corpse)
 	end
 end
 
-function PLUGIN:PlayerInteractEntity(client, entity, option, data)
-	if (entity:GetClass() ~= "prop_ragdoll") then
+function PLUGIN:OnPlayerCorpseOptionSelected(client, entity, option, data)
+	if (option ~= L("resurrect", client)) then
 		return
 	end
 
@@ -106,59 +93,49 @@ function PLUGIN:PlayerInteractEntity(client, entity, option, data)
 
 	local healthPenaltyFactor = phoenixTamerPerkTable.healthPenaltyFactor
 
-	entity.OnOptionSelected = function(entity, client, option, data)
-		if (option == L("searchCorpse", client) and entity.StartSearchCorpse) then
-			entity:StartSearchCorpse(client)
-		end
+	local target = entity:GetNetVar("player")
 
-		if (option ~= L("resurrect", client)) then
-			return
-		end
-
-		local target = entity:GetNetVar("player")
-
-		if (not IsValid(target) or target:Alive()) then
-			client:Notify("This corpse is beyond saving!")
-			return
-		end
-
-		local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
-
-		if (not canResurrect) then
-			client:Notify("This corpse is blocked from being resurrected!")
-			return
-		end
-
-		local resurrectTimeInSeconds = ix.config.Get("resurrectTimeInSeconds")
-
-		target:SetAction("@beingResurrected", resurrectTimeInSeconds)
-		client:SetAction("@resurrecting", resurrectTimeInSeconds)
-		client:DoStaredAction(entity, function()
-			if (not IsValid(target) or target:Alive() or not IsValid(client)) then
-				return
-			end
-
-			local newHealth
-
-			if (healthPenaltyFactor) then
-				newHealth = client:Health() * healthPenaltyFactor
-				local damageInfo = DamageInfo()
-				damageInfo:SetDamage(newHealth)
-				damageInfo:SetAttacker(client)
-				damageInfo:SetInflictor(client:GetActiveWeapon())
-				damageInfo:SetDamageType(DMG_BURN)
-				client:TakeDamageInfo(damageInfo)
-			end
-
-			self:ResurrectPlayer(client, target, entity, newHealth)
-		end, resurrectTimeInSeconds, function()
-			if (IsValid(client)) then
-				client:SetAction()
-			end
-
-			if (IsValid(target)) then
-				target:SetAction()
-			end
-		end)
+	if (not IsValid(target) or target:Alive()) then
+		client:Notify("This corpse is beyond saving!")
+		return
 	end
+
+	local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
+
+	if (not canResurrect) then
+		client:Notify("This corpse is blocked from being resurrected!")
+		return
+	end
+
+	local resurrectTimeInSeconds = ix.config.Get("resurrectTimeInSeconds")
+
+	target:SetAction("@beingResurrected", resurrectTimeInSeconds)
+	client:SetAction("@resurrecting", resurrectTimeInSeconds)
+	client:DoStaredAction(entity, function()
+		if (not IsValid(target) or target:Alive() or not IsValid(client)) then
+			return
+		end
+
+		local newHealth
+
+		if (healthPenaltyFactor) then
+			newHealth = client:Health() * healthPenaltyFactor
+			local damageInfo = DamageInfo()
+			damageInfo:SetDamage(newHealth)
+			damageInfo:SetAttacker(client)
+			damageInfo:SetInflictor(client:GetActiveWeapon())
+			damageInfo:SetDamageType(DMG_BURN)
+			client:TakeDamageInfo(damageInfo)
+		end
+
+		self:ResurrectPlayer(client, target, entity, newHealth)
+	end, resurrectTimeInSeconds, function()
+		if (IsValid(client)) then
+			client:SetAction()
+		end
+
+		if (IsValid(target)) then
+			target:SetAction()
+		end
+	end)
 end

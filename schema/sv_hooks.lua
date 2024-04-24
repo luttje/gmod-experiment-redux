@@ -735,3 +735,61 @@ function Schema:GeneratorAdjustEarnings(generator, earnings)
 		return newEarnings
 	end
 end
+
+function Schema:PlayerInteractEntity(client, entity, option, data)
+	if (entity:GetClass() ~= "prop_ragdoll") then
+		return
+	end
+
+	local entityPlayer = entity:GetNetVar("player", NULL)
+
+	if (not IsValid(entityPlayer)) then
+		return
+	end
+
+	entity.OnOptionSelected = function(entity, client, option, data)
+		hook.Run("OnPlayerCorpseOptionSelected", client, entity, option, data)
+	end
+end
+
+function Schema:OnPlayerCorpseOptionSelected(client, entity, option, data)
+	if (option == L("searchCorpse", client) and entity.StartSearchCorpse) then
+		entity:StartSearchCorpse(client)
+		return
+	end
+
+	if (option == L("mutilateCorpse", client)) then
+		local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator", client)
+
+		if (hasMutilatorPerk) then
+			if (entity:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+				return
+			end
+
+			local mutilateTime = mutilatorPerkTable.mutilateTime
+			local healthIncrease = mutilatorPerkTable.healthIncrease
+
+			client:SetAction("@mutilatingCorpse", mutilateTime)
+			client:DoStaredAction(entity, function()
+				-- Double check, so players cant mutilate the same corpse at once.
+				if (entity:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+					return
+				end
+
+				local trace = client:GetEyeTraceNoCursor()
+
+				Schema.BloodEffect(entity, entity:NearestPoint(trace.HitPos))
+				client:EmitSound("npc/barnacle/barnacle_crunch" .. math.random(2, 3) .. ".wav")
+
+				client:SetHealth(math.min(client:Health() + healthIncrease, client:GetMaxHealth()))
+				entity:SetNetVar("mutilated", entity:GetNetVar("mutilated", 0) + 1)
+			end, mutilateTime, function()
+				if (IsValid(client)) then
+					client:SetAction()
+				end
+			end)
+		end
+
+		return
+	end
+end

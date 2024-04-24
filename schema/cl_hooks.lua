@@ -567,6 +567,39 @@ function Schema:PlayerPerkBought(client, perk)
 	end
 end
 
+function Schema:NetworkEntityCreated(entity)
+	local client = LocalPlayer()
+
+	if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
+		return
+	end
+
+	local player = entity:GetNetVar("player", NULL)
+
+	if (not IsValid(player)) then
+		return
+	end
+
+	entity.GetEntityMenu = function(entity)
+		local target = entity:GetNetVar("player", NULL)
+		local options = {}
+
+		hook.Run("AdjustPlayerCorpseEntityMenu", options, target, entity)
+
+		return options
+	end
+end
+
+function Schema:AdjustPlayerCorpseEntityMenu(options, target, corpse)
+	options[L("searchCorpse")] = true
+
+	local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
+
+	if (hasMutilatorPerk and corpse:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
+		options[L("mutilateCorpse")] = true
+	end
+end
+
 -- TODO: We could use weaponItemTable.pacData to let PAC3 handle the attachment
 function Schema:PostPlayerDraw(client)
 	local character = client:GetCharacter()
