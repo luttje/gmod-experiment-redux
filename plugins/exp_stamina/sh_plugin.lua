@@ -76,7 +76,6 @@ local function calcStaminaChange(client)
 	end
 end
 
-
 if (SERVER) then
 	function PLUGIN:PostPlayerLoadout(client)
 		local uniqueID = "ixStam" .. client:SteamID()
@@ -128,6 +127,7 @@ if (SERVER) then
 		local damageScale = 1.2 - endurance -- Always take at least 20% of the damage
 
 		damageInfo:ScaleDamage(damageScale)
+		print("Damage scaled by " .. damageScale)
 	end
 
 	local playerMeta = FindMetaTable("Player")

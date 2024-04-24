@@ -101,7 +101,7 @@ function Schema.armor.DamageAfterArmor(character, damage)
 		end
 	end
 
-	return damage - preventableDamage
+	return damage - (preventableDamage - remaining)
 end
 
 function Schema.armor.ProtectedFromTearGas(character)
