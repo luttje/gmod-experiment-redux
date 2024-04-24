@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 35,
 	size = 32,
 }
+PERK.modifyRunSpeed = 1.1
 PERK.description = "Using this perk will cause you to sprint 10% faster."
-

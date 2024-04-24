@@ -149,7 +149,7 @@ end
 
 --[[
 
-	Spawning hooks
+	Spawning and Loadout hooks
 
 --]]
 
@@ -163,6 +163,23 @@ function Schema:PlayerSpawn(client)
 	-- Reset these so they don't interfere the next time the player dies
 	client.expCorpseCharacter = nil
 	client.expDropMode = nil
+end
+
+function Schema:PostPlayerLoadout(client)
+	local character = client:GetCharacter()
+
+	if (not character) then
+		return
+	end
+
+	local hasGodspeed, godspeedPerkTable = Schema.perk.GetOwned("godspeed", client)
+
+	if (hasGodspeed) then
+		local modifyRunSpeed = godspeedPerkTable.modifyRunSpeed
+		local currentRunSpeed = client:GetRunSpeed()
+
+		client:SetRunSpeed(currentRunSpeed * modifyRunSpeed)
+	end
 end
 
 --[[
@@ -633,31 +650,37 @@ end
 function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)
 	-- If the item has base_stackable and we find existing base_stackable items in the target inventory
 	-- Check if the existing item can stack with the new item, if so, stack them.
-	if (item:IsBasedOn("base_stackable")) then
-		local client = targetInventory:GetOwner()
+	if (not item:IsBasedOn("base_stackable")) then
+		return
+	end
 
-		if (client.expLastSplit and client.expLastSplit + 0.1 > CurTime()) then
-			-- Don't stack items if the player just tried to split them.
-			return
-		end
+	local client = targetInventory:GetOwner()
 
-		local tallestStackItem = nil
-		local tallestStack = 0
+	if (not client) then
+		return
+	end
 
-		for _, otherItem in pairs(targetInventory:GetItems()) do
-			if (otherItem:IsBasedOn("base_stackable") and otherItem:CanStackWith(item)) then
-				local otherStacks = otherItem:GetData("stacks", 1)
+	if (client.expLastSplit and client.expLastSplit + 0.1 > CurTime()) then
+		-- Don't stack items if the player just tried to split them.
+		return
+	end
 
-				if (otherStacks > tallestStack) then
-					tallestStack = otherStacks
-					tallestStackItem = otherItem
-				end
+	local tallestStackItem = nil
+	local tallestStack = 0
+
+	for _, otherItem in pairs(targetInventory:GetItems()) do
+		if (otherItem:IsBasedOn("base_stackable") and otherItem:CanStackWith(item)) then
+			local otherStacks = otherItem:GetData("stacks", 1)
+
+			if (otherStacks > tallestStack) then
+				tallestStack = otherStacks
+				tallestStackItem = otherItem
 			end
 		end
+	end
 
-		if (tallestStackItem) then
-			tallestStackItem:Stack(item)
-			return
-		end
+	if (tallestStackItem) then
+		tallestStackItem:Stack(item)
+		return
 	end
 end
