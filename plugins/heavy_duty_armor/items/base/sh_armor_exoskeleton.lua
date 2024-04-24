@@ -1,15 +1,12 @@
 local ITEM = ITEM
 
-ITEM.price = 14000
-ITEM.name = "Freedom Exoskeleton"
-ITEM.description =
-"A Freedom branded exoskeleton. Provides you with bullet resistance."
-ITEM.width = 2
-ITEM.height = 1
+ITEM.base = "base_armor"
+ITEM.name = "Exoskeleton"
+ITEM.description = "An exoskeleton suit. Provides you with bullet resistance."
 ITEM.replacement = "models/stalkertnb/exo_free.mdl"
 ITEM.hasTearGasProtection = true
 ITEM.attribBoosts = {
-	["medical"] = 35,
+	-- ["medical"] = 35,
 }
 ITEM.maxArmor = 500
 ITEM.repairMaterials = {
@@ -30,8 +27,6 @@ ITEM.footstepSounds = {
 	walk = footstepSounds,
 	run = footstepSounds,
 }
-
-ix.anim.SetModelClass(ITEM.replacement, "player")
 
 function ITEM:CanRepair()
     if (not self.baseTable.CanRepair(self)) then

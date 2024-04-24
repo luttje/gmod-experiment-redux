@@ -205,37 +205,14 @@ function ENT:OnOptionSelected(client, option, data)
             return
         end
 
-        local items = inventory:GetItemsByUniqueID(data.item)
-        local totalAmount = 0
+		local ownedAmount = inventory:GetItemCount(data.item)
 
-		for _, item in ipairs(items) do
-			totalAmount = totalAmount + item:GetData("stacks", 1)
-		end
-
-        if (totalAmount < amount) then
+        if (ownedAmount < amount) then
             client:Notify("You do not have enough materials.")
             return
         end
 
-        local amountToRemove = amount
-
-        -- Go through the items, removing them (or taking from their stack) until we have enough
-		for _, item in ipairs(items) do
-			local stacks = item:GetData("stacks", 1)
-			local toRemove = math.min(stacks, amountToRemove)
-
-			if (toRemove == stacks) then
-				item:Remove()
-			else
-				item:SetData("stacks", stacks - toRemove)
-			end
-
-			amountToRemove = amountToRemove - toRemove
-
-			if (amountToRemove <= 0) then
-				break
-			end
-		end
+		inventory:RemoveStackedItem(data.item, amount)
 
         structureMaterials[data.item] = (structureMaterials[data.item] or 0) + amount
 

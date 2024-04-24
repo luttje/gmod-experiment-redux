@@ -109,13 +109,17 @@ ITEM.functions.split = {
 				end
 
                 local stackedCount = (stacks - cleanSplitStack)
-				local stackData = {stacks = cleanSplitStack}
+                local stackData = { stacks = cleanSplitStack }
 
-				if (not character:GetInventory():Add(itemUniqueID, 1, stackData)) then
-					ix.item.Spawn(itemUniqueID, client, nil, angle_zero, stackData)
-				end
+				client.expLastSplit = CurTime()
 
-				item:SetData("stacks", stackedCount, ix.inventory.Get(item.invID):GetReceivers())
+                if (not character:GetInventory():Add(itemUniqueID, 1, stackData)) then
+                    ix.item.Spawn(itemUniqueID, client, nil, angle_zero, stackData)
+                end
+
+				local inventory = ix.inventory.Get(item.invID)
+
+				item:SetData("stacks", stackedCount, inventory and ix.inventory.Get(item.invID):GetReceivers() or nil)
 			end,
             "1"
 		)

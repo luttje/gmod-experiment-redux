@@ -23,20 +23,50 @@ end
 -- Overrides GetItemCount in gamemode/core/meta/sh_inventory.lua
 -- Source: https://github.com/Bilwin/helix-plugins/blob/main/stacks/sh_meta.lua
 function META:GetItemCount(uniqueID, onlyMain)
-	local i = 0
+    local count = 0
     local stacks
 
-	for _, v in pairs(self:GetItems(onlyMain)) do
-		if (v.uniqueID == uniqueID) then
-            stacks = v.data.stacks
+    for _, item in pairs(self:GetItems(onlyMain)) do
+        if (item.uniqueID == uniqueID) then
+            stacks = item.data.stacks
 
             if (stacks and stacks >= 2) then
-                i = i + stacks
+                count = count + stacks
             else
-                i = i + 1
+                count = count + 1
             end
-		end
-	end
+        end
+    end
 
-	return i
+    return count
 end
+
+--- Go through the items, removing them (or taking from their stack) until we have enough
+---@param uniqueID string The unique ID of the item to remove.
+---@param amountToRemove number The amount of items to remove.
+---@param bOnlyMain boolean Whether or not to only remove items from the main inventory.
+function META:RemoveStackedItem(uniqueID, amountToRemove, bOnlyMain)
+    local items = self:GetItems(bOnlyMain)
+
+    for _, item in pairs(items) do
+		if (item.uniqueID ~= uniqueID) then
+			continue
+		end
+
+        local stacks = item:GetData("stacks", 1)
+        local toRemove = math.min(stacks, amountToRemove)
+
+        if (toRemove == stacks) then
+            item:Remove()
+        else
+            item:SetData("stacks", stacks - toRemove)
+        end
+
+        amountToRemove = amountToRemove - toRemove
+
+        if (amountToRemove <= 0) then
+            break
+        end
+    end
+end
+

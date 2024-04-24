@@ -634,6 +634,13 @@ function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)
 	-- If the item has base_stackable and we find existing base_stackable items in the target inventory
 	-- Check if the existing item can stack with the new item, if so, stack them.
 	if (item:IsBasedOn("base_stackable")) then
+		local client = targetInventory:GetOwner()
+
+		if (client.expLastSplit and client.expLastSplit + 0.1 > CurTime()) then
+			-- Don't stack items if the player just tried to split them.
+			return
+		end
+
 		local tallestStackItem = nil
 		local tallestStack = 0
 

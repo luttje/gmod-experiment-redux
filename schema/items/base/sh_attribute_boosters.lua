@@ -7,7 +7,7 @@ ITEM.height = 1
 ITEM.category = "Stimpacks"
 ITEM.description = "A Stimpack branded stimulator promising to enhance the body."
 ITEM.boostSound = "items/medshot4.wav"
-ITEM.attributeBoosts = {
+-- ITEM.attributeBoosts = {
 	-- Example:
 	-- ["agility"] = {
 	-- 	amount = 25,
@@ -17,7 +17,7 @@ ITEM.attributeBoosts = {
 	-- 	amount = 25,
 	-- 	duration = 3600
 	-- }
-}
+-- }
 
 ITEM.functions.Consume = {
     OnRun = function(item)

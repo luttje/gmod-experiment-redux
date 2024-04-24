@@ -5,10 +5,10 @@ ITEM.model = Model("models/props_c17/suitcase_passenger_physics.mdl")
 ITEM.category = "Armor"
 ITEM.width = 2
 ITEM.height = 2
-ITEM.maxArmor = 0
-ITEM.noArmor = false
+-- ITEM.maxArmor = 500
+-- ITEM.noArmor = true
 ITEM.removeOnDestroy = false
-ITEM.hasTearGasProtection = false
+-- ITEM.hasTearGasProtection = true
 -- ITEM.repairMaterials = {
 --     ["material_fabric"] = 2,
 --     ["material_metal"] = 1,
@@ -136,13 +136,7 @@ function ITEM:OnRepair()
 	local character = client:GetCharacter()
 
 	for material, amount in pairs(self.repairMaterials) do
-		for i = 1, amount do
-			local item = character:GetInventory():HasItem(material)
-
-			if (item) then
-				item:Remove()
-			end
-		end
+		character:GetInventory():RemoveStackedItem(material, amount)
 	end
 
     if (not self.noArmor) then
