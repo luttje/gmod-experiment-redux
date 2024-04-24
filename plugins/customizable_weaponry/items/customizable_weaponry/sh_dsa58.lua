@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "DSA FAL SA58"
 ITEM.description = "Battle rifle with slow fire rate but very high damage and armor penetration. Has a grippod that provides some stability if deployed."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 7200
 ITEM.class = "tacrp_dsa58"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_dsa58.mdl"

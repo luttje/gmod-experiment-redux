@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "SIG SG 551"
 ITEM.description = "Assault rifle with all around excellent performance, offset by a lower magazine capacity."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 8750
 ITEM.class = "tacrp_sg551"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_sg551.mdl"

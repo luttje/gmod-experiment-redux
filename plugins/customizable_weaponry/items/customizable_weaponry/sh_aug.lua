@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Steyr AUG"
 ITEM.description = "Burst bullpup rifle with a generous magazine capacity and great handling."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 7600
 ITEM.class = "tacrp_aug"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_aug.mdl"

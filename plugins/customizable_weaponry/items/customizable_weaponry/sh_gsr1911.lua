@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "SIG 1911 TACOPS"
 ITEM.description = "High damage pistol with low range and capacity.\nA tactical evolution, or some would call devolution, of a venerable classic."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 2000
 ITEM.class = "tacrp_gsr1911"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint/w_gsr1911.mdl"

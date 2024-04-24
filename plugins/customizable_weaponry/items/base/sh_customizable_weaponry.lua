@@ -83,7 +83,7 @@ ITEM.functions.DetachAttachment = {
 			local attachment = TacRP.GetAttTable(attachmentData.id)
 
 			options[attachmentSlotId] = {
-				name = "Remove " .. TacRP:GetPhrase(attachment.PrintName),
+				name = "Remove " .. (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName),
 				data = {
 					attachmentSlotId = attachmentSlotId,
 				},
@@ -185,7 +185,7 @@ if (CLIENT) then
 
             local panel = tooltip:AddRowAfter("ammo", "attachments" .. attachmentSlotId)
             panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-            panel:SetText(TacRP:GetPhrase(attachment.PrintName))
+            panel:SetText(TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName)
             panel:SizeToContents()
         end
 

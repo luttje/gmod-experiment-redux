@@ -44,21 +44,21 @@ function PANEL:AddCompatibleWeapon(itemTable)
 	label:Dock(FILL)
 	label:DockMargin(5, 0, 0, 0)
 	label:SetFont("ixMediumFont")
-	label:SetText(weapon.PrintName)
+	label:SetText(itemTable:GetName())
 	label:SizeToContents()
 	label:SetContentAlignment(4)
 	label:SetExpensiveShadow(1, Color(0, 0, 0, 150))
 end
 
 function PANEL:Populate(attachmentId)
-	local compatibleItems = PLUGIN:GetCompatibleItems(attachmentId)
+	local compatibleItems = table.ClearKeys(PLUGIN:GetCompatibleItems(attachmentId))
 	local attachment = TacRP.GetAttTable(attachmentId)
 
 	table.SortByMember(compatibleItems, "name", true)
 
 	self:SetTitle("Weapons compatible with the '" .. attachment.PrintName .. "'")
 
-	for _, weaponItem in ipairs(compatibleItems) do
+	for _, weaponItem in pairs(compatibleItems) do
 		self:AddCompatibleWeapon(weaponItem)
 	end
 end

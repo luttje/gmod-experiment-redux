@@ -54,7 +54,7 @@ end
 function ITEM:GetSearchMatches(search)
 	local compatibleItems = PLUGIN:GetCompatibleItems(self.attachmentId)
 
-	for _, item in ipairs(compatibleItems) do
+	for _, item in pairs(compatibleItems) do
 		if (item.name:lower():find(search, 1, true)) then
 			return true
 		end

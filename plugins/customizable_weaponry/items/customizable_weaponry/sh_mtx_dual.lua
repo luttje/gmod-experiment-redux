@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Dual MTX"
 ITEM.description = "An indulgent pair of high capacity, high damage, high quality compact pistols.\nWith firepower like this, who needs aiming?"
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 4900
 ITEM.class = "tacrp_mtx_dual"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint/w_mtx.mdl"

@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "FB Beryl 96"
 ITEM.description = "Easy to handle rifle with low fire rate and recoil."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 7000
 ITEM.class = "tacrp_ak47"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_ak47.mdl"

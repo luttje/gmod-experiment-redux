@@ -76,7 +76,7 @@ function PLUGIN:GetCompatibleItems(attachmentId)
 
 		if (items) then
 			for _, item in ipairs(items) do
-				compatibleItems[#compatibleItems + 1] = item
+				compatibleItems[item.uniqueID] = item
 			end
 		end
 	end

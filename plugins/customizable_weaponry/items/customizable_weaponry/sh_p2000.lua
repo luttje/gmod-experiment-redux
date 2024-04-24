@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "HK P2000"
 ITEM.description = "Well-rounded, run-of-the-mill police handgun."
-ITEM.price = 8100 -- TODO: Set this value
+ITEM.price = 1900
 ITEM.class = "tacrp_p2000"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint/w_p2000.mdl"
