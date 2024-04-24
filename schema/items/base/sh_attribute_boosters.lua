@@ -6,7 +6,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Stimpacks"
 ITEM.description = "A Stimpack branded stimulator promising to enhance the body."
-ITEM.boostSound = "items/medshot4.wav"
+-- ITEM.boostSound = "items/medshot4.wav"
 -- ITEM.attributeBoosts = {
 	-- Example:
 	-- ["agility"] = {
@@ -37,8 +37,8 @@ ITEM.functions.Consume = {
 
 		if (item.GetEmitBoostSound) then
             client:EmitSound(item:GetEmitBoostSound())
-		elseif (item.boostSound) then
-			client:EmitSound(item.boostSound)
+		else
+			client:EmitSound(item.boostSound or "items/medshot4.wav")
 		end
 
 		if (item.OnBoosted) then

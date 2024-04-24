@@ -7,11 +7,10 @@ ITEM.name = "Stackable Items Base"
 ITEM.description = "Stackable Item"
 ITEM.category = "Stackable"
 ITEM.model = "models/props_c17/TrapPropeller_Lever.mdl"
-ITEM.maxStacks = 16
 
 if (CLIENT) then
     function ITEM:PaintOver(item, w, h)
-        local isMax = item:GetData("stacks", 1) == item.maxStacks
+        local isMax = item:GetData("stacks", 1) == item:GetMaxStacks()
 
         draw.SimpleTextOutlined(
             item:GetData("stacks", 1),
@@ -27,6 +26,10 @@ if (CLIENT) then
     end
 end
 
+function ITEM:GetMaxStacks()
+	return self.maxStacks or 16
+end
+
 function ITEM:CanStackWith(otherItem)
     local currentItemStacks = self:GetData("stacks", 1)
     local otherItemStacks = otherItem:GetData("stacks", 1)
@@ -40,7 +43,7 @@ function ITEM:CanStackWith(otherItem)
 		return false, "You can't stack an item with itself."
 	end
 
-    if (totalStacks > self.maxStacks) then
+    if (totalStacks > self:GetMaxStacks()) then
         return false, "These items can't be stacked any further."
     end
 
