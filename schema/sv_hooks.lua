@@ -579,7 +579,7 @@ function Schema:PlayerUse(client, entity)
 		client:SetAction("@unTying", 5)
 
 		client:DoStaredAction(entity, function()
-			Scema:UntiePlayer(entity)
+			Schema.UntiePlayer(entity)
 		end, 5, function()
 			if (IsValid(entity)) then
 				entity:SetNetVar("untying")

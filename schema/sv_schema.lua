@@ -80,6 +80,29 @@ function Schema.ImpactEffect(position, scale, withSound)
 end
 
 function Schema.TiePlayer(client)
+	local ragdollIndex = client:GetLocalVar("ragdoll")
+	local ragdoll = ragdollIndex and Entity(ragdollIndex) or nil
+
+	if (IsValid(ragdoll)) then
+		local hasBadDreamer = Schema.perk.GetOwned("bad_dreamer", client)
+
+		if (hasBadDreamer) then
+			return false
+		end
+
+		-- When the player is tied up while fallen over, move their stored weapon information.
+		-- Otherwise, when they get up their weapons will be returned to them.
+		if (ragdoll.ixActiveWeapon) then
+			client.expTiedActiveWeapon = ragdoll.ixActiveWeapon
+			ragdoll.ixActiveWeapon = nil
+		end
+
+		if (ragdoll.ixWeapons) then
+			client.expTiedWeapons = ragdoll.ixWeapons
+			ragdoll.ixWeapons = {}
+		end
+	end
+
 	client:SetRestricted(true)
 	client:SetNetVar("tying")
 	client:NotifyLocalized("fTiedUp")
@@ -87,9 +110,56 @@ function Schema.TiePlayer(client)
 end
 
 function Schema.UntiePlayer(client)
+	local ragdollIndex = client:GetLocalVar("ragdoll")
+	local ragdoll = ragdollIndex and Entity(ragdollIndex) or nil
+
 	client:SetRestricted(false)
 	client:SetNetVar("untying")
 	client:NotifyLocalized("fUntied")
+
+	-- If they have weapon information stored, give it back to their ragdoll.
+	if (IsValid(ragdoll)) then
+		if (client.expTiedActiveWeapon) then
+			ragdoll.ixActiveWeapon = client.expTiedActiveWeapon
+		end
+
+		if (client.expTiedWeapons) then
+			ragdoll.ixWeapons = client.expTiedWeapons
+		end
+	else
+		-- If they don't have a ragdoll, return their weapons to them.
+		if (client.expTiedWeapons) then
+			for _, v in ipairs(client.expTiedWeapons) do
+				if (v.class) then
+					local weapon = client:Give(v.class, true)
+
+					if (v.item) then
+						weapon.ixItem = v.item
+					end
+
+					client:SetAmmo(v.ammo, weapon:GetPrimaryAmmoType())
+					weapon:SetClip1(v.clip)
+				elseif (v.item and v.invID == v.item.invID) then
+					v.item:Equip(client, true, true)
+					client:SetAmmo(v.ammo, client.carryWeapons[v.item.weaponCategory]:GetPrimaryAmmoType())
+				end
+			end
+		end
+
+		if (client.expTiedActiveWeapon) then
+			if (client:HasWeapon(client.expTiedActiveWeapon)) then
+				client:SetActiveWeapon(client:GetWeapon(client.expTiedActiveWeapon))
+			else
+				local weapons = client:GetWeapons()
+				if (#weapons > 0) then
+					client:SetActiveWeapon(weapons[1])
+				end
+			end
+		end
+	end
+
+	client.expTiedActiveWeapon = nil
+	client.expTiedWeapons = nil
 end
 
 function Schema.ChloroformPlayer(client)
