@@ -526,6 +526,27 @@ function Schema:PopulateCharacterInfo(client, character, tooltip)
 	end
 end
 
+function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
+	local hasCashbackPerk, cashbackPerkTable = Schema.perk.GetOwned("cashback")
+
+	if (not hasCashbackPerk) then
+		return
+	end
+
+	if (not itemTable.price or itemTable.noBusiness) then
+		return
+	end
+
+	menu:AddOption(L("cashback"), function()
+		Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
+			function()
+			net.Start("expCashbackRequest")
+			net.WriteUInt(itemTable:GetID(), 32)
+			net.SendToServer()
+		end, L("no"))
+	end):SetImage("icon16/money_delete.png")
+end
+
 -- TODO: We could use weaponItemTable.pacData to let PAC3 handle the attachment
 function Schema:PostPlayerDraw(client)
 	local character = client:GetCharacter()

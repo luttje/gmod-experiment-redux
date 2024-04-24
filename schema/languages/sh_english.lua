@@ -61,9 +61,11 @@ LANGUAGE = {
 	searchCorpse = "Search corpse",
 	searchingCorpse = "Searching corpse...",
 	resurrectingCorpse = "Resurrecting corpse...",
+
 	radioNotOn = "Your radio isn't on!",
 	radioRequired = "You need a radio to do this.",
 	radioAlreadyOn = "You already have a radio that is turned on!",
+
 	economy = "Economy",
 
 	broadcaster = "Broadcaster",
@@ -73,6 +75,9 @@ LANGUAGE = {
 	chatRadioing = "Radioing...",
 
 	rareItem = "Rare Item",
+
+	cashback = "Cashback",
+	cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
 
 	--[[
 		Bind button names
