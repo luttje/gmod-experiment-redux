@@ -5,11 +5,12 @@ ITEM.model = "models/gibs/scanner_gib02.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.description = "Junk that can be scrapped into useful materials."
-ITEM.scrapMaterials = {
+ITEM.noBusiness = true
+-- ITEM.scrapMaterials = {
     -- ["material_plastic"] = 1,
     -- ["material_metal"] = 1,
 	-- ["material_wood"] = 1
-}
+-- }
 
 function ITEM:GetFilters()
 	return {

@@ -386,7 +386,7 @@ function Schema:PlayerDestroyGenerator(client, entity, generator)
 		return
 	end
 
-	client:GetCharacter():GiveMoney((generator.price * .75))
+	client:GetCharacter():GiveMoney(math.ceil(generator.price * .75))
 end
 
 --[[

@@ -100,7 +100,7 @@ function NPC:OnInteract(client, npcEntity)
 
 		if (winner) then
 			local character = winner.client:GetCharacter()
-			local prize = npcEntity.expRaceEndData.entryFeeSum * NPC.entryFeeRewardFactor
+			local prize = math.ceil(npcEntity.expRaceEndData.entryFeeSum * NPC.entryFeeRewardFactor)
 			local winnerName = winner.client:Name()
 
 			timer.Simple(3, function()

@@ -103,7 +103,7 @@ end
 function ENT:GetEarnings()
 	local generator = self.expGenerator
 
-	return (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
+	return math.ceil((generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier"))
 end
 
 function ENT:OnEarned(money)
