@@ -42,14 +42,16 @@ do
 
     function COMMAND:OnRun(client, pattern)
         local items = ix.item.list
+		local count = 0
 
         for _, item in pairs(items) do
             if (item.uniqueID:match(pattern)) then
                 client:GetCharacter():GetInventory():Add(item.uniqueID)
+				count = count + 1
             end
         end
 
-		client:Notify("You have been given all items that match the pattern '" .. pattern .. "'.")
+		client:Notify("You have been given " .. count .. " items that match the pattern '" .. pattern .. "'.")
 	end
 
 	ix.command.Add("CharGiveAllItems", COMMAND)

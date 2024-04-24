@@ -91,6 +91,10 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
         return
     end
 
+	if (not weapon.ixItem) then
+		return
+	end
+
     local position, angles = PLUGIN:GetPlacementTrace(client)
 	local isPlacementValid = PLUGIN:GetPlacementValid(client, position, angles)
     weapon.expRotation = weapon.expRotation or angles
@@ -103,6 +107,10 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 
     -- 	position = position + offset
 	-- end
+
+	if (weapon.ixItem.structureOffset) then
+		position = position + weapon.ixItem.structureOffset
+	end
 
 	-- Draw all the structure parts, positioning them relative to the placement trace
 	for _, structure in ipairs(weapon.expClientSideModels or {}) do
@@ -118,7 +126,7 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 		-- 		math.Round(structurePosition.y / weapon.expPositionSnap) * weapon.expPositionSnap,
 		-- 		math.Round(structurePosition.z / weapon.expPositionSnap) * weapon.expPositionSnap
 		-- 	)
-		-- end
+        -- end
 
         weapon.expLastStructurePosition = structurePosition
 		weapon.expLastStructureAngles = structureAngles
@@ -189,7 +197,8 @@ function SWEP:BuildStructureIfNotExists(client, itemTable)
 
 	local structure = itemTable:GetStructure(client)
 
-	self.expClientSideModels = self.expClientSideModels or {}
+    self.expClientSideModels = self.expClientSideModels or {}
+	self.ixItem = itemTable
 
 	for _, structurePart in ipairs(structure) do
 		local structureEntity = ClientsideModel(structurePart.model, RENDERGROUP_OPAQUE)
@@ -224,9 +233,11 @@ function SWEP:OnRemove()
     BaseClass.OnRemove(self)
 
 	if (CLIENT) then
-		for _, structure in ipairs(self.expClientSideModels or {}) do
-			structure.entity:Remove()
-		end
+        for _, structure in ipairs(self.expClientSideModels or {}) do
+            structure.entity:Remove()
+        end
+
+		self.expClientSideModels = nil
 	end
 end
 
@@ -235,12 +246,18 @@ function SWEP:PrimaryAttack()
 		return
 	end
 
-	if (self.expLastCanPlaceError) then
-		self.Owner:Notify(self.expLastCanPlaceError)
-		return
+    if (self.expLastCanPlaceError) then
+        self.Owner:Notify(self.expLastCanPlaceError)
+        return
+    end
+
+	local position = self.expLastStructurePosition
+
+	if (self.ixItem.structureOffset) then
+		position = position - self.ixItem.structureOffset
 	end
 
-	PLUGIN:RequestBuildStructure(self.expLastStructurePosition, self.expLastStructureAngles)
+	PLUGIN:RequestBuildStructure(position, self.expLastStructureAngles)
 end
 
 function SWEP:SecondaryAttack()

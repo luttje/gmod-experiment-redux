@@ -63,7 +63,7 @@ function ITEM:GetStructure(client)
 		{
 			model = self.structureModel,
 			position = Vector(0, 0, 0),
-			angles = Angle(0, 0, 0)
+			angles = Angle(0, 0, 0),
 		}
 	}
 end

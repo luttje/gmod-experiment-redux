@@ -140,15 +140,17 @@ function Schema.RegisterMaterialSources()
 	materialSources:RemoveQueued()
 
 	-- Register the allowed props as blueprint items
-	for _, data in ipairs(materialSources) do
+    for _, data in ipairs(materialSources) do
+		local uniqueID = string.lower(data.uniqueID)
         local ITEM = ix.item.Register(
-			string.lower(data.uniqueID),
+			uniqueID,
             "base_material_sources",
             false,
 			nil,
             true
         )
 
-		table.Merge(ITEM, data, true)
+        table.Merge(ITEM, data, true)
+		ITEM.uniqueID = uniqueID
 	end
 end

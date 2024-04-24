@@ -34,20 +34,24 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 
 	local structures = ents.FindByClass("exp_structure")
 
-	for _, structure in ipairs(structures) do
-		local structureBuilder = structure:GetBuilder()
+    for _, structure in ipairs(structures) do
+        local structureBuilder = structure:GetBuilder()
 
-		if (IsValid(structureBuilder) and structureBuilder == client and structure:GetUnderConstruction()) then
-			client:Notify("You are already building a structure. Finish that first.")
-			return
-		end
-	end
+        if (IsValid(structureBuilder) and structureBuilder == client and structure:GetUnderConstruction()) then
+            client:Notify("You are already building a structure. Finish that first.")
+            return
+        end
+    end
 
     local isPlacementValid, otherStructure = PLUGIN:GetPlacementValid(client, position, angles)
 
 	if (not isPlacementValid) then
 		client:Notify("You cannot build this far off the ground.")
 		return
+	end
+
+	if (weapon.ixItem.structureOffset) then
+		position = position + weapon.ixItem.structureOffset
 	end
 
     local structure = PLUGIN:BuildStructure(client, item, position, angles)

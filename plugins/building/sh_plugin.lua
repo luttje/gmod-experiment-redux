@@ -53,11 +53,13 @@ function PLUGIN:InitializedPlugins()
 
 	-- Register the allowed props as blueprint items
 	for _, data in ipairs(self.allowedProps) do
-		local ITEM = ix.item.Register("blueprint_" .. string.lower(data.uniqueID), "base_blueprints", false, nil, true)
+		local uniqueID = string.lower(data.uniqueID)
+		local ITEM = ix.item.Register(uniqueID, "base_blueprints", false, nil, true)
 
 		table.Merge(ITEM, data, true)
 
 		ITEM.structureModel = data.model
+		ITEM.uniqueID = uniqueID
 	end
 end
 
@@ -110,7 +112,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		Plastic props
 	--]]
 	allowedProps:Add({
-		uniqueID = "blue_barrel",
+		uniqueID = "blueprint_blue_barrel",
 		name = "Blue Barrel",
 		description = "A blue barrel.",
 		price = 100,
@@ -119,14 +121,15 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		constructionMaterials = {
 			["material_plastic"] = 5,
 			["material_metal"] = 1
-		}
+		},
+		structureOffset = Vector(0, 0, 28),
     })
 
 	--[[
 		Hard metal props
 	--]]
 	allowedProps:Add({
-		uniqueID = "storefront_bars",
+		uniqueID = "blueprint_storefront_bars",
 		name = "Storefront Bars",
 		description = "Strong bars to protect your storefront.",
 		price = 200,
@@ -134,11 +137,12 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		model = "models/props_building_details/Storefront_Template001a_Bars.mdl",
 		constructionMaterials = {
 			["material_metal"] = 10
-		}
+		},
+		structureOffset = Vector(0, 0, 54),
     })
 
     allowedProps:Add({
-        uniqueID = "blast_door",
+        uniqueID = "blueprint_blast_door",
         name = "Blast Door",
         description = "A blast door to protect your base.",
         price = 200,
@@ -151,7 +155,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 
 	-- Commented because we should only provide small to medium props (in order to prevent prop climbing to high places)
 	-- allowedProps:Add({
-	-- 	uniqueID = "blast_door_double",
+	-- 	uniqueID = "blueprint_blast_door_double",
 	-- 	name = "Welded Double Blast Door",
 	-- 	description = "Double blast doors welded together.",
 	-- 	price = 400,
@@ -166,7 +170,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		Wooden props
 	--]]
 	allowedProps:Add({
-		uniqueID = "furniture_shelf",
+		uniqueID = "blueprint_furniture_shelf",
 		name = "Shelf",
 		description = "A shelf to store your items.",
 		price = 150,
@@ -174,11 +178,12 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		model = "models/props_c17/FurnitureShelf001a.mdl",
 		constructionMaterials = {
 			["material_wood"] = 10
-		}
+		},
+		structureOffset = Vector(0, 0, 44),
 	})
 
 	allowedProps:Add({
-		uniqueID = "furniture_table",
+		uniqueID = "blueprint_furniture_table",
 		name = "Table",
 		description = "A table to place your items.",
 		price = 150,
@@ -186,11 +191,12 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		model = "models/props_c17/FurnitureTable001a.mdl",
 		constructionMaterials = {
 			["material_wood"] = 10
-		}
+		},
+		structureOffset = Vector(0, 0, 20),
 	})
 
 	allowedProps:Add({
-		uniqueID = "oil_drum",
+		uniqueID = "blueprint_oil_drum",
 		name = "Oil Drum",
 		description = "A barrel to store oil.",
 		price = 100,
@@ -198,6 +204,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		model = "models/props_c17/oildrum001.mdl",
 		constructionMaterials = {
 			["material_metal"] = 5
-		}
+        },
+		structureOffset = Vector(0, 0, 1),
 	})
 end
