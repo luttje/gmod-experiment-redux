@@ -12,6 +12,11 @@ if (SERVER) then
 			-- P1, P2, etc... to get a player by index
 			_G["P" .. k] = otherClient
 
+			-- P1T(), P2T(), etc... to get an eye trace from a player by index
+			_G["P" .. k .. "T"] = function()
+				return otherClient:GetEyeTraceNoCursor()
+			end
+
 			-- P1C(), P2C(), etc... to get a player's character by index
 			_G["P" .. k .. "C"] = function()
 				return otherClient:GetCharacter()

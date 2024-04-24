@@ -73,7 +73,7 @@ end, FLAG_DANGER)
 ---@param targetEntity? Entity
 function Schema.PlayerClearEntityInfoTooltip(client, targetEntity)
 	net.Start("expClearEntityInfoTooltip")
-	net.WriteEntity(targetEntity or NULL)
+	net.WriteEntity(targetEntity or Entity(0))
 	net.Send(client)
 end
 

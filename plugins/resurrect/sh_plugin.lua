@@ -40,18 +40,46 @@ if (not SERVER) then
 	return
 end
 
-function PLUGIN:ResurrectPlayer(client, target, entity, newHealth)
-	entity:RemoveWithEffect()
+function PLUGIN:ResurrectPlayer(client, target, corpse, newHealth)
+	if (corpse.expIsResurrecting) then
+		return
+	end
+
+	-- Prevent double resurrection, which might lead to inventory duplication
+	corpse.expIsResurrecting = true
+
+	-- Make sure that whoever is inspecting the corpse inventory has their storage menu closed
+	-- Furthermore return all remaining items and money to the resurrected player
+	if (corpse.ixInventory) then
+		ix.storage.Close(corpse.ixInventory)
+		-- TODO: Shouldn't this happen automatically? Helix bug?
+		corpse.ixInventory.receivers = {}
+
+		local items = corpse.ixInventory:GetItems()
+		local money = corpse:GetMoney()
+
+		local character = target:GetCharacter()
+		local targetInventory = character:GetInventory()
+		character:GiveMoney(money)
+
+		for _, item in ipairs(items) do
+			item:Transfer(targetInventory:GetID(), item.gridX, item.gridY, nil, false, true)
+		end
+
+		corpse.ixInventory = nil
+	end
+
+	corpse:RemoveWithEffect()
 	target:SetNetVar("deathTime", nil)
 	target:Spawn()
-	target:SetPos(entity:GetPos())
+	target:SetPos(corpse:GetPos())
 	target:SetHealth(newHealth or target:GetMaxHealth())
 
 	if (target:IsStuck()) then
-		entity:DropToFloor()
-		target:SetPos(entity:GetPos() + Vector(0, 0, 16))
+		corpse:DropToFloor()
+		target:SetPos(corpse:GetPos() + Vector(0, 0, 16))
 
-		local positions = ix.util.FindEmptySpace(target, { entity, target })
+		local positions = ix.util.FindEmptySpace(target, { corpse, target })
 
 		for _, v in ipairs(positions) do
 			target:SetPos(v)
@@ -80,7 +108,7 @@ function PLUGIN:CanPlayerSearchCorpse(client, corpse)
 	end
 end
 
-function PLUGIN:OnPlayerCorpseOptionSelected(client, entity, option, data)
+function PLUGIN:OnPlayerCorpseOptionSelected(client, corpse, option, data)
 	if (option ~= L("resurrect", client)) then
 		return
 	end
@@ -93,14 +121,14 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, entity, option, data)
 
 	local healthPenaltyFactor = phoenixTamerPerkTable.healthPenaltyFactor
 
-	local target = entity:GetNetVar("player")
+	local target = corpse:GetNetVar("player")
 
 	if (not IsValid(target) or target:Alive()) then
 		client:Notify("This corpse is beyond saving!")
 		return
 	end
 
-	local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, entity) ~= false
+	local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, corpse) ~= false
 
 	if (not canResurrect) then
 		client:Notify("This corpse is blocked from being resurrected!")
@@ -111,7 +139,7 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, entity, option, data)
 
 	target:SetAction("@beingResurrected", resurrectTimeInSeconds)
 	client:SetAction("@resurrecting", resurrectTimeInSeconds)
-	client:DoStaredAction(entity, function()
+	client:DoStaredAction(corpse, function()
 		if (not IsValid(target) or target:Alive() or not IsValid(client)) then
 			return
 		end
@@ -128,7 +156,7 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, entity, option, data)
 			client:TakeDamageInfo(damageInfo)
 		end
 
-		self:ResurrectPlayer(client, target, entity, newHealth)
+		self:ResurrectPlayer(client, target, corpse, newHealth)
 	end, resurrectTimeInSeconds, function()
 		if (IsValid(client)) then
 			client:SetAction()

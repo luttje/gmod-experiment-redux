@@ -39,6 +39,8 @@ ITEM.functions.Tie = {
 		target:SetNetVar("tying", true)
 		target:SetAction("@fBeingTied", tyingTime)
 
+		hook.Run("OnPlayerStartTying", target, client)
+
 		client:DoStaredAction(target, function()
 			Schema.TiePlayer(target)
 
@@ -48,6 +50,8 @@ ITEM.functions.Tie = {
 			end
 
 			itemTable:Remove()
+
+			hook.Run("OnPlayerTied", target, client)
 		end, tyingTime, function()
 			client:SetAction()
 

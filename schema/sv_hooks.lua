@@ -108,6 +108,12 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 
 	if (client.ixOpenStorage and client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
 		local corpse = client.ixOpenStorage.storageInfo.entity
+
+		-- If the corpse is the same as the player retrieving the money, they're being resurrected and this achievement doesn't apply.
+		if (corpse:GetNetVar("player") == client) then
+			return
+		end
+
 		local corpseMoneyBefore = corpse:GetMoney()
 
 		if (corpseMoneyBefore < requiredMoney) then
@@ -215,6 +221,11 @@ function Schema:PostPlayerLoadout(client)
 
 		client:SetRunSpeed(currentRunSpeed * modifyRunSpeed)
 	end
+
+	-- Make sure they're not still tied up (or tying or being tied) from a previous session.
+	client:SetRestricted(false)
+	client:SetNetVar("tying")
+	client:SetNetVar("untying")
 end
 
 --[[
@@ -680,9 +691,12 @@ function Schema:PlayerUse(client, entity)
 
 		client:SetAction("@unTying", untieSpeed)
 
+		hook.Run("OnPlayerStartUntying", entity, client)
 		client:DoStaredAction(entity, function()
 			Schema.UntiePlayer(entity)
 			Schema.PlayerClearEntityInfoTooltip(client)
+
+			hook.Run("OnPlayerUntied", entity, client)
 		end, 5, function()
 			if (IsValid(entity)) then
 				entity:SetNetVar("untying")

@@ -30,6 +30,16 @@ function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
 	end
 end
 
+function BUFF.hooks:OnPlayerStartTying(client, tiedBy)
+	Schema.buff.SetActive(client, "deserters_demise")
+	Schema.buff.SetActive(tiedBy, "deserters_demise")
+end
+
+function BUFF.hooks:OnPlayerStartUntying(client, unTiedBy)
+	Schema.buff.SetActive(client, "deserters_demise")
+	Schema.buff.SetActive(unTiedBy, "deserters_demise")
+end
+
 function BUFF.hooks:OnCharacterDisconnect(client, character)
 	if (not Schema.buff.GetActive(client, self.index)) then
 		return

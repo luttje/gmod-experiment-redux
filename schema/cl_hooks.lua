@@ -18,7 +18,7 @@ net.Receive("expClearEntityInfoTooltip", function()
 		return
 	end
 
-	if (targetEntity ~= NULL and targetEntity ~= ix.gui.entityInfo.entity) then
+	if (targetEntity ~= Entity(0) and targetEntity ~= ix.gui.entityInfo.entity) then
 		return
 	end
 

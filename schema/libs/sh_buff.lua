@@ -61,7 +61,7 @@ if (SERVER) then
                 end
             end
 
-            if (buff) then
+			if (buff) then
                 hook.Run("PlayerBuffReset", client, buffTable, buff)
             end
         end

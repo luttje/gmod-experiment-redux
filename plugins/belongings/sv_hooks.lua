@@ -29,6 +29,8 @@ function PLUGIN:OnPlayerCorpseRemoved(client, corpse)
 
 	if (corpse:GetMoney() == 0 and table.Count(corpse.ixInventory:GetItems()) == 0) then
 		ix.storage.Close(corpse.ixInventory)
+		-- TODO: Shouldn't this happen automatically? Helix bug?
+		corpse.ixInventory.receivers = {}
 
 		local index = corpse.ixInventory:GetID()
 
