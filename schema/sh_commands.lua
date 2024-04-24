@@ -353,3 +353,23 @@ do
 
 	ix.command.Add("CharBuffExpire", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Bring the given character to where you are looking."
+	COMMAND.arguments = {
+		ix.type.character
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target)
+		target = target:GetPlayer()
+
+		target:SetPos(client:GetEyeTraceNoCursor().HitPos)
+
+		client:Notify("You have brought " .. target:GetName() .. " to your location.")
+	end
+
+	ix.command.Add("CharBring", COMMAND)
+end

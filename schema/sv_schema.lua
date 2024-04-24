@@ -94,7 +94,8 @@ end
 
 function Schema.ChloroformPlayer(client)
 	client:SetNetVar("beingChloroformed")
-	client:SetRagdolled(true, 0, 5)
+	client:NotifyLocalized("fChloroformed")
+	client:SetRagdolled(true, 15)
 end
 
 function Schema.MakeExplosion(position, scale)

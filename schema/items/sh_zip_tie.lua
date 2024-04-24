@@ -13,12 +13,12 @@ ITEM.functions.Tie = {
 		local tyingTime = 5
 		local client = itemTable.player
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 96
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
 		local target = util.TraceLine(data).Entity
 		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
-		and not target:GetNetVar("tying") and not target:IsRestricted()
+			and not target:GetNetVar("tying") and not target:IsRestricted()
 
 		if (not isTargetValid) then
 			itemTable.player:NotifyLocalized("plyNotValid")
@@ -35,6 +35,10 @@ ITEM.functions.Tie = {
 		client:DoStaredAction(target, function()
 			Schema.TiePlayer(target)
 
+			if (IsValid(client)) then
+				Schema.achievement.Progress(client, "zip_ninja")
+			end
+
 			itemTable:Remove()
 		end, tyingTime, function()
 			client:SetAction()
@@ -49,10 +53,10 @@ ITEM.functions.Tie = {
 	end,
 
 	OnCanRun = function(itemTable)
-		return !IsValid(itemTable.entity) or itemTable.bBeingUsed
+		return ! IsValid(itemTable.entity) or itemTable.bBeingUsed
 	end
 }
 
 function ITEM:CanTransfer(inventory, newInventory)
-	return !self.bBeingUsed
+	return ! self.bBeingUsed
 end

@@ -16,40 +16,41 @@ ITEM.functions.Apply = {
 		data.endpos = data.start + client:GetAimVector() * 96
 		data.filter = client
 		local target = util.TraceLine(data).Entity
+		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
 
-		if (IsValid(target) and target:IsPlayer() and target:GetCharacter()
-		and !target:GetNetVar("tying") and !target:IsRestricted()) then
-			itemTable.bBeingUsed = true
-
-			client:SetAction("@chloroforming", chloroformTime)
-
-			target:SetNetVar("beingChloroformed", true)
-			target:SetAction("@fBeingChloroformed", chloroformTime)
-
-			client:DoStaredAction(target, function()
-				Schema.ChloroformPlayer(target)
-
-				itemTable:Remove()
-			end, chloroformTime, function()
-				client:SetAction()
-
-				target:SetAction()
-				target:SetNetVar("beingChloroformed")
-
-				itemTable.bBeingUsed = false
-			end)
-		else
-			client:NotifyLocalized("plyNotValid")
+		if (not isTargetValid) then
+			itemTable.player:NotifyLocalized("plyNotValid")
+			return false
 		end
+
+		itemTable.bBeingUsed = true
+
+		client:SetAction("@chloroforming", chloroformTime)
+
+		target:SetNetVar("beingChloroformed", true)
+		target:SetAction("@fBeingChloroformed", chloroformTime)
+
+		client:DoStaredAction(target, function()
+			Schema.ChloroformPlayer(target)
+
+			itemTable:Remove()
+		end, chloroformTime, function()
+			client:SetAction()
+
+			target:SetAction()
+			target:SetNetVar("beingChloroformed")
+
+			itemTable.bBeingUsed = false
+		end)
 
 		return false
 	end,
 
 	OnCanRun = function(itemTable)
-		return !IsValid(itemTable.entity) or itemTable.bBeingUsed
+		return ! IsValid(itemTable.entity) or itemTable.bBeingUsed
 	end
 }
 
 function ITEM:CanTransfer(inventory, newInventory)
-	return !self.bBeingUsed
+	return ! self.bBeingUsed
 end

@@ -51,6 +51,13 @@ LANGUAGE = {
 	fUntied = "You have been untied.",
 	beingTied = "They are being tied up.",
 	beingUntied = "They are being untied.",
+
+	chloroforming = "Chloroforming...",
+	fBeingChloroformed = "You are being chloroformed.",
+	beingChloroformed = "They are being chloroformed.",
+	fChloroformed = "You have been chloroformed.",
+	chloroformed = "They have been chloroformed.",
+
 	searchCorpse = "Search corpse",
 	searchingCorpse = "Searching corpse...",
 	resurrectingCorpse = "Resurrecting corpse...",
