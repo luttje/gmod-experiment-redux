@@ -58,7 +58,13 @@ function Schema:InitializedPlugins()
     local items = ix.item.list
 
     for _, item in pairs(items) do
-        if (item.isAttachment and item.class ~= nil) then
+        if (item.mergeIntoSwep and item.class) then
+            local swep = weapons.GetStored(item.class)
+
+            table.Merge(swep, item.mergeIntoSwep, true)
+        end
+
+        if (item.isAttachment and item.class) then
             Schema.RegisterWeaponAttachment(item)
         end
 

@@ -3,9 +3,10 @@ local PLUGIN = PLUGIN
 -- [TacRP] Tactical RP Weapons (https://steamcommunity.com/sharedfiles/filedetails/?id=2588031232)
 resource.AddWorkshop("2588031232")
 
--- TODO: Optionally add more weapons: https://steamcommunity.com/workshop/filedetails/?id=3006509287
+-- [TacRP] Brute Force Melee Pack (https://steamcommunity.com/sharedfiles/filedetails/?id=3009874388)
+resource.AddWorkshop("3009874388")
 
--- TODO: Add melee weapons: https://steamcommunity.com/sharedfiles/filedetails/?id=3009874388
+-- TODO: Optionally add more weapons: https://steamcommunity.com/workshop/filedetails/?id=3006509287
 
 -- We override this so TacRP doesnt interfere with our own door busting
 function TacRP.DoorBust(ent, vel, attacker)

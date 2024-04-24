@@ -360,8 +360,8 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 	-- Adjust melee damage based on perks and items.
 	-- TODO: Check if ScalePlayerDamage is called for this type of melee damage
 	if (damageInfo:IsDamageType(DMG_CLUB) or damageInfo:IsDamageType(DMG_SLASH)) then
-		if (Schema.perk.GetOwned("bluntdefense", client)) then
-			local damageScale = Schema.perk.GetProperty("bluntdefense", "damageScale")
+		if (Schema.perk.GetOwned("blunt_defense", client)) then
+			local damageScale = Schema.perk.GetProperty("blunt_defense", "damageScale")
 			damageInfo:ScaleDamage(damageScale)
 		end
 	end

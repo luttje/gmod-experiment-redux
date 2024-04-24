@@ -134,11 +134,18 @@ do
 			return
 		end
 
+		local inflictor = client:GetActiveWeapon()
+		local damageType = DMG_BULLET
+
+		if (inflictor and inflictor.MeleeDamageType) then
+			damageType = inflictor.MeleeDamageType
+		end
+
 		local damageInfo = DamageInfo()
 		damageInfo:SetDamage(amount)
 		damageInfo:SetAttacker(client)
-		damageInfo:SetInflictor(client:GetActiveWeapon())
-		damageInfo:SetDamageType(DMG_BULLET)
+		damageInfo:SetInflictor(inflictor)
+		damageInfo:SetDamageType(damageType)
 
 		Schema:ScalePlayerDamage(target, hitGroup, damageInfo)
 
