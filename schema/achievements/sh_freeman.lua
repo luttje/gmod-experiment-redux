@@ -9,6 +9,6 @@ ACHIEVEMENT.foregroundImage = {
 }
 ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 1
-ACHIEVEMENT.targetItemId = "weapon_crowbar"
+ACHIEVEMENT.targetItemId = "crowbar"
 ACHIEVEMENT.description = "Be the decisive hand that secures a shipment of crowbars."
 

@@ -21,10 +21,10 @@ function ENT:Upgrade(client, nextUpgrade)
     end
 
     local price = nextUpgrade.price
+	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
 
-	if (Schema.perk.GetOwned("mercantile", client)) then
-		local priceModifier = Schema.perk.GetProperty("mercantile", "priceModifier")
-		price = price * priceModifier
+	if (hasMercantilePerk) then
+		price = price * mercantilePerkTable.priceModifier
 	end
 
 	if (not client:GetCharacter():HasMoney(price)) then

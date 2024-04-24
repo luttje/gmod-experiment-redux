@@ -640,18 +640,35 @@ function Schema:PlayerPerkBought(client, perk)
 end
 
 function Schema:CreateShipment(client, shipmentEntity)
-	local atLeast = Schema.achievement.GetProperty("master_trader", "atLeast")
-	if (shipmentEntity:GetItemCount() >= atLeast) then
-		Schema.achievement.Progress(client, "master_trader")
-	end
+	local itemCount = 0
+	local itemSum = 0
 
-	for uniqueID, amount in ipairs(shipmentEntity.items) do
+	for uniqueID, amount in pairs(shipmentEntity.items) do
 		local itemTable = ix.item.list[uniqueID]
 
 		local targetItemId = Schema.achievement.GetProperty("freeman", "targetItemId")
+
 		if (itemTable.uniqueID == targetItemId) then
 			Schema.achievement.Progress(client, "freeman")
-			break
+		end
+
+		itemCount = itemCount + math.max(amount, 0)
+		itemSum = itemSum + math.max(amount, 0) * (itemTable.price or 0)
+	end
+
+	local atLeast = Schema.achievement.GetProperty("master_trader", "atLeast")
+
+	if (itemCount >= atLeast) then
+		Schema.achievement.Progress(client, "master_trader")
+	end
+
+	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
+
+	if (hasMercantilePerk) then
+		local rebate = itemSum * mercantilePerkTable.sumRebate
+
+		if (rebate > 0) then
+			client:GetCharacter():GiveMoney(rebate)
 		end
 	end
 end

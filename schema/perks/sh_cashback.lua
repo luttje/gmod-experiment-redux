@@ -44,6 +44,6 @@ if (SERVER) then
 		character:GetInventory():Remove(itemID)
 		character:GiveMoney(price)
 
-		client:EmitSound("buttons/button19.wav", 55, 150 * math.Rand(0.5, 1.5))
+		client:EmitSound("buttons/button19.wav", 55, 150 * math.Rand(0.8, 1.2))
 	end)
 end
