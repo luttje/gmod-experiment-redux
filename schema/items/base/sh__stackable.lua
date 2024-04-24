@@ -13,48 +13,68 @@ if (CLIENT) then
     function ITEM:PaintOver(item, w, h)
         local isMax = item:GetData("stacks", 1) == item.maxStacks
 
-		draw.SimpleTextOutlined(
-			item:GetData("stacks", 1),
-			"DermaDefault",
-			w - 5,
-			h - 5,
-			isMax and Color(120, 120, 120, 200) or Color(255, 255, 255, 200),
-			TEXT_ALIGN_RIGHT,
-			TEXT_ALIGN_BOTTOM,
-			1,
-			color_black
-		)
+        draw.SimpleTextOutlined(
+            item:GetData("stacks", 1),
+            "DermaDefault",
+            w - 5,
+            h - 5,
+            isMax and Color(120, 120, 120, 200) or Color(255, 255, 255, 200),
+            TEXT_ALIGN_RIGHT,
+            TEXT_ALIGN_BOTTOM,
+            1,
+            color_black
+        )
+    end
+end
+
+function ITEM:CanStackWith(otherItem)
+    local currentItemStacks = self:GetData("stacks", 1)
+    local otherItemStacks = otherItem:GetData("stacks", 1)
+    local totalStacks = otherItemStacks + currentItemStacks
+
+    if (self.uniqueID ~= otherItem.uniqueID) then
+        return false, "You can't stack these items."
+    end
+
+	if (self == otherItem) then
+		return false, "You can't stack an item with itself."
 	end
+
+    if (totalStacks > self.maxStacks) then
+        return false, "These items can't be stacked any further."
+    end
+
+    return true
+end
+
+function ITEM:Stack(otherItem)
+	local currentItemStacks = self:GetData("stacks", 1)
+	local otherItemStacks = otherItem:GetData("stacks", 1)
+	local totalStacks = otherItemStacks + currentItemStacks
+
+	self:SetData(
+		"stacks",
+		totalStacks,
+		ix.inventory.Get(self.invID):GetReceivers()
+	)
+    otherItem:Remove()
 end
 
 ITEM.functions.combine = {
 	name = "Combine",
 	icon = "icon16/arrow_in.png",
 	OnRun = function(item, data)
-        local currentItemStacks = item:GetData("stacks", 1)
         local otherItem = ix.item.instances[data[1]]
-        local otherItemStacks = otherItem:GetData("stacks", 1)
-		local totalStacks = otherItemStacks + currentItemStacks
+		local canStack, message = item:CanStackWith(otherItem)
         local client = item.player
 
-        if (item.uniqueID ~= otherItem.uniqueID) then
-			client:Notify("You can't stack these items.")
+		if (not canStack) then
+			client:Notify(message)
 
 			return false
 		end
 
-        if (totalStacks > item.maxStacks) then
-			client:Notify("These items can't be stacked any further.")
-
-			return false
-		end
-
-		item:SetData(
-			"stacks",
-			totalStacks,
-			ix.inventory.Get(item.invID):GetReceivers()
-		)
-		otherItem:Remove()
+		item:Stack(otherItem)
 
 		return false
 	end,

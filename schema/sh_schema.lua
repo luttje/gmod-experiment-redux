@@ -107,3 +107,48 @@ end
 function Schema.GetWeaponAttachment(class)
     return Schema.registeredWeaponAttachments[class]
 end
+
+function Schema.RegisterMaterialSources()
+	local helperMetaTable = {}
+	helperMetaTable.__index = helperMetaTable
+	local toBeRemoved = {}
+
+    function helperMetaTable:Add(data)
+        table.insert(self, data)
+    end
+
+    function helperMetaTable:Remove(uniqueID)
+        table.insert(toBeRemoved, uniqueID)
+    end
+
+	function helperMetaTable:RemoveQueued()
+		for _, uniqueID in ipairs(toBeRemoved) do
+			for i, data in ipairs(self) do
+				if (data.uniqueID == uniqueID) then
+					table.remove(self, i)
+				end
+			end
+		end
+
+		toBeRemoved = {}
+	end
+
+    local materialSources = setmetatable({}, helperMetaTable)
+
+    hook.Run("AdjustMaterialSources", materialSources)
+
+	materialSources:RemoveQueued()
+
+	-- Register the allowed props as blueprint items
+	for _, data in ipairs(materialSources) do
+        local ITEM = ix.item.Register(
+			string.lower(data.uniqueID),
+            "base_material_sources",
+            false,
+			nil,
+            true
+        )
+
+		table.Merge(ITEM, data, true)
+	end
+end

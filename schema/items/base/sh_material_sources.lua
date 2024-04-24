@@ -31,7 +31,9 @@ ITEM.functions.Scrap = {
         local scrapMaterials = item:GetScrapMaterials(client)
 
         for materialItem, amount in pairs(scrapMaterials) do
-            character:GetInventory():Add(materialItem, amount)
+			if (not character:GetInventory():Add(materialItem, amount)) then
+				ix.item.Spawn(materialItem, client, nil, angle_zero)
+			end
         end
 
         client:Notify("You scrapped the item for materials.")

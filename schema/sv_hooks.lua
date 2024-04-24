@@ -629,3 +629,28 @@ function Schema:CreateShipment(client, shipmentEntity)
 		end
 	end
 end
+
+function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)
+	-- If the item has base_stackable and we find existing base_stackable items in the target inventory
+	-- Check if the existing item can stack with the new item, if so, stack them.
+	if (item:IsBasedOn("base_stackable")) then
+		local tallestStackItem = nil
+		local tallestStack = 0
+
+		for _, otherItem in pairs(targetInventory:GetItems()) do
+			if (otherItem:IsBasedOn("base_stackable") and otherItem:CanStackWith(item)) then
+				local otherStacks = otherItem:GetData("stacks", 1)
+
+				if (otherStacks > tallestStack) then
+					tallestStack = otherStacks
+					tallestStackItem = otherItem
+				end
+			end
+		end
+
+		if (tallestStackItem) then
+			tallestStackItem:Stack(item)
+			return
+		end
+	end
+end

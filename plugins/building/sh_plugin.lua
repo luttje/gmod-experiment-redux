@@ -23,26 +23,41 @@ end
 function PLUGIN:InitializedPlugins()
 	local helperMetaTable = {}
 	helperMetaTable.__index = helperMetaTable
+	local toBeRemoved = {}
 
-	function helperMetaTable:AddProp(data)
-		table.insert(self, data)
+    function helperMetaTable:Add(data)
+        table.insert(self, data)
+    end
+
+    function helperMetaTable:Remove(uniqueID)
+        table.insert(toBeRemoved, uniqueID)
+    end
+
+	function helperMetaTable:RemoveQueued()
+        for _, uniqueID in ipairs(toBeRemoved) do
+            for i, data in ipairs(self) do
+                if (data.uniqueID == uniqueID) then
+                    table.remove(self, i)
+                end
+            end
+        end
+
+		toBeRemoved = {}
 	end
 
 	self.allowedProps = setmetatable({}, helperMetaTable)
 
-	hook.Run("AdjustAllowedProps", self.allowedProps)
+    hook.Run("AdjustAllowedProps", self.allowedProps)
+
+	self.allowedProps:RemoveQueued()
 
 	-- Register the allowed props as blueprint items
 	for _, data in ipairs(self.allowedProps) do
 		local ITEM = ix.item.Register("blueprint_" .. string.lower(data.uniqueID), "base_blueprints", false, nil, true)
 
-		ITEM.name = data.name
-		ITEM.model = data.model
-        ITEM.health = data.health
+		table.Merge(ITEM, data, true)
+
 		ITEM.structureModel = data.model
-		ITEM.price = data.priceOfBlueprint
-        ITEM.description = data.description
-		ITEM.constructionMaterials = data.materials
 	end
 end
 
@@ -94,14 +109,14 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 	--[[
 		Plastic props
 	--]]
-	allowedProps:AddProp({
+	allowedProps:Add({
 		uniqueID = "blue_barrel",
 		name = "Blue Barrel",
 		description = "A blue barrel.",
-		priceOfBlueprint = 100,
+		price = 100,
 		health = 100,
 		model = "models/props_borealis/bluebarrel001.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_plastic"] = 5,
 			["material_metal"] = 1
 		}
@@ -110,39 +125,39 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 	--[[
 		Hard metal props
 	--]]
-	allowedProps:AddProp({
+	allowedProps:Add({
 		uniqueID = "storefront_bars",
 		name = "Storefront Bars",
 		description = "Strong bars to protect your storefront.",
-		priceOfBlueprint = 200,
+		price = 200,
 		health = 200,
 		model = "models/props_building_details/Storefront_Template001a_Bars.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_metal"] = 10
 		}
     })
 
-    allowedProps:AddProp({
+    allowedProps:Add({
         uniqueID = "blast_door",
         name = "Blast Door",
         description = "A blast door to protect your base.",
-        priceOfBlueprint = 200,
+        price = 200,
         health = 200,
         model = "models/props_lab/blastdoor001b.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_metal"] = 15
 		}
     })
 
 	-- Commented because we should only provide small to medium props (in order to prevent prop climbing to high places)
-	-- allowedProps:AddProp({
+	-- allowedProps:Add({
 	-- 	uniqueID = "blast_door_double",
 	-- 	name = "Welded Double Blast Door",
 	-- 	description = "Double blast doors welded together.",
-	-- 	priceOfBlueprint = 400,
+	-- 	price = 400,
 	-- 	health = 400,
 	-- 	model = "models/props_lab/blastdoor001c.mdl",
-	-- 	materials = {
+	-- 	constructionMaterials = {
 	-- 		["material_metal"] = 25
 	-- 	}
 	-- })
@@ -150,38 +165,38 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 	--[[
 		Wooden props
 	--]]
-	allowedProps:AddProp({
+	allowedProps:Add({
 		uniqueID = "furniture_shelf",
 		name = "Shelf",
 		description = "A shelf to store your items.",
-		priceOfBlueprint = 150,
+		price = 150,
 		health = 150,
 		model = "models/props_c17/FurnitureShelf001a.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_wood"] = 10
 		}
 	})
 
-	allowedProps:AddProp({
+	allowedProps:Add({
 		uniqueID = "furniture_table",
 		name = "Table",
 		description = "A table to place your items.",
-		priceOfBlueprint = 150,
+		price = 150,
 		health = 150,
 		model = "models/props_c17/FurnitureTable001a.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_wood"] = 10
 		}
 	})
 
-	allowedProps:AddProp({
+	allowedProps:Add({
 		uniqueID = "oil_drum",
 		name = "Oil Drum",
 		description = "A barrel to store oil.",
-		priceOfBlueprint = 100,
+		price = 100,
 		health = 100,
 		model = "models/props_c17/oildrum001.mdl",
-		materials = {
+		constructionMaterials = {
 			["material_metal"] = 5
 		}
 	})

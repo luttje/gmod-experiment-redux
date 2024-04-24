@@ -5,25 +5,19 @@ local META = ix.meta.inventory
 -- @string baseID The base to search for.
 -- @bool bOnlyMain Whether or not to exclude bags that are present from the search.
 function META:GetItemsByNestedBase(baseID, bOnlyMain)
-	local items = {}
+    local items = {}
 
     -- Goes through all items and for each item will recursively check their base to see if it matches the baseID
     -- If it does, the very child item will be added to the items table
-	for _, item in pairs(self:GetItems(bOnlyMain)) do
-		local parent = item.baseTable
+    for _, item in pairs(self:GetItems(bOnlyMain)) do
+		if (item:IsBasedOn(baseID)) then
+			items[#items + 1] = item
 
-		while (parent) do
-			if (parent.uniqueID == baseID) then
-				items[#items + 1] = item
-
-				break
-			end
-
-			parent = parent.baseTable
+			break
 		end
-	end
+    end
 
-	return items
+    return items
 end
 
 -- Overrides GetItemCount in gamemode/core/meta/sh_inventory.lua

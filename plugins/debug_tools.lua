@@ -29,3 +29,28 @@ if (SERVER) then
 		end
 	end
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Give yourself every item which has an uniqueID that matches the provided pattern."
+	COMMAND.arguments = {
+		ix.type.string,
+	}
+
+	COMMAND.superAdminOnly = true
+
+    function COMMAND:OnRun(client, pattern)
+        local items = ix.item.list
+
+        for _, item in pairs(items) do
+            if (item.uniqueID:match(pattern)) then
+                client:GetCharacter():GetInventory():Add(item.uniqueID)
+            end
+        end
+
+		client:Notify("You have been given all items that match the pattern '" .. pattern .. "'.")
+	end
+
+	ix.command.Add("CharGiveAllItems", COMMAND)
+end

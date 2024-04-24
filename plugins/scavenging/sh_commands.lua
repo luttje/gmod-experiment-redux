@@ -12,16 +12,18 @@ do
 
 	function COMMAND:OnRun(client, name)
 		local trace = client:GetEyeTraceNoCursor()
-		local ent = ents.Create("exp_scavenging_source")
-		ent:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 1))
-		ent:Spawn()
+		local entity = ents.Create("exp_scavenging_source")
+		entity:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 1))
+		entity:Spawn()
 
 		if (name) then
-			ent:SetSourceName(name)
+			entity:SetSourceName(name)
 		end
 
-		ent:MakeInventory()
-		ent:Activate()
+		entity:MakeInventory()
+        entity:Activate()
+
+		PLUGIN:AddItemsToScavengingSource(entity, entity:GetInventory())
 
 		client:Notify("Scavenging source spawned.")
 	end

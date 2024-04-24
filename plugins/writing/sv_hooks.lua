@@ -7,7 +7,7 @@ netstream.Hook("ixWritingEdit", function(client, itemID, text)
 	local item = ix.item.instances[itemID]
 
 	-- we don't check for entity since data can be changed in the client's inventory
-	if (character and item and item.base == "base_writing") then
+	if (character and item and item:IsBasedOn("base_writing")) then
 		local owner = item:GetData("owner", 0)
 
 		if ((owner == 0 or owner == character:GetID()) and text:len() > 0) then
