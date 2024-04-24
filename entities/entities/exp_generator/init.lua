@@ -47,13 +47,14 @@ function ENT:Upgrade(client, nextUpgrade)
 
 	client:GetCharacter():TakeMoney(price)
 
+	self:SetUpgrades(self:GetUpgrades() + 1)
+
 	local itemID = self.expItemID
 	local itemTable = ix.item.instances[itemID]
 
-	itemTable:SetData("upgrades", itemTable:GetData("upgrades", 0) + 1)
-	self.extraProduce = (self.extraProduce or 0) + nextUpgrade.produce
-
-	self:SetUpgrades(itemTable:GetData("upgrades", 0))
+	if (itemTable.OnUpgraded) then
+		itemTable:OnUpgraded(self, self:GetUpgrades())
+	end
 
 	self:EmitSound("items/suitchargeok1.wav", 75)
 
@@ -102,11 +103,20 @@ end
 
 function ENT:GetEarnings()
 	local generator = self.expGenerator
-	local earnings = (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
+	local earnings = generator.produce
+
+	-- Go through each upgrade and add the produce to the earnings
+	for i = 1, self:GetUpgrades() do
+		local upgrade = generator.upgrades[i]
+
+		if (upgrade) then
+			earnings = earnings + upgrade.produce
+		end
+	end
 
 	earnings = hook.Run("GeneratorAdjustEarnings", self, earnings) or earnings
 
-	return math.ceil(earnings)
+	return math.ceil(earnings * ix.config.Get("incomeMultiplier"))
 end
 
 function ENT:OnEarned(money)

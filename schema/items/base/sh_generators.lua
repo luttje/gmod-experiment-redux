@@ -65,8 +65,12 @@ function ITEM:GetNextUpgrade(entity)
 end
 
 function ITEM:OnEarned(entity, amount)
-    -- Set the power of the generator on the item
+	-- Set the power of the generator on the item
 	self:SetData("power", entity:GetPower() or 0)
+end
+
+function ITEM:OnUpgraded(entity, upgrades)
+	self:SetData("upgrades", upgrades)
 end
 
 function ITEM:OnCanOrder(client)

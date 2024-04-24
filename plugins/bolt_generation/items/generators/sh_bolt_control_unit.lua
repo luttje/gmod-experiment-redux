@@ -32,29 +32,29 @@ ITEM.generator = {
 	uniqueID = "exp_bolt_control_unit",
 	currency = 50,
     health = 200,
-	produce = 100, -- Base production
+	produce = 50, -- Base production
 	power = 4,
 	name = "Bolt Generator",
 	upgrades = {
 		{
 			name = "Minor Augmentation",
 			price = 350,
-			produce = 100
+			produce = 25
 		},
 		{
 			name = "Major Augmentation",
 			price = 1000,
-			produce = 200
+			produce = 50
 		},
 		{
 			name = "Ultra Augmentation",
 			price = 2500,
-			produce = 300
+			produce = 100
 		},
 		{
 			name = "Minor+",
 			price = 5000,
-			produce = 100,
+			produce = 50,
 			condition = function(client, entity)
 				if(client ~= entity:GetItemOwner())then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
@@ -66,7 +66,7 @@ ITEM.generator = {
 		{
 			name = "Major+",
 			price = 5000,
-			produce = 200,
+			produce = 100,
 			condition = function(client, entity)
 				if(client ~= entity:GetItemOwner())then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
@@ -78,7 +78,7 @@ ITEM.generator = {
 		{
 			name = "Ultra+",
 			price = 5000,
-			produce = 300,
+			produce = 200,
 			condition = function(client, entity)
 				if(client ~= entity:GetItemOwner())then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"

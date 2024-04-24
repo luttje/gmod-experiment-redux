@@ -702,11 +702,19 @@ function Schema:GeneratorAdjustEarnings(generator, earnings)
 	end
 
 	local hasThievingPerk, thievingPerkTable = Schema.perk.GetOwned("thieving", client)
+	local newEarnings = earnings
 
 	if (hasThievingPerk) then
-		local earningsModifier = thievingPerkTable.earningsModifier
-		earnings = earnings * earningsModifier
+		newEarnings = newEarnings + (earnings * thievingPerkTable.baseEarningsAdditionFactor)
+	end
 
-		return earnings
+	local hasMetalshipPerk, metalshipPerkTable = Schema.perk.GetOwned("metalship", client)
+
+	if (hasMetalshipPerk) then
+		newEarnings = newEarnings + (earnings * metalshipPerkTable.baseEarningsAdditionFactor)
+	end
+
+	if (newEarnings ~= earnings) then
+		return newEarnings
 	end
 end
