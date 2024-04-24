@@ -20,6 +20,9 @@ hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 	-- TODO: Check if players find this font hard to read.
 	ix.config.Set("font", "Lights Out BRK")
 	ix.config.Set("genericFont", "Roman Antique")
+
+	-- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
+	ix.config.Set("spawnTime", 60)
 end)
 
 if (CLIENT) then
@@ -39,9 +42,6 @@ if (CLIENT) then
 		end,
 	})
 end
-
--- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
-ix.config.SetDefault("spawnTime", 60)
 
 ix.config.Add("allianceCost", 10000, "How much an alliance costs to create.", nil, {
 	data = { min = 0, max = 1000000 },

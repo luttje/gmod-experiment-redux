@@ -50,18 +50,19 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 
 			if (SERVER) then
 				if (LIBRARY.backgroundImage) then
-					resource.AddFile("materials/" .. LIBRARY.backgroundImage .. ".vtf")
 					resource.AddFile("materials/" .. LIBRARY.backgroundImage .. ".vmt")
 				end
 
 				if (isstring(LIBRARY.foregroundImage)) then
-					resource.AddFile("materials/" .. LIBRARY.foregroundImage .. ".vtf")
 					resource.AddFile("materials/" .. LIBRARY.foregroundImage .. ".vmt")
 				elseif (istable(LIBRARY.foregroundImage)) then
 					local spritesheetData = LIBRARY.foregroundImage
 
-					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vtf")
-					resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
+					if (spritesheetData.spritesheet:EndsWith(".png")) then
+						resource.AddFile("materials/" .. spritesheetData.spritesheet)
+					else
+						resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
+					end
 				end
 			else
 				if (istable(LIBRARY.foregroundImage)) then
