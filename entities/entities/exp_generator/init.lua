@@ -102,8 +102,11 @@ end
 
 function ENT:GetEarnings()
 	local generator = self.expGenerator
+	local earnings = (generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier")
 
-	return math.ceil((generator.produce + (self.extraProduce or 0)) * ix.config.Get("incomeMultiplier"))
+	earnings = hook.Run("GeneratorAdjustEarnings", self, earnings) or earnings
+
+	return math.ceil(earnings)
 end
 
 function ENT:OnEarned(money)
@@ -215,26 +218,19 @@ function ENT:OnOptionSelected(client, option, data)
 			return
 		end
 
-		-- Take scrap from the player to recharge the generator (1 scrap = 1 power)
-		local scrap = client:GetCharacter():GetInventory():GetItemsByUniqueID("scrap")
+		local inventory = client:GetCharacter():GetInventory()
 
-		if (#scrap <= 0) then
+		-- Take scrap from the player to recharge the generator (1 scrap = 1 power)
+		local ownedAmount = inventory:GetItemCount("scrap")
+
+		if (ownedAmount <= 0) then
 			client:Notify("You do not have any scrap to recharge the generator with!")
 			return
 		end
 
-		local chargeAmount = itemTable.generator.power - power
-		local scrapAmount = 0
+		local scrapAmount = math.min(itemTable.generator.power - power, ownedAmount)
 
-		for _, scrapItem in ipairs(scrap) do
-			scrapItem:Remove()
-
-			scrapAmount = scrapAmount + 1
-
-			if (scrapAmount >= chargeAmount) then
-				break
-			end
-		end
+		inventory:RemoveStackedItem("scrap", scrapAmount)
 
 		self:SetPower(math.min(power + scrapAmount, itemTable.generator.power))
 

@@ -693,3 +693,20 @@ function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)
 		return
 	end
 end
+
+function Schema:GeneratorAdjustEarnings(generator, earnings)
+	local client = generator:GetItemOwner()
+
+	if (not IsValid(client)) then
+		return
+	end
+
+	local hasThievingPerk, thievingPerkTable = Schema.perk.GetOwned("thieving", client)
+
+	if (hasThievingPerk) then
+		local earningsModifier = thievingPerkTable.earningsModifier
+		earnings = earnings * earningsModifier
+
+		return earnings
+	end
+end
