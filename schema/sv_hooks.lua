@@ -88,12 +88,47 @@ function Schema:PlayerDisconnected(client)
 end
 
 function Schema:CharacterVarChanged(character, key, oldValue, value)
-	if (key == "money") then
-		local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
+	if (key ~= "money") then
+		return
+	end
 
-		if (value > requiredMoney) then
-			Schema.achievement.Progress("northern_rock", character:GetPlayer())
+	local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
+
+	if (value > requiredMoney) then
+		Schema.achievement.Progress("northern_rock", character:GetPlayer())
+	end
+
+	local requiredMoney = Schema.achievement.GetProperty("ransacked", "requiredMoney")
+
+	if (value < requiredMoney) then
+		return
+	end
+
+	local client = character:GetPlayer()
+
+	if (client.ixOpenStorage and client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
+		local corpse = client.ixOpenStorage.storageInfo.entity
+		local corpseMoneyBefore = corpse:GetMoney()
+
+		if (corpseMoneyBefore < requiredMoney) then
+			-- The money couldn't have been taken from the corpse, so we don't need to check if it was taken.
+			return
 		end
+
+		-- TODO: This is a bit hacky, but Helix doesn't provide a hook for when money is taken from a storage.
+		-- In sh_storage net.Receive("ixStorageMoneyGive") in Helix, the character money is set, right before it is taken (or given) to the storage.
+		-- For this reason we will wait a frame, to check if the money has been taken from the corpse.
+		timer.Simple(0, function()
+			if (not IsValid(client) or not IsValid(corpse)) then
+				return
+			end
+
+			local corpseMoneyAfter = corpse:GetMoney()
+
+			if (corpseMoneyBefore - corpseMoneyAfter >= requiredMoney) then
+				Schema.achievement.Progress("ransacked", client)
+			end
+		end)
 	end
 end
 
@@ -495,6 +530,7 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 	local width, height = characterInventory:GetSize()
 
 	local inventory = ix.inventory.Create(width, height, os.time())
+	inventory.vars.isCorpse = true
 	entity.ixInventory = inventory
 
 	entity.StartSearchCorpse = function(corpse, client)
