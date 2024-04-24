@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_m1.mdl"
 ITEM.width = 3
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = ".223 Remington"
+ITEM.requiresGunsmith = true

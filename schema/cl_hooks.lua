@@ -540,11 +540,17 @@ function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
 	menu:AddOption(L("cashback"), function()
 		Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
 			function()
-			net.Start("expCashbackRequest")
-			net.WriteUInt(itemTable:GetID(), 32)
-			net.SendToServer()
-		end, L("no"))
+				net.Start("expCashbackRequest")
+				net.WriteUInt(itemTable:GetID(), 32)
+				net.SendToServer()
+			end, L("no"))
 	end):SetImage("icon16/money_delete.png")
+end
+
+function Schema:PlayerPerkBought(client, perk)
+	if (IsValid(Schema.businessPanel)) then
+		Schema.businessPanel:Refresh()
+	end
 end
 
 -- TODO: We could use weaponItemTable.pacData to let PAC3 handle the attachment

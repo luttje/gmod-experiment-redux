@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_p90.mdl"
 ITEM.width = 3
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = "5.7x28mm"
+ITEM.requiresGunsmith = true

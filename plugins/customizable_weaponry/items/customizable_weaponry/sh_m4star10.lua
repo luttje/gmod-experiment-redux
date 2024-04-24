@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_m4star10.mdl"
 ITEM.width = 3
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = "12 Gauge"
+ITEM.requiresGunsmith = true

@@ -6,6 +6,7 @@ ITEM.description = "An attachment for a weapon."
 ITEM.model = "models/weapons/tacint/addons/optic_rmr_hq.mdl"
 ITEM.attachmentId = "optic_rmr"
 ITEM.category = "Weapon Attachments"
+ITEM.requiresGunsmith = true
 
 function ITEM:GetModel()
 	if (SERVER) then

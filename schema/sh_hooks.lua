@@ -51,6 +51,14 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 	if (itemTable.OnCanOrder) then
 		return itemTable:OnCanOrder(client)
 	end
+
+	if (itemTable.requiresGunsmith and not Schema.perk.GetOwned("gunsmith", client)) then
+		return false
+	end
+
+	if (itemTable.requiresExplosives and not Schema.perk.GetOwned("explosives", client)) then
+		return false
+	end
 end
 
 function Schema:InitializedPlugins()

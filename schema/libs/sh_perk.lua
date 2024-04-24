@@ -152,6 +152,8 @@ else
 		Schema.perk.localOwned[perkTable.uniqueID] = true
 
 		Schema.perk.UpdatePanel()
+
+		hook.Run("PlayerPerkBought", LocalPlayer(), perkTable)
 	end)
 
 	net.Receive("PerkLoadOwned", function()

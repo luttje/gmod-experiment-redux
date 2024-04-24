@@ -18,6 +18,8 @@ function PANEL:GetItemsForCategory(category)
 end
 
 function PANEL:Init()
+	Schema.businessPanel = self
+
 	-- Create a panel to hold the search bar and category list
 	self.searchPanel = self:Add("EditablePanel")
 	self.searchPanel:Dock(TOP)
@@ -110,6 +112,10 @@ function PANEL:LoadItems(category, search)
 	end
 
 	self:DisplayItems(matchedItems)
+end
+
+function PANEL:Refresh()
+	self:LoadItems(self.selected.category)
 end
 
 vgui.Register("expEnhancedBusiness", PANEL, "ixBusiness")

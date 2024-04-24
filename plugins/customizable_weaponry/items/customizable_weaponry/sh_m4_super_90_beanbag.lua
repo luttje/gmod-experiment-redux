@@ -20,5 +20,5 @@ ITEM.attachmentBone = "ValveBiped.Bip01_Spine"
 ITEM.requiresGunsmith = true
 ITEM.attachmentOffsetAngles = Angle(0, 0, 0)
 ITEM.attachmentOffsetVector = Vector(-3.96, 4.95, -2.97)
-
 ITEM.forcedWeaponCalibre = "beanbag"
+ITEM.requiresGunsmith = true

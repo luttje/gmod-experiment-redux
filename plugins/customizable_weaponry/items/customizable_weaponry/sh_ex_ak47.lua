@@ -13,3 +13,4 @@ ITEM.iconCam = {
 }
 
 ITEM.forcedWeaponCalibre = "7.62x39mm"
+ITEM.requiresGunsmith = true

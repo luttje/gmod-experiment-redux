@@ -13,3 +13,4 @@ ITEM.iconCam = {
 }
 
 ITEM.forcedWeaponCalibre = "12 Gauge"
+ITEM.requiresGunsmith = true
