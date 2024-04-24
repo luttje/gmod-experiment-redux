@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 30,
 	size = 32,
 }
-PERK.description = "With this perk your screen will always shake the same way when you're hit, you'll hardly notice it."
+PERK.description = "Whether you are hit hard or not, you get knocked back about the same intensity each time."
 

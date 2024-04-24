@@ -218,6 +218,48 @@ function Schema:EntityTakeDamage(entity, damageInfo)
 	end
 end
 
+function Schema:PostEntityTakeDamage(entity, damageInfo, tookDamage)
+	if (not entity:IsPlayer()) then
+		return
+	end
+
+	-- Disable default viewpunch
+	entity:SetViewPunchAngles(Angle(0, 0, 0))
+
+	if (hook.Run("PlayerShouldViewPunch", entity, damageInfo) == false) then
+		return
+	end
+
+	local force = damageInfo:GetDamageForce()
+	local damage = damageInfo:GetDamage()
+
+	force.z = math.max(force.z, damage) * 0.5
+	force.y = math.max(force.z, damage) * 0.5
+	force.x = math.max(force.z, damage) * 0.5
+
+	-- Maximum knockback values (before it gets ridiculous):
+	-- p (0 - 50)
+	-- y (-45 - 45)
+	-- r (-10 - 10)
+	local pitch = math.Clamp(math.random(force.z * .7, force.z), 0, 50)
+	local yaw = math.Clamp(math.random(-force.y * .5, force.y * .5), -45, 45)
+	local roll = math.Clamp(math.random(-force.x * .1, force.x * .1), -10, 10)
+
+	entity:ViewPunch(Angle(pitch, yaw, roll))
+end
+
+function Schema:PlayerShouldViewPunch(client, damageInfo)
+	if (Schema.perk.GetOwned("concentration", client)) then
+		local pitch = math.random(0, 4)
+		local yaw = math.random(-2, 2)
+		local roll = math.random(-1, 1)
+
+		client:ViewPunch(Angle(pitch, yaw, roll))
+
+		return false
+	end
+end
+
 function Schema:PlayerHurt(client, attacker, health, damage)
 	if ((client.ixNextPain or 0) < CurTime() and health > 0) then
 		local painSound, delay = hook.Run("GetPlayerPainSound", client)
