@@ -9,5 +9,6 @@ ITEM.replacement = "models/stalkertnb/exo_skat_duty.mdl"
 ITEM.attribBoosts = {
 	["endurance"] = 20,
 }
+ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")

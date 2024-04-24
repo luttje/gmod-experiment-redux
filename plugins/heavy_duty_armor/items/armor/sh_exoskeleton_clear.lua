@@ -10,5 +10,6 @@ ITEM.attribBoosts = {
 	["medical"] = 10,
 	["dexterity"] = 10,
 }
+ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")

@@ -9,5 +9,6 @@ ITEM.replacement = "models/stalkertnb/exo_skat_merc.mdl"
 ITEM.attribBoosts = {
 	["dexterity"] = 30,
 }
+ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")

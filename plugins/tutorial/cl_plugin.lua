@@ -287,6 +287,13 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	OnActivate = function(tutorial, menuPanel)
 		local inventoryButton
 
+		if (not IsValid(menuPanel.tabs)) then
+			-- TODO: I had this happen once during Lua OnReloaded. I doubt it happens during normal gameplay.
+			ErrorNoHalt(
+				"Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #010 - Thanks!")
+			return
+		end
+
 		for k, tabButton in pairs(menuPanel.tabs.buttons) do
 			if (tabButton.name ~= "inv") then
 				continue

@@ -9,5 +9,6 @@ ITEM.replacement = "models/stalkertnb/cs2_goggles.mdl"
 ITEM.attribBoosts = {
 	["agility"] = 25,
 }
+ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")

@@ -52,12 +52,16 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 		return itemTable:OnCanOrder(client)
 	end
 
-	if (itemTable.requiresGunsmith and not Schema.perk.GetOwned("gunsmith", client)) then
-		return false
-	end
+	local requirementKeys = {
+		requiresGunsmith = "gunsmith",
+		requiresExplosives = "explosives",
+		requiresArmadillo = "armadillo",
+	}
 
-	if (itemTable.requiresExplosives and not Schema.perk.GetOwned("explosives", client)) then
-		return false
+	for key, perk in pairs(requirementKeys) do
+		if (itemTable[key] and not Schema.perk.GetOwned(perk, client)) then
+			return false
+		end
 	end
 end
 

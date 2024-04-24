@@ -9,5 +9,6 @@ ITEM.replacement = "models/stalkertnb/exo_mono.mdl"
 ITEM.attribBoosts = {
 	["strength"] = 25,
 }
+ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")
