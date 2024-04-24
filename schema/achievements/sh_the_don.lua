@@ -9,5 +9,5 @@ ACHIEVEMENT.foregroundImage = {
 }
 ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 10
+ACHIEVEMENT.progress = 10
 ACHIEVEMENT.description = "Forge bonds within the chaos by bringing ten individuals under your command."
-

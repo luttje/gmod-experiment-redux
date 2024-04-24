@@ -10,4 +10,3 @@ ACHIEVEMENT.foregroundImage = {
 ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 20
 ACHIEVEMENT.description = "Expand your influence by welcoming twenty souls into the fold of your formidable alliance."
-

@@ -606,6 +606,8 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 			local inviter = client.expAllianceInvites[allianceId]
 
 			if (IsValid(inviter)) then
+				Schema.achievement.Progress("the_don", inviter, client:SteamID64())
+				Schema.achievement.Progress("alliance_architect", inviter, client:SteamID64())
 				ix.util.Notify(client:Name() .. " has accepted your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.", inviter)
 			end
 
