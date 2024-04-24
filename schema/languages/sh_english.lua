@@ -42,8 +42,12 @@ LANGUAGE = {
 	setFrequencyDesc = "Enter the frequency you would like to set this radio to.",
 	radioNoLongerThere = "The radio is no longer there.",
 
+	plyNotValid = "You are not looking at a valid character!",
+
 	tying = "Tying...",
 	unTying = "Untying...",
+	untie = "Untie",
+	searchTied = "Search",
 	isTied = "Tied",
 	fTiedUp = "You have been tied up.",
 	fBeingTied = "You are being tied up.",

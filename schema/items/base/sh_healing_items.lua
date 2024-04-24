@@ -55,7 +55,7 @@ ITEM.functions.ApplyLookAt = {
 		local target = util.TraceLine(data).Entity
 
 		if (not IsValid(target) or not target:IsPlayer()) then
-			client:Notify("You must be looking at a valid player!")
+			client:Notify("You must be looking at a valid character!")
 			return false
 		end
 

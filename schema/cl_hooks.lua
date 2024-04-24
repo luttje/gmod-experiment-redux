@@ -591,13 +591,22 @@ function Schema:NetworkEntityCreated(entity)
 		local target = entity:GetNetVar("player", NULL)
 		local options = {}
 
-		hook.Run("AdjustPlayerCorpseEntityMenu", options, target, entity)
+		hook.Run("AdjustPlayerRagdollEntityMenu", options, target, entity)
 
 		return options
 	end
 end
 
-function Schema:AdjustPlayerCorpseEntityMenu(options, target, corpse)
+function Schema:AdjustPlayerRagdollEntityMenu(options, target, corpse)
+	if (target:Alive()) then
+		if (target:IsRestricted()) then
+			options[L("searchTied")] = true
+			options[L("untie")] = true
+		end
+
+		return
+	end
+
 	options[L("searchCorpse")] = true
 
 	local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")

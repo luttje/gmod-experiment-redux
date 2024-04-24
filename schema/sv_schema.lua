@@ -146,6 +146,7 @@ function Schema.TiePlayer(client)
 		end
 	end
 
+	client:SetNetVar("tied", true)
 	client:SetRestricted(true)
 	client:SetNetVar("tying")
 	client:NotifyLocalized("fTiedUp")
@@ -156,6 +157,7 @@ function Schema.UntiePlayer(client)
 	local ragdollIndex = client:GetLocalVar("ragdoll")
 	local ragdoll = ragdollIndex and Entity(ragdollIndex) or nil
 
+	client:SetNetVar("tied")
 	client:SetRestricted(false)
 	client:SetNetVar("untying")
 	client:NotifyLocalized("fUntied")
@@ -205,10 +207,48 @@ function Schema.UntiePlayer(client)
 	client.expTiedWeapons = nil
 end
 
+function Schema.PlayerTryUntieTarget(client, target)
+	local lookTarget = target
+
+	if (IsValid(target:GetNetVar("player"))) then
+		target = target:GetNetVar("player")
+	end
+
+	local hasHurrymanPerk, hurrymanPerkTable = Schema.perk.GetOwned("hurryman", client)
+	local untieSpeed = 5
+
+	if (hasHurrymanPerk) then
+		untieSpeed = untieSpeed * hurrymanPerkTable.untieTimeMultiplier
+	end
+
+	target:SetAction("@beingUntied", untieSpeed)
+	target:SetNetVar("untying", true)
+
+	client:SetAction("@unTying", untieSpeed)
+
+	hook.Run("OnPlayerStartUntying", target, client)
+	client:DoStaredAction(lookTarget, function()
+		Schema.UntiePlayer(target)
+		Schema.PlayerClearEntityInfoTooltip(client)
+
+		hook.Run("OnPlayerUntied", target, client)
+	end, 5, function()
+		if (IsValid(target)) then
+			target:SetNetVar("untying")
+			target:SetAction()
+		end
+
+		if (IsValid(client)) then
+			client:SetAction()
+			Schema.PlayerClearEntityInfoTooltip(client)
+		end
+	end)
+end
+
 function Schema.ChloroformPlayer(client)
 	client:SetNetVar("beingChloroformed")
 	client:NotifyLocalized("fChloroformed")
-	client:SetRagdolled(true, 15)
+	client:SetRagdolled(true, 1000) -- TODO: Lower this, only this high for testing on bots
 end
 
 function Schema.MakeExplosion(position, scale)

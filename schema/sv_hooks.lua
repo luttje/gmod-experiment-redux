@@ -106,32 +106,41 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 
 	local client = character:GetPlayer()
 
-	if (client.ixOpenStorage and client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
-		local corpse = client.ixOpenStorage.storageInfo.entity
+	if (client.ixOpenStorage and client.ixOpenStorage.storageInfo and IsValid(client.ixOpenStorage.storageInfo.entity)) then
+		local target = client.ixOpenStorage.storageInfo.entity
 
-		-- If the corpse is the same as the player retrieving the money, they're being resurrected and this achievement doesn't apply.
-		if (corpse:GetNetVar("player") == client) then
+		-- If the ragdoll is the same as the player retrieving the money, they're being resurrected and this achievement doesn't apply.
+		if (target:GetNetVar("player") == client) then
 			return
 		end
 
-		local corpseMoneyBefore = corpse:GetMoney()
+		if (client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
+			target = target
+		elseif (target:IsRestricted()) then
+			-- We're inspecting a tied up player
+			target = target:GetCharacter()
+		end
 
-		if (corpseMoneyBefore < requiredMoney) then
-			-- The money couldn't have been taken from the corpse, so we don't need to check if it was taken.
+		local moneyBefore = target:GetMoney()
+
+		if (moneyBefore < requiredMoney) then
+			-- The money couldn't have been taken from the ragdoll, so we don't need to check if it was taken.
 			return
 		end
 
 		-- TODO: This is a bit hacky, but Helix doesn't provide a hook for when money is taken from a storage.
 		-- In sh_storage net.Receive("ixStorageMoneyGive") in Helix, the character money is set, right before it is taken (or given) to the storage.
-		-- For this reason we will wait a frame, to check if the money has been taken from the corpse.
+		-- For this reason we will wait a frame, to check if the money has been taken from the ragdoll.
 		timer.Simple(0, function()
-			if (not IsValid(client) or not IsValid(corpse)) then
+			local isValidTarget = IsValid(target) or (target.GetPlayer and IsValid(target:GetPlayer()))
+
+			if (not IsValid(client) or not isValidTarget) then
 				return
 			end
 
-			local corpseMoneyAfter = corpse:GetMoney()
+			local moneyAfter = target:GetMoney()
 
-			if (corpseMoneyBefore - corpseMoneyAfter >= requiredMoney) then
+			if (moneyBefore - moneyAfter >= requiredMoney) then
 				Schema.achievement.Progress("ransacked", client)
 			end
 		end)
@@ -679,35 +688,7 @@ end
 
 function Schema:PlayerUse(client, entity)
 	if (not client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and not entity:GetNetVar("untying")) then
-		local hasHurrymanPerk, hurrymanPerkTable = Schema.perk.GetOwned("hurryman", client)
-		local untieSpeed = 5
-
-		if (hasHurrymanPerk) then
-			untieSpeed = untieSpeed * hurrymanPerkTable.untieTimeMultiplier
-		end
-
-		entity:SetAction("@beingUntied", untieSpeed)
-		entity:SetNetVar("untying", true)
-
-		client:SetAction("@unTying", untieSpeed)
-
-		hook.Run("OnPlayerStartUntying", entity, client)
-		client:DoStaredAction(entity, function()
-			Schema.UntiePlayer(entity)
-			Schema.PlayerClearEntityInfoTooltip(client)
-
-			hook.Run("OnPlayerUntied", entity, client)
-		end, 5, function()
-			if (IsValid(entity)) then
-				entity:SetNetVar("untying")
-				entity:SetAction()
-			end
-
-			if (IsValid(client)) then
-				client:SetAction()
-				Schema.PlayerClearEntityInfoTooltip(client)
-			end
-		end)
+		Schema.PlayerTryUntieTarget(client, entity)
 	end
 
 	if (entity:GetClass() ~= "prop_ragdoll") then
@@ -840,13 +821,29 @@ function Schema:PlayerInteractEntity(client, entity, option, data)
 	end
 
 	entity.OnOptionSelected = function(entity, client, option, data)
-		hook.Run("OnPlayerCorpseOptionSelected", client, entity, option, data)
+		if (client:IsRestricted()) then
+			return
+		end
+
+		hook.Run("OnPlayerRagdollOptionSelected", client, entityPlayer, entity, option, data)
 	end
 end
 
-function Schema:OnPlayerCorpseOptionSelected(client, entity, option, data)
-	if (option == L("searchCorpse", client) and entity.StartSearchCorpse) then
-		entity:StartSearchCorpse(client)
+function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
+	if (ragdollPlayer:Alive()) then
+		if (ragdollPlayer:IsRestricted() and not ragdollPlayer:GetNetVar("untying")) then
+			if (option == L("untie", client)) then
+				Schema.PlayerTryUntieTarget(client, ragdoll)
+			elseif (option == L("searchTied", client)) then
+				Schema.SearchPlayer(client, ragdollPlayer)
+			end
+		end
+
+		return
+	end
+
+	if (option == L("searchCorpse", client) and ragdoll.StartSearchCorpse) then
+		ragdoll:StartSearchCorpse(client)
 		return
 	end
 
@@ -854,7 +851,7 @@ function Schema:OnPlayerCorpseOptionSelected(client, entity, option, data)
 		local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator", client)
 
 		if (hasMutilatorPerk) then
-			if (entity:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+			if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
 				return
 			end
 
@@ -862,19 +859,19 @@ function Schema:OnPlayerCorpseOptionSelected(client, entity, option, data)
 			local healthIncrease = mutilatorPerkTable.healthIncrease
 
 			client:SetAction("@mutilatingCorpse", mutilateTime)
-			client:DoStaredAction(entity, function()
+			client:DoStaredAction(ragdoll, function()
 				-- Double check, so players cant mutilate the same corpse at once.
-				if (entity:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+				if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
 					return
 				end
 
 				local trace = client:GetEyeTraceNoCursor()
 
-				Schema.BloodEffect(entity, entity:NearestPoint(trace.HitPos))
+				Schema.BloodEffect(ragdoll, ragdoll:NearestPoint(trace.HitPos))
 				client:EmitSound("npc/barnacle/barnacle_crunch" .. math.random(2, 3) .. ".wav")
 
 				client:SetHealth(math.min(client:Health() + healthIncrease, client:GetMaxHealth()))
-				entity:SetNetVar("mutilated", entity:GetNetVar("mutilated", 0) + 1)
+				ragdoll:SetNetVar("mutilated", ragdoll:GetNetVar("mutilated", 0) + 1)
 			end, mutilateTime, function()
 				if (IsValid(client)) then
 					client:SetAction()

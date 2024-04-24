@@ -15,8 +15,12 @@ ix.config.Add("resurrectTimeInSeconds", 5, "The time in seconds that it takes to
 })
 
 if (CLIENT) then
-	function PLUGIN:AdjustPlayerCorpseEntityMenu(options, target, corpse)
+	function PLUGIN:AdjustPlayerRagdollEntityMenu(options, target, corpse)
 		local client = LocalPlayer()
+
+		if (target:Alive()) then
+			return
+		end
 
 		if (not Schema.perk.GetOwned("phoenix_tamer")) then
 			return
@@ -108,7 +112,7 @@ function PLUGIN:CanPlayerSearchCorpse(client, corpse)
 	end
 end
 
-function PLUGIN:OnPlayerCorpseOptionSelected(client, corpse, option, data)
+function PLUGIN:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
 	if (option ~= L("resurrect", client)) then
 		return
 	end
@@ -121,14 +125,14 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, corpse, option, data)
 
 	local healthPenaltyFactor = phoenixTamerPerkTable.healthPenaltyFactor
 
-	local target = corpse:GetNetVar("player")
+	local target = ragdoll:GetNetVar("player")
 
 	if (not IsValid(target) or target:Alive()) then
 		client:Notify("This corpse is beyond saving!")
 		return
 	end
 
-	local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, corpse) ~= false
+	local canResurrect = hook.Run("CanPlayerResurrectTarget", client, target, ragdoll) ~= false
 
 	if (not canResurrect) then
 		client:Notify("This corpse is blocked from being resurrected!")
@@ -139,7 +143,7 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, corpse, option, data)
 
 	target:SetAction("@beingResurrected", resurrectTimeInSeconds)
 	client:SetAction("@resurrecting", resurrectTimeInSeconds)
-	client:DoStaredAction(corpse, function()
+	client:DoStaredAction(ragdoll, function()
 		if (not IsValid(target) or target:Alive() or not IsValid(client)) then
 			return
 		end
@@ -156,7 +160,7 @@ function PLUGIN:OnPlayerCorpseOptionSelected(client, corpse, option, data)
 			client:TakeDamageInfo(damageInfo)
 		end
 
-		self:ResurrectPlayer(client, target, corpse, newHealth)
+		self:ResurrectPlayer(client, target, ragdoll, newHealth)
 	end, resurrectTimeInSeconds, function()
 		if (IsValid(client)) then
 			client:SetAction()

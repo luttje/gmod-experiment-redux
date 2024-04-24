@@ -24,8 +24,15 @@ ITEM.functions.Tie = {
 		data.filter = client
 
 		local target = util.TraceLine(data).Entity
+		local lookTarget = target
+
+		if (IsValid(target:GetNetVar("player"))) then
+			target = target:GetNetVar("player")
+		end
+
 		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
 			and not target:GetNetVar("tying") and not target:IsRestricted()
+		-- target:GetNetVar("tied", false)
 
 		if (not isTargetValid) then
 			itemTable.player:NotifyLocalized("plyNotValid")
@@ -41,7 +48,7 @@ ITEM.functions.Tie = {
 
 		hook.Run("OnPlayerStartTying", target, client)
 
-		client:DoStaredAction(target, function()
+		client:DoStaredAction(lookTarget, function()
 			Schema.TiePlayer(target)
 
 			if (IsValid(client)) then
