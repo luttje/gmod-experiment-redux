@@ -590,13 +590,21 @@ end
 
 function Schema:PlayerUse(client, entity)
 	if (not client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and not entity:GetNetVar("untying")) then
-		entity:SetAction("@beingUntied", 5)
+		local hasHurrymanPerk, hurrymanPerkTable = Schema.perk.GetOwned("hurryman", client)
+		local untieSpeed = 5
+
+		if (hasHurrymanPerk) then
+			untieSpeed = untieSpeed * hurrymanPerkTable.untieTimeMultiplier
+		end
+
+		entity:SetAction("@beingUntied", untieSpeed)
 		entity:SetNetVar("untying", true)
 
-		client:SetAction("@unTying", 5)
+		client:SetAction("@unTying", untieSpeed)
 
 		client:DoStaredAction(entity, function()
 			Schema.UntiePlayer(entity)
+			Schema.PlayerClearEntityInfoTooltip(client)
 		end, 5, function()
 			if (IsValid(entity)) then
 				entity:SetNetVar("untying")
@@ -605,6 +613,7 @@ function Schema:PlayerUse(client, entity)
 
 			if (IsValid(client)) then
 				client:SetAction()
+				Schema.PlayerClearEntityInfoTooltip(client)
 			end
 		end)
 	end

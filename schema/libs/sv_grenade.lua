@@ -16,7 +16,7 @@ function Schema.grenade.SpawnFlash(position)
 			continue
 		end
 
-		net.Start("exp_Flashed")
+		net.Start("expFlashed")
 		net.Send(otherClient)
 	end
 end
@@ -68,7 +68,7 @@ function Schema.grenade.SpawnTearGas(position, grenadeEntityIndex)
 			if (not otherClient.nextTearGas or curTime >= otherClient.nextTearGas) then
 				otherClient.nextTearGas = curTime + 30
 
-				net.Start("exp_TearGassed")
+				net.Start("expTearGassed")
 				net.Send(otherClient)
 			end
 		end

@@ -8,5 +8,6 @@ PERK.foregroundImage = {
 	y = 31,
 	size = 32,
 }
+PERK.untieTimeMultiplier = 0.5
 PERK.description = "You will untie characters 50% faster."
 

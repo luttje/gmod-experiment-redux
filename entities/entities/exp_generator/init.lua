@@ -136,6 +136,13 @@ function ENT:OnEarned(money)
 	self:EmitSound("ambient/levels/labs/coinslot1.wav", 75)
 
 	ix.log.Add(client, "generatorEarn", money)
+
+	-- Update tooltips for any player looking at this generator
+	for _, otherClient in ipairs(ents.FindInSphere(self:GetPos(), 256)) do
+		if (otherClient.IsPlayer and otherClient:IsPlayer()) then
+			Schema.PlayerClearEntityInfoTooltip(otherClient, self)
+		end
+	end
 end
 
 function ENT:ReleaseCharacterCount(character)

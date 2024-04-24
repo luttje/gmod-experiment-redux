@@ -11,6 +11,20 @@ hook.Remove("PopulateHelpMenu", "ixCredits")
 helixSkin.DrawHelixCurved = function() end
 hook.Remove("CreateMenuButtons", "ixHelpMenu")
 
+net.Receive("expClearEntityInfoTooltip", function()
+	local targetEntity = net.ReadEntity()
+
+	if (not IsValid(ix.gui.entityInfo)) then
+		return
+	end
+
+	if (targetEntity ~= NULL and targetEntity ~= ix.gui.entityInfo.entity) then
+		return
+	end
+
+	ix.gui.entityInfo:Remove()
+end)
+
 function Schema:LoadFonts(headingFont, readableFont)
 	local enabledAccessibilityFont = ix.option.Get("accessibilityFont", false)
 	local accessibilityFontScale = ix.option.Get("accessibilityFontScale", 1)

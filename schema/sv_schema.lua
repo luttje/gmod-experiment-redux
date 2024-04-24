@@ -1,5 +1,6 @@
-util.AddNetworkString("exp_Flashed")
-util.AddNetworkString("exp_TearGassed")
+util.AddNetworkString("expFlashed")
+util.AddNetworkString("expTearGassed")
+util.AddNetworkString("expClearEntityInfoTooltip")
 
 local L = Format
 
@@ -64,6 +65,16 @@ ix.log.AddType("schemaDebug", function(client, ...)
 	local arg = {...}
 	return L("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
 end, FLAG_DANGER)
+
+--- Use this to force an entity info tooltip to update.
+---For example when a player is being tied up, you will want to update the tooltip to show its done.
+---@param client Player
+---@param targetEntity? Entity
+function Schema.PlayerClearEntityInfoTooltip(client, targetEntity)
+	net.Start("expClearEntityInfoTooltip")
+	net.WriteEntity(targetEntity or NULL)
+	net.Send(client)
+end
 
 function Schema.ImpactEffect(position, scale, withSound)
 	local effectData = EffectData()

@@ -13,11 +13,11 @@ function Schema.GetCachedTextSize(font, text)
 	return unpack(Schema.CachedTextSizes[font][text])
 end
 
-net.Receive("exp_TearGassed", function()
+net.Receive("expTearGassed", function()
 	Schema.tearGassed = CurTime() + 20
 end)
 
-net.Receive("exp_Flashed", function()
+net.Receive("expFlashed", function()
 	local curTime = CurTime()
 
 	Schema.stunEffects[#Schema.stunEffects + 1] = {

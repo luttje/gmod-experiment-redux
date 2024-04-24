@@ -8,5 +8,6 @@ PERK.foregroundImage = {
 	y = 44,
 	size = 32,
 }
+PERK.tieTimeMultiplier = 0.7
 PERK.description = "You will tie characters 30% faster."
 
