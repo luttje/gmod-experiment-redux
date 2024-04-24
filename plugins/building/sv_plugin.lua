@@ -2,14 +2,6 @@ local PLUGIN = PLUGIN
 
 util.AddNetworkString("ixBuildingRequestBuildStructure")
 
-function PLUGIN:BuildStructure(client, item, position, angles)
-	local structureBaseEntity = ents.Create("exp_structure")
-	structureBaseEntity:SetStructure(client, item, position, angles)
-	structureBaseEntity:Spawn()
-
-	return structureBaseEntity
-end
-
 net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	local position = net.ReadVector()
 	local angles = net.ReadAngle()
@@ -64,3 +56,47 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 
 	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
 end)
+
+function PLUGIN:BuildStructure(client, item, position, angles)
+	local structureBaseEntity = ents.Create("exp_structure")
+	structureBaseEntity:SetStructure(client, item, position, angles)
+	structureBaseEntity:Spawn()
+
+	return structureBaseEntity
+end
+
+function PLUGIN:EntityTakeDamage(entity, damageInfo)
+	local attacker = damageInfo:GetAttacker()
+
+	if (not IsValid(attacker) or not attacker:IsPlayer()) then
+		return
+	end
+
+	local weapon = attacker:GetActiveWeapon()
+
+	if (not IsValid(weapon) or not weapon.ixItem) then
+		return
+	end
+
+	local isStructure = entity:GetClass() == "exp_structure" or entity:GetClass() == "exp_structure_part"
+
+	if (not isStructure) then
+		-- Crowbars should do extra damage to structures, but minimal damage to anything else
+		if (weapon.ixItem.uniqueID == "crowbar") then
+			damageInfo:ScaleDamage(0.1)
+		end
+
+		return
+	end
+
+	if (weapon.ixItem.uniqueID == "crowbar") then
+		damageInfo:ScaleDamage(1.1)
+	else
+		-- Any other damage should be scaled down, to make the crowbar more interesting, especially bullet damage
+		if (damageInfo:IsBulletDamage()) then
+			damageInfo:ScaleDamage(0.1)
+		else
+			damageInfo:ScaleDamage(0.2)
+		end
+	end
+end

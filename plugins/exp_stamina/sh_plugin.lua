@@ -109,7 +109,7 @@ if (SERVER) then
 			local requiredAttribute = Schema.achievement.GetProperty("enduring_spirit", "requiredAttribute")
 
 			if (value >= requiredAttribute) then
-				Schema.achievement.Progress(client, "enduring_spirit")
+				Schema.achievement.Progress("enduring_spirit", client)
 			end
 		end
 	end
@@ -127,7 +127,6 @@ if (SERVER) then
 		local damageScale = 1.2 - endurance -- Always take at least 20% of the damage
 
 		damageInfo:ScaleDamage(damageScale)
-		print("Damage scaled by " .. damageScale)
 	end
 
 	local playerMeta = FindMetaTable("Player")

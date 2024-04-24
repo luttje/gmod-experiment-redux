@@ -9,5 +9,5 @@ ACHIEVEMENT.foregroundImage = {
 }
 ACHIEVEMENT.reward = 500
 ACHIEVEMENT.maximum = 50
-ACHIEVEMENT.description = "Unleash destruction upon fifty of your adversaries' structures."
+ACHIEVEMENT.description = "Unleash destruction on fifty of your adversaries' structures."
 

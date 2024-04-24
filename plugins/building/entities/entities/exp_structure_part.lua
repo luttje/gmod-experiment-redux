@@ -73,13 +73,21 @@ if (SERVER) then
 		end
 	end
 
-    function ENT:Touch(entity)
+	function ENT:Touch(entity)
 		-- Allow parts to only clip eachother
-        if (entity.IsStructure or entity.IsStructurePart) then
-            return
-        end
+		if (entity.IsStructure or entity.IsStructurePart) then
+			return
+		end
 
 		self.expIsTouched = true
+	end
+
+	function ENT:OnRemove()
+		local parent = self:GetParent()
+
+		if (IsValid(parent)) then
+			parent:Remove()
+		end
 	end
 else
 	function ENT:Draw()

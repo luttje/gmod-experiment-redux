@@ -445,7 +445,7 @@ function Schema.DecayEntity(entity, seconds, callback)
 		local color = entity:GetColor()
 		local decayed = math.Clamp(math.ceil(alpha), 0, 255)
 
-		if (color.a > 0) then
+		if (decayed > 0) then
 			entity:SetColor(Color(color.r, color.g, color.b, decayed))
 			return
 		end

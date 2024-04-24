@@ -148,6 +148,7 @@ function ENT:SetStructure(client, item, position, angles)
 
 	self:SetItemID(item.uniqueID)
 	self:SetHealth(item.health)
+	self:SetMaxHealth(item.health)
 
 	self:SetUnderConstruction(true)
 	self:BuildStructure(client, item)
@@ -237,48 +238,50 @@ function ENT:CheckConstruction(client)
     self:FinishConstruction(client)
 end
 
-function ENT:FinishConstruction(client)
-    local children = self:GetChildren()
+function ENT:ForEachPart(callback)
+	local children = self:GetChildren()
 
 	for _, child in ipairs(children) do
-        if (child.IsStructurePart) then
-			child.expIsTouched = false
-			child:SetTrigger(true)
+		if (IsValid(child) and child.IsStructurePart) then
+			local result = callback(child)
+
+			if (result ~= nil) then
+				return result
+			end
 		end
 	end
+end
+
+function ENT:FinishConstruction(client)
+	self:ForEachPart(function(child)
+		child.expIsTouched = false
+		child:SetTrigger(true)
+	end)
 
 	timer.Simple(0.1, function()
 		if (not IsValid(self)) then
 			return
 		end
 
-		local children = self:GetChildren()
-
-		for _, child in ipairs(children) do
-            if (not child.IsStructurePart) then
-                continue
-            end
-
+		local isTouched = self:ForEachPart(function(child)
 			child:SetTrigger(false)
 
 			if (child.expIsTouched) then
-				if (IsValid(client)) then
-					client:Notify("You cannot finish the construction while it's intersecting with another object.")
-				end
+				return true
+			end
+		end)
 
-				return
+		if (isTouched) then
+			if (IsValid(client)) then
+				client:Notify("You cannot finish the construction while it's intersecting with another object.")
 			end
 		end
 
 		self:SetUnderConstruction(false)
 
-		local children = self:GetChildren()
-
-		for _, child in ipairs(children) do
-			if (child.IsStructurePart) then
-				child:SetCollisionGroup(COLLISION_GROUP_NONE)
-			end
-		end
+		self:ForEachPart(function(child)
+			child:SetCollisionGroup(COLLISION_GROUP_NONE)
+		end)
 	end)
 end
 
@@ -328,10 +331,6 @@ function ENT:HandleSiegeSurgeDamage(damageInfo)
 end
 
 function ENT:HandleSiegeSurgeStack(client)
-    if (not IsValid(client) or not client:IsPlayer()) then
-        return
-    end
-
 	local buff, buffTable = self:HasSiegeSurgeActive(client)
 
     if (not buff) then
@@ -356,17 +355,44 @@ function ENT:OnTakeDamage(damageInfo)
 		return
 	end
 
+	if (self.expIsDecaying) then
+		return
+	end
+
 	self:HandleSiegeSurgeDamage(damageInfo)
 
 	self:SetHealth(self:Health() - damageInfo:GetDamage())
 
-	-- TODO: Change color of the structure parts to indicate damage
+	local damageColor = math.max((self:Health() / self:GetMaxHealth()) * 255, 30)
+	self:ForEachPart(function(child)
+		child:SetColor(Color(damageColor, damageColor, damageColor, 255))
+	end)
 
 	if (self:Health() <= 0) then
-        hook.Run("StructureDestroyed", damageInfo:GetAttacker(), self)
+		local attacker = damageInfo:GetAttacker()
 
-		self:HandleSiegeSurgeStack(damageInfo:GetAttacker())
+		if (IsValid(attacker) and attacker:IsPlayer()) then
+			self:HandleSiegeSurgeStack(attacker)
 
-		self:RemoveWithEffect()
+			if (self:GetBuilderSteamID64() ~= attacker:SteamID64()) then
+				Schema.achievement.Progress("hooligan", attacker)
+			end
+		end
+
+        hook.Run("StructureDestroyed", self, attacker)
+
+		self.expIsDecaying = true
+
+		self:ForEachPart(function(child)
+			child:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+			child:Ignite(4, 0)
+			Schema.DecayEntity(child, 4)
+		end)
 	end
+end
+
+function ENT:OnRemove()
+	self:ForEachPart(function(child)
+		child:Remove()
+	end)
 end

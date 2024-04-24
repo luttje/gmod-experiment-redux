@@ -5,8 +5,8 @@ BUFF.name = "Deserter's Demise"
 BUFF.isNegative = true
 BUFF.foregroundImage = {
 	spritesheet = "experiment-redux/flatmsicons32.png",
-	x = 4,
-	y = 20,
+	x = 18,
+	y = 8,
 	size = 32,
 }
 BUFF.durationInSeconds = 5 * 60

@@ -92,7 +92,7 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 		local requiredMoney = Schema.achievement.GetProperty("northern_rock", "requiredMoney")
 
 		if (value > requiredMoney) then
-			Schema.achievement.Progress(character:GetPlayer(), "northern_rock")
+			Schema.achievement.Progress("northern_rock", character:GetPlayer())
 		end
 	end
 end
@@ -102,25 +102,25 @@ function Schema:CharacterAttributeUpdated(client, character, attributeKey, value
 		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "titans_strength")
+			Schema.achievement.Progress("titans_strength", client)
 		end
 	elseif (attributeKey == "dexterity") then
 		local requiredAttribute = Schema.achievement.GetProperty("dextrous_rogue", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "dextrous_rogue")
+			Schema.achievement.Progress("dextrous_rogue", client)
 		end
 	elseif (attributeKey == "acrobatics") then
 		local requiredAttribute = Schema.achievement.GetProperty("natural_acrobat", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "natural_acrobat")
+			Schema.achievement.Progress("natural_acrobat", client)
 		end
 	elseif (attributeKey == "agility") then
 		local requiredAttribute = Schema.achievement.GetProperty("agile_shadow", "requiredAttribute")
 
 		if (value >= requiredAttribute) then
-			Schema.achievement.Progress(client, "agile_shadow")
+			Schema.achievement.Progress("agile_shadow", client)
 		end
 	end
 end
@@ -363,7 +363,6 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 	client.expLastBulletDamageHitGroup = hitGroup
 
 	local attacker = damageInfo:GetAttacker()
-	local weapon = attacker:GetActiveWeapon()
 
 	if (IsValid(attacker) and attacker:IsPlayer()) then
 		if (handleBeanbagWeaponDamage(client, attacker, damageInfo) == true) then
@@ -382,7 +381,8 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 			end
 		end
 
-		if (attacker:IsPlayer()) then
+		if (IsValid(attacker) and attacker:IsPlayer()) then
+			local weapon = attacker:GetActiveWeapon()
 			local weaponIsSilenced = IsValid(weapon) and weapon.ixItem and weapon.ixItem.isSilenced
 			local attackerIsStealthed = attacker:HasStealthActivated()
 			local hasAssassinsCreedPerk = Schema.perk.GetOwned("assassins_creed", attacker)
@@ -603,7 +603,7 @@ function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 		entity:SetMoney(amountToLose)
 
 		if (character:GetMoney() == 0) then
-			Schema.achievement.Progress(client, "boltless_wanderer", 1)
+			Schema.achievement.Progress("boltless_wanderer", client)
 		end
 	end
 
@@ -621,7 +621,7 @@ function Schema:PlayerDeath(client, inflictor, attacker)
 		return
 	end
 
-	Schema.achievement.Progress(client, "favored_target")
+	Schema.achievement.Progress("favored_target", client)
 end
 
 --[[
@@ -678,7 +678,7 @@ function Schema:PlayerUse(client, entity)
 end
 
 function Schema:PlayerPerkBought(client, perk)
-	Schema.achievement.Progress(client, "perk_purveyor")
+	Schema.achievement.Progress("perk_purveyor", client)
 end
 
 function Schema:CreateShipment(client, shipmentEntity)
@@ -691,7 +691,7 @@ function Schema:CreateShipment(client, shipmentEntity)
 		local targetItemId = Schema.achievement.GetProperty("freeman", "targetItemId")
 
 		if (itemTable.uniqueID == targetItemId) then
-			Schema.achievement.Progress(client, "freeman")
+			Schema.achievement.Progress("freeman", client)
 		end
 
 		itemCount = itemCount + math.max(amount, 0)
@@ -701,7 +701,7 @@ function Schema:CreateShipment(client, shipmentEntity)
 	local atLeast = Schema.achievement.GetProperty("master_trader", "atLeast")
 
 	if (itemCount >= atLeast) then
-		Schema.achievement.Progress(client, "master_trader")
+		Schema.achievement.Progress("master_trader", client)
 	end
 
 	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)

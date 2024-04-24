@@ -43,7 +43,7 @@ ITEM.functions.Tie = {
 			Schema.TiePlayer(target)
 
 			if (IsValid(client)) then
-				Schema.achievement.Progress(client, "zip_ninja")
+				Schema.achievement.Progress("zip_ninja", client)
 				Schema.PlayerClearEntityInfoTooltip(client)
 			end
 

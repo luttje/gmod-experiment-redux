@@ -133,7 +133,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		name = "Storefront Bars",
 		description = "Strong bars to protect your storefront.",
 		price = 200,
-		health = 200,
+		health = 4000,
 		model = "models/props_building_details/Storefront_Template001a_Bars.mdl",
 		constructionMaterials = {
 			["material_metal"] = 10
@@ -146,7 +146,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
         name = "Blast Door",
         description = "A blast door to protect your base.",
         price = 200,
-        health = 200,
+        health = 5000,
         model = "models/props_lab/blastdoor001b.mdl",
 		constructionMaterials = {
 			["material_metal"] = 15
@@ -174,7 +174,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		name = "Shelf",
 		description = "A shelf to store your items.",
 		price = 150,
-		health = 150,
+		health = 400,
 		model = "models/props_c17/FurnitureShelf001a.mdl",
 		constructionMaterials = {
 			["material_wood"] = 10
@@ -187,7 +187,7 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
 		name = "Table",
 		description = "A table to place your items.",
 		price = 150,
-		health = 150,
+		health = 300,
 		model = "models/props_c17/FurnitureTable001a.mdl",
 		constructionMaterials = {
 			["material_wood"] = 10

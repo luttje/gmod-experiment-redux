@@ -21,7 +21,7 @@ function ITEM:GetFilters()
 end
 
 function ITEM:OnRead()
-	Schema.achievement.Progress(self.player, "archivist", self.uniqueID)
+	Schema.achievement.Progress("archivist", self.player, self.uniqueID)
 end
 
 -- Only add lore to a scavenge source if it doesn't already contain a lore item

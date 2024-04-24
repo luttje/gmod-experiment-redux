@@ -4,7 +4,7 @@ function PLUGIN:EntityBreached(entity, client, breach, noSound)
 	self:OpenDoor(entity, client, noSound)
 
 	if (IsValid(client)) then
-		Schema.achievement.Progress(client, "doorway_demolisher")
+		Schema.achievement.Progress("doorway_demolisher", client)
 	end
 end
 

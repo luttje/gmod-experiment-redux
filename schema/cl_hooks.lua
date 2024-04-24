@@ -551,14 +551,21 @@ function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
 		return
 	end
 
-	menu:AddOption(L("cashback"), function()
-		Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
-			function()
-				net.Start("expCashbackRequest")
-				net.WriteUInt(itemTable:GetID(), 32)
-				net.SendToServer()
-			end, L("no"))
-	end):SetImage("icon16/money_delete.png")
+	-- TODO: This is a hacky way to get cashback to appear at the end of the menu, if Helix provides a way to do this, we should use it
+	local oldMenuOpen = menu.Open
+
+	function menu:Open(...)
+		menu:AddOption(L("cashback"), function()
+			Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
+				function()
+					net.Start("expCashbackRequest")
+					net.WriteUInt(itemTable:GetID(), 32)
+					net.SendToServer()
+				end, L("no"))
+		end):SetImage("icon16/money_delete.png")
+
+		oldMenuOpen(self, ...)
+	end
 end
 
 function Schema:PlayerPerkBought(client, perk)

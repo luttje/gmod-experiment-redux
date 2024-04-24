@@ -24,5 +24,5 @@ end
 
 function ITEM:OnBoosted()
 	local client = self.player
-	Schema.achievement.Progress(client, "liquid_courage")
+	Schema.achievement.Progress("liquid_courage", client)
 end

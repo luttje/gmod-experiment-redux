@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Crowbar"
-ITEM.description = "A scratched up and dirty metal crowbar."
+ITEM.description = "A scratched up and dirty metal crowbar. Useful for breaking things open."
 ITEM.price = 100
 ITEM.model = "models/weapons/tacint_melee/w_crowbar.mdl"
 ITEM.width = 1

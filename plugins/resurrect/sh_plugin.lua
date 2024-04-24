@@ -62,12 +62,12 @@ function PLUGIN:ResurrectPlayer(client, target, entity, newHealth)
 		end
 	end
 
-	Schema.achievement.Progress(client, "paramedic")
+	Schema.achievement.Progress("paramedic", client)
 
 	local alliance = client:GetAlliance()
 
 	if (alliance ~= nil and alliance == target:GetAlliance()) then
-		Schema.achievement.Progress(client, "guardian_of_the_fallen")
+		Schema.achievement.Progress("guardian_of_the_fallen", client)
 	end
 
 	hook.Run("PlayerResurrectedTarget", client, target)
