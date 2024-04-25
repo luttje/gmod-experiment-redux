@@ -2,6 +2,10 @@ util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
 util.AddNetworkString("expClearEntityInfoTooltip")
 
+-- JersonGaming's Model/Real RNG Ammo Boxes (https://steamcommunity.com/sharedfiles/filedetails/?id=1741790902)
+-- Higher quality ammo boxes, they replace the default ones.
+resource.AddWorkshop("1741790902")
+
 local L = Format
 
 Schema.corpses = Schema.corpses or {}
