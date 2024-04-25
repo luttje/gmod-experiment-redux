@@ -11,25 +11,11 @@ NPC.attributeRewards = {
 }
 
 local noRaceStartedMessages = {
-	"No race has been started yet! I can't help you.",
-	"Sorry, but there's no started race you're participating in.",
-	"Are you sure you're in the right place?",
-	"It seems you're ahead of the game. No race has started yet!",
-	"You're eager to run, but alas, the race has not yet commenced.",
-	"Your enthusiasm is admirable, but the race hasn't begun.",
-	"No need to stretch those muscles yet—the race hasn't started.",
-}
-
-local notPartOfRaceMessages = {
-	"You're not part of the race. Go see Leo Usain to join in!",
-	"Sorry, but you're not part of the race. Go see Leo on the other side of the city!",
-	"Looks like you missed signing up for the race. Don't worry, Leo can still get you in!",
-	"Seems like you forgot to register for the race. Head over to Leo's spot and get yourself enrolled!",
-	"The race is off-limits for you at the moment. Make sure to talk to Leo to get in on the action!",
-	"You haven't joined the footrace yet. Don't delay, go find Leo and get yourself registered!",
-	"Not seeing your name on the participant list? That means you haven't joined yet. Visit Leo and get yourself sorted!",
-	"You're not on the roster for the race. Swing by Leo's place and get yourself added!",
-	"Seems like you haven't signed up for the race yet. Don't miss out, go chat with Leo!",
+	"No race has been started yet! Find my colleague Leo Usain to join in. I'll be waiting here at the finish line.",
+	"You're at the finish line, but there's no started race you're participating in. Go see Leo Usain to join in!",
+	"Are you sure you're in the right place? This is the finish line, but you haven't spoken to Leo Usain to join the race!",
+	"You're eager to cross this finish line, but you're not part of the race. Go see Leo Usain to join in!",
+	"Your enthusiasm is admirable, but the race hasn't begun. Go see Leo Usain to join in! I'll be waiting here at the finish line.",
 }
 
 function NPC:OnInteract(client, npcEntity)
@@ -42,7 +28,7 @@ function NPC:OnInteract(client, npcEntity)
 	end
 
 	if (not startEntity.expRaceData or not startEntity.expRaceData.runners or not startEntity.expRaceData.runners[client]) then
-		npcEntity:PrintChat(notPartOfRaceMessages[math.random(#notPartOfRaceMessages)])
+		npcEntity:PrintChat(noRaceStartedMessages[math.random(#noRaceStartedMessages)])
 		return
 	end
 

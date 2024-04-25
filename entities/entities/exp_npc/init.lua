@@ -90,7 +90,8 @@ function ENT:SetupRandomVoiceSet(model)
 		"vo/npc/male01/hi02.wav",
 		"vo/npc/male01/hi02.wav",
 		"vo/npc/male01/doingsomething.wav",
-		"vo/npc/male01/doingsomething.wav",
+        "vo/npc/male01/doingsomething.wav",
+		"vo/npc/male01/answer18.wav"
 	}
 
 	if (model:find("female", nil, true) ~= nil) then
@@ -148,9 +149,12 @@ function ENT:Think()
 
 	self.nextCheckThink = CurTime() + 1
 
-	if (self.expNpcData.OnThink) then
-		self.expNpcData:OnThink(self)
-	end
+    if (self.expNpcData.OnThink) then
+        self.expNpcData:OnThink(self)
+    end
+
+    self:NextThink(CurTime())
+	return true
 end
 
 function ENT:PrintChat(message, isYelling)
@@ -165,7 +169,7 @@ function ENT:PrintChat(message, isYelling)
 
 	ix.chat.Send(nil, "npc", message, false, receivers, {
 		name = self:GetDisplayName(),
-		yelling = isYelling or false
+		yelling = isYelling == true -- Verbose equality check in case someone calls PrintChat with table.Random (second return value is string key there)
 	})
 end
 

@@ -118,7 +118,7 @@ function PANEL:Init()
     self.html = self:Add("DHTML")
     self.html:Dock(FILL)
     self.html:AddFunction("interop", "onKnownTextHeight", function(height)
-		self:RecalculateDimensions(height)
+		self:RecalculateDimensions(height + 16) -- Add some padding to prevent sudden scrollbars
 	end)
 
     self.answers = self:Add("expNpcAnswers")
@@ -132,10 +132,10 @@ function PANEL:Init()
 end
 
 function PANEL:RecalculateDimensions(htmlHeight)
-	local tilteBarHeight = 24
+	local titleBarHeight = 24
     htmlHeight = htmlHeight or 200
 
-	local height = htmlHeight + tilteBarHeight + self.answers:GetTall() + 32
+	local height = htmlHeight + titleBarHeight + self.answers:GetTall() + 32
 
     self:SetSize(math.min(ScrW(), 512), math.min(height, ScrH()))
     self:SetPos(ScrW() * 0.5 - self:GetWide() * 0.5, ScrH() - self:GetTall() - 32)

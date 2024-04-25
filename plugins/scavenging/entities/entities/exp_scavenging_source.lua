@@ -83,10 +83,13 @@ if (SERVER) then
 			name = "A pile of junk"
 		end
 
+		local baseTaskTime = ix.config.Get("scavengeSourceOpenTime", 4)
+		local searchTime = Schema.GetDexterityTime(activator, baseTaskTime)
+
 		ix.storage.Open(activator, inventory, {
 			name = name,
 			entity = self,
-			searchTime = ix.config.Get("scavengeSourceOpenTime", 4),
+			searchTime = searchTime,
 			searchText = "Scavenging...",
 			bMultipleUsers = true,
 			OnPlayerOpen = function()

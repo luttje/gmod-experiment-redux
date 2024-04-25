@@ -53,11 +53,18 @@ if (SERVER) then
 		net.Send(client)
 	end
 
-	function Schema.perk.GetOwned(perk, client)
+	--- Returns whether a player has a perk or not.
+	---@param perk string|number
+	---@param client Player
+	---@param character? table
+	---@return boolean
+	function Schema.perk.GetOwned(perk, client, character)
 		local perkTable = Schema.perk.Get(perk)
 
+        character = character or client:GetCharacter()
+
         if (not perkTable) then
-            ix.log.Add(client, "schemaDebug", "Schema.perk.Give", "Attempt to check for invalid perk: " ..
+            ix.log.Add(client, "schemaDebug", "Schema.perk.GetOwned", "Attempt to check for invalid perk: " ..
                 tostring(perk))
             return false
         end
@@ -66,7 +73,7 @@ if (SERVER) then
 			return false
 		end
 
-		local perks = client:GetCharacter():GetData("perks", {})
+		local perks = character:GetData("perks", {})
 
 		return checkHasPerk(perks, perkTable, client)
 	end

@@ -53,7 +53,8 @@ function ENT:Use(client)
 		client.expLockersSession = session
 
 		local baseTaskTime = ix.config.Get("lockersOpenDelayInSeconds")
-		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+        local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+
 		client:SetAction("@openingLockers", searchTime)
 		client:DoStaredAction(self, function()
 			if (not IsValid(client) or not IsValid(self)) then

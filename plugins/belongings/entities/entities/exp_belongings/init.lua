@@ -80,11 +80,13 @@ function ENT:OpenInventory(activator)
 	end
 
 	local name = self:GetDisplayName()
+	local baseTaskTime = ix.config.Get("containerOpenTime", 0.7)
+	local searchTime = Schema.GetDexterityTime(activator, baseTaskTime)
 
 	ix.storage.Open(activator, inventory, {
 		name = name,
 		entity = self,
-		searchTime = ix.config.Get("containerOpenTime", 0.7),
+		searchTime = searchTime,
 		data = { money = self:GetMoney() },
 		OnPlayerOpen = function()
 			hook.Run("PlayerOpenedBelongings", activator, self, inventory)

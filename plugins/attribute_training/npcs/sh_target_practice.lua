@@ -8,7 +8,7 @@ NPC.voicePitch = 95
 NPC.trainingDuration = 30
 NPC.trainingIntervalInMinutes = 15
 NPC.attributeRewards = {
-	["dexterity"] = 0.2,
+	["dexterity"] = 1,
 }
 
 local challengeStart = NPC:RegisterInteraction("challengeStart", {
@@ -60,7 +60,7 @@ local challengeAlreadyStartedOther = NPC:RegisterInteraction("challengeAlreadySt
 local challengeRecentlyStarted = NPC:RegisterInteraction("challengeRecentlyStarted", {
 	text = function(client, npcEntity, answersPanel)
 		local character = client:GetCharacter()
-		local nextChallengeStart = character:GetData("expNextChallengeStart", 0)
+		local nextChallengeStart = character:GetData("nextChallengeStart", 0)
 		local curTime = CurTime()
 		local nextChallengeStartRemaining = string.NiceTime(math.ceil(nextChallengeStart - curTime))
 
@@ -86,7 +86,7 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
 
 	local character = client:GetCharacter()
 
-	if (character:GetData("expNextChallengeStart", 0) > CurTime()) then
+	if (character:GetData("nextChallengeStart", 0) > CurTime()) then
 		return challengeRecentlyStarted
 	end
 
@@ -124,7 +124,7 @@ function NPC:OnThink(npcEntity)
 		if (challenge.finishAt and challenge.finishAt <= curTime) then
 			local client = challenge.client
 			local character = client:GetCharacter()
-			local score = client:GetCharacterNetVar("expTargetPracticeScore", 0)
+			local score = client:GetCharacterNetVar("targetPracticeScore", 0)
 
 			for attribute, reward in pairs(NPC.attributeRewards) do
 				character:UpdateAttrib(attribute, reward * score)
@@ -136,7 +136,7 @@ function NPC:OnThink(npcEntity)
 
 			npcEntity.expCurrentChallenge = nil
 			client:SetCharacterNetVar("targetPracticeChallenger", nil)
-			character:SetData("expNextChallengeStart", curTime + (NPC.trainingIntervalInMinutes * 60))
+			character:SetData("nextChallengeStart", curTime + (NPC.trainingIntervalInMinutes * 60))
 
 			return
 		end
@@ -175,7 +175,7 @@ end
 if (CLIENT) then
 	function NPC:HUDPaint(npcEntity)
 		local client = LocalPlayer()
-		local score = client:GetCharacterNetVar("expTargetPracticeScore", 0)
+		local score = client:GetCharacterNetVar("targetPracticeScore", 0)
 
 		draw.SimpleText(
 			"Score: " .. math.Round(score, 2),

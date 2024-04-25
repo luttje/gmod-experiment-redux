@@ -14,13 +14,13 @@ local raceStart = NPC:RegisterInteraction("raceStart", {
 	text = [[
 		Hey there! I'm Leo Usain.
 
-		You know that running is a great way to train your stamina, right?
+		You know that running is a great way to train your stamina and endurance, right? How about you show me what you've got?
 
-		How about you show me what you've got? I'll time you as you run from here to the finish line across the city.
+		I'll time you as you run from here to the finish line across the city. My colleague Enda Bolt will be waiting there for you.
 
-		<b>I only charge a small fee. Do you want to race?</b>
+		<b>I only charge a small fee for our services. Do you want to race?</b>
 
-		Other racers might join in, and the winner takes a prize!
+		Other racers might join in, and the first one to talk to Enda Bolt at the finish line wins!
 	]],
 	responses = function(client, npcEntity, answersPanel)
 		local responses = {}

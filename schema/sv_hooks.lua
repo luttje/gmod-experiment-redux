@@ -151,7 +151,8 @@ function Schema:CharacterAttributeUpdated(client, character, attributeKey, value
 	local attribute = ix.attributes.list[attributeKey]
 
 	if (attribute and attribute.OnSetup) then
-		attribute:OnSetup(client, character:GetAttribute(attributeKey, value))
+		-- client:GetCharacter() might be nil if the character is being created. For that reason we pass the character object.
+		attribute:OnSetup(client, character:GetAttribute(attributeKey, value), character)
 	end
 
 	if (attributeKey == "strength") then
@@ -557,11 +558,14 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 			return
 		end
 
+		local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
+		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+
 		ix.storage.Open(client, entity.ixInventory, {
 			entity = entity,
 			name = "Corpse",
 			searchText = "@searchingCorpse",
-			searchTime = ix.config.Get("corpseSearchTime", 1)
+			searchTime = searchTime
 		})
 	end
 

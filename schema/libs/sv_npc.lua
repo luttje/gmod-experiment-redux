@@ -11,7 +11,21 @@ function Schema.npc.SpawnEntity(npc, position, angles)
 	npcEntity:SetupNPC(npc)
 	npcEntity:SetPos(position)
 	npcEntity:SetAngles(angles)
-	npcEntity:Spawn()
+    npcEntity:Spawn()
+
+    npcEntity:CapabilitiesRemove(bit.bor(
+        CAP_MOVE_GROUND,
+        CAP_MOVE_JUMP,
+        CAP_MOVE_FLY,
+        CAP_MOVE_CLIMB,
+		CAP_MOVE_SWIM,
+        CAP_MOVE_CRAWL,
+		CAP_MOVE_SHOOT
+	))
+
+	if (npc.OnSpawn) then
+		npc:OnSpawn(npcEntity)
+	end
 
 	return npcEntity
 end
