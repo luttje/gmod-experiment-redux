@@ -266,14 +266,6 @@ function ENT:OnDuplicated(entTable)
 	end)
 end
 
-function ENT:Think()
-	self:NextThink(CurTime() + 1)
-
-	if (self:WaterLevel() >= 3) then
-		self:SetPower(0)
-	end
-end
-
 function ENT:UpdateTransmitState()
 	return TRANSMIT_PVS
 end

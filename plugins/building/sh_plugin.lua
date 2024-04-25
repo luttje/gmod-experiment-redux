@@ -12,12 +12,20 @@ ix.config.Add("maxBuildGroundLevel", 2, "The maximum distance from the ground pl
 })
 
 if (CLIENT) then
-	function PLUGIN:RequestBuildStructure(position, angles)
-		net.Start("ixBuildingRequestBuildStructure")
-		net.WriteVector(position)
-		net.WriteAngle(angles)
-		net.SendToServer()
-	end
+	-- Have the blueprint weapon not show the hazardous environment sheet, but a custom one with blueprints on them
+    Schema.util.ReplaceMaterialTexture(
+        Material("models/props_lab/clipboard_sheet"),
+        Material("experiment-redux/replacements/clipboard")
+	)
+
+    function PLUGIN:RequestBuildStructure(position, angles)
+        net.Start("ixBuildingRequestBuildStructure")
+        net.WriteVector(position)
+        net.WriteAngle(angles)
+        net.SendToServer()
+    end
+else
+	resource.AddFile("materials/experiment-redux/replacements/clipboard.vmt")
 end
 
 function PLUGIN:InitializedPlugins()

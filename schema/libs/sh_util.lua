@@ -370,5 +370,35 @@ if (CLIENT) then
 
 			output:DoRefresh()
 		end
-	end)
+    end)
+
+    --- Replaces a material texture with another texture for all models/ui that use it.
+    ---@param material IMaterial
+    ---@param replacement IMaterial
+	---@param keyValues? table|number
+	function Schema.util.ReplaceMaterialTexture(material, replacement, keyValues)
+		local replacementTexture = replacement:GetTexture("$basetexture")
+
+		material:SetTexture("$basetexture", replacementTexture)
+
+		-- Since 'Material' also returns a number as the second return value, we want to make sure it's a table.
+		if (istable(keyValues)) then
+            for key, value in pairs(keyValues) do
+				local valueType = type(value)
+                if (valueType == "number") then
+                    material:SetFloat(key, value)
+                elseif (valueType == "VMatrix") then
+                    material:SetMatrix(key, value)
+                elseif (valueType == "string") then
+                    material:SetString(key, value)
+                elseif (valueType == "ITexture") then
+                    material:SetTexture(key, value)
+                elseif (valueType == "Vector") then
+                    material:SetVector(key, value)
+                else
+					error("Invalid value type for keyValues: " .. valueType)
+                end
+			end
+		end
+	end
 end
