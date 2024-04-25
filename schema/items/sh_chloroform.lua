@@ -9,8 +9,9 @@ ITEM.description = "Applying this on somebody will knock them out cold."
 
 ITEM.functions.Apply = {
 	OnRun = function(itemTable)
-		local chloroformTime = 5
 		local client = itemTable.player
+		local baseTaskTime = 10
+		local taskTime = Schema.GetDexterityTime(client, baseTaskTime)
 		local data = {}
 		data.start = client:GetShootPos()
 		data.endpos = data.start + client:GetAimVector() * 70
@@ -29,12 +30,14 @@ ITEM.functions.Apply = {
 			return false
 		end
 
+		taskTime = math.Clamp(taskTime, 2, baseTaskTime)
+
 		itemTable.bBeingUsed = true
 
-		client:SetAction("@chloroforming", chloroformTime)
+		client:SetAction("@chloroforming", taskTime)
 
 		target:SetNetVar("beingChloroformed", true)
-		target:SetAction("@fBeingChloroformed", chloroformTime)
+		target:SetAction("@fBeingChloroformed", taskTime)
 
 		client:DoStaredAction(target, function()
 			Schema.ChloroformPlayer(target)
@@ -42,7 +45,7 @@ ITEM.functions.Apply = {
 			itemTable:Remove()
 
 			hook.Run("OnPlayerBecameChloroformed", target, client)
-		end, chloroformTime, function()
+		end, taskTime, function()
 			client:SetAction()
 
 			target:SetAction()
@@ -55,10 +58,10 @@ ITEM.functions.Apply = {
 	end,
 
 	OnCanRun = function(itemTable)
-		return ! IsValid(itemTable.entity) or itemTable.bBeingUsed
+		return not IsValid(itemTable.entity) or itemTable.bBeingUsed
 	end
 }
 
 function ITEM:CanTransfer(inventory, newInventory)
-	return ! self.bBeingUsed
+	return not self.bBeingUsed
 end

@@ -11,6 +11,11 @@ Schema.dropMode = {
 	WITH_EQUIPPED = 4
 }
 
+ix.log.AddType("playerHealed", function(client, ...)
+	local arg = {...}
+	return L("%s has healed %s for %d hp", client:Name(), arg[1], arg[2])
+end, FLAG_WARNING)
+
 ix.log.AddType("perkBought", function(client, ...)
 	local arg = { ... }
 	return L("%s bought the perk '%s'", client:Name(), arg[1])
@@ -221,7 +226,8 @@ function Schema.PlayerTryUntieTarget(client, target)
 	end
 
 	local hasHurrymanPerk, hurrymanPerkTable = Schema.perk.GetOwned("hurryman", client)
-	local untieSpeed = 5
+	local baseTaskTime = 5
+	local untieSpeed = Schema.GetDexterityTime(client, baseTaskTime)
 
 	if (speedMultiplier) then
 		untieSpeed = untieSpeed * speedMultiplier
@@ -241,7 +247,7 @@ function Schema.PlayerTryUntieTarget(client, target)
 		Schema.PlayerClearEntityInfoTooltip(client)
 
 		hook.Run("OnPlayerBecameUntied", target, client)
-	end, 5, function()
+	end, untieSpeed, function()
 		if (IsValid(target)) then
 			target:SetNetVar("untying")
 			target:SetAction()
@@ -274,8 +280,10 @@ function Schema.MakeExplosion(position, scale)
 	util.Effect("explosion", effectData, true, true)
 end
 
-function Schema.GetHealAmount(client, amount)
-	local healAmount = amount * (1 + Schema.GetAttributeFraction(client:GetCharacter(), "medical"))
+function Schema.GetHealAmount(client, healAmount)
+	local attributeIncrement = 1 + (Schema.GetAttributeFraction(client:GetCharacter(), "medical") * 1.5)
+
+	healAmount = healAmount * attributeIncrement
 
 	healAmount = hook.Run("AdjustHealAmount", client, healAmount) or healAmount
 
@@ -283,7 +291,9 @@ function Schema.GetHealAmount(client, amount)
 end
 
 function Schema.GetDexterityTime(client, time)
-	return time * Schema.GetAttributeFraction(client:GetCharacter(), "dexterity")
+	local attributeFraction = math.max(1, (1 + Schema.GetAttributeFraction(client:GetCharacter(), "dexterity")) * 1.5)
+
+	return time / attributeFraction
 end
 
 function Schema.BustDownDoor(client, door, force)

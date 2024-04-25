@@ -78,6 +78,10 @@ ix.chat.Register("shipment", {
 	end,
 })
 
+--- Returns the players attribute as a fraction of the maximum value.
+---@param character Player
+---@param attributeKey string
+---@return number
 function Schema.GetAttributeFraction(character, attributeKey)
 	local attributeTable = ix.attributes.list[attributeKey]
 	local maximum = attributeTable.maxValue or ix.config.Get("maxAttributes", 100)

@@ -12,8 +12,8 @@ ITEM.class = "tacrp_m_crowbar"
 
 ITEM.isAttachment = true
 ITEM.attachmentBone = "ValveBiped.Bip01_Spine"
-ITEM.attachmentOffsetAngles = Angle(200, 200, 0)
-ITEM.attachmentOffsetVector = Vector(0, 5, 2)
+ITEM.attachmentOffsetVector = Vector(15.2, -2.2, -5.3)
+ITEM.attachmentOffsetAngles = Angle(-57, 12.2, 0.7)
 
 ITEM.mergeIntoSwep = {
 	MeleeRange = 64,

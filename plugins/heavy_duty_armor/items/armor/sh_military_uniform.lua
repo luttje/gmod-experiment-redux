@@ -12,6 +12,9 @@ ITEM.maxArmor = 250
 ITEM.repairMaterials = {
 	["material_fabric"] = 4,
 }
+ITEM.attribBoosts = {
+	["stamina"] = 10,
+}
 ITEM.requiresArmadillo = true
 
 ix.anim.SetModelClass(ITEM.replacement, "player")

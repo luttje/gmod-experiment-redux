@@ -2,7 +2,7 @@ PLUGIN.name = "Experiment Stamina"
 PLUGIN.author = "Experiment Redux" -- Based on original system by Chessnut
 PLUGIN.description = "Adds a stamina system to limit running."
 
-ix.config.Add("staminaDrain", 1, "How much stamina to drain per tick (every quarter second). This is calculated before attribute reduction.", nil, {
+ix.config.Add("staminaDrain", 2, "How much stamina to drain per tick (every quarter second). This is calculated before attribute reduction.", nil, {
 	data = {min = 0, max = 10, decimals = 2},
 	category = "attributes"
 })
@@ -44,8 +44,11 @@ local function calcStaminaChange(client)
 	local offset
 
 	if (client:KeyDown(IN_SPEED) and client:GetVelocity():LengthSqr() >= (walkSpeed * walkSpeed)) then
-		-- Characters could have attribute values greater than max if the config was changed
-		offset = -ix.config.Get("staminaDrain", 1) + math.min(character:GetAttribute("endurance", 0), maxAttributes) / 100
+        local staminaDrain = ix.config.Get("staminaDrain")
+		local maximumTraining = staminaDrain * 0.95
+
+        offset = -staminaDrain
+			+ (math.min(character:GetAttribute("endurance", 0), maxAttributes) * maximumTraining / maxAttributes)
 	else
 		offset = client:Crouching() and ix.config.Get("staminaCrouchRegeneration", 2) or ix.config.Get("staminaRegeneration", 1.75)
 	end
@@ -67,6 +70,12 @@ local function calcStaminaChange(client)
 
 				hook.Run("PlayerStaminaLost", client)
 			elseif (value >= 50 and client:GetNetVar("brth", false)) then
+				local hasGodspeed, godspeedPerkTable = Schema.perk.GetOwned("godspeed", client)
+
+				if (hasGodspeed) then
+					runSpeed = runSpeed * godspeedPerkTable.modifyRunSpeed
+				end
+
 				client:SetRunSpeed(runSpeed)
 				client:SetNetVar("brth", nil)
 
@@ -78,7 +87,7 @@ end
 
 if (SERVER) then
 	function PLUGIN:PostPlayerLoadout(client)
-		local uniqueID = "ixStam" .. client:SteamID()
+		local uniqueID = "expStamina" .. client:SteamID64()
 
 		timer.Create(uniqueID, 0.25, 0, function()
 			if (not IsValid(client)) then

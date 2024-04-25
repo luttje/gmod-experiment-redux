@@ -12,12 +12,6 @@ BUFF.description = "You're bonded to '%s', meaning you can't hurt them. %s you'r
 BUFF.generatorEarningsMultiplier = 1.1
 BUFF.nearbyDistance = 512
 
--- bloodBondRequest = "Request Blood Bond",
--- bloodBondRequestSent = "You have sent a blood bond request to %s.",
--- bloodBondRequested = "%s has requested a blood bond with you.",
--- bloodBondAccept = "Accept Blood Bond",
--- bloodBondActivated = "You have blood bonded with %s. You can't hurt each other. When you're near them your generators output 10% more.",
-
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return string

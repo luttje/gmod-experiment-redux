@@ -139,7 +139,8 @@ function PLUGIN:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, op
 		return
 	end
 
-	local resurrectTimeInSeconds = ix.config.Get("resurrectTimeInSeconds")
+	local baseTaskTime = ix.config.Get("resurrectTimeInSeconds")
+	local resurrectTimeInSeconds = Schema.GetDexterityTime(client, baseTaskTime)
 
 	target:SetAction("@beingResurrected", resurrectTimeInSeconds)
 	client:SetAction("@resurrecting", resurrectTimeInSeconds)

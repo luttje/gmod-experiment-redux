@@ -24,15 +24,17 @@ ITEM.functions.Consume = {
         local client = item.player
 		local character = client:GetCharacter()
 
-		for attribute, data in pairs(item.attributeBoosts) do
-			if (not ix.attributes.list[attribute]) then
+        for attributeKey, data in pairs(item.attributeBoosts) do
+            local attribute = ix.attributes.list[attributeKey]
+
+			if (not attribute) then
 				-- In case the attribute plugin is disabled, we skip this attribute.
 				continue
 			end
 
 			local boostID = "item#"..item.uniqueID
-            character:AddBoost(boostID, attribute, data.amount)
-            client:QueueBoostRemove(boostID, attribute, data.duration)
+            character:AddBoost(boostID, attributeKey, data.amount)
+            client:QueueBoostRemove(boostID, attributeKey, data.duration)
         end
 
 		if (item.GetEmitBoostSound) then

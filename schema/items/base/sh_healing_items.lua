@@ -6,8 +6,16 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Medical"
 ITEM.description = "A bandage roll, there isn't much so use it wisely."
-ITEM.healAmount = 10
-ITEM.healSound = nil
+-- ITEM.healAmount = 10
+-- ITEM.healSound = "items/medshot4.wav"
+
+function ITEM:GetHealSound()
+    return self.healSound or "items/medshot4.wav"
+end
+
+function ITEM:GetHealAmount()
+	return self.healAmount or 10
+end
 
 ITEM.functions.ApplySelf = {
 	name = "Apply To Self",
@@ -17,21 +25,24 @@ ITEM.functions.ApplySelf = {
         local client = item.player
 		local throttled, remaining = Schema.util.Throttle("allowHeal", 10, client)
 
-		if (throttled) then
-			client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
-			return false
-		end
+        if (throttled) then
+            client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
+            return false
+        end
+
+		local healAmount = Schema.GetHealAmount(client, item:GetHealAmount())
 
 		client:SetHealth(
-			math.Clamp(client:Health() + Schema.GetHealAmount(client, item.healAmount), 0,
-				client:GetMaxHealth())
+			math.Clamp(client:Health() + healAmount, 0, client:GetMaxHealth())
 		)
 
-		if (item.healSound) then
-			client:EmitSound(item.healSound, 50, 100, 0.7)
+        local healSound = item:GetHealSound()
+
+		if (healSound) then
+			client:EmitSound(healSound, 50, 100, 0.7)
 		end
 
-		hook.Run("PlayerHealed", client, client, item)
+		hook.Run("PlayerHealed", client, client, item, healAmount)
 	end
 }
 
@@ -64,18 +75,19 @@ ITEM.functions.ApplyLookAt = {
 			return false
 		end
 
-		client._NextAllowedHeal = CurTime() + 10
+		local healAmount = Schema.GetHealAmount(client, item:GetHealAmount())
 
 		client:SetHealth(
-			math.Clamp(client:Health() + Schema.GetHealAmount(client, item.healAmount), 0,
-				client:GetMaxHealth())
+			math.Clamp(client:Health() + healAmount, 0, client:GetMaxHealth())
 		)
 
-		if (item.healSound) then
-			client:EmitSound(item.healSound, 50, 100, 0.7)
+        local healSound = item:GetHealSound()
+
+		if (healSound) then
+			client:EmitSound(healSound, 50, 100, 0.7)
 		end
 
-		hook.Run("PlayerHealed", client, target, item)
+		hook.Run("PlayerHealed", client, target, item, healAmount)
 	end,
 
 	OnCanRun = function(item)

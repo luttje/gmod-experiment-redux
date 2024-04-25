@@ -8,7 +8,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Melee"
 ITEM.weaponCategory = "melee"
-ITEM.class = "tacrp_m_shovel"
+ITEM.class = "tacrp_m_machete"
 
 ITEM.isAttachment = true
 ITEM.attachmentBone = "ValveBiped.Bip01_Pelvis"

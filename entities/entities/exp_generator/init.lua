@@ -84,10 +84,6 @@ end
 function ENT:SetupPayTimer(item)
 	local uniqueID = "expGenerator" .. item.id
 
-	if (timer.Exists(uniqueID)) then
-		timer.Remove(uniqueID)
-	end
-
 	timer.Create(uniqueID, item:GetPayTimeInSeconds(), 0, function()
 		if (IsValid(self) and IsValid(self:GetItemOwner())) then
 			if (self:GetCanEarn()) then

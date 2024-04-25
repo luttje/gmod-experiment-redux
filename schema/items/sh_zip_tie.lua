@@ -12,11 +12,14 @@ ITEM.functions.Tie = {
 	OnRun = function(itemTable)
 		local client = itemTable.player
 		local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
-		local tyingTime = 5
+		local baseTaskTime = 10
+		local taskTime = Schema.GetDexterityTime(client, baseTaskTime)
 
 		if (hasQuickHands) then
-			tyingTime = tyingTime * quickHandsPerkTable.tieTimeMultiplier
+			taskTime = taskTime * quickHandsPerkTable.tieTimeMultiplier
 		end
+
+		taskTime = math.Clamp(taskTime, 2, baseTaskTime)
 
 		local data = {}
 		data.start = client:GetShootPos()
@@ -47,10 +50,10 @@ ITEM.functions.Tie = {
 
 		itemTable.bBeingUsed = true
 
-		client:SetAction("@tying", tyingTime)
+		client:SetAction("@tying", taskTime)
 
 		target:SetNetVar("tying", true)
-		target:SetAction("@fBeingTied", tyingTime)
+		target:SetAction("@fBeingTied", taskTime)
 
 		client:DoStaredAction(lookTarget, function()
 			Schema.TiePlayer(target)
@@ -63,7 +66,7 @@ ITEM.functions.Tie = {
 			itemTable:Remove()
 
 			hook.Run("OnPlayerBecameTied", target, client)
-		end, tyingTime, function()
+		end, taskTime, function()
 			client:SetAction()
 
 			target:SetAction()
@@ -77,10 +80,10 @@ ITEM.functions.Tie = {
 	end,
 
 	OnCanRun = function(itemTable)
-		return ! IsValid(itemTable.entity) or itemTable.bBeingUsed
+		return not IsValid(itemTable.entity) or itemTable.bBeingUsed
 	end
 }
 
 function ITEM:CanTransfer(inventory, newInventory)
-	return ! self.bBeingUsed
+	return not self.bBeingUsed
 end

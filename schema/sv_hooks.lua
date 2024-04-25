@@ -148,6 +148,12 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 end
 
 function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
+	local attribute = ix.attributes.list[attributeKey]
+
+	if (attribute and attribute.OnSetup) then
+		attribute:OnSetup(client, character:GetAttribute(attributeKey, value))
+	end
+
 	if (attributeKey == "strength") then
 		local requiredAttribute = Schema.achievement.GetProperty("titans_strength", "requiredAttribute")
 
@@ -220,15 +226,6 @@ function Schema:PostPlayerLoadout(client)
 
 	if (not character) then
 		return
-	end
-
-	local hasGodspeed, godspeedPerkTable = Schema.perk.GetOwned("godspeed", client)
-
-	if (hasGodspeed) then
-		local modifyRunSpeed = godspeedPerkTable.modifyRunSpeed
-		local currentRunSpeed = client:GetRunSpeed()
-
-		client:SetRunSpeed(currentRunSpeed * modifyRunSpeed)
 	end
 
 	-- Make sure they're not still tied up (or tying or being tied) from a previous session.
@@ -512,7 +509,9 @@ end
 function Schema:AdjustHealAmount(client, amount)
 end
 
-function Schema:PlayerHealed(client, target, item)
+function Schema:PlayerHealed(client, target, item, healAmount)
+	ix.log.Add(client, "playerHealed", target:Name(), healAmount)
+
 	local buff, buffTable = Schema.buff.GetActive(client, "waning_ward")
 
 	if (not buff) then
@@ -765,7 +764,8 @@ function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, op
 			return
 		end
 
-		local mutilateTime = mutilatorPerkTable.mutilateTime
+		local baseTaskTime = mutilatorPerkTable.mutilateTime
+		local mutilateTime = Schema.GetDexterityTime(client, baseTaskTime)
 		local healthIncrease = mutilatorPerkTable.healthIncrease
 
 		client:SetAction("@mutilatingCorpse", mutilateTime)
