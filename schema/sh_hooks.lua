@@ -126,6 +126,21 @@ function Schema:InitializedPlugins()
     Schema.RegisterMaterialSources()
 end
 
+function Schema:EntityKeyValue(entity, key, value)
+    local maps = Schema.map.FindByProperty("mapName", game.GetMap())
+
+	for _, map in ipairs(maps) do
+		if (map.EntityKeyValue) then
+            local override = map:EntityKeyValue(entity, key, value)
+
+			if (override ~= nil) then
+				print("Override", override, "for", key, value, "on", entity)
+				return override
+			end
+		end
+	end
+end
+
 function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter)
 	local character = client:GetCharacter()
 
@@ -161,9 +176,19 @@ function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter
 		soundOverride = footstepSounds[math.random(#footstepSounds)]
 	end
 
-	if (soundOverride) then
-		EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, 100, 0, filter)
-		return true
+    if (soundOverride) then
+        EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, 100, 0, filter)
+        return true
+    end
+
+	if (soundName:StartsWith("player/footsteps/wood")) then
+		local shouldPlaySqueekSound = math.random(0, 100) <= 2
+
+		if (shouldPlaySqueekSound) then
+			soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or "ambient/materials/squeekyfloor2.wav"
+
+			EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, math.random(95, 105), 0, filter)
+		end
 	end
 end
 

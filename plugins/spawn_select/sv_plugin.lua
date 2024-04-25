@@ -158,7 +158,7 @@ local teleportSounds = {
 
 function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 	local hitNormal = Vector(0, 0, 1)
-	local animationDuration = DEBUG_DISABLE_SPAWN_ANIM and 0 or 1
+	local animationDuration = DEBUG_DISABLE_SPAWN_ANIM and 0 or 3
 	local effectData
 	local scale = 20
 
@@ -166,24 +166,31 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 	client:Freeze(true)
 	client:SetPos(spawnPosition)
 	client:SetEyeAngles(spawnAngles)
+
 	-- For some reason Eye Angles wont set properly without a delay
 	timer.Simple(1, function()
 		if (IsValid(client)) then
 			client:SetEyeAngles(spawnAngles)
 		end
-	end)
+    end)
+
+    local volume = math.Rand(0.8, 0.99)
+	local pitch = math.random(75, 125)
+
 	client:SetColor(Color(0, 0, 255, 75))
 	client:EmitSound(
 		"ambient/levels/labs/teleport_preblast_suckin1.wav",
-		50 * math.Rand(.5, 1),
-		100 * math.Rand(.75, 1.25)
+		75,
+		pitch,
+		volume,
+		CHAN_STATIC
 	)
 
 	net.Start("expSpawnSelectResponse")
 	net.WriteUInt(self.spawnResult.OK, 4)
 	net.Send(client)
 
-	for i = 1, 10 do
+	for i = 1, 8 do
 		timer.Simple(animationDuration - (i * .5), function()
 			effectData = EffectData()
 			effectData:SetOrigin(spawnPosition + VectorRand(100, 100) + Vector(0, 0, 400))
@@ -194,8 +201,6 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		end)
 	end
 
-	-- TODO: Some lightning here
-
 	timer.Simple(animationDuration, function()
 		if (not IsValid(client)) then
 			return
@@ -205,7 +210,15 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		client:SetNetVar("expChoosingSpawn", false)
 		client:SetRenderMode(RENDERMODE_TRANSCOLOR)
 		client:SetColor(Color(255, 255, 255, 255))
-		client:EmitSound(table.Random(teleportSounds), 50 * math.Rand(.5, 1), 100 * math.Rand(.75, 1.25))
+        client:EmitSound(
+            table.Random(teleportSounds),
+			75,
+            pitch,
+            volume,
+            CHAN_STATIC,
+            0,
+			34 -- "EXPLOSION RING 3" DSP
+		)
 
 		effectData = EffectData()
 		effectData:SetOrigin(spawnPosition)
