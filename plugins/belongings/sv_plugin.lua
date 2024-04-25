@@ -18,7 +18,7 @@ function PLUGIN:LoadBelongings()
 				entity:SetInventory(inventory)
 			end
 
-			inventory.vars.isBelongings = entity
+			inventory.vars.belongingsEntity = entity
 		end)
 
 		if (not belongingsData.moveable) then
@@ -84,11 +84,11 @@ end
 --- If there's no money or items left in the belongings, remove it.
 ---@param inventory table
 function PLUGIN:RemoveIfEmpty(inventory)
-	if (not inventory.vars or not IsValid(inventory.vars.isBelongings)) then
+	if (not inventory.vars or not IsValid(inventory.vars.belongingsEntity)) then
 		return false
 	end
 
-	local entity = inventory.vars.isBelongings
+	local entity = inventory.vars.belongingsEntity
 
 	if (entity:GetMoney() > 0 or table.Count(entity:GetInventory():GetItems()) > 0) then
 		return false
@@ -128,7 +128,8 @@ function PLUGIN:CreateBelongings(client, storageEntity)
 	end
 
 	entity.ixInventory = inventory
-	inventory.vars.isBelongings = entity
+	inventory.vars.isCorpse = true -- So Ransacked check will work
+	inventory.vars.belongingsEntity = entity
 
 	entity:SetInventory(inventory)
 	entity:SetAngles(storageEntity and storageEntity:GetAngles() or Angle(0, 0, -90))

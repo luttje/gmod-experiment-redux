@@ -1,5 +1,5 @@
 Schema.buff = ix.util.GetOrCreateCommonLibrary("Buff", function() return setmetatable({}, Schema.meta.buff) end)
-Schema.buff.nextActiveBuffKey = 1
+Schema.buff.nextActiveBuffKey = Schema.buff.nextActiveBuffKey or 1
 
 --[[
 	A buff is a temporary effect that can be applied to a player.
@@ -127,9 +127,13 @@ if (SERVER) then
 
 	--- Network the buff to the client.
 	---@param client Player
-	---@param buffIndex number
+	---@param buffIndex number|string
 	---@param buff ActiveBuff
     function Schema.buff.Network(client, buffIndex, buff)
+        if (isstring(buffIndex)) then
+            buffIndex = Schema.buff.Get(buffIndex).index
+        end
+
 		net.Start("exp_BuffUpdated")
 		net.WriteUInt(buff.key, 32)
 		net.WriteUInt(buffIndex, 32)
@@ -154,7 +158,7 @@ if (SERVER) then
 		for k, storedBuff in ipairs(storedBuffs) do
             local buffTable = Schema.buff.Get(storedBuff.index)
 
-			if (not buffTable:ShouldPersistThroughRespawn(client, buff)) then
+			if (not buffTable:ShouldPersistThroughDeath(client, buff)) then
 				continue
 			end
 
@@ -190,13 +194,18 @@ if (SERVER) then
 
 	--- Create a buff to store in the character's data.
 	---@param client Player
-	---@param buffIndex number
-	---@param activeRemaining number
+	---@param buffIndex number|string
+	---@param activeRemaining? number
 	---@param data? table
 	---@return table
-	function Schema.buff.MakeStored(client, buffIndex, activeRemaining, data)
+    function Schema.buff.MakeStored(client, buffIndex, activeRemaining, data)
+		local buffTable = Schema.buff.Get(buffIndex)
+
+		if (isstring(buffIndex)) then
+			buffIndex = buffTable.index
+		end
+
 		if (not activeRemaining) then
-			local buffTable = Schema.buff.Get(buffIndex)
 			activeRemaining = buffTable:GetDurationInSeconds(client)
 		end
 
@@ -231,55 +240,89 @@ if (SERVER) then
 	---@param client Player
     ---@param expireChecker? fun(client: Player, buffTable: Buff, buff: ActiveBuff): boolean
 	---@return number # The amount of expired buffs.
-	function Schema.buff.CheckExpired(client, expireChecker)
-		local character = client:GetCharacter()
+    function Schema.buff.CheckExpired(client, expireChecker)
+        local character = client:GetCharacter()
 
-		if (not character) then
-			return 0
-		end
+        if (not character) then
+            return 0
+        end
 
-		local buffs = character.expBuffs or {}
-		local curTime = CurTime()
+        local buffs = character.expBuffs or {}
+        local curTime = CurTime()
 
-		if (not expireChecker) then
-			expireChecker = function(client, buffTable, buff)
-				return buff.activeUntil <= curTime
-			end
-		end
+        if (not expireChecker) then
+            expireChecker = function(client, buffTable, buff)
+                return buff.activeUntil <= curTime
+            end
+        end
 
         local expiredCount = 0
 
-		-- for buffKey, buff in ipairs(buffs) do
-		-- We traverse in reverse order, so that we can remove elements without affecting the loop, whilst also shifting the indexes.
-		for buffKey = #buffs, 1, -1 do
-			local buff = buffs[buffKey]
-			local buffTable = Schema.buff.Get(buff.index)
+        -- for buffKey, buff in ipairs(buffs) do
+        -- We traverse in reverse order, so that we can remove elements without affecting the loop, whilst also shifting the indexes.
+        for buffKey = #buffs, 1, -1 do
+            local buff = buffs[buffKey]
+            local buffTable = Schema.buff.Get(buff.index)
             local expired = expireChecker(client, buffTable, buff)
 
-			if (not expired) then
-				continue
-			end
+            if (not expired) then
+                continue
+            end
 
-			-- Correct the time so it's always in the past, even if they client is behind (should only ever be slightly if at all)
-			buff.activeUntil = curTime - 1
+            if (buff.isExpiring) then
+                continue
+            end
 
-			if (buffTable.OnExpire) then
-				buffTable:OnExpire(client, buff, false)
-			end
+			buff.isExpiring = true
 
-			table.remove(buffs, buffKey)
-			Schema.buff.Network(client, buff.index, buff)
-			expiredCount = expiredCount + 1
-		end
+            -- Correct the time so it's always in the past, even if they client is behind (should only ever be slightly if at all)
+            buff.activeUntil = curTime - 1
 
-		return expiredCount
+            if (buffTable.OnExpire) then
+                buffTable:OnExpire(client, buff, false)
+            end
+
+            table.remove(buffs, buffKey)
+            Schema.buff.Network(client, buff.index, buff)
+            expiredCount = expiredCount + 1
+        end
+
+        return expiredCount
+    end
+
+    --- Expires all buffs of a certain type.
+    ---@param client Player
+    ---@param buffIndex number|string
+    function Schema.buff.ExpireAllOfType(client, buffIndex)
+        Schema.buff.CheckExpired(client, function(client, buffTable, buff)
+            if (isstring(buffIndex)) then
+                return buffTable.uniqueID == buffIndex
+            end
+
+			return buff.index == buffIndex
+		end)
 	end
 
 	hook.Add("PostPlayerDeath", "expBuffsRemoveOnDeath", function(client)
 		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
-			return not buffTable:ShouldPersistThroughRespawn(client, buff)
+			return not buffTable:ShouldPersistThroughDeath(client, buff)
 		end)
     end)
+
+	hook.Add("PlayerDisconnected", "expBuffsRemoveOnDisconnect", function(client)
+		Schema.buff.CheckExpired(client, function(client, buffTable, buff)
+			return not buffTable:ShouldPersistThroughDeath(client, buff)
+		end)
+    end)
+
+    -- Disconnect, except for listen servers:
+	hook.Add("ShutDown", "expBuffsRemoveOnShutdown", function()
+		for _, client in ipairs(player.GetAll()) do
+			Schema.buff.CheckExpired(client, function(client, buffTable, buff)
+				return not buffTable:ShouldPersistThroughDeath(client, buff)
+			end)
+		end
+	end)
 
 	hook.Add("PlayerSecondElapsed", "expBuffsSecondElapsed", function(client)
 		local character = client:GetCharacter()

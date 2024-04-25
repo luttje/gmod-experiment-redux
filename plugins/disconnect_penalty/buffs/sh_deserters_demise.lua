@@ -20,24 +20,42 @@ end
 
 function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
 	if (victim:IsPlayer()) then
-		Schema.buff.SetActive(victim, "deserters_demise")
+		Schema.buff.SetActive(victim, self.index)
 	end
 
 	local attacker = damageInfo:GetAttacker()
 
 	if (IsValid(attacker) and attacker:IsPlayer() and attacker ~= victim) then
-		Schema.buff.SetActive(attacker, "deserters_demise")
+		Schema.buff.SetActive(attacker, self.index)
 	end
 end
 
-function BUFF.hooks:OnPlayerStartTying(client, tiedBy)
-	Schema.buff.SetActive(client, "deserters_demise")
-	Schema.buff.SetActive(tiedBy, "deserters_demise")
+function BUFF.hooks:CanPlayerTie(client, target)
+    Schema.buff.SetActive(client, self.index)
+    Schema.buff.SetActive(target, self.index)
 end
 
-function BUFF.hooks:OnPlayerStartUntying(client, unTiedBy)
-	Schema.buff.SetActive(client, "deserters_demise")
-	Schema.buff.SetActive(unTiedBy, "deserters_demise")
+function BUFF.hooks:OnPlayerBecameTied(client, tiedBy)
+    Schema.buff.SetActive(client, self.index)
+    Schema.buff.SetActive(tiedBy, self.index)
+end
+
+function BUFF.hooks:CanPlayerUntie(client, target)
+    Schema.buff.SetActive(client, self.index)
+end
+
+function BUFF.hooks:OnPlayerBecameUntied(client, untiedBy)
+	Schema.buff.SetActive(untiedBy, self.index)
+end
+
+function BUFF.hooks:CanPlayerChloroform(client, target)
+	Schema.buff.SetActive(client, self.index)
+	Schema.buff.SetActive(target, self.index)
+end
+
+function BUFF.hooks:OnPlayerBecameChloroformed(client, chloroformedBy)
+	Schema.buff.SetActive(client, self.index)
+	Schema.buff.SetActive(chloroformedBy, self.index)
 end
 
 function BUFF.hooks:OnCharacterDisconnect(client, character)

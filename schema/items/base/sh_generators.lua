@@ -7,7 +7,6 @@ ITEM.width = 2
 ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Generators"
-ITEM.payTimeInSeconds = 600
 ITEM.maximum = 1
 
 function ITEM:OnRegistered()
@@ -27,6 +26,10 @@ function ITEM:OnRegistered()
         self.generator.uniqueID,
         self.generator.upgrades
     )
+end
+
+function ITEM:GetPayTimeInSeconds()
+	return self.payTimeInSeconds or ix.config.Get("generatorPayTime", 600)
 end
 
 if (CLIENT) then

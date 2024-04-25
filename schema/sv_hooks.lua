@@ -116,7 +116,7 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 
 		if (client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
 			target = target
-		elseif (target:IsRestricted()) then
+		elseif (target:IsPlayer() and target:IsRestricted()) then
 			-- We're inspecting a tied up player
 			target = target:GetCharacter()
 		end
@@ -687,10 +687,6 @@ end
 --]]
 
 function Schema:PlayerUse(client, entity)
-	if (not client:IsRestricted() and entity:IsPlayer() and entity:IsRestricted() and not entity:GetNetVar("untying")) then
-		Schema.PlayerTryUntieTarget(client, entity)
-	end
-
 	if (entity:GetClass() ~= "prop_ragdoll") then
 		return
 	end
@@ -705,6 +701,94 @@ function Schema:PlayerUse(client, entity)
 		entity:StartSearchCorpse(client)
 
 		return false
+	end
+end
+
+function Schema:PlayerInteractEntity(client, entity, option, data)
+	if (entity:GetClass() ~= "prop_ragdoll") then
+		return
+	end
+
+	local entityPlayer = entity:GetNetVar("player", NULL)
+
+	if (not IsValid(entityPlayer)) then
+		return
+	end
+
+	entity.OnOptionSelected = function(entity, client, option, data)
+		if (client:IsRestricted()) then
+			return
+		end
+
+		hook.Run("OnPlayerRagdollOptionSelected", client, entityPlayer, entity, option, data)
+	end
+end
+
+function Schema:OnPlayerOptionSelected(target, client, option, data)
+	if (option == L("untie", client)) then
+		if (not client:IsRestricted() and target:IsPlayer() and target:IsRestricted() and not target:GetNetVar("untying")) then
+			Schema.PlayerTryUntieTarget(client, target)
+		end
+	end
+end
+
+function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
+	if (ragdollPlayer:Alive()) then
+		if (ragdollPlayer:IsRestricted() and not ragdollPlayer:GetNetVar("untying")) then
+			if (option == L("untie", client)) then
+				Schema.PlayerTryUntieTarget(client, ragdoll)
+			elseif (option == L("searchTied", client)) then
+				Schema.SearchPlayer(client, ragdollPlayer)
+			end
+		end
+
+		return
+	end
+
+	if (option == L("searchCorpse", client) and ragdoll.StartSearchCorpse) then
+		ragdoll:StartSearchCorpse(client)
+		return
+	end
+
+	if (option == L("mutilateCorpse", client)) then
+		local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator", client)
+
+		if (not hasMutilatorPerk) then
+			return
+		end
+
+		if (hook.Run("CanPlayerMutilate", client, target, ragdoll) == false) then
+			return
+		end
+
+		if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+			return
+		end
+
+		local mutilateTime = mutilatorPerkTable.mutilateTime
+		local healthIncrease = mutilatorPerkTable.healthIncrease
+
+		client:SetAction("@mutilatingCorpse", mutilateTime)
+		client:DoStaredAction(ragdoll, function()
+			-- Double check, so players cant mutilate the same corpse at once.
+			if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
+				return
+			end
+
+			local trace = client:GetEyeTraceNoCursor()
+
+			Schema.BloodEffect(ragdoll, ragdoll:NearestPoint(trace.HitPos))
+			client:EmitSound("npc/barnacle/barnacle_crunch" .. math.random(2, 3) .. ".wav")
+
+			client:SetHealth(math.min(client:Health() + healthIncrease, client:GetMaxHealth()))
+			ragdoll:SetNetVar("mutilated", ragdoll:GetNetVar("mutilated", 0) + 1)
+		end, mutilateTime, function()
+			if (IsValid(client)) then
+				client:SetAction()
+			end
+		end)
+
+		return
 	end
 end
 
@@ -784,7 +868,7 @@ function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)
 	end
 end
 
-function Schema:GeneratorAdjustEarnings(generator, earnings)
+function Schema:GeneratorAdjustEarnings(generator, earningsData)
 	local client = generator:GetItemOwner()
 
 	if (not IsValid(client)) then
@@ -792,93 +876,14 @@ function Schema:GeneratorAdjustEarnings(generator, earnings)
 	end
 
 	local hasThievingPerk, thievingPerkTable = Schema.perk.GetOwned("thieving", client)
-	local newEarnings = earnings
 
 	if (hasThievingPerk) then
-		newEarnings = newEarnings + (earnings * thievingPerkTable.baseEarningsAdditionFactor)
+		earningsData.earnings = earningsData.earnings * thievingPerkTable.generatorEarningsMultiplier
 	end
 
 	local hasMetalshipPerk, metalshipPerkTable = Schema.perk.GetOwned("metalship", client)
 
 	if (hasMetalshipPerk) then
-		newEarnings = newEarnings + (earnings * metalshipPerkTable.baseEarningsAdditionFactor)
-	end
-
-	if (newEarnings ~= earnings) then
-		return newEarnings
-	end
-end
-
-function Schema:PlayerInteractEntity(client, entity, option, data)
-	if (entity:GetClass() ~= "prop_ragdoll") then
-		return
-	end
-
-	local entityPlayer = entity:GetNetVar("player", NULL)
-
-	if (not IsValid(entityPlayer)) then
-		return
-	end
-
-	entity.OnOptionSelected = function(entity, client, option, data)
-		if (client:IsRestricted()) then
-			return
-		end
-
-		hook.Run("OnPlayerRagdollOptionSelected", client, entityPlayer, entity, option, data)
-	end
-end
-
-function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
-	if (ragdollPlayer:Alive()) then
-		if (ragdollPlayer:IsRestricted() and not ragdollPlayer:GetNetVar("untying")) then
-			if (option == L("untie", client)) then
-				Schema.PlayerTryUntieTarget(client, ragdoll)
-			elseif (option == L("searchTied", client)) then
-				Schema.SearchPlayer(client, ragdollPlayer)
-			end
-		end
-
-		return
-	end
-
-	if (option == L("searchCorpse", client) and ragdoll.StartSearchCorpse) then
-		ragdoll:StartSearchCorpse(client)
-		return
-	end
-
-	if (option == L("mutilateCorpse", client)) then
-		local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator", client)
-
-		if (hasMutilatorPerk) then
-			if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
-				return
-			end
-
-			local mutilateTime = mutilatorPerkTable.mutilateTime
-			local healthIncrease = mutilatorPerkTable.healthIncrease
-
-			client:SetAction("@mutilatingCorpse", mutilateTime)
-			client:DoStaredAction(ragdoll, function()
-				-- Double check, so players cant mutilate the same corpse at once.
-				if (ragdoll:GetNetVar("mutilated", 0) >= mutilatorPerkTable.maximumMutilations) then
-					return
-				end
-
-				local trace = client:GetEyeTraceNoCursor()
-
-				Schema.BloodEffect(ragdoll, ragdoll:NearestPoint(trace.HitPos))
-				client:EmitSound("npc/barnacle/barnacle_crunch" .. math.random(2, 3) .. ".wav")
-
-				client:SetHealth(math.min(client:Health() + healthIncrease, client:GetMaxHealth()))
-				ragdoll:SetNetVar("mutilated", ragdoll:GetNetVar("mutilated", 0) + 1)
-			end, mutilateTime, function()
-				if (IsValid(client)) then
-					client:SetAction()
-				end
-			end)
-		end
-
-		return
+		earningsData.earnings = earningsData.earnings * metalshipPerkTable.generatorEarningsMultiplier
 	end
 end

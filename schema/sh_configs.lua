@@ -53,6 +53,30 @@ ix.config.Add("incomeMultiplier", 1, "The income multiplier for generators and s
 	category = "income"
 })
 
+ix.config.Add("generatorPayTime", 600, "How often generators pay out income in seconds.", function(oldValue, newValue)
+	if (SERVER) then
+        -- Go through all entities, check if IsBoltGenerator and set the payTimeInSeconds
+		for _, entity in ipairs(ents.GetAll()) do
+            if (not entity.IsBoltGenerator) then
+                continue
+            end
+
+			local itemID = entity.expItemID
+            local itemTable = itemID and ix.item.instances[itemID] or nil
+
+			if (not itemTable) then
+				continue
+			end
+
+			entity:SetupPayTimer(itemTable)
+		end
+	end
+end, {
+	data = { min = 1, max = 3600 },
+    category = "income",
+
+})
+
 ix.config.Add("teleportGeneratorEarnings", false,
 	"Wether income from generators should be teleported to the player. If not they'll have to get it from the generator manually.",
 	nil, {

@@ -6,10 +6,6 @@ FACTION.isDefault = true
 -- FACTION.payTime = 300
 
 function FACTION:OnCharacterCreated(client, character)
-    character:SetData("buffs", {
-        Schema.buff.MakeStored(client, "newbie")
-    })
-
     -- For some reason, attribute bars wont draw boosts, unless the character has the attribute. So let's give em some for each attribute.
     for uniqueID, attribute in pairs(ix.attributes.list) do
 		character:UpdateAttrib(uniqueID, 0.000001)

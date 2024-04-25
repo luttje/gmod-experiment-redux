@@ -10,7 +10,7 @@
 ---@field foregroundImage string
 ---@field description string
 ---@field durationInSeconds number
----@field persistThroughRespawn? boolean
+---@field persistThroughDeath? boolean
 ---@field attributeBoosts? table<string, number>
 ---@field resetOnDuplicate? boolean
 local META = Schema.meta.buff or {}
@@ -85,8 +85,8 @@ end
 ---@param client Player
 ---@param buff ActiveBuff
 ---@return boolean
-function META:ShouldPersistThroughRespawn(client, buff)
-    return self.persistThroughRespawn or false
+function META:ShouldPersistThroughDeath(client, buff)
+    return self.persistThroughDeath or false
 end
 
 ---@param client Player

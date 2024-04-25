@@ -8,12 +8,18 @@ LANGUAGE = {
 	optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
 
 	achievements = "Achievements",
-	alliance = "Alliance",
+    alliance = "Alliance",
+	alliances = "Alliances",
 	buffs = "Nano Buffs",
 	perks = "Perks",
 	scoreboard = "Player List",
 	skills = "Attributes",
-	chooseSkills = "Distribute your attribute points.",
+    chooseSkills = "Distribute your attribute points.",
+
+    grenades = "Grenades",
+    income = "Income",
+    moderation = "Moderation",
+	scavenging = "Scavenging",
 
 	noBuffs = "No active nano buffs.",
 
@@ -85,7 +91,17 @@ LANGUAGE = {
 	rareItem = "Rare Item",
 
 	cashback = "Cashback",
-	cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
+    cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
+
+    bloodBondRequest = "Request Blood Bond",
+    bloodBondRequestSent = "You have sent a blood bond request to %s.",
+	bloodBondRequested = "%s has requested a blood bond with you.",
+    bloodBondAccept = "Accept Blood Bond",
+    bloodBondActivated =
+    "You have blood bonded with %s. You can't hurt each other. When you're near them your generators output 10%% more.",
+    bloodBondCannotTie = "You can't tie someone you're blood bonded with.",
+    bloodBondCannotChloroform = "You can't chloroform someone you're blood bonded with.",
+	bloodBondCannotMutilate = "You can't mutilate someone you're blood bonded with.",
 
 	--[[
 		Bind button names

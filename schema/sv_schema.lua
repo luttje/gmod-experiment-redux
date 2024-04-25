@@ -214,8 +214,18 @@ function Schema.PlayerTryUntieTarget(client, target)
 		target = target:GetNetVar("player")
 	end
 
+	local canPerform, speedMultiplier = hook.Run("CanPlayerUntie", client, target)
+
+	if (canPerform == false) then
+		return false
+	end
+
 	local hasHurrymanPerk, hurrymanPerkTable = Schema.perk.GetOwned("hurryman", client)
 	local untieSpeed = 5
+
+	if (speedMultiplier) then
+		untieSpeed = untieSpeed * speedMultiplier
+	end
 
 	if (hasHurrymanPerk) then
 		untieSpeed = untieSpeed * hurrymanPerkTable.untieTimeMultiplier
@@ -226,12 +236,11 @@ function Schema.PlayerTryUntieTarget(client, target)
 
 	client:SetAction("@unTying", untieSpeed)
 
-	hook.Run("OnPlayerStartUntying", target, client)
 	client:DoStaredAction(lookTarget, function()
 		Schema.UntiePlayer(target)
 		Schema.PlayerClearEntityInfoTooltip(client)
 
-		hook.Run("OnPlayerUntied", target, client)
+		hook.Run("OnPlayerBecameUntied", target, client)
 	end, 5, function()
 		if (IsValid(target)) then
 			target:SetNetVar("untying")
@@ -245,10 +254,15 @@ function Schema.PlayerTryUntieTarget(client, target)
 	end)
 end
 
-function Schema.ChloroformPlayer(client)
+--- Knock out a player with chloroform.
+---@param client Player
+---@param duration? number
+function Schema.ChloroformPlayer(client, duration)
+	duration = duration or 20
+
 	client:SetNetVar("beingChloroformed")
 	client:NotifyLocalized("fChloroformed")
-	client:SetRagdolled(true, 1000) -- TODO: Lower this, only this high for testing on bots
+	client:SetRagdolled(true, duration)
 end
 
 function Schema.MakeExplosion(position, scale)

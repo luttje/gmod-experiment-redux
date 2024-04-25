@@ -23,6 +23,12 @@ ITEM.functions.Apply = {
 			return false
 		end
 
+		local canPerform = hook.Run("CanPlayerChloroform", client, target)
+
+		if (canPerform == false) then
+			return false
+		end
+
 		itemTable.bBeingUsed = true
 
 		client:SetAction("@chloroforming", chloroformTime)
@@ -34,6 +40,8 @@ ITEM.functions.Apply = {
 			Schema.ChloroformPlayer(target)
 
 			itemTable:Remove()
+
+			hook.Run("OnPlayerBecameChloroformed", target, client)
 		end, chloroformTime, function()
 			client:SetAction()
 

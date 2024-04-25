@@ -78,9 +78,17 @@ function ENT:SetupGenerator(client, item)
 		item:OnEntityCreated(self)
 	end
 
+	self:SetupPayTimer(item)
+end
+
+function ENT:SetupPayTimer(item)
 	local uniqueID = "expGenerator" .. item.id
 
-	timer.Create(uniqueID, item.payTimeInSeconds, 0, function()
+	if (timer.Exists(uniqueID)) then
+		timer.Remove(uniqueID)
+	end
+
+	timer.Create(uniqueID, item:GetPayTimeInSeconds(), 0, function()
 		if (IsValid(self) and IsValid(self:GetItemOwner())) then
 			if (self:GetCanEarn()) then
 				self:OnEarned(self:GetEarnings())
@@ -114,9 +122,13 @@ function ENT:GetEarnings()
 		end
 	end
 
-	earnings = hook.Run("GeneratorAdjustEarnings", self, earnings) or earnings
+	local earningsData = {
+		earnings = earnings,
+	}
 
-	return math.ceil(earnings * ix.config.Get("incomeMultiplier"))
+	hook.Run("GeneratorAdjustEarnings", self, earningsData)
+
+	return math.ceil(earningsData.earnings * ix.config.Get("incomeMultiplier"))
 end
 
 function ENT:OnEarned(money)

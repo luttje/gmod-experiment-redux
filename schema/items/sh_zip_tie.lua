@@ -39,14 +39,18 @@ ITEM.functions.Tie = {
 			return false
 		end
 
+		local canPerform = hook.Run("CanPlayerTie", client, target)
+
+		if (canPerform == false) then
+			return false
+		end
+
 		itemTable.bBeingUsed = true
 
 		client:SetAction("@tying", tyingTime)
 
 		target:SetNetVar("tying", true)
 		target:SetAction("@fBeingTied", tyingTime)
-
-		hook.Run("OnPlayerStartTying", target, client)
 
 		client:DoStaredAction(lookTarget, function()
 			Schema.TiePlayer(target)
@@ -58,7 +62,7 @@ ITEM.functions.Tie = {
 
 			itemTable:Remove()
 
-			hook.Run("OnPlayerTied", target, client)
+			hook.Run("OnPlayerBecameTied", target, client)
 		end, tyingTime, function()
 			client:SetAction()
 

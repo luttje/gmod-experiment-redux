@@ -575,29 +575,35 @@ function Schema:PlayerPerkBought(client, perk)
 end
 
 function Schema:NetworkEntityCreated(entity)
-	local client = LocalPlayer()
+    local client = LocalPlayer()
 
-	if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
-		return
-	end
+    if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
+        return
+    end
 
-	local player = entity:GetNetVar("player", NULL)
+    local player = entity:GetNetVar("player", NULL)
 
-	if (not IsValid(player)) then
-		return
-	end
+    if (not IsValid(player)) then
+        return
+    end
 
-	entity.GetEntityMenu = function(entity)
-		local target = entity:GetNetVar("player", NULL)
-		local options = {}
+    entity.GetEntityMenu = function(entity)
+        local target = entity:GetNetVar("player", NULL)
+        local options = {}
 
-		hook.Run("AdjustPlayerRagdollEntityMenu", options, target, entity)
+        hook.Run("AdjustPlayerRagdollEntityMenu", options, target, entity)
 
-		return options
+        return options
+    end
+end
+
+function Schema:GetPlayerEntityMenu(target, options)
+	if (target:IsRestricted() and target:IsPlayer() and not target:GetNetVar("untying")) then
+		options[L("untie")] = true
 	end
 end
 
-function Schema:AdjustPlayerRagdollEntityMenu(options, target, corpse)
+function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
 	if (target:Alive()) then
 		if (target:IsRestricted()) then
 			options[L("searchTied")] = true
@@ -611,8 +617,10 @@ function Schema:AdjustPlayerRagdollEntityMenu(options, target, corpse)
 
 	local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
 
-	if (hasMutilatorPerk and corpse:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
-		options[L("mutilateCorpse")] = true
+    if (hasMutilatorPerk and ragdoll:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
+		if (hook.Run("CanPlayerMutilate", LocalPlayer(), target, ragdoll) ~= false) then
+			options[L("mutilateCorpse")] = true
+		end
 	end
 end
 

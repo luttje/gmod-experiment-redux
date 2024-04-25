@@ -273,9 +273,9 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		end
 
 		return {
-			"Here you can see your buffs.",
-			"Hovering over a buff will show more information.",
-			importantText("Hover over your buffs to view what they do."),
+			"Through nano technology you can be (de)buffed.",
+			"Hovering over a buff will show how it affects you.",
+			importantText("Hover over a nano buff to view what it does."),
 			importantText("Next, click on the inventory tab to continue."),
 		}, x + (combinedW * .5), y + combinedH, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP
 	end,

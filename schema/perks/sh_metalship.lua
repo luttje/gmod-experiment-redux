@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 15,
 	size = 32,
 }
-PERK.baseEarningsAdditionFactor = 1.5
-PERK.description = "You will receive 150% extra from your Bolt Generator base rate every payday"
+PERK.generatorEarningsMultiplier = 1.5
+PERK.description = "Your Bolt Generator will produce 150% of it's normal output every payday"

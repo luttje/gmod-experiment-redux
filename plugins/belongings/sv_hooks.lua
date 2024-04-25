@@ -9,7 +9,7 @@ function PLUGIN:LoadData()
 end
 
 function PLUGIN:CanTransferItem(item, sourceInventory, targetInventory)
-	if (targetInventory.vars and targetInventory.vars.isBelongings) then
+	if (targetInventory.vars and targetInventory.vars.belongingsEntity) then
 		return false
 	end
 end
