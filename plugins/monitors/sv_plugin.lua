@@ -3,6 +3,11 @@ local PLUGIN = PLUGIN
 util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
 
+resource.AddFile("materials/experiment-redux/arrow.png")
+resource.AddFile("materials/experiment-redux/arrow_forward.png")
+resource.AddFile("materials/experiment-redux/arrow_backward.png")
+resource.AddFile("materials/experiment-redux/combinescanline.vmt")
+
 -- lua_run ix.plugin.list["monitors"]:SetTarget(player.GetByID(1))
 function PLUGIN:SetTarget(entity)
 	net.Start("expSetMonitorTarget")

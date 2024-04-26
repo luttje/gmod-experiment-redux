@@ -70,6 +70,8 @@ function PLUGIN:OnCharacterMenuCreated(panel)
         )
     end
 
+    panel:ParentToHUD()
+
     panel.mainPanel.Undim = function()
         showCorrectPanel()
     end

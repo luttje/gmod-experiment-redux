@@ -2,6 +2,11 @@ util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
 util.AddNetworkString("expClearEntityInfoTooltip")
 
+resource.AddFile("materials/experiment-redux/logo.png")
+resource.AddFile("materials/experiment-redux/arrow-down.png")
+resource.AddFile("materials/experiment-redux/check.png")
+resource.AddFile("materials/experiment-redux/close.png")
+
 -- JersonGaming's Model/Real RNG Ammo Boxes (https://steamcommunity.com/sharedfiles/filedetails/?id=1741790902)
 -- Higher quality ammo boxes, they replace the default ones.
 resource.AddWorkshop("1741790902")

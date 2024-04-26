@@ -18,7 +18,6 @@ function PANEL:Init()
     self:SetBackgroundBlur(true)
     self:SetDeleteOnClose(true)
     self:SetTitle(L("paper"))
-    self:SetKeyboardInputEnabled(true)
 
     self.close = self:Add("DButton")
     self.close:Dock(BOTTOM)
@@ -44,7 +43,9 @@ function PANEL:Init()
         end
     end
 
+    self:ParentToHUD()
     self:MakePopup()
+    self:SetZPos(32767)
 
     ix.gui.expReadableFrame = self
 end

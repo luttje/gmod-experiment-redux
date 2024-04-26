@@ -81,7 +81,9 @@ function BUFF.hooks:PlayerSecondElapsed(client)
 end
 
 function BUFF.hooks:CanPlayerInteractItem(client, action, item)
-    if (not item or item.uniqueID == "tutorial") then
+    local instance = ix.item.instances[item]
+
+    if (not instance or instance.uniqueID == "tutorial") then
         return
     end
 

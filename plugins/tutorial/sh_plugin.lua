@@ -12,8 +12,18 @@ ix.lang.AddTable("english", {
 ix.util.Include("cl_plugin.lua")
 
 if (not SERVER) then
-	return
+    return
 end
+
+resource.AddFile("materials/experiment-redux/illustrations/apartment.png")
+resource.AddFile("materials/experiment-redux/illustrations/death.png")
+resource.AddFile("materials/experiment-redux/illustrations/generator.png")
+resource.AddFile("materials/experiment-redux/illustrations/gradient.png")
+resource.AddFile("materials/experiment-redux/illustrations/lockers.png")
+resource.AddFile("materials/experiment-redux/illustrations/raiding.png")
+resource.AddFile("materials/experiment-redux/illustrations/scavenging.png")
+resource.AddFile("materials/experiment-redux/illustrations/the-business.png")
+resource.AddFile("materials/experiment-redux/illustrations/vignette.png")
 
 function PLUGIN:OnCharacterCreated(client, character)
 	local inventory = character:GetInventory()

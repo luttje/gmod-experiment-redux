@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service</title>
+
+    <!--
+        Reminder to self: Garry's Mod's HTML is based on Awesomium, which is based on Chromium 18.
+        This means that some modern features are not supported. So no fancy ES6 features like let,
+        const, etc. And no CSS features like flexbox, grid, etc.
+    -->
+
+    <style>
+        @font-face {
+            font-family: "LightsOut";
+            src: url(asset://garrysmod/resource/fonts/lightout.woff)
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: black;
+            color: white;
+            padding: 1em;
+            font-size: 16px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: #A33426;
+            font-family: "LightsOut";
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wrapper {
+            max-width: 512px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            max-width: 256px;
+        }
+
+        img {
+            position: relative;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        p {
+            margin: 0.5em;
+            line-height: 1.5em;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0.25em 0 0 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        ul li::before {
+            content: "•";
+            color: #A33426;
+            display: inline-block;
+            margin: 0.5em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .my {
+            margin-top: 2em;
+            margin-bottom: 2em;
+        }
+        .mt-s {
+            margin-top: 1em;
+        }
+
+        .highlight {
+            color: #A33426;
+        }
+
+        button {
+            background: #A33426;
+            color: white;
+            border: none;
+            font-size: 1em;
+            padding: .5em 1em;
+            margin: 0.5em 0;
+            cursor: pointer;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            width: 100%;
+        }
+
+        button.huge {
+            font-size: 2em;
+            padding: .8em 1em;
+        }
+
+        button.gray {
+            background: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: .5em;
+            margin: 0.5em 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper logo">
+        <img src="asset://garrysmod/materials/experiment-redux/logo.png">
+    </div>
+    <div class="wrapper my">
+        <h2>WELCOME TO OUR SERVER!</h2>
+        <p>
+            Thanks for considering to come play on our server! We're excited to have you join us.
+        </p>
+        <p>
+            Before we start playing we want to be transparent with you about
+            our <span class="highlight">data practices and policies</span>
+            and our <span class="highlight">terms of service</span>.
+        </p>
+    </div>
+    <div class="wrapper my">
+        <h2>YOUR DATA & RIGHTS</h2>
+        <ul>
+            <li>
+                We collect and store your <span class="highlight">SteamID</span> and <span class="highlight">IP Address (last used to connect)</span> in our database.
+            </li>
+            <li>
+                We collect this in order to moderate our servers and provide a safe and enjoyable experience for all players.
+            </li>
+            <li>
+                We store this data for as long as our servers are operational.
+            </li>
+        </ul>
+        <p class="mt-s">
+            To request a copy of the data we have on you, or to file a complaint, do not hesitate to contact us at <span class="highlight">{{privacy_email}}</span>
+        </p>
+        <p class="mt-s">
+            To have your data removed from our database, click the "disagree"-button below or type <span class="highlight">/TermsOfService</span> in the chat.
+        </p>
+    </div>
+    <div class="wrapper my">
+        <h2>TERMS OF SERVICE</h2>
+        <p>
+            By playing on our servers, you agree to the following terms:
+        </p>
+        <ul>
+            <li>
+                You will not use cheats, hacks, or any other third-party software that gives you an unfair advantage.
+            </li>
+            <li>
+                You will not exploit bugs or glitches, nor will you share them with others
+                (except through our GitHub repository: <span class="highlight">{{github_url}}</span>)
+            </li>
+            <li>
+                You will not harass, bully, or discriminate against other players or their characters.
+            </li>
+            <li>
+                You will not spam, flood, or otherwise disrupt the chat.
+            </li>
+            <li>
+                You will not impersonate staff or other players.
+            </li>
+        </ul>
+    </div>
+    <div class="wrapper my">
+        <h2>AGREEMENT</h2>
+        <p>
+            By clicking the "agree"-button below, you agree to the above terms and our data practices.
+        </p>
+        <button id="agreeButton" class="huge" onclick="console.log('TERMS_AGREED')">
+            I agree
+        </button>
+        <button id="disagreeButton" class="gray" onclick="disagree()">
+            I disagree
+        </button>
+        <div id="disagree-warning" class="hidden">
+            <p>
+                <strong>Beware:</strong> If you disagree to the terms, you will be disconnected from the server and your data will be removed from our database.
+                <span class="highlight">This action is irreversible. You will lose all progress and items you have gained on our servers.</span>
+            </p>
+            <p>
+                To confirm that you want to proceed, enter "delete everything" in the box below and click the button.
+            </p>
+            <input type="text" id="disagreeInput" placeholder="Enter 'delete everything'">
+            <button id="disagreeFinalize" class="gray" onclick="disagreeFinish()">
+                I disagree to the terms and want my data removed
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function disagree() {
+            document.getElementById('disagree-warning').classList.remove('hidden');
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function disagreeFinish() {
+            var input = document.getElementById('disagreeInput').value;
+
+            if (input === 'delete everything') {
+                console.log('TERMS_DISAGREED');
+            } else {
+                alert('Please enter "delete everything" to confirm');
+            }
+        }
+    </script>
+
+    <script>
+        // Garry's Mod's HTML panel doesn't support Array.from, so the following code only loads in the browser
+        // we do this so we can test HTML in the browser without having to load Garry's Mod. Then in Garry's Mod we can
+        // use the exact same HTML and this code will happily be ignored.
+        if (Array.from) {
+            document.addEventListener('DOMContentLoaded', function (event) {
+                var newPath = "../../../content/";
+
+                document.querySelectorAll('img').forEach(function (img) {
+                    if (img.src.includes('asset://garrysmod/')) {
+                        img.src = img.src.replace('asset://garrysmod/', newPath);
+                    }
+                });
+
+                document.querySelectorAll('style').forEach(function (style) {
+                    var cssText = style.innerHTML;
+                    var assetRegex = /asset:\/\/garrysmod\/(\S+)/g;
+
+                    cssText = cssText.replace(assetRegex, function (match, path) {
+                        return newPath + path;
+                    });
+
+                    style.innerHTML = cssText;
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>
