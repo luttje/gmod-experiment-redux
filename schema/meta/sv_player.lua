@@ -93,3 +93,15 @@ function META:RegisterEntityToRemoveOnLeave(entity)
 	table.insert(characterEntities, entity)
 	character:SetVar("charEnts", characterEntities, true)
 end
+
+-- ! WORKAROUND: This fixes a bug where Helix tries to SaveData for bots
+-- ! Since bots never have LoadData called, ixData wont be set. Since we dont want to save data for bots, we just return
+META.expSaveData = META.expSaveData or META.SaveData
+
+function META:SaveData()
+	if (self:IsBot()) then
+		return
+	end
+
+	self:expSaveData()
+end

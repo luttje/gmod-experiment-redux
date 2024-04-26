@@ -29,6 +29,32 @@ function Schema:CharacterLoaded(character)
 	Schema.perk.LoadOwned(client, character)
 	Schema.buff.LoadActive(client, character)
 	Schema.achievement.LoadProgress(client, character)
+
+	if (character.isBot) then
+		-- ! Workaround. This fixes a Helix bug with bots getting a random model from the faction,
+		-- ! but not having their OnAdjust called on their character vars.
+		-- ! In OnAdjust skins and bodygroups are extracted from the model and applied to the player.
+		local payload = character.vars
+
+		payload.description = "A test subject, living in this city."
+		payload.faction = ix.faction.GetIndex(payload.faction)
+
+		local faction = ix.faction.indices[payload.faction]
+
+		payload.model = math.random(#faction:GetModels(client))
+
+		local newPayload = {}
+
+		for varName, var in SortedPairsByMemberValue(ix.char.vars, "index") do
+			local value = payload[varName]
+
+			if (var.OnAdjust) then
+				var:OnAdjust(client, payload, value, newPayload)
+			end
+		end
+
+		table.Merge(payload, newPayload, true)
+	end
 end
 
 function Schema:PlayerSecondElapsed(client)
