@@ -1,9 +1,0 @@
-{
-	auto_https off
-}
-
-fastdl.experiment.games:80 {
-	handle_path /fastdl* {
-        file_server browse
-	}
-}

@@ -1,0 +1,23 @@
+#
+# 1.    Clone this repository to `/srv/experiment-redux/`:
+#       sudo git clone https://github.com/luttje/gmod-experiment-redux /srv/experiment-redux/
+#
+# 2.    Change ownership to the 'caddy' user:
+#       sudo chown -R caddy:caddy /srv/experiment-redux
+#
+# 3.    Navigate to the directory:
+#       cd /srv/experiment-redux/
+#
+# 4.    Have caddy load the configuration:
+#       sudo -u caddy caddy adapt
+#
+# 5.    Make caddy reload:
+#       caddy reload
+{
+	auto_https off
+}
+
+fastdl.experiment.games:80 {
+    root * /srv/experiment-redux/content
+    file_server browse
+}
