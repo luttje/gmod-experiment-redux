@@ -42,7 +42,9 @@ if (SERVER) then
         client:SetData("acceptedTerms", {
 			at = os.time(),
 			version = PLUGIN.termsOfServiceVersion,
-		})
+        })
+
+		client:SaveData()
     end)
 
 	-- Kick the player, remove all their data
