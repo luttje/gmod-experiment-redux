@@ -1,6 +1,6 @@
 # Experiment Redux
 
-Bringing back VentMob/RevoltGaming Experiment as a schema for [Helix](https://github.com/nebulouscloud/helix).
+**An FPS RPG gamemode for Garry's Mod, built using the [Helix framework](https://github.com/nebulouscloud/helix).**
 
 <div align="middle">
 
