@@ -5,7 +5,7 @@ function PANEL:Init()
     self.html = self:Add("DHTML")
     self.html:Dock(FILL)
 
-    local html = file.Read(PLUGIN.folder .. "/html/terms-of-service.html", "LUA")
+    local html = Schema.util.GetHtml("terms-of-service.html")
 
     html = html:Replace("{{privacy_email}}", ix.config.Get("privacyEmail"))
     html = html:Replace("{{github_url}}", ix.config.Get("githubUrl"))

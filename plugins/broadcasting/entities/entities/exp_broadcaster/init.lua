@@ -2,7 +2,7 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
 
-resource.AddFile("materials/sprites/redglow8.vmt")
+resource.AddSingleFile("materials/sprites/redglow8.vmt")
 
 function ENT:Initialize()
 	self:SetModel("models/props_lab/citizenradio.mdl")

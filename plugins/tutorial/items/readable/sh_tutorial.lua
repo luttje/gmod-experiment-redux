@@ -9,7 +9,7 @@ ITEM.hideFrameTitleBar = true
 ITEM.hideFrameCloseButton = true
 
 function ITEM:GetText()
-    local html = file.Read(PLUGIN.folder .. "/html/tutorial.html", "LUA")
+    local html = Schema.util.GetHtml("tutorial.html")
 
 	return html, true
 end

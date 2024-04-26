@@ -106,7 +106,7 @@ Additionally you should consider this for a production server:
 
     4. Now when you start the server, content should be downloaded from the local web server quickly.
 
-10. To easily start the server with the required command line arguments we use a `start-srcds.bat` and `start-srcds.sh` for Windows and Linux respectively. These scripts are located in [the `tools` directory of this project](../tools/).
+10. To easily start the server with the required command line arguments we use a `start-srcds.bat` and `start-srcds.sh` for Windows and Linux respectively. These scripts are located in [the `tools/dev` directory of this project](../tools/dev).
 
 ### Authenticating your server (Recommended)
 

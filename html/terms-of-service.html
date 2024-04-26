@@ -16,7 +16,7 @@
     <style>
         @font-face {
             font-family: "LightsOut";
-            src: url(asset://garrysmod/resource/fonts/lightout.woff)
+            src: url(http://fastdl.experiment.games/resource/fonts/lightout.woff)
         }
 
         * {
@@ -246,7 +246,7 @@
         // use the exact same HTML and this code will happily be ignored.
         if (Array.from) {
             document.addEventListener('DOMContentLoaded', function (event) {
-                var newPath = "../../../content/";
+                var newPath = "../content/";
 
                 document.querySelectorAll('img').forEach(function (img) {
                     if (img.src.includes('asset://garrysmod/')) {

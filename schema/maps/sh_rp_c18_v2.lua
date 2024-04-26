@@ -31,21 +31,24 @@ if (CLIENT) then
 else
     resource.AddFile("materials/experiment-redux/maps/rp_c18_v2_feathered_black.png")
 
+	-- ! The soundscape replacements below are commented because of this error:
+	-- ! Rejected transfer 'scripts/soundscapes_rp_c18_v2.txt'
+	-- ! :/ We're not allowed to send this file type I guess
     -- Improved (quieter) soundscapes
-    resource.AddFile("scripts/soundscapes_rp_c18_v2.txt")
+    -- resource.AddFile("scripts/soundscapes_rp_c18_v2.txt")
 end
 
--- Note that I made the keys lowercase to prevent mistakes.
-MAP.soundscapeReplacements = {
-	["d1_trainstation.terminalsquare"] = "experiment.PlazaSquare",
-	["d1_trainstation.appartments"] = "experiment.Apartments",
-    ["d1_trainstation.quietcourtyard"] = "experiment.QuietCourtyard",
-    -- ["prison.util_louder_cellblock"] = "", -- Fine as is, its just: ambient/atmosphere/underground.wav
-	["d3_citadel.breen_hall"] = "experiment.BreenHall",
-    ["d3_citadel.breen_office"] = "experiment.BreenOffice",
-    ["d1_trainstation.turnstyle"] = "experiment.TurnStyle",
-	["d1_canals.waterpuzzleroom"] = "experiment.WaterPuzzleRoom",
-}
+-- -- Note that I made the keys lowercase to prevent mistakes.
+-- MAP.soundscapeReplacements = {
+-- 	["d1_trainstation.terminalsquare"] = "experiment.PlazaSquare",
+-- 	["d1_trainstation.appartments"] = "experiment.Apartments",
+--     ["d1_trainstation.quietcourtyard"] = "experiment.QuietCourtyard",
+--     -- ["prison.util_louder_cellblock"] = "", -- Fine as is, its just: ambient/atmosphere/underground.wav
+-- 	["d3_citadel.breen_hall"] = "experiment.BreenHall",
+--     ["d3_citadel.breen_office"] = "experiment.BreenOffice",
+--     ["d1_trainstation.turnstyle"] = "experiment.TurnStyle",
+-- 	["d1_canals.waterpuzzleroom"] = "experiment.WaterPuzzleRoom",
+-- }
 
 -- Override specific entity keyvalues
 function MAP:EntityKeyValue(entity, key, value)
@@ -70,5 +73,27 @@ function MAP:EntityKeyValue(entity, key, value)
         return
     end
 
-	return self.soundscapeReplacements[value:lower()]
+	return "" -- Silence the soundscape for now.
+    -- TODO: Implement custom soundscape replacements when a player gets in their range.
+    -- TODO: I'm thinking we add a custom entity trigger that waits for collisions with players.
+    -- TODO: Then it sends a message to the client to play the custom sound scape
+	--[[ TODO:
+		ENT.Base = "base_brush"
+		ENT.Type = "brush"
+
+		AccessorFunc(ENT, "soundscape", "Soundscape")
+
+		function ENT:StartTouch(entity)
+			if (not IsValid(entity) or not entity:IsPlayer()) then
+				return
+			end
+
+			net.Start("expPlaySoundscape")
+			net.WriteUInt(self:GetSoundscape(), 32
+			net.Send(entity)
+		end
+	]]
+	-- TODO: We would have to reimplement the soundscape system in Lua, but honestly that sounds fun.
+
+	-- return self.soundscapeReplacements[value:lower()]
 end

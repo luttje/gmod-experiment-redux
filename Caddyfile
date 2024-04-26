@@ -8,11 +8,18 @@
 # 3.    Navigate to the directory:
 #       cd /srv/experiment-redux/
 #
-# 4.    Have caddy load the configuration:
-#       sudo -u caddy caddy adapt
+# 4.    Have caddy load the configuration: (https://caddyserver.com/docs/running#overrides)
+#       sudo systemctl edit caddy
 #
-# 5.    Make caddy reload:
-#       caddy reload
+# 5.    Add the following configuration:
+#       [Service]
+#       ExecStart=
+#       ExecStart=/usr/bin/caddy run --environ --config /srv/experiment-redux/Caddyfile
+#       ExecReload=
+#       ExecReload=/usr/bin/caddy reload --config /srv/experiment-redux/Caddyfile
+#
+# 6.    Make caddy restart:
+#       sudo systemctl restart caddy
 {
 	auto_https off
 }

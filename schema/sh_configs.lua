@@ -4,7 +4,6 @@ ix.currency.plural = "bolts"
 ix.currency.model = "models/props_lab/box01a.mdl"
 
 if (SERVER) then
-    resource.AddFile("resource/fonts/lightout.woff")
     resource.AddFile("resource/fonts/RomanAntique.ttf")
     resource.AddFile("resource/fonts/RomanAntique-Italic.ttf")
 end
