@@ -105,7 +105,7 @@ function PLUGIN:LoadData()
 	-- Place the parent entities
 	local parentEntities = {}
 
-	for uniqueName, parentData in pairs(data.parentEntities) do
+	for uniqueName, parentData in pairs(data.parentEntities or {}) do
 		local parent = ents.Create("prop_physics")
 		parent:SetModel(parentData.model)
 		parent:SetModelScale(parentData.scale)
@@ -128,7 +128,7 @@ function PLUGIN:LoadData()
 	end
 
 	-- Place the monitors
-	for _, monitorData in ipairs(data.entities) do
+	for _, monitorData in ipairs(data.entities or {}) do
 		local parent = parentEntities[monitorData.parentName]
 
 		if (not IsValid(parent)) then

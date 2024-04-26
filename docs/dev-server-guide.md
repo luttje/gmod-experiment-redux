@@ -65,7 +65,7 @@ Additionally you should consider this for a production server:
 7. Start the server so you can test it. Run the following server start command:
 
     ```bash
-    /path/to/gmod/srcds -console -game garrysmod +maxplayers 20 +gamemode experiment-redux +map rp_c18_v2 +host_workshop_collection 3215035081
+    /path/to/gmod/srcds -console -game garrysmod -tickrate 100 +maxplayers 64 +gamemode experiment-redux +map rp_c18_v2 +host_workshop_collection 3215035081
     ```
 
     *Replace `3215035081` with the ID of the Workshop Collection you created. You can use `3215035081` for the default content and `rp_c18_v2` map*
