@@ -1,7 +1,15 @@
 local PLUGIN = PLUGIN
 
 ix.bar.Add(function()
-	local battery = LocalPlayer():GetCharacter():GetData("battery", 0)
+    local client = LocalPlayer()
+    local character = IsValid(client) and client:GetCharacter() or nil
+
+	if (not character) then
+		return 0
+	end
+
+	local battery = character:GetData("battery", 0)
+
 	return battery / PLUGIN.batteryMax
 end, Color(182, 255, 0), nil, "battery")
 

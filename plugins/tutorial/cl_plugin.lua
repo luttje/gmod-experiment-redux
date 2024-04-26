@@ -83,11 +83,11 @@ end
 
 --- Draws dimmed rectangles everywhere except for the specified rectangle.
 --- Useful to draw attention to a specific area.
----@param x number
----@param y number
----@param w number
----@param h number
----@param a number
+--- @param x number
+--- @param y number
+--- @param w number
+--- @param h number
+--- @param a number
 function PLUGIN:DrawUndimmedRect(x, y, w, h, a)
 	local scrW, scrH = ScrW(), ScrH()
 
@@ -127,7 +127,7 @@ local lastOrder = PLUGIN:AddTutorial(1, {
 
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnSpawnSelectSuccess",
-	ActivateOnDelay = 2,
+	ActivateOnDelay = 5,
 
 	GetText = function(tutorial)
 		local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"

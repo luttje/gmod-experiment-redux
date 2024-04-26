@@ -4,12 +4,12 @@ if (SERVER) then
 	util.AddNetworkString("exp_AchievementProgress")
 	util.AddNetworkString("exp_AchievementsLoad")
 
-    ---Progress an achievement, optionally with a specific amount.
-	---If the progress is a string, it will be used as a key to track progress (1 progression per key)
-	---@param achievement any
-	---@param client Player
-	---@param progress any
-	---@return boolean
+    --- Progress an achievement, optionally with a specific amount.
+	--- If the progress is a string, it will be used as a key to track progress (1 progression per key)
+	--- @param achievement any
+	--- @param client Player
+	--- @param progress any
+	--- @return boolean
 	function Schema.achievement.Progress(achievement, client, progress)
 		local achievementTable = Schema.achievement.Get(achievement)
         local achievements = client:GetData("achievements", {})

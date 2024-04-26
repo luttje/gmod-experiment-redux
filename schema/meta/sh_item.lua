@@ -1,9 +1,9 @@
 local META = ix.meta.item
 
 --- Returns whether or not the item is based on the provided base.
----This will also check the base of the base, and so on.
----@param baseID string The base to search for.
----@return boolean
+--- This will also check the base of the base, and so on.
+--- @param baseID string The base to search for.
+--- @return boolean
 function META:IsBasedOn(baseID)
     if (self.uniqueID == baseID) then
         return true

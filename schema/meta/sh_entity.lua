@@ -11,8 +11,8 @@ if (SERVER) then
 		Override the bodygroup functions to call hooks
 	--]]
 
-	---@param index number
-	---@param value number
+	--- @param index number
+	--- @param value number
     function META:SetBodygroup(index, value)
         if (self:IsPlayer()) then
             local oldValue = self:GetBodygroup(index)
@@ -29,13 +29,13 @@ if (SERVER) then
         self:expSetBodygroup(index, value)
     end
 
-	---@param index number
-	---@param value number
+	--- @param index number
+	--- @param value number
 	function META:SetBodyGroup(index, value)
 		self:SetBodygroup(index, value)
 	end
 
-	---@param bodygroups string # Body groups to set. Each character in the string represents a separate bodygroup. (0 to 9, a to z being (10 to 35))
+	--- @param bodygroups string # Body groups to set. Each character in the string represents a separate bodygroup. (0 to 9, a to z being (10 to 35))
     function META:SetBodyGroups(bodygroups)
         if (self:IsPlayer()) then
             local oldBodygroups = ""

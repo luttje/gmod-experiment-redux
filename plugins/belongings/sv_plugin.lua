@@ -82,7 +82,7 @@ function PLUGIN:SaveBelongings()
 end
 
 --- If there's no money or items left in the belongings, remove it.
----@param inventory table
+--- @param inventory table
 function PLUGIN:RemoveIfEmpty(inventory)
 	if (not inventory.vars or not IsValid(inventory.vars.belongingsEntity)) then
 		return false

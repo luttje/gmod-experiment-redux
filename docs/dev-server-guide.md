@@ -95,10 +95,13 @@ Additionally you should consider this for a production server:
     3. Open `path/to/gmod/garrysmod/cfg/server.cfg` and add the following lines:
 
         ```cfg
+        hostname "Experiment (Redux) | Closed Alpha Test"
+        sv_location eu
         sv_allowupload "0"
         sv_allowdownload "0"
         sv_downloadurl "http://127.0.0.1:5500/content/"
         sv_password "4123"
+        lua_log_sv "1"
         ```
 
     4. Now when you start the server, content should be downloaded from the local web server quickly.

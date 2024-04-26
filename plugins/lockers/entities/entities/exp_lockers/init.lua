@@ -88,8 +88,8 @@ function ENT:Use(client)
 end
 
 --- Each client gets a single unique locker inventory.
----@param client Player
----@param callback fun(table) # The function to call when the locker inventory is ready.
+--- @param client Player
+--- @param callback fun(table) # The function to call when the locker inventory is ready.
 function ENT:GetOrCreateLockerInventory(client, callback)
 	local character = client:GetCharacter()
 	local lockerInventoryID = character:GetData("lockerID")

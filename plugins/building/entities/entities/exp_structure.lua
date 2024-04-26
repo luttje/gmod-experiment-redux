@@ -294,9 +294,9 @@ function ENT:Think()
     end
 end
 
----Checks if the client has an active siege surge buff against the builder or their alliance
----@param client any
----@return boolean|ActiveBuff, Buff
+--- Checks if the client has an active siege surge buff against the builder or their alliance
+--- @param client any
+--- @return boolean|ActiveBuff, Buff
 function ENT:HasSiegeSurgeActive(client)
 	local victimData = {
 		victimID = self:GetBuilderSteamID64(),

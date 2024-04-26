@@ -10,17 +10,17 @@ Schema.buff.nextActiveBuffKey = Schema.buff.nextActiveBuffKey or 1
 	who destroyed the props to deal more damage to the victim's props.
 --]]
 
----@class ActiveBuff
----@field key number A unique key for the active buff (allowing for stacking buffs and removing them by key)
----@field index number The index of the buff, pointing to a type of buff.
----@field activeUntil number The time the buff will expire (server time, CurTime()).
----@field data? table Optional data that can be stored in the buff.
+--- @class ActiveBuff
+--- @field key number A unique key for the active buff (allowing for stacking buffs and removing them by key)
+--- @field index number The index of the buff, pointing to a type of buff.
+--- @field activeUntil number The time the buff will expire (server time, CurTime()).
+--- @field data? table Optional data that can be stored in the buff.
 
 --- Creates information about an active buff.
----@param buffIndex number
----@param activeUntil number
----@param buffData? table
----@return ActiveBuff
+--- @param buffIndex number
+--- @param activeUntil number
+--- @param buffData? table
+--- @return ActiveBuff
 function Schema.buff.MakeActive(buffIndex, activeUntil, buffData)
 	local active = {
 		key = Schema.buff.nextActiveBuffKey,
@@ -39,10 +39,10 @@ if (SERVER) then
 	util.AddNetworkString("exp_BuffsLoaded")
 
 	--- Set a buff active for a client, optionally with custom duration and data.
-	---@param client Player
-	---@param buffIndex string|number
-	---@param activeUntil? number
-	---@param buffData? table
+	--- @param client Player
+	--- @param buffIndex string|number
+	--- @param activeUntil? number
+	--- @param buffData? table
 	function Schema.buff.SetActive(client, buffIndex, activeUntil, buffData)
 		local buffTable = Schema.buff.Get(buffIndex)
 		local character = client:GetCharacter()
@@ -78,10 +78,10 @@ if (SERVER) then
 	end
 
 	--- Checks if a buff is active for a client. Optionally checking if the buff has a specific data.
-	---@param client Player
-	---@param buffIndex string|number
-	---@param data? table
-	---@return boolean|ActiveBuff, Buff
+	--- @param client Player
+	--- @param buffIndex string|number
+	--- @param data? table
+	--- @return boolean|ActiveBuff, Buff
 	function Schema.buff.GetActive(client, buffIndex, data)
 		local character = client:GetCharacter()
 
@@ -126,9 +126,9 @@ if (SERVER) then
 	end
 
 	--- Network the buff to the client.
-	---@param client Player
-	---@param buffIndex number|string
-	---@param buff ActiveBuff
+	--- @param client Player
+	--- @param buffIndex number|string
+	--- @param buff ActiveBuff
     function Schema.buff.Network(client, buffIndex, buff)
         if (isstring(buffIndex)) then
             buffIndex = Schema.buff.Get(buffIndex).index
@@ -146,8 +146,8 @@ if (SERVER) then
 	end
 
 	--- Loads buffs, transforming their 'time remaining' to the time they will expire.
-	---@param client Player
-	---@param character any
+	--- @param client Player
+	--- @param character any
 	function Schema.buff.LoadActive(client, character)
 		local storedBuffs = character:GetData("buffs", {})
 		local curTime = CurTime()
@@ -183,9 +183,9 @@ if (SERVER) then
 	end
 
 	--- Sets up the buff for the client by calling the OnSetup function.
-	---@param client Player
-	---@param buffTable Buff
-	---@param buff ActiveBuff
+	--- @param client Player
+	--- @param buffTable Buff
+	--- @param buff ActiveBuff
 	function Schema.buff.Setup(client, buffTable, buff)
 		if (buffTable.OnSetup) then
 			buffTable:OnSetup(client, buff)
@@ -193,11 +193,11 @@ if (SERVER) then
 	end
 
 	--- Create a buff to store in the character's data.
-	---@param client Player
-	---@param buffIndex number|string
-	---@param activeRemaining? number
-	---@param data? table
-	---@return table
+	--- @param client Player
+	--- @param buffIndex number|string
+	--- @param activeRemaining? number
+	--- @param data? table
+	--- @return table
     function Schema.buff.MakeStored(client, buffIndex, activeRemaining, data)
 		local buffTable = Schema.buff.Get(buffIndex)
 
@@ -217,8 +217,8 @@ if (SERVER) then
 	end
 
 	--- Calculates how long the buff has remaining, stores that in the character's data.
-	---@param client Player
-	---@param character any
+	--- @param client Player
+	--- @param character any
 	function Schema.buff.PrepareSaveActive(client, character)
 		local buffs = character.expBuffs or {}
 		local buffsToStore = {}
@@ -237,9 +237,9 @@ if (SERVER) then
 
 	--- Checks which buffs are expired, calls the OnExpire function and removes them from the character's data.
 	--- Optionally uses a custom expiry callback.
-	---@param client Player
-    ---@param expireChecker? fun(client: Player, buffTable: Buff, buff: ActiveBuff): boolean
-	---@return number # The amount of expired buffs.
+	--- @param client Player
+    --- @param expireChecker? fun(client: Player, buffTable: Buff, buff: ActiveBuff): boolean
+	--- @return number # The amount of expired buffs.
     function Schema.buff.CheckExpired(client, expireChecker)
         local character = client:GetCharacter()
 
@@ -291,8 +291,8 @@ if (SERVER) then
     end
 
     --- Expires all buffs of a certain type.
-    ---@param client Player
-    ---@param buffIndex number|string
+    --- @param client Player
+    --- @param buffIndex number|string
     function Schema.buff.ExpireAllOfType(client, buffIndex)
         Schema.buff.CheckExpired(client, function(client, buffTable, buff)
             if (isstring(buffIndex)) then
@@ -380,10 +380,10 @@ else
 	end
 
 	--- Updates the local active buffs table so they display on screen and in the YOU menu.
-	---@param key any
-	---@param index any
-	---@param activeUntil any
-	---@param data any
+	--- @param key any
+	--- @param index any
+	--- @param activeUntil any
+	--- @param data any
     function Schema.buff.UpdateLocalActive(key, index, activeUntil, data)
         local found = nil
 

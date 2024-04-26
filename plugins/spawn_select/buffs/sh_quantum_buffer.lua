@@ -81,6 +81,10 @@ function BUFF.hooks:PlayerSecondElapsed(client)
 end
 
 function BUFF.hooks:CanPlayerInteractItem(client, action, item)
+    if (not item or item.uniqueID == "tutorial") then
+        return
+    end
+
 	if (Schema.buff.GetActive(client, self.index)) then
 		client.expQuantumBufferShouldExpire = true
 	end

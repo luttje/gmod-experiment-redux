@@ -77,9 +77,9 @@ ix.log.AddType("schemaDebug", function(client, ...)
 end, FLAG_DANGER)
 
 --- Use this to force an entity info tooltip to update.
----For example when a player is being tied up, you will want to update the tooltip to show its done.
----@param client Player
----@param targetEntity? Entity
+--- For example when a player is being tied up, you will want to update the tooltip to show its done.
+--- @param client Player
+--- @param targetEntity? Entity
 function Schema.PlayerClearEntityInfoTooltip(client, targetEntity)
 	net.Start("expClearEntityInfoTooltip")
 	net.WriteEntity(targetEntity or Entity(0))
@@ -265,8 +265,8 @@ function Schema.PlayerTryUntieTarget(client, target)
 end
 
 --- Knock out a player with chloroform.
----@param client Player
----@param duration? number
+--- @param client Player
+--- @param duration? number
 function Schema.ChloroformPlayer(client, duration)
 	duration = duration or 20
 

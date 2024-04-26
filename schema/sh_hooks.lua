@@ -134,7 +134,6 @@ function Schema:EntityKeyValue(entity, key, value)
             local override = map:EntityKeyValue(entity, key, value)
 
 			if (override ~= nil) then
-				print("Override", override, "for", key, value, "on", entity)
 				return override
 			end
 		end

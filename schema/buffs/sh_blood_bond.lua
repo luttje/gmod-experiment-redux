@@ -12,9 +12,9 @@ BUFF.description = "You're bonded to '%s', meaning you can't hurt them. %s you'r
 BUFF.generatorEarningsMultiplier = 1.1
 BUFF.nearbyDistance = 512
 
----@param client Player
----@param buff ActiveBuff
----@return string
+--- @param client Player
+--- @param buff ActiveBuff
+--- @return string
 function BUFF:GetDescription(client, buff)
     local allyName = "someone"
 

@@ -3,15 +3,15 @@ Schema.util.transactions = Schema.util.transactions or {}
 Schema.util.throttles = Schema.util.throttles or {}
 
 --- Converts Source Engine units (1 unit = 1 inch) to centimeters (1 unit = 2.54 cm)
----@param unit any
----@return unknown
+--- @param unit any
+--- @return unknown
 function Schema.util.UnitToCentimeters(unit)
     return unit * 2.54
 end
 
 --- Converts a time in seconds to a short nice time format (e.g: 2s, 1m, 1h)
----@param time number The time in seconds.
----@return string
+--- @param time number The time in seconds.
+--- @return string
 function Schema.util.GetNiceShortTime(time)
     local text = string.NiceTime(time)
 
@@ -22,10 +22,10 @@ function Schema.util.GetNiceShortTime(time)
 end
 
 --- Creates a scope that allows only a single transaction to be active at a time.
----@param scope string
----@param callback fun(release: fun())
----@param client? any If provided, the scope will be unique to the client.
----@return boolean
+--- @param scope string
+--- @param callback fun(release: fun())
+--- @param client? any If provided, the scope will be unique to the client.
+--- @return boolean
 function Schema.util.RunSingleWithinScope(scope, callback, client)
 	if (client) then
 		scope = scope .. "_" .. client:SteamID64()
@@ -52,10 +52,10 @@ function Schema.util.RunSingleWithinScope(scope, callback, client)
 end
 
 --- Returns true if the throttle is active, otherwise false.
----@param scope string
----@param delay number
----@param entity Entity? If provided, the throttle will be unique to the entity.
----@return boolean, number?
+--- @param scope string
+--- @param delay number
+--- @param entity Entity? If provided, the throttle will be unique to the entity.
+--- @return boolean, number?
 function Schema.util.Throttle(scope, delay, entity)
 	local scopeTable = Schema.util.throttles
 
@@ -82,10 +82,10 @@ function Schema.util.Throttle(scope, delay, entity)
 end
 
 --- Expands the bounds of a cube to a list of points.
----@param boundsMin Vector
----@param boundsMax Vector
----@param relativePosition Vector
----@param relativeAngles Angle
+--- @param boundsMin Vector
+--- @param boundsMax Vector
+--- @param relativePosition Vector
+--- @param relativeAngles Angle
 function Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, relativePosition, relativeAngles)
 	local corners = {
 		Vector(boundsMin.x, boundsMin.y, boundsMin.z),
@@ -152,8 +152,8 @@ if (CLIENT) then
     end
 
     --- Finds bindings surrounded by curly braces and replaces them with their actual key.
-    ---@param text string
-	---@return string
+    --- @param text string
+	--- @return string
     function Schema.util.ReplaceBindings(text)
         local replacement = text:gsub("{(.-)}", function(bind)
             return Schema.util.LookupBinding(bind) or ("{" .. bind .. "}")
@@ -195,10 +195,10 @@ if (CLIENT) then
 
 	--- Draws a circle on the screen.
     -- Source: https://wiki.facepunch.com/gmod/surface.DrawPoly
-    ---@param x number
-    ---@param y number
-    ---@param radius number
-	---@param seg number
+    --- @param x number
+    --- @param y number
+    --- @param radius number
+	--- @param seg number
     function Schema.util.DrawCircle(x, y, radius, seg)
         local cir = {}
 
@@ -219,16 +219,16 @@ if (CLIENT) then
     end
 
     --- Draws part of a spritesheet
-    ---@param spritesheet IMaterial
-    ---@param x number Where to draw the spritesheet part on the X axis.
-    ---@param y number Where to draw the spritesheet part on the Y axis.
-    ---@param w number How wide the drawn spritesheet part should be.
-    ---@param h number How tall the drawn spritesheet part should be.
-    ---@param partX number The X position (starting at 0) of the part (not in pixels, but in parts).
-    ---@param partY number The Y position (starting at 0) of the part.
-    ---@param partW number The width of each part in the spritesheet.
-    ---@param partH number The height of each part in the spritesheet.
-	---@param mirror? boolean Whether to mirror the spritesheet part.
+    --- @param spritesheet IMaterial
+    --- @param x number Where to draw the spritesheet part on the X axis.
+    --- @param y number Where to draw the spritesheet part on the Y axis.
+    --- @param w number How wide the drawn spritesheet part should be.
+    --- @param h number How tall the drawn spritesheet part should be.
+    --- @param partX number The X position (starting at 0) of the part (not in pixels, but in parts).
+    --- @param partY number The Y position (starting at 0) of the part.
+    --- @param partW number The width of each part in the spritesheet.
+    --- @param partH number The height of each part in the spritesheet.
+	--- @param mirror? boolean Whether to mirror the spritesheet part.
     function Schema.util.DrawSpritesheetMaterial(spritesheet, x, y, w, h, partX, partY, partW, partH, mirror)
         local spritesheetWidth, spritesheetHeight = spritesheet:Width(), spritesheet:Height()
         local spriteX, spriteY = spritesheetWidth / partW, spritesheetHeight / partH
@@ -373,9 +373,9 @@ if (CLIENT) then
     end)
 
     --- Replaces a material texture with another texture for all models/ui that use it.
-    ---@param material IMaterial
-    ---@param replacement IMaterial
-	---@param keyValues? table|number
+    --- @param material IMaterial
+    --- @param replacement IMaterial
+	--- @param keyValues? table|number
 	function Schema.util.ReplaceMaterialTexture(material, replacement, keyValues)
 		local replacementTexture = replacement:GetTexture("$basetexture")
 

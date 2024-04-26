@@ -12,10 +12,10 @@ ix.chat.Register("npc", {
 })
 
 --- Checks if a player has completed an interaction, optionally within a scope (e.g: belonging to a quest/npc)
----@param client Player
----@param interaction any
----@param scope? any
----@return boolean
+--- @param client Player
+--- @param interaction any
+--- @param scope? any
+--- @return boolean
 function Schema.npc.HasCompletedInteraction(client, interaction, scope)
 	local character = client:GetCharacter()
 

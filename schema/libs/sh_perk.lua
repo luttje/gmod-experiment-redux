@@ -54,10 +54,10 @@ if (SERVER) then
 	end
 
 	--- Returns whether a player has a perk or not.
-	---@param perk string|number
-	---@param client Player
-	---@param character? table
-	---@return boolean
+	--- @param perk string|number
+	--- @param client Player
+	--- @param character? table
+	--- @return boolean
 	function Schema.perk.GetOwned(perk, client, character)
 		local perkTable = Schema.perk.Get(perk)
 

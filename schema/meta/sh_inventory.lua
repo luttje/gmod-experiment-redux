@@ -42,9 +42,9 @@ function META:GetItemCount(uniqueID, onlyMain)
 end
 
 --- Go through the items, removing them (or taking from their stack) until we have enough
----@param uniqueID string The unique ID of the item to remove.
----@param amountToRemove number The amount of items to remove.
----@param bOnlyMain boolean Whether or not to only remove items from the main inventory.
+--- @param uniqueID string The unique ID of the item to remove.
+--- @param amountToRemove number The amount of items to remove.
+--- @param bOnlyMain boolean Whether or not to only remove items from the main inventory.
 function META:RemoveStackedItem(uniqueID, amountToRemove, bOnlyMain)
     local items = self:GetItems(bOnlyMain)
 
