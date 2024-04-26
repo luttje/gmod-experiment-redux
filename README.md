@@ -24,7 +24,7 @@
 
 ## Hosting a Server
 
-For a quick overview check out the [Dev Server Guide](docs/dev-server-guide.md). This guide will walk you through setting up a dedicated server for development purposes.
+For a quick overview check out the [🏗 Dev Server Guide](docs/dev-server-guide.md). This guide will walk you through setting up a dedicated server for development purposes.
 
 You can find more information on hosting a Garry's Mod server in the [official documentation](https://wiki.facepunch.com/gmod/Downloading_a_Dedicated_Server).
 

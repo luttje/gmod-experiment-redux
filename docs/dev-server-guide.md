@@ -1,4 +1,4 @@
-# 📡 Dev Server Guide
+# 🏗 Dev Server Guide
 
 **Although the below information can be found online, we've compiled it here for your convenience.**
 
