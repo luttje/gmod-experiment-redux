@@ -18,6 +18,6 @@
 }
 
 fastdl.experiment.games:80 {
-    root * /srv/experiment-redux/content
-    file_server browse
+	root * /srv/experiment-redux/content
+	file_server browse
 }
