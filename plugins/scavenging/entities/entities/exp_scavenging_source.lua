@@ -29,8 +29,10 @@ if (SERVER) then
 	function ENT:Initialize()
 		self:SetModel(self.Model)
 
-		self:SetSolid(SOLID_BBOX)
-		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		-- self:SetSolid(SOLID_BBOX)
+		-- self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		self:SetSolid(SOLID_VPHYSICS)
+		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
 	end
 
@@ -40,10 +42,14 @@ if (SERVER) then
 
 		if (invisible) then
 			self:SetModel("models/props_wasteland/laundry_dryer001.mdl")
+			self:SetSolid(SOLID_BBOX)
+			self:SetCollisionGroup(COLLISION_GROUP_WORLD)
 			self:SetRenderMode(RENDERMODE_TRANSALPHA)
 			self:SetColor(Color(0, 0, 0, 0))
 		else
 			self:SetModel(self.Model)
+			self:SetSolid(SOLID_VPHYSICS)
+			self:PhysicsInit(SOLID_VPHYSICS)
 			self:SetRenderMode(RENDERMODE_NORMAL)
 			self:SetColor(Color(255, 255, 255, 255))
 		end
@@ -84,7 +90,7 @@ if (SERVER) then
 		local name = self:GetSourceName()
 
 		if (name == "") then
-			name = "A pile of junk"
+			name = "A bunch of junk"
 		end
 
 		local baseTaskTime = ix.config.Get("scavengeSourceOpenTime", 4)

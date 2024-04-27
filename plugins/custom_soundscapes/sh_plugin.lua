@@ -66,9 +66,10 @@ function PLUGIN:EntityKeyValue(entity, key, value)
 	entity.expSoundscapeInfo[key] = value
 
 	-- Since we cannot remove env_soundscape entities (or the player will crash), we'll just disable them.
-	if (key == "soundscape") then
-		return ""
-	elseif (key == "radius") then
+	-- if (key == "soundscape") then
+	-- 	return "" -- This caused errors in the console.
+	-- else
+	if (key == "radius") then
 		return 0
 	end
 end
@@ -108,5 +109,6 @@ function PLUGIN:ReplaceSoundscapes()
 
 		-- Don't remove the env_soundscape entity, that will crash the game as soon as the player gets in range.
 		-- data.entity:Remove()
+		data.entity:Fire("Disable")
 	end
 end

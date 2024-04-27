@@ -28,6 +28,7 @@ ix.config.Add("scavengeSourceMaxFillPercentage", 30, "What percentage of the sca
 })
 
 ix.inventory.Register("scavenging:base", 5, 1)
+ix.inventory.Register("scavenging:medium", 5, 2)
 
 if (SERVER) then
 	-- Let's allow players to store items in scavenging sources (might result in fun where players can hide items for others to find)
@@ -139,6 +140,7 @@ if (SERVER) then
 				position = entity:GetPos(),
 				angles = entity:GetAngles(),
 				model = entity:GetModel(),
+				invisible = entity:GetNoDraw(),
 				inventoryID = inventory:GetID(),
 				inventoryType = entity:GetInventoryType()
 			}
@@ -160,6 +162,12 @@ if (SERVER) then
 				entity:SetSourceName(scavengingSourceData.name)
 				entity:SetInventoryType(scavengingSourceData.inventoryType)
 				entity:Spawn()
+				entity:PhysicsInit(SOLID_VPHYSICS)
+
+				if (scavengingSourceData.invisible) then
+					entity:SetInvisible(true)
+				end
+
 				entity:Activate()
 
 				local inventoryType = ix.item.inventoryTypes[scavengingSourceData.inventoryType]
