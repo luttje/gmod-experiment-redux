@@ -46,6 +46,7 @@ function MAP:EntityKeyValue(entity, key, value)
 	if (class == "point_camera" or class == "func_monitor"
 			or entityIndex == 140 or entityIndex == 142) then
 		if (IsValid(entity)) then
+			print("Removing entity " .. class .. " with key " .. key .. " and value " .. value)
 			entity:Remove()
 		end
 
