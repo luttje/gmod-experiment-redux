@@ -67,6 +67,20 @@ function Schema:LoadFonts(headingFont, readableFont)
 		weight = 600,
 	})
 
+	surface.CreateFont("expMonitorFont", {
+		font = headingFont,
+		size = 256,
+		extended = true,
+		weight = 600
+	})
+
+	surface.CreateFont("expMonitorSmall", {
+		font = headingFont,
+		size = 64,
+		extended = true,
+		weight = 600
+	})
+
 	--[[
 		Override default Helix fonts
 	--]]

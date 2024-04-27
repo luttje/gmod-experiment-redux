@@ -11,8 +11,22 @@ net.Receive("expSetMonitorTarget", function(length)
 
 	for _, monitor in pairs(monitors) do
 		if (IsValid(entity)) then
-			PLUGIN:SetMonitorTargetVgui(monitor, function(parent) return vgui.Create("expMonitorTarget", parent) end)
+			PLUGIN:SetMonitorTargetVgui(monitor, function(parent)
+				return vgui.Create("expMonitorTarget", parent)
+			end)
 		end
+	end
+end)
+
+net.Receive("expSetMonitorVgui", function(length)
+	local vguiFunction = net.ReadString()
+
+	local monitors = ents.FindByClass("exp_monitor")
+
+	for _, monitor in pairs(monitors) do
+		PLUGIN:SetMonitorTargetVgui(monitor, function(parent)
+			return vgui.Create(vguiFunction, parent)
+		end)
 	end
 end)
 
@@ -63,7 +77,7 @@ function PLUGIN:SetupMonitorDrawing(monitor)
 
 	-- Draw the monitor contents to the render target so we can easily mirror the whole thing
 	render.PushRenderTarget(customRenderTarget)
-	self:DrawMonitorContents(monitor)
+	self:DrawMonitorContents(monitor, renderTargetMaterial)
 	render.PopRenderTarget()
 
 	self:RenderMonitorToPlayerView(monitor, renderTargetMaterial)
@@ -91,21 +105,21 @@ function PLUGIN:GetMonitorRenderTarget(monitor)
 	return renderTarget, monitor.expRenderTargetMaterial, monitor.expRenderTargetMaterialMirrored
 end
 
-function PLUGIN:DrawMonitorContents(monitor)
+function PLUGIN:DrawMonitorContents(monitor, renderTargetMaterial)
 	cam.Start2D()
 	render.Clear(0, 0, 0, 0, true, true)
 
 	if (monitor.expMonitorTargetHtml) then
-		self:SetupAndOrDrawHtml(monitor)
+		self:SetupAndOrDrawHtml(monitor, renderTargetMaterial)
 	elseif (monitor.expMonitorTargetVgui) then
-		self:SetupAndOrDrawVgui(monitor)
+		self:SetupAndOrDrawVgui(monitor, renderTargetMaterial)
 	end
 
 	self:DrawMonitorOverlay(monitor)
 	cam.End2D()
 end
 
-function PLUGIN:SetupAndOrDrawHtml(monitor)
+function PLUGIN:SetupAndOrDrawHtml(monitor, renderTargetMaterial)
 	if (IsValid(monitor.expVguiPanel)) then
 		monitor.expVguiPanel:Remove()
 	end
@@ -125,6 +139,7 @@ function PLUGIN:SetupAndOrDrawHtml(monitor)
 
 		monitor.expHtmlPanel = vgui.Create("DHTML")
 		monitor.expHtmlPanel:SetSize(monitor.expHtmlPanelWidth, monitor.expHtmlPanelHeight)
+		-- monitor.expHtmlPanel:SetSize(renderTargetMaterial:Width(), renderTargetMaterial:Height())
 
 		-- Hide the panel, we will only use the HTML material
 		monitor.expHtmlPanel:SetAlpha(0)
@@ -164,14 +179,14 @@ function PLUGIN:SetMonitorTargetHtml(monitor, html)
 	monitor.expMonitorTargetVgui = nil
 end
 
-function PLUGIN:SetupAndOrDrawVgui(monitor)
+function PLUGIN:SetupAndOrDrawVgui(monitor, renderTargetMaterial)
 	if (IsValid(monitor.expHtmlPanel)) then
 		monitor.expHtmlPanel:Remove()
 	end
 
 	if (not IsValid(monitor.expVguiPanel)) then
 		monitor.expVguiPanel = vgui.Create("EditablePanel")
-		monitor.expVguiPanel:SetSize(monitor:GetMonitorWidth(), monitor:GetMonitorHeight())
+		monitor.expVguiPanel:SetSize(renderTargetMaterial:Width(), renderTargetMaterial:Height())
 		monitor.expVguiPanel:SetPaintedManually(true)
 
 		monitor:CallOnRemove("expMonitorVguiPanelRemove", function()
@@ -184,8 +199,8 @@ function PLUGIN:SetupAndOrDrawVgui(monitor)
 	if (monitor.expMonitorTargetVgui ~= monitor.expVguiPanelVgui) then
 		monitor.expVguiPanel:Clear()
 		monitor.expVguiPanelVgui = monitor.expMonitorTargetVgui
-
 		monitor.expVguiPanelVguiInstance = monitor.expMonitorTargetVgui(monitor.expVguiPanel)
+
 		if (not IsValid(monitor.expVguiPanelVguiInstance)) then
 			ix.util.SchemaErrorNoHalt("Invalid monitor target vgui function return value. Return a VGUI Panel!\n")
 			return
@@ -233,7 +248,8 @@ function PLUGIN:DrawMonitorOverlay(monitor)
 end
 
 function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, renderTargetMaterialMirrored)
-	local width, height = monitor:GetMonitorWidth(), monitor:GetMonitorHeight()
+	local scale = monitor:GetMonitorScale() or 1
+	local width, height = monitor:GetMonitorWidth() * scale, monitor:GetMonitorHeight() * scale
 	local halfWidth = width * .5
 	local halfHeight = height * .5
 	local monitorPos = monitor:GetPos()

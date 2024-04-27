@@ -15,8 +15,14 @@ function PANEL:SetMonitor(monitor)
     self.monitor = monitor
 end
 
-function PANEL:DrawDistanceText(distance)
-	local font = "ixMediumFont"
+function PANEL:DrawDistanceText(distance, width, height)
+	local font = "expMonitorFont"
+	local scale = self.monitor:GetMonitorScale()
+
+	if (scale < 0.1) then
+		font = "expMonitorSmall"
+	end
+
 	local distanceCentimeters = Schema.util.UnitToCentimeters(distance)
 	local distanceRounded = math.Round(distanceCentimeters / 100)
 	local text = distanceRounded == 0 and "They're right here!" or
@@ -25,11 +31,11 @@ function PANEL:DrawDistanceText(distance)
 
 	surface.SetTextColor(255, 255, 255, 90)
 	surface.SetFont(font)
-	surface.SetTextPos((self:GetWide() * .5) - (textWidth * .5), (self:GetTall() * .5) + 128)
+	surface.SetTextPos((width * .5) - (textWidth * .5), height * .15)
 	surface.DrawText(text)
 end
 
-function PANEL:DrawDirectionArrow(direction)
+function PANEL:DrawDirectionArrow(direction, width, height)
 	local rotation
     local correctedDirection = direction
 	local monitorAngles = self.monitor:GetAngles()
@@ -58,17 +64,17 @@ function PANEL:DrawDirectionArrow(direction)
 	surface.SetDrawColor(255, 255, 255, 90)
 	if (rotation) then
 		surface.SetMaterial(arrowMaterial)
-		surface.DrawTexturedRectRotated(self:GetWide() * .5, self:GetTall() * .5, 256, 256, rotation)
+		surface.DrawTexturedRectRotated(width * .5, height * .5, width * .8, height * .8, rotation)
 	else
 		if (x == 1) then
 			surface.SetMaterial(arrowBackwardMaterial)
 		elseif (x == -1) then
 			surface.SetMaterial(arrowForwardMaterial)
 		else
-			drawCircle(self:GetWide() * .5, self:GetTall() * .5, 256, 18)
+			drawCircle(width * .5, height * .5, width * .8, 18)
 		end
 
-		surface.DrawTexturedRect(self:GetWide() * .5 - 128, self:GetTall() * .5 - 128, 256, 256)
+		surface.DrawTexturedRect(0, 0, width, height)
 	end
 end
 
@@ -79,8 +85,13 @@ function PANEL:Paint(width, height)
     local direction, distance = PLUGIN:GetDirectionToTarget(monitor)
 	if (not direction) then return end
 
-	self:DrawDirectionArrow(direction)
-	self:DrawDistanceText(distance)
+	-- Cheat a bit so the player doesnt have to be dead center of the moniotor
+	if (distance < 512) then
+		distance = 0
+	end
+
+	self:DrawDirectionArrow(direction, width, height)
+	self:DrawDistanceText(distance, width, height)
 end
 
 vgui.Register("expMonitorTarget", PANEL, "Panel")

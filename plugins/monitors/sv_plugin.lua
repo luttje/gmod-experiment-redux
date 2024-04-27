@@ -2,19 +2,14 @@ local PLUGIN = PLUGIN
 
 util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
+util.AddNetworkString("expSetMonitorVgui")
 
 resource.AddFile("materials/experiment-redux/arrow.png")
 resource.AddFile("materials/experiment-redux/arrow_forward.png")
 resource.AddFile("materials/experiment-redux/arrow_backward.png")
 resource.AddSingleFile("materials/experiment-redux/combinescanline.vmt")
 
--- lua_run ix.plugin.list["monitors"]:SetTarget(player.GetByID(1))
-function PLUGIN:SetTarget(entity)
-	net.Start("expSetMonitorTarget")
-	net.WriteEntity(entity)
-	net.Broadcast()
-
-	-- Dramatically turn on all monitors with delay
+function PLUGIN:DramaticDelayEachMonitor(callback)
 	local monitorEntities = ents.FindByClass("exp_monitor")
 
 	for i = 1, #monitorEntities do
@@ -22,10 +17,21 @@ function PLUGIN:SetTarget(entity)
 
 		timer.Simple(math.Rand(0, 1) * i, function()
 			if (IsValid(monitor)) then
-				monitor:SetPoweredOn(true)
+				callback(monitor)
 			end
 		end)
 	end
+end
+
+function PLUGIN:SetTarget(entity)
+	net.Start("expSetMonitorTarget")
+	net.WriteEntity(entity)
+	net.Broadcast()
+
+	-- Dramatically turn on all monitors with delay
+	self:DramaticDelayEachMonitor(function(monitor)
+		monitor:SetPoweredOn(true)
+	end)
 end
 
 function PLUGIN:RelateMonitorToParent(monitor, parent)
