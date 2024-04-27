@@ -104,7 +104,7 @@
             margin-top: 1em;
         }
 
-        .highlight {
+        a, .highlight {
             color: #A33426;
         }
 
@@ -184,7 +184,7 @@
             </li>
             <li>
                 You will not exploit bugs or glitches, nor will you share them with others
-                (except through our GitHub repository: <span class="highlight">{{github_url}}</span>)
+                (except through our GitHub repository: <a href="#" onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>)
             </li>
             <li>
                 You will not harass, bully, or discriminate against other players or their characters.
@@ -194,6 +194,24 @@
             </li>
             <li>
                 You will not impersonate staff or other players.
+            </li>
+        </ul>
+    </div>
+    <div class="wrapper my">
+        <h2>CLOSED ALPHA TEST</h2>
+        <p>
+            Our server is currently in a closed alpha test. This means:
+        </p>
+        <ul>
+            <li>
+                You may encounter bugs, glitches, and other issues.
+            </li>
+            <li>
+                Please help us by reporting these issues on our GitHub repository:
+                <a href="#" onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>
+            </li>
+            <li>
+                Your progress can be reset at any time.
             </li>
         </ul>
     </div>

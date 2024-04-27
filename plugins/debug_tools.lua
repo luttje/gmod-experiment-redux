@@ -3,7 +3,7 @@ local PLUGIN = PLUGIN
 PLUGIN.name = "Debug Tools"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds various tools for debugging."
-PLUGIN.alphaTestMessageInterval = 5
+PLUGIN.alphaTestMessageInterval = 60 * 5
 
 ix.config.Add("alphaTestMessage", "Welcome to Experiment Redux! You are part of the Closed Alpha Test. Please report bugs @ https://github.com/luttje/gmod-experiment-redux/issues. Thanks for your help and patience.", "Message to display at an interval to signal that the server is in alpha testing.", nil, {
 	category = "Server"

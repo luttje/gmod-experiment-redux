@@ -11,6 +11,14 @@ ENT.PrintName = "Bolt Generator"
 ENT.PhysgunDisabled = true
 ENT.IsBoltControlUnit = true
 
+DEFINE_BASECLASS("exp_generator")
+
+function ENT:Initialize()
+	BaseClass.Initialize(self)
+
+	self:ResetSequence("idle")
+end
+
 function ENT:Think()
 	local power = self:GetPower()
 

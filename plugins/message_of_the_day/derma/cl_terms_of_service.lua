@@ -1,6 +1,8 @@
 local PLUGIN = PLUGIN
 local PANEL = {}
 
+local OPEN_URL_PREFIX = "OPEN_URL:"
+
 function PANEL:Init()
     self.html = self:Add("DHTML")
     self.html:Dock(FILL)
@@ -24,7 +26,10 @@ function PANEL:Init()
             net.SendToServer()
 		elseif (message == "TERMS_DISAGREED") then
             net.Start("expDisagreeTermsOfService")
-            net.SendToServer()
+			net.SendToServer()
+		elseif (message:StartsWith(OPEN_URL_PREFIX)) then
+            self:Close()
+			gui.OpenURL(message:sub(OPEN_URL_PREFIX:len() + 1))
         end
     end
 end
