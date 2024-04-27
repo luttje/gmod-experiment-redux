@@ -91,6 +91,24 @@ function PLUGIN:GetPlacementValid(client, position, angles)
 		filter = client
 	})
 
+	-- ! This sucks: It's always close to a spawn point with the amount we have.
+	-- ! I "solve" the problem of people prop blocking eachother, by just giving everyone a crowbar by default.
+	-- local spawnPointsPlugin = ix.plugin.Get("spawn_select")
+
+	-- if (spawnPointsPlugin) then
+	-- 	-- Check if this is close to a spawn point
+	-- 	local spawns = spawnPointsPlugin.spawns or {}
+	-- 	local minimumDistance = 1048
+
+	-- 	for _, spawn in ipairs(spawns) do
+	-- 		local distance = spawn.position:DistToSqr(position)
+
+	-- 		if (distance < (minimumDistance * minimumDistance)) then
+	-- 			return false, "You cannot build this close to a spawn point."
+	-- 		end
+	-- 	end
+	-- end
+
     if (groundTrace.HitWorld) then
         return true
     end
@@ -103,14 +121,14 @@ function PLUGIN:GetPlacementValid(client, position, angles)
 			local groundLevel = groundTrace.Entity:GetGroundLevel()
 
 			if (groundLevel >= maxBuildGroundLevel) then
-				return false
+				return false, "You cannot build this far off the ground."
 			end
 		end
 
 		return true, groundTrace.Entity
 	end
 
-	return false
+	return false, "You cannot build this far off the ground."
 end
 
 function PLUGIN:AdjustAllowedProps(allowedProps)

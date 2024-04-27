@@ -38,10 +38,10 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
         end
     end
 
-    local isPlacementValid, otherStructure = PLUGIN:GetPlacementValid(client, position, angles)
+    local isPlacementValid, otherStructureOrError = PLUGIN:GetPlacementValid(client, position, angles)
 
 	if (not isPlacementValid) then
-		client:Notify("You cannot build this far off the ground.")
+		client:Notify(otherStructureOrError)
 		return
 	end
 
@@ -50,7 +50,7 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	end
 
     local structure = PLUGIN:BuildStructure(client, item, position, angles)
-	local otherStructureGroundLevel = IsValid(otherStructure) and otherStructure:GetGroundLevel() or 0
+	local otherStructureGroundLevel = IsValid(otherStructureOrError) and otherStructureOrError:GetGroundLevel() or 0
 	structure:SetGroundLevel(otherStructureGroundLevel + 1)
 
 	item:Unequip(client, false, true)
@@ -59,6 +59,11 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 
 	client:Notify("You have constructed a structure blueprint, complete it by filling it with materials.")
 end)
+
+function PLUGIN:OnCharacterCreated(client, character)
+	local inventory = character:GetInventory()
+	inventory:Add("crowbar", 1)
+end
 
 function PLUGIN:BuildStructure(client, item, position, angles)
 	local structureBaseEntity = ents.Create("exp_structure")
@@ -86,7 +91,7 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 	if (not isStructure) then
 		-- Crowbars should do extra damage to structures, but minimal damage to anything else
 		if (weapon.ixItem.uniqueID == "crowbar") then
-			damageInfo:ScaleDamage(0.1)
+			damageInfo:ScaleDamage(0.01)
 		end
 
 		return
@@ -94,6 +99,7 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 
 	if (weapon.ixItem.uniqueID == "crowbar") then
 		damageInfo:ScaleDamage(1.1)
+		Schema.achievement.Progress("freeman", attacker)
 	else
 		-- Any other damage should be scaled down, to make the crowbar more interesting, especially bullet damage
 		if (damageInfo:IsBulletDamage()) then

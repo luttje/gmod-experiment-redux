@@ -1,8 +1,13 @@
 local PLUGIN = PLUGIN
 
+PLUGIN.spawns = PLUGIN.spawns or {}
+
 net.Receive("expSpawnSelectOpen", function()
 	local spawns = net.ReadTable()
 	local panel = vgui.Create("expSpawnSelection")
+
+	PLUGIN.spawns = spawns
+
 	panel:SetSpawns(spawns)
 end)
 

@@ -9,5 +9,5 @@ ACHIEVEMENT.foregroundImage = {
 }
 ACHIEVEMENT.reward = 650
 ACHIEVEMENT.maximum = 10
-ACHIEVEMENT.description = "Breach through ten seemingly impenetrable barriers."
+ACHIEVEMENT.description = "Breach through a bunch of seemingly impenetrable barriers."
 

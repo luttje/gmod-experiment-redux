@@ -836,12 +836,6 @@ function Schema:CreateShipment(client, shipmentEntity)
 	for uniqueID, amount in pairs(shipmentEntity.items) do
 		local itemTable = ix.item.list[uniqueID]
 
-		local targetItemId = Schema.achievement.GetProperty("freeman", "targetItemId")
-
-		if (itemTable.uniqueID == targetItemId) then
-			Schema.achievement.Progress("freeman", client)
-		end
-
 		itemCount = itemCount + math.max(amount, 0)
 		itemSum = itemSum + math.max(amount, 0) * (itemTable.price or 0)
 	end

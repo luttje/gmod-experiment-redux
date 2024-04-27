@@ -96,7 +96,7 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 	end
 
     local position, angles = PLUGIN:GetPlacementTrace(client)
-	local isPlacementValid = PLUGIN:GetPlacementValid(client, position, angles)
+	local isPlacementValid, otherStructureOrError = PLUGIN:GetPlacementValid(client, position, angles)
     weapon.expRotation = weapon.expRotation or angles
 
     -- if (weapon.expPositionOffset) then
@@ -137,7 +137,7 @@ hook.Add("PostDrawOpaqueRenderables", "expStructureBuilderDrawStructure", functi
 		local placeError = nil
 
         if (not isPlacementValid) then
-            placeError = "You cannot build this far off the ground."
+            placeError = otherStructureOrError
         else
             local boundsMin, boundsMax = structure.entity:GetCollisionBounds()
             local cube = Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, structure.entity:GetPos(),
@@ -246,7 +246,11 @@ function SWEP:PrimaryAttack()
 		return
 	end
 
-    if (self.expLastCanPlaceError) then
+	if (self.expLastCanPlaceError) then
+		if (Schema.util.Throttle("StructureBuildError", 2)) then
+			return
+		end
+
         self.Owner:Notify(self.expLastCanPlaceError)
         return
     end
