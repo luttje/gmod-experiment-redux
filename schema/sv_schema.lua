@@ -2,6 +2,7 @@ util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
 util.AddNetworkString("expClearEntityInfoTooltip")
 
+resource.AddFile("materials/experiment-redux/symbol_background.vmt")
 resource.AddFile("materials/experiment-redux/logo.png")
 resource.AddFile("materials/experiment-redux/arrow-down.png")
 resource.AddFile("materials/experiment-redux/check.png")

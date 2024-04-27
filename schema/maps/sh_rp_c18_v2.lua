@@ -29,7 +29,12 @@ if (CLIENT) then
         return x, y
     end
 else
-    resource.AddFile("materials/experiment-redux/maps/rp_c18_v2_feathered_black.png")
+	if (game.GetMap() == "rp_c18_v2") then
+		resource.AddFile("materials/experiment-redux/maps/rp_c18_v2_feathered_black.png")
+
+		-- rp_c18_v2 (https://steamcommunity.com/sharedfiles/filedetails/?id=132937160)
+		resource.AddWorkshop("132937160")
+	end
 end
 
 -- Override specific entity keyvalues

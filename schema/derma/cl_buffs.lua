@@ -112,6 +112,8 @@ function PANEL:Think()
 		end
 	end
 
+	self:SetAlpha(100)
+
 	local barManager = ix.gui.bars
 	local offsetY = 0
 
