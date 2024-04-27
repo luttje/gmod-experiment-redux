@@ -58,7 +58,7 @@ function PLUGIN:SaveBelongings()
 		end
 
 		if (not inventory.GetSize) then
-			ErrorNoHaltWithStack("TODO: Im doing something wrong, find out why inventories are not complete\n")
+			ix.util.SchemaErrorNoHaltWithStack("TODO: Im doing something wrong, find out why inventories are not complete\n")
 			continue
 		end
 

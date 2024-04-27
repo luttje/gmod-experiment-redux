@@ -163,7 +163,7 @@ if (SERVER) then
 			end
 
 			if (not buffTable) then
-				ErrorNoHalt("Buff with index " ..
+				ix.util.SchemaErrorNoHalt("Buff with index " ..
 				storedBuff.index .. " does not exist (player: " .. client:Name() .. ")\n")
 				continue
 			end

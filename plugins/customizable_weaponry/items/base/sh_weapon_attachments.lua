@@ -128,7 +128,7 @@ ITEM.functions.Attach = {
 		local attachment = attachmentItem:GetAttachment()
 
 		if (not attachment) then
-			ErrorNoHalt("Attachment not found for item " .. attachmentItem.uniqueID .. ".\n")
+			ix.util.SchemaErrorNoHalt("Attachment not found for item " .. attachmentItem.uniqueID .. ".\n")
 			client:Notify("This attachment is not valid")
 
 			return false
@@ -138,7 +138,7 @@ ITEM.functions.Attach = {
 		local swep = weapons.Get(weaponItem.class)
 
 		if (not swep) then
-			ErrorNoHalt("Weapon not found for item "
+			ix.util.SchemaErrorNoHalt("Weapon not found for item "
 				.. weaponItem.uniqueID
 				.. " when attaching "
 				.. attachmentItem.uniqueID .. ".\n")

@@ -27,7 +27,7 @@ if (CLIENT) then
 		local item = ix.item.instances[itemID]
 
 		if (not item) then
-			ErrorNoHalt("Attempted to read a lore item that doesn't exist!\n")
+			ix.util.SchemaErrorNoHalt("Attempted to read a lore item that doesn't exist!\n")
 			return
 		end
 

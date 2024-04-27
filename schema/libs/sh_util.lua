@@ -44,7 +44,7 @@ function Schema.util.RunSingleWithinScope(scope, callback, client)
 	local success, err = pcall(callback, release)
 
 	if (not success) then
-		ErrorNoHalt("Schema.util.RunSingleWithinScope: " .. err .. "\n")
+		ix.util.SchemaErrorNoHalt("Schema.util.RunSingleWithinScope: " .. err .. "\n")
 		release()
 	end
 
@@ -259,7 +259,7 @@ if (CLIENT) then
 		local spritesheet = Material(spritesheetPath)
 
 		if (spritesheet:IsError()) then
-			ErrorNoHalt("Invalid spritesheet path.\n")
+			ix.util.SchemaErrorNoHalt("Invalid spritesheet path.\n")
 			return
 		end
 

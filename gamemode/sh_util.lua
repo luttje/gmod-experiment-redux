@@ -139,3 +139,47 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 
 	return library
 end
+
+--- print, but with Experiment Redux prefix.
+--- @vararg any
+function ix.util.SchemaPrint(...)
+	print("[Experiment Redux] " .. string.format(...))
+end
+
+--- ErrorNoHalt, but with Experiment Redux prefix.
+--- @vararg any
+function ix.util.SchemaErrorNoHalt(...)
+	ErrorNoHalt("[Experiment Redux] ")
+
+	for i = 1, select("#", ...) do
+		local value = select(i, ...)
+
+		ErrorNoHalt(tostring(value))
+		ErrorNoHalt(" ")
+	end
+
+	ErrorNoHalt("\n")
+end
+
+--- ErrorNoHaltWithStack, but with Experiment Redux prefix.
+--- @vararg any
+function ix.util.SchemaErrorNoHaltWithStack(...)
+	ErrorNoHalt("[Experiment Redux] ")
+
+	for i = 1, select("#", ...) do
+		local value = select(i, ...)
+
+		ErrorNoHalt(tostring(value))
+		ErrorNoHalt(" ")
+	end
+
+	ErrorNoHalt("\n")
+	ErrorNoHalt(debug.traceback("", 2))
+	ErrorNoHalt("\n")
+end
+
+--- error, but with Experiment Redux prefix.
+--- @vararg any
+function ix.util.SchemaError(...)
+	error("[Experiment Redux] " .. string.format(...), 2)
+end

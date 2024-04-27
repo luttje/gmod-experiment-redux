@@ -75,7 +75,7 @@ function ENT:OpenInventory(activator)
 	local inventory = self:GetInventory()
 
 	if (not inventory) then
-		ErrorNoHalt("Attempt to open belongings with no inventory!\n")
+		ix.util.SchemaErrorNoHalt("Attempt to open belongings with no inventory!\n")
 		return
 	end
 

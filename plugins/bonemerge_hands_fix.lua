@@ -138,7 +138,7 @@ end
 
 function PLUGIN:PreDrawPlayerHands(hands, viewModel, client, weapon)
 	if (not IsValid(hands)) then
-		ErrorNoHalt("Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #001 - Thanks!")
+		ix.util.SchemaErrorNoHalt("Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #001 - Thanks!")
 		return
 	end
 

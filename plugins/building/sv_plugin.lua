@@ -2,6 +2,9 @@ local PLUGIN = PLUGIN
 
 util.AddNetworkString("ixBuildingRequestBuildStructure")
 
+resource.AddFile("materials/experiment-redux/blueprint.png")
+resource.AddFile("materials/experiment-redux/replacements/clipboard.vmt")
+
 net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	local position = net.ReadVector()
 	local angles = net.ReadAngle()

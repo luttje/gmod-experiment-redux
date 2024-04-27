@@ -289,8 +289,9 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 
 		if (not IsValid(menuPanel.tabs)) then
 			-- TODO: I had this happen once during Lua OnReloaded. I doubt it happens during normal gameplay.
-			ErrorNoHalt(
-				"Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #010 - Thanks!")
+			ix.util.SchemaErrorNoHalt(
+				"Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #010 - Thanks!"
+			)
 			return
 		end
 

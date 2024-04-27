@@ -18,7 +18,7 @@ net.Receive("expSpawnSelectResponse", function()
     elseif (status == PLUGIN.spawnResult.FAIL) then
 		ix.gui.spawnSelection:Rebuild()
 	else
-		ErrorNoHalt("[Experiment Redux] An unknown error occurred. (TODO)\n")
+		ix.util.SchemaErrorNoHalt("An unknown error occurred. (TODO)\n")
 	end
 end)
 

@@ -24,8 +24,6 @@ if (CLIENT) then
         net.WriteAngle(angles)
         net.SendToServer()
     end
-else
-	resource.AddFile("materials/experiment-redux/replacements/clipboard.vmt")
 end
 
 function PLUGIN:InitializedPlugins()

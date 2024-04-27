@@ -86,7 +86,7 @@ function Schema:InitializedPlugins()
 
         if (item.forcedWeaponCalibre) then
             if (not item.class) then
-                ErrorNoHalt("Item " .. item.uniqueID .. " does not have a class, can't force bullet calibre.")
+                ix.util.SchemaErrorNoHalt("Item " .. item.uniqueID .. " does not have a class, can't force bullet calibre.")
                 continue
             end
 
@@ -99,7 +99,7 @@ function Schema:InitializedPlugins()
     -- Check if the calibre has a matching ammo item
     for _, calibre in ipairs(calibres) do
         if (not ammoItems[calibre]) then
-            ErrorNoHalt("No ammo item found for calibre '" ..
+            ix.util.SchemaErrorNoHalt("No ammo item found for calibre '" ..
                 calibre .. "'. You should create an ammo item for this calibre.\n")
         end
     end
@@ -113,13 +113,14 @@ function Schema:InitializedPlugins()
             if (not pluginUnloaded) then
                 anyNewUnloaded = true
                 ix.plugin.SetUnloaded(pluginID, true)
-                ErrorNoHalt("Helix Plugin Notice: The plugin '" .. pluginID .. "' is marked as disabled in the schema.\n")
+                ix.util.SchemaErrorNoHalt("Helix Plugin Notice: The plugin '" .. pluginID .. "' is marked as disabled in the schema.\n")
             end
         end
 
         if (anyNewUnloaded) then
-            ErrorNoHalt(
-                "Helix Plugin Notice: Some plugins were disabled by the schema. You should most definitely restart the server to apply these changes!\n")
+            ix.util.SchemaErrorNoHalt(
+				"Helix Plugin Notice: Some plugins were disabled by the schema. You should most definitely restart the server to apply these changes!\n"
+			)
         end
     end
 

@@ -29,7 +29,7 @@ function PLUGIN:GetMapDetails()
 	end
 
 	if (#maps > 1) then
-		error("[Experiment Redux] - Duplicate map details found for '" .. game.GetMap() .. "'!\n")
+		ix.util.SchemaError("Duplicate map details found for '" .. game.GetMap() .. "'!\n")
 	end
 
 	return maps[1]

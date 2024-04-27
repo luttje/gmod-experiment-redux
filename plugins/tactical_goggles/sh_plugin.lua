@@ -13,7 +13,7 @@ function PLUGIN:InitializedPlugins()
 	local dependency = ix.plugin.Get("radioing")
 
 	if (not dependency) then
-		ErrorNoHalt("[Experiment Redux] The Tactical Goggles plugin requires the Radioing plugin to function.\n")
+		ix.util.SchemaErrorNoHalt("The Tactical Goggles plugin requires the Radioing plugin to function.\n")
 		return
 	end
 end

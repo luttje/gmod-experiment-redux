@@ -58,7 +58,7 @@ function ITEM:OnRestored()
 			local itemTable = ix.item.list[uniqueID]
 
             if (not itemTable or not itemID) then
-                ErrorNoHalt("Attached item with ID " .. itemID .. " has no item table. Unique ID: " .. uniqueID .. "\n")
+                ix.util.SchemaErrorNoHalt("Attached item with ID " .. itemID .. " has no item table. Unique ID: " .. uniqueID .. "\n")
 				return
 			end
 
@@ -106,7 +106,7 @@ ITEM.functions.DetachAttachment = {
 		local attachmentItem = ix.item.instances[attachmentData.itemID]
 
 		if (not attachmentItem) then
-			ErrorNoHalt("Attachment item not found for item " .. weaponItem.uniqueID .. " when attempting to detach from weapon.\n")
+			ix.util.SchemaErrorNoHalt("Attachment item not found for item " .. weaponItem.uniqueID .. " when attempting to detach from weapon.\n")
 			client:Notify("This attachment no longer belongs to a valid item.")
 
 			return false

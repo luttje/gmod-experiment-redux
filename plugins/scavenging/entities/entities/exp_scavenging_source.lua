@@ -73,7 +73,7 @@ if (SERVER) then
 		local inventory = self:GetInventory()
 
 		if (not inventory) then
-			ErrorNoHalt("Attempt to open a scavenging source with no inventory!\n")
+			ix.util.SchemaErrorNoHalt("Attempt to open a scavenging source with no inventory!\n")
 			return
 		end
 

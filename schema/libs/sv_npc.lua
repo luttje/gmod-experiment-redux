@@ -42,7 +42,7 @@ function Schema.npc.StartInteraction(client, npcEntity, desiredInteraction)
 	local npc = Schema.npc.Get(npcID)
 
     if (not npc) then
-        ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+        ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
         return
     end
 
@@ -99,14 +99,14 @@ net.Receive("expNpcInteractResponse", function(length, client)
 	local npc = Schema.npc.Get(npcID)
 
 	if (not npc) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+		ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
 	local interaction = client.expCurrentInteraction.interaction
 
 	if (not interaction) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+		ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 
@@ -131,7 +131,7 @@ net.Receive("expNpcInteractEnd", function(length, client)
 	local npc = Schema.npc.Get(npcID)
 
 	if (not npc) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+		ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 

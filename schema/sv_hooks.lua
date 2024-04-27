@@ -108,7 +108,10 @@ function Schema:PlayerDisconnected(client)
 			steamID64 = tostring(client:SteamID64()),
 			steamName = tostring(client:SteamName()),
 		}
-		ErrorNoHaltWithStack("Player disconnected (wiki bug/issue validation): " .. util.TableToJSON(playerData) .. "\n")
+		ix.util.SchemaErrorNoHaltWithStack(
+			"Player disconnected (wiki bug/issue validation): "
+			.. util.TableToJSON(playerData) .. "\n"
+		)
 		file.Write("disconnect_validation.txt", util.TableToJSON(playerData) .. "\n")
 	end
 end

@@ -106,7 +106,7 @@ if (SERVER) then
 				local inventory = entity:GetInventory()
 
 				if (not inventory) then
-					ErrorNoHalt("Attempt to spawn items in a scavenging source with no inventory!\n")
+					ix.util.SchemaErrorNoHalt("Attempt to spawn items in a scavenging source with no inventory!\n")
 					continue
 				end
 
@@ -130,7 +130,7 @@ if (SERVER) then
 			local inventory = entity:GetInventory()
 
 			if (not inventory) then
-				ErrorNoHalt("Attempt to save a scavenging source with no inventory!\n")
+				ix.util.SchemaErrorNoHalt("Attempt to save a scavenging source with no inventory!\n")
 				continue
 			end
 

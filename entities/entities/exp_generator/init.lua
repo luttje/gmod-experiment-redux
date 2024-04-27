@@ -185,7 +185,7 @@ function ENT:OnOptionSelected(client, option, data)
 
 	if (not itemTable) then
 		client:Notify("This generator is broken!")
-		ErrorNoHalt("Generator with item ID " .. itemID .. " is missing item table!\n")
+		ix.util.SchemaErrorNoHalt("Generator with item ID " .. itemID .. " is missing item table!\n")
 		return
 	end
 

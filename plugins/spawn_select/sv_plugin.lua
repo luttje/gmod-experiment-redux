@@ -50,14 +50,14 @@ function PLUGIN:PostPlayerLoadout(client)
     end
 
     if (#PLUGIN.spawns == 0) then
-        print("[Experiment Redux] No spawn points have been set! Spawning without spawn selection.\n")
+        ix.util.SchemaPrint("No spawn points have been set! Spawning without spawn selection.\n")
         return
     end
 
     local mapDetails = self:GetMapDetails()
 
     if (not mapDetails) then
-        ErrorNoHalt("[Experiment Redux] No map details found! Spawning without spawn selection.\n")
+        ix.util.SchemaErrorNoHalt("No map details found! Spawning without spawn selection.\n")
         return
     end
 

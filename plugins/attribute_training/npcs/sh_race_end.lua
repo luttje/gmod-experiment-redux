@@ -37,7 +37,7 @@ function NPC:OnInteract(client, npcEntity)
 
 	if (not raceStartedAt) then
 		client:Notify("What the heck? The race hasn't even started yet! This shouldn't happen!")
-		ErrorNoHalt("Player " .. client:Name() .. " tried to finish without the racing having started!\n")
+		ix.util.SchemaErrorNoHalt("Player " .. client:Name() .. " tried to finish without the racing having started!\n")
 		return
 	end
 

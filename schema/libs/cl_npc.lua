@@ -7,14 +7,14 @@ net.Receive("expNpcInteractShow", function(length)
     local npc = Schema.npc.Get(npcEntity:GetNpcId())
 
     if (not npc) then
-        ErrorNoHalt("Attempted to interact with an invalid NPC.")
+        ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC.")
         return
     end
 
     interaction = npc:GetInteraction(interaction)
 
 	if (not interaction) then
-		ErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
+		ix.util.SchemaErrorNoHalt("Attempted to interact with an invalid NPC interaction.\n")
 		return
 	end
 

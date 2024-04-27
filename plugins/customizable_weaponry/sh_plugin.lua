@@ -49,7 +49,7 @@ for conVarName, value in pairs(conVarsToSet) do
 	value = value.value
 
 	if (!conVar) then
-		ErrorNoHalt("ConVar " .. conVarName .. " does not exist in conVarsToSet.")
+		ix.util.SchemaErrorNoHalt("ConVar " .. conVarName .. " does not exist in conVarsToSet.")
 		continue
 	end
 
@@ -60,7 +60,7 @@ for conVarName, value in pairs(conVarsToSet) do
 	elseif (isstring(value)) then
         conVar:SetString(value)
     else
-		ErrorNoHalt("Invalid value type for conVar " .. conVarName .. " in conVarsToSet.")
+		ix.util.SchemaErrorNoHalt("Invalid value type for conVar " .. conVarName .. " in conVarsToSet.")
 	end
 end
 

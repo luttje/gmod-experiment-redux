@@ -281,7 +281,7 @@ function PANEL:CreateFilterInput(filter, filterItems, filterType)
 			return matchedItems
 		end
 	elseif (filterType:StartsWith("slider")) then
-		ErrorNoHalt("Not yet implemented! This filter type is not yet supported.")
+		ix.util.SchemaErrorNoHalt("Not yet implemented! This filter type is not yet supported.")
 		-- -- TODO: Slider filter
 		-- local min, max = filterType:match("slider:(%d+),(%d+)")
 
@@ -313,7 +313,7 @@ function PANEL:CreateFilterInput(filter, filterItems, filterType)
 		-- 	return matchedItems
 		-- end
 	else
-		ErrorNoHalt("Not yet implemented! This filter type is not yet supported.")
+		ix.util.SchemaErrorNoHalt("Not yet implemented! This filter type is not yet supported.")
 		-- -- TODO: Text filter
 		-- filterInput = filterPanel:Add("DTextEntry")
 		-- filterInput:SetValue("")

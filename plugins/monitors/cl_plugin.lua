@@ -187,7 +187,7 @@ function PLUGIN:SetupAndOrDrawVgui(monitor)
 
 		monitor.expVguiPanelVguiInstance = monitor.expMonitorTargetVgui(monitor.expVguiPanel)
 		if (not IsValid(monitor.expVguiPanelVguiInstance)) then
-			ErrorNoHalt("Invalid monitor target vgui function return value. Return a VGUI Panel!\n")
+			ix.util.SchemaErrorNoHalt("Invalid monitor target vgui function return value. Return a VGUI Panel!\n")
 			return
 		end
 
