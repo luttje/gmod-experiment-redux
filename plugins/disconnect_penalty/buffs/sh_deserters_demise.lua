@@ -25,7 +25,7 @@ if (not SERVER) then
 end
 
 function BUFF:OnSetup(client, buff)
-	if (Schema.util.Throttle("DesertersDemiseWarning", 60, client)) then
+	if (Schema.util.Throttle("DesertersDemiseWarning", 60 * 15, client)) then
 		return
 	end
 
