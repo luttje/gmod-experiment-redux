@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 if (SERVER) then
 	AddCSLuaFile()
 end
@@ -65,6 +67,8 @@ if (SERVER) then
 
 			if (IsValid(entity)) then
 				entity:SetInventory(inventory)
+
+				PLUGIN:AddItemsToScavengingSource(entity, inventory)
 			end
 		end)
 	end

@@ -23,8 +23,6 @@ do
 		entity:MakeInventory()
         entity:Activate()
 
-		PLUGIN:AddItemsToScavengingSource(entity, entity:GetInventory())
-
 		client:Notify("Scavenging source spawned.")
 	end
 
