@@ -14,8 +14,22 @@ BUFF.resetOnDuplicate = true
 BUFF.description =
 "You've recently taken or dealt damage. Disconnecting with this debuff active will cause you to drop all your belongings."
 
+ix.chat.Register("deserters_demise", {
+	OnChatAdd = function(self, speaker, text)
+		chat.AddText(Color(205, 31, 0, 255), "(Deserters Demise Debuff activated) ", color_white, text)
+	end,
+})
+
 if (not SERVER) then
 	return
+end
+
+function BUFF:OnSetup(client, buff)
+	if (Schema.util.Throttle("DesertersDemiseWarning", 60, client)) then
+		return
+	end
+
+	ix.chat.Send(client, "deserters_demise", "Disconnecting with this debuff active will cause you to drop all your belongings!")
 end
 
 function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
