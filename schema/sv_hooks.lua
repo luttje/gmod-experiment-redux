@@ -920,3 +920,20 @@ function Schema:GeneratorAdjustEarnings(generator, earningsData)
 		earningsData.earnings = earningsData.earnings * metalshipPerkTable.generatorEarningsMultiplier
 	end
 end
+
+-- Fix Nexus doors not opening when using them
+function Schema:PlayerUseDoor(client, door)
+	if (game.GetMap() ~= "rp_c18_v2" or door:GetClass() ~= "func_door") then
+		return
+	end
+
+	if (door:IsLocked() or door:GetNetVar("disabled")) then
+		return
+	end
+
+	if (client:IsRestricted()) then
+		return
+	end
+
+	door:Fire("open")
+end
