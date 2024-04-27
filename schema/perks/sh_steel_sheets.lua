@@ -8,4 +8,4 @@ PERK.foregroundImage = {
 	y = 44,
 	size = 32,
 }
-PERK.description = "With this perk your generators will be harder to destroy."
+PERK.description = "Your generators will be harder to destroy."

@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 13,
 	size = 32,
 }
-PERK.description = "With this perk you will be able to purchase grenades."
+PERK.description = "You will be able to purchase grenades."
 

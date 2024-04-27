@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 6,
 	size = 32,
 }
-PERK.description = "With this perk your flash grenades will also emit a smoke cloud."
+PERK.description = "Your flash grenades will also emit a smoke cloud."
 

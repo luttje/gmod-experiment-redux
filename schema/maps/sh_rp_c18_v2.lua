@@ -30,25 +30,7 @@ if (CLIENT) then
     end
 else
     resource.AddFile("materials/experiment-redux/maps/rp_c18_v2_feathered_black.png")
-
-	-- ! The soundscape replacements below are commented because of this error:
-	-- ! Rejected transfer 'scripts/soundscapes_rp_c18_v2.txt'
-	-- ! :/ We're not allowed to send this file type I guess
-    -- Improved (quieter) soundscapes
-    -- resource.AddFile("scripts/soundscapes_rp_c18_v2.txt")
 end
-
--- -- Note that I made the keys lowercase to prevent mistakes.
--- MAP.soundscapeReplacements = {
--- 	["d1_trainstation.terminalsquare"] = "experiment.PlazaSquare",
--- 	["d1_trainstation.appartments"] = "experiment.Apartments",
---     ["d1_trainstation.quietcourtyard"] = "experiment.QuietCourtyard",
---     -- ["prison.util_louder_cellblock"] = "", -- Fine as is, its just: ambient/atmosphere/underground.wav
--- 	["d3_citadel.breen_hall"] = "experiment.BreenHall",
---     ["d3_citadel.breen_office"] = "experiment.BreenOffice",
---     ["d1_trainstation.turnstyle"] = "experiment.TurnStyle",
--- 	["d1_canals.waterpuzzleroom"] = "experiment.WaterPuzzleRoom",
--- }
 
 -- Override specific entity keyvalues
 function MAP:EntityKeyValue(entity, key, value)
@@ -139,7 +121,7 @@ function MAP:AdjustCustomSoundscapes(customSoundscapes)
 		rules = {
 			{
 				rule = "playlooping",
-				volume = "0.05",
+				volume = "0.5",
 				wave = "*ambient/atmosphere/town_ambience.wav",
 				pitch = "95",
 				-- attenuation = "0", -- Not implemented
@@ -168,7 +150,7 @@ function MAP:AdjustCustomSoundscapes(customSoundscapes)
 			{
 				rule = "playrandom",
 				time = "10,60",
-				volume = "0.01,0.09",
+				volume = "0.1,0.15",
 				pitch = "95,105",
 				-- position = "random", -- Not implemented
 				soundlevel = SNDLVL_30dB,

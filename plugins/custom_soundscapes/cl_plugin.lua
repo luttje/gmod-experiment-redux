@@ -1,5 +1,7 @@
 local PLUGIN = PLUGIN
 
+local FADE_TIME = 1
+
 function PLUGIN:NormalizeNumbers(numbers, returnRandomIfTable)
 	local numbersTable
 
@@ -60,31 +62,61 @@ end
 function PLUGIN:SetupSoundPatches(customSoundscapes, soundscapeKey)
 	local client = LocalPlayer()
 
-	-- Clear all previous sound patches
-	for soundName, soundPatch in pairs(client.expSoundPatches or {}) do
-		soundPatch:Stop()
-	end
+	self:FadeOutSoundPatches(function()
+		client.expSoundPatchesInfo = {}
+		client.expPlayRandom = {}
 
-	client.expSoundPatches = {}
-	client.expPlayRandom = {}
-
-	self:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey)
+		self:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey)
+	end)
 end
 
-function PLUGIN:GetOrCreateSoundPatch(name, parentDSP)
+function PLUGIN:PlaySoundPatch(name, parentDSP, parentVolume, parentPitch, fadeInTime)
 	local client = LocalPlayer()
-	local soundPatch = client.expSoundPatches[name]
+	local soundPatchInfo = client.expSoundPatchesInfo[name]
 
-	if (not soundPatch) then
-		soundPatch = CreateSound(client, name)
-		client.expSoundPatches[name] = soundPatch
+	fadeInTime = fadeInTime or 0
+	parentVolume = parentVolume or 1
+	parentPitch = parentPitch or 100
+	parentDSP = parentDSP or 0
+
+	-- We always overwrite the sound, so a random value will be picked from table the tables of sound files, volumes and pitches provided to sound.Add
+	local soundPatch = CreateSound(client, name)
+	client.expSoundPatchesInfo[name] = {
+		soundPatch = soundPatch,
+		fadeInTime = fadeInTime,
+		originalVolume = parentVolume,
+		originalPitch = parentPitch,
+	}
+
+	soundPatch:SetDSP(parentDSP)
+
+	if (not fadeInTime) then
+		soundPatch:PlayEx(parentVolume, parentPitch)
 	else
-		soundPatch:Stop()
+		soundPatch:PlayEx(0, parentPitch)
+		soundPatch:ChangeVolume(parentVolume, fadeInTime)
 	end
 
-	soundPatch:SetDSP(parentDSP or 0)
+	return soundPatchInfo
+end
 
-	return soundPatch
+--- @param callback function
+--- @param fadeTime? number
+function PLUGIN:FadeOutSoundPatches(callback, fadeTime)
+	local client = LocalPlayer()
+
+	fadeTime = fadeTime or FADE_TIME
+
+	-- Clear all previous sound patches
+	for soundName, soundPatchInfo in pairs(client.expSoundPatchesInfo or {}) do
+		soundPatchInfo.soundPatch:FadeOut(fadeTime)
+	end
+
+	timer.Create("expCustomSoundscapesFadeOut", fadeTime, 1, function()
+		if (IsValid(client)) then
+			callback()
+		end
+	end)
 end
 
 function PLUGIN:CreateRandomSoundInfo(name, rule, parentDSP, parentVolume, parentPitch)
@@ -117,17 +149,30 @@ function PLUGIN:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey, p
 	local client = LocalPlayer()
 
 	parentDSP = parentDSP or customSoundscape.dsp
-	parentVolume = parentVolume or 1
-	parentPitch = parentPitch or 100
 
 	if (not customSoundscape) then
-		local soundPatch = self:GetOrCreateSoundPatch(soundscapeKey, parentDSP)
-		soundPatch:PlayEx(parentVolume, parentPitch)
+		self:PlaySoundPatch(soundscapeKey, parentDSP, parentVolume, parentPitch, FADE_TIME)
 		return
 	end
 
 	for ruleIndex, rule in ipairs(customSoundscape.rules) do
 		if (rule.rule == "playsoundscape") then
+			local volume, pitch
+			local ruleVolume = self:NormalizeNumbers(rule.volume or 1, true)
+			local rulePitch = self:NormalizeNumbers(rule.pitch or 100, true)
+
+			if (parentVolume) then
+				volume = parentVolume * ruleVolume
+			else
+				volume = ruleVolume
+			end
+
+			if (parentPitch) then
+				pitch = parentPitch * rulePitch
+			else
+				pitch = rulePitch
+			end
+
 			self:CreateSoundscapeSoundPatches(
 				customSoundscapes,
 				rule.name,
@@ -137,8 +182,13 @@ function PLUGIN:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey, p
 			)
 		elseif (rule.rule == "playlooping") then
 			local name = self:GetCustomSoundscapeName(soundscapeKey, ruleIndex)
-			local soundPatch = self:GetOrCreateSoundPatch(name, parentDSP)
-			soundPatch:PlayEx(parentVolume, parentPitch)
+			self:PlaySoundPatch(
+				name,
+				parentDSP,
+				parentVolume,
+				parentPitch,
+				FADE_TIME
+			)
 		elseif (rule.rule == "playrandom") then
 			local name = self:GetCustomSoundscapeName(soundscapeKey, ruleIndex)
 
@@ -156,7 +206,17 @@ end
 function PLUGIN:PlayerSecondElapsed()
 	local client = LocalPlayer()
 
-	if (not IsValid(client) or not client.expPlayRandom) then
+	if (not IsValid(client)) then
+		return
+	end
+
+	local character = client:GetCharacter()
+
+	if (character and Schema.perk.GetOwned("earplugs")) then
+		return
+	end
+
+	if (not client.expPlayRandom) then
 		return
 	end
 
@@ -165,8 +225,7 @@ function PLUGIN:PlayerSecondElapsed()
 			continue
 		end
 
-		local soundPatch = self:GetOrCreateSoundPatch(randomSound.name, randomSound.parentDSP)
-		soundPatch:PlayEx(randomSound.parentVolume, randomSound.parentPitch)
+		self:PlaySoundPatch(randomSound.name, randomSound.parentDSP, randomSound.parentVolume, randomSound.parentPitch)
 
 		client.expPlayRandom[i] = self:CreateRandomSoundInfo(
 			randomSound.name,
@@ -191,8 +250,6 @@ net.Receive("expSetCustomSoundscape", function()
 	end
 
 	client.expSoundscapeKey = soundscapeKey
-
-	print("Set current soundscape", soundscapeKey)
 
 	local customSoundscapes = PLUGIN:GetCustomSoundscapes()
 	PLUGIN:SetupSoundPatches(customSoundscapes, soundscapeKey)
