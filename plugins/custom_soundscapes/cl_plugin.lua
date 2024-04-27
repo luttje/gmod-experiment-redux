@@ -192,6 +192,10 @@ function PLUGIN:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey, p
 		elseif (rule.rule == "playrandom") then
 			local name = self:GetCustomSoundscapeName(soundscapeKey, ruleIndex)
 
+			if (hook.Run("ShouldPlayRandomAmbientSound", rule, name) == false) then
+				continue
+			end
+
 			client.expPlayRandom = client.expPlayRandom or {}
 			client.expPlayRandom[#client.expPlayRandom + 1] = self:CreateRandomSoundInfo(
 				name, rule, parentDSP, parentVolume, parentPitch
@@ -203,7 +207,7 @@ function PLUGIN:CreateSoundscapeSoundPatches(customSoundscapes, soundscapeKey, p
 	end
 end
 
-function PLUGIN:PlayerSecondElapsed()
+function PLUGIN:ShouldPlayRandomAmbientSound(rule, name)
 	local client = LocalPlayer()
 
 	if (not IsValid(client)) then
@@ -213,6 +217,15 @@ function PLUGIN:PlayerSecondElapsed()
 	local character = client:GetCharacter()
 
 	if (character and Schema.perk.GetOwned("earplugs")) then
+		print("earplugs")
+		return false
+	end
+end
+
+function PLUGIN:PlayerSecondElapsed()
+	local client = LocalPlayer()
+
+	if (not IsValid(client)) then
 		return
 	end
 
