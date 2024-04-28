@@ -57,6 +57,13 @@ if (SERVER) then
         local steamID = client:SteamID64()
 
 		if (#characterIds > 0) then
+            for _, id in ipairs(characterIds) do
+                local character = ix.char.loaded[id]
+
+				hook.Run("PreCharacterDeleted", client, character)
+				ix.char.loaded[id] = nil
+            end
+
 			-- Remove items belonging to the characters
 			query = mysql:Select("ix_inventories")
 			query:Select("inventory_id")
@@ -102,11 +109,15 @@ if (SERVER) then
         -- Remove the player data
         query = mysql:Delete("ix_players")
         query:Where("steamid", steamID)
-		query:Execute()
+        query:Execute(function()
+			if (not IsValid(client)) then
+				return
+			end
 
-		if(not noKick) then
-			client:Kick("Data removal requested.")
-		end
+			if(not noKick) then
+				client:Kick("Data removal requested.")
+			end
+		end)
     end
 end
 
