@@ -162,7 +162,13 @@ if (SERVER) then
 				entity:SetInventoryType(scavengingSourceData.inventoryType)
 				entity:Spawn()
 				entity:SetModel(scavengingSourceData.model)
-				entity:PhysicsInit(SOLID_VPHYSICS)
+                entity:PhysicsInit(SOLID_VPHYSICS)
+
+				local physicsObject = entity:GetPhysicsObject()
+
+				if (IsValid(physicsObject)) then
+					physicsObject:EnableMotion(false)
+				end
 
 				if (scavengingSourceData.invisible) then
 					entity:SetInvisible(true)
