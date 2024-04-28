@@ -15,7 +15,7 @@ do
         if (inventoryType) then
             if (inventoryType == "medium") then
                 inventoryType = "scavenging:medium"
-            elseif (inventoryType ~= "base") then
+            elseif (inventoryType == "base") then
                 inventoryType = "scavenging:base"
             end
 
