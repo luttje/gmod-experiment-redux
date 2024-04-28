@@ -91,6 +91,7 @@ local function ForEachSubMaterial(client, callback)
 end
 
 function ITEM:RemoveOutfit(client)
+	local client = self.player -- client was nil somehow?
 	local character = client:GetCharacter()
 
 	self:SetData("equip", false)
