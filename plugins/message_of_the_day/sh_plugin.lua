@@ -60,9 +60,11 @@ if (SERVER) then
             for _, id in ipairs(characterIds) do
                 local character = ix.char.loaded[id]
 
-				hook.Run("PreCharacterDeleted", client, character)
-				ix.char.loaded[id] = nil
-            end
+				if (character) then
+					hook.Run("PreCharacterDeleted", client, character)
+					ix.char.loaded[id] = nil
+				end
+			end
 
 			-- Remove items belonging to the characters
 			query = mysql:Select("ix_inventories")
