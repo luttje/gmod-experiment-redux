@@ -130,24 +130,18 @@ end
 function Schema:EntityKeyValue(entity, key, value)
     local maps = Schema.map.FindByProperty("mapName", game.GetMap())
 
-	for _, map in ipairs(maps) do
-		if (map.EntityKeyValue) then
+    for _, map in ipairs(maps) do
+        if (map.EntityKeyValue) then
             local override = map:EntityKeyValue(entity, key, value)
 
-			if (override ~= nil) then
-				return override
-			end
-		end
-	end
+            if (override ~= nil) then
+                return override
+            end
+        end
+    end
 end
 
 function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter)
-	local character = client:GetCharacter()
-
-	if (not character) then
-		return true
-	end
-
 	local mode = client:IsRunning() and "run" or "walk"
 
 	if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
@@ -159,11 +153,13 @@ function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter
 		return
 	end
 
-	local inventory = character:GetInventory()
+	local armorItems = client:GetCharacterNetVar("armorItems", {})
 	local soundOverride
 
-	for _, item in pairs(inventory:GetItems()) do
-		if (not item:GetData("equip") or not item.footstepSounds) then
+    for _, uniqueId in ipairs(armorItems) do
+        local item = ix.item.list[uniqueId]
+
+		if (not item or not item.footstepSounds) then
 			continue
 		end
 
