@@ -154,7 +154,9 @@ if (SERVER) then
 
 		if (scavengingSources) then
 			for _, scavengingSourceData in pairs(scavengingSources) do
-				local entity = ents.Create("exp_scavenging_source")
+                local entity = ents.Create("exp_scavenging_source")
+
+				scavengingSourceData.inventoryType = scavengingSourceData.inventoryType or "scavenging:base"
 
 				entity:SetPos(scavengingSourceData.position)
 				entity:SetAngles(scavengingSourceData.angles)
