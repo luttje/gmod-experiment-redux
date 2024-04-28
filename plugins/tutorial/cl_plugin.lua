@@ -407,7 +407,9 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 function PLUGIN:DrawOverlay()
 	local showTutorial = ix.option.Get("showTutorial", true)
 
-	if (not showTutorial) then
+    if (not showTutorial or self.hasAlreadyNotShown) then
+		-- Prevent the tutorial from starting during gameplay (awkward, since it starts from spawn selection).
+		self.hasAlreadyNotShown = true
 		return
 	end
 
