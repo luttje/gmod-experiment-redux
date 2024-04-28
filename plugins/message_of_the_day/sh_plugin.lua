@@ -111,7 +111,7 @@ if (SERVER) then
         -- Remove the player data
         query = mysql:Delete("ix_players")
         query:Where("steamid", steamID)
-        query:Execute(function()
+		query:Callback(function(result)
 			if (not IsValid(client)) then
 				return
 			end
@@ -120,6 +120,7 @@ if (SERVER) then
 				client:Kick("Data removal requested.")
 			end
 		end)
+        query:Execute()
     end
 end
 
