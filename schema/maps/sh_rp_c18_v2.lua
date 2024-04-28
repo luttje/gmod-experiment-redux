@@ -42,11 +42,9 @@ function MAP:EntityKeyValue(entity, key, value)
 	local class = entity:GetClass()
 	local entityIndex = entity:EntIndex()
 
-	-- Remove the judgement waiver and camera buttons, and monitor and camera
-	if (class == "point_camera" or class == "func_monitor"
-			or entityIndex == 140 or entityIndex == 142) then
+	-- Remove the monitor and camera
+	if (class == "point_camera" or class == "func_monitor") then
 		if (IsValid(entity)) then
-			print("Removing entity " .. class .. " with key " .. key .. " and value " .. value)
 			entity:Remove()
 		end
 
