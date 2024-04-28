@@ -45,10 +45,13 @@ if (SERVER) then
 	function ENT:Think()
 		local physicsObject = self:GetPhysicsObject()
 
-		if (IsValid(physicsObject) and self:IsMotionEnabled()) then
+		if (IsValid(physicsObject) and physicsObject:IsMotionEnabled()) then
 			-- Prevent admins from accidentally moving the entity too much
 			physicsObject:EnableMotion(false)
 		end
+
+		self:NextThink(CurTime() + 1)
+		return true
 	end
 
 	function ENT:SetInvisible(invisible)
