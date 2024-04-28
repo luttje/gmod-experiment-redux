@@ -34,6 +34,21 @@ if (SERVER) then
 		self:SetSolid(SOLID_VPHYSICS)
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetUseType(SIMPLE_USE)
+
+		local physicsObject = self:GetPhysicsObject()
+
+		if (IsValid(physicsObject)) then
+			physicsObject:EnableMotion(false)
+		end
+	end
+
+	function ENT:Think()
+		local physicsObject = self:GetPhysicsObject()
+
+		if (IsValid(physicsObject) and self:IsMotionEnabled()) then
+			-- Prevent admins from accidentally moving the entity too much
+			physicsObject:EnableMotion(false)
+		end
 	end
 
 	function ENT:SetInvisible(invisible)
