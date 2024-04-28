@@ -168,7 +168,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 	client:SetEyeAngles(spawnAngles)
 
 	-- For some reason Eye Angles wont set properly without a delay
-	timer.Simple(1, function()
+	timer.Simple(3, function()
 		if (IsValid(client)) then
 			client:SetEyeAngles(spawnAngles)
 		end

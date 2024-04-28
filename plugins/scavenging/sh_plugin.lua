@@ -158,10 +158,10 @@ if (SERVER) then
 
 				entity:SetPos(scavengingSourceData.position)
 				entity:SetAngles(scavengingSourceData.angles)
-				entity:SetModel(scavengingSourceData.model)
 				entity:SetSourceName(scavengingSourceData.name)
 				entity:SetInventoryType(scavengingSourceData.inventoryType)
 				entity:Spawn()
+				entity:SetModel(scavengingSourceData.model)
 				entity:PhysicsInit(SOLID_VPHYSICS)
 
 				if (scavengingSourceData.invisible) then

@@ -12,12 +12,7 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, inventoryType, model)
-		local trace = client:GetEyeTraceNoCursor()
-		local entity = ents.Create("exp_scavenging_source")
-		entity:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 32))
-		entity:Spawn()
-
-		if (inventoryType) then
+		if (inventoryType and inventoryType ~= "base") then
 			if (inventoryType == "medium") then
 				inventoryType = "scavenging:medium"
 			end
@@ -28,6 +23,10 @@ do
 			end
 		end
 
+		local trace = client:GetEyeTraceNoCursor()
+		local entity = ents.Create("exp_scavenging_source")
+		entity:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 32))
+		entity:Spawn()
 		entity:MakeInventory(inventoryType)
 
 		if (model) then
