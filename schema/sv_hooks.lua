@@ -143,6 +143,11 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 			return
 		end
 
+		-- If the player is interacting with their locker, don't check for the achievement.
+		if (IsValid(client.expLockersSession)) then
+			return
+		end
+
 		if (client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
 			target = target
 		elseif (target:IsPlayer() and target:IsRestricted()) then

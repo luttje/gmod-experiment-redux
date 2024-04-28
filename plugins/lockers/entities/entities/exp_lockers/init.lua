@@ -74,9 +74,11 @@ function ENT:Use(client)
 				OnPlayerClose = function()
 					ix.log.Add(client, "closeLockers")
 
-					if (IsValid(session)) then
-						session:Remove()
-					end
+                    if (IsValid(session)) then
+                        session:Remove()
+                    end
+
+					client.expLockersSession = nil
 				end
 			})
 		end, searchTime, function()
