@@ -29,7 +29,7 @@ do
 		client:Notify("You added lockers.")
 	end
 
-	ix.command.Add("LockersAdd", COMMAND)
+	ix.command.Add("LockersSpawn", COMMAND)
 end
 
 do

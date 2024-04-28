@@ -53,7 +53,7 @@ function ENT:StartSpawningForTrainees(trainees, duration)
 	for _, trainee in ipairs(trainees) do
 		if (IsValid(trainee)) then
 			trainee.expTargetPracticeScore = 0
-			trainee:SetCharacterNetVar("expTargetPracticeScore", trainee.expTargetPracticeScore)
+			trainee:SetCharacterNetVar("targetPracticeScore", trainee.expTargetPracticeScore)
 		end
 	end
 

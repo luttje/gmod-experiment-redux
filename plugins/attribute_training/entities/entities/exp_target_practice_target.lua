@@ -94,7 +94,7 @@ function ENT:OnTakeDamage(dmginfo)
 
 		if (isTrainee) then
 			attacker.expTargetPracticeScore = attacker.expTargetPracticeScore + (1 / self:GetModelScale())
-			attacker:SetCharacterNetVar("expTargetPracticeScore", attacker.expTargetPracticeScore)
+			attacker:SetCharacterNetVar("targetPracticeScore", attacker.expTargetPracticeScore)
 		end
 	end
 

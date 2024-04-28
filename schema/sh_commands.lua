@@ -258,7 +258,7 @@ do
 		ix.util.Notify("NPC spawned successfully.", client)
 	end
 
-	ix.command.Add("NpcAdd", COMMAND)
+	ix.command.Add("NpcSpawn", COMMAND)
 end
 
 do
