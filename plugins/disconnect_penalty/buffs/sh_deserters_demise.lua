@@ -12,13 +12,7 @@ BUFF.foregroundImage = {
 BUFF.durationInSeconds = 5 * 60
 BUFF.resetOnDuplicate = true
 BUFF.description =
-"You've recently taken or dealt damage. Disconnecting with this debuff active will cause you to drop all your belongings."
-
-ix.chat.Register("deserters_demise", {
-	OnChatAdd = function(self, speaker, text)
-		chat.AddText(Color(205, 31, 0, 255), "(Deserters Demise Debuff activated) ", color_white, text)
-	end,
-})
+	"You've recently taken or dealt damage. Disconnecting with this debuff active will cause you to drop all your belongings."
 
 if (not SERVER) then
 	return
@@ -29,7 +23,7 @@ function BUFF:OnSetup(client, buff)
 		return
 	end
 
-	ix.chat.Send(client, "deserters_demise", "Disconnecting with this debuff active will cause you to drop all your belongings!")
+	client:Notify("Deserters Demise Debuff is active! Disconnecting will cause you to drop all your belongings!")
 end
 
 function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
