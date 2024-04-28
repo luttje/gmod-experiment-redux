@@ -120,8 +120,20 @@ if (SERVER) then
 		timer.Remove("ixScavengingSourceSpawner")
 	end
 
-	function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
-		closeIfEmpty(sourceInventory)
+    function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
+        closeIfEmpty(sourceInventory)
+    end
+
+    function PLUGIN:OnPhysgunPickup(client, entity)
+        if (entity:GetClass() == "exp_scavenging_source") then
+            entity.expPhysgunnedBy = client
+        end
+    end
+
+	function PLUGIN:PhysgunDrop(client, entity)
+		if (entity:GetClass() == "exp_scavenging_source") then
+            entity.expPhysgunnedBy = nil
+		end
 	end
 
 	function PLUGIN:SaveData()

@@ -45,7 +45,7 @@ if (SERVER) then
 	function ENT:Think()
 		local physicsObject = self:GetPhysicsObject()
 
-		if (IsValid(physicsObject) and physicsObject:IsMotionEnabled()) then
+		if (IsValid(physicsObject) and physicsObject:IsMotionEnabled() and not IsValid(entity.expPhysgunnedBy)) then
 			-- Prevent admins from accidentally moving the entity too much
 			physicsObject:EnableMotion(false)
 		end
