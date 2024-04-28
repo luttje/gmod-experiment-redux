@@ -190,10 +190,10 @@ end
 
 function Schema:AdjustMaterialSources(materialSources)
 	local VERY_RARE = 0.5
-    local RARE = 1
-    local UNCOMMON = 3
-    local COMMON = 4
-    local VERY_COMMON = 6
+    local RARE = 4
+    local UNCOMMON = 10
+    local COMMON = 15
+    local VERY_COMMON = 30
 
 	--[[
 		Wooden props
