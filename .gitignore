@@ -1,3 +1,4 @@
 .vscode/
 *.sublime-*
 content/**/*.bz2
+content/errors.txt
