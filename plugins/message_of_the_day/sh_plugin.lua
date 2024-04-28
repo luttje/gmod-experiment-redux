@@ -56,6 +56,8 @@ if (SERVER) then
         local characterIds = client.ixCharList
         local steamID = client:SteamID64()
 
+		ix.char.cache[steamID] = nil
+
 		if (#characterIds > 0) then
             for _, id in ipairs(characterIds) do
                 local character = ix.char.loaded[id]
