@@ -22,3 +22,8 @@ ITEM.attachmentOffsetAngles = Angle(0, 0, 0)
 ITEM.attachmentOffsetVector = Vector(-3.96, 4.95, -2.97)
 ITEM.forcedWeaponCalibre = "beanbag"
 ITEM.requiresGunsmith = true
+
+ITEM.mergeIntoSwep = {
+	-- Spread = 0.03 (spread radius, if ShotgunPelletSpread is super low, pellets will circle around this radius perimeter)
+	ShotgunPelletSpread = 0.1, -- was 0.01 (deviation from spread, even going out of spread radius)
+}
