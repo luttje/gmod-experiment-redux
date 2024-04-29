@@ -25,7 +25,7 @@ function PANEL:DrawDistanceText(distance, width, height)
 
 	local distanceCentimeters = Schema.util.UnitToCentimeters(distance)
 	local distanceRounded = math.Round(distanceCentimeters / 100)
-	local text = distanceRounded == 0 and "They're right here!" or
+	local text = distanceRounded == 0 and "Right here!" or
 		(distanceRounded .. (distanceRounded == 1 and " meter" or " meters"))
 	local textWidth, textHeight = Schema.GetCachedTextSize(font, text)
 
