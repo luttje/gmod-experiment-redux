@@ -78,7 +78,7 @@ function PLUGIN:PostPlayerLoadout(client)
     client:SetColor(Color(255, 255, 255, 0))
     client:SetRenderMode(RENDERMODE_TRANSALPHA)
     client:SetNetVar("expChoosingSpawn", true)
-    client:Lock()
+	client:Freeze(true)
 
     net.Start("expSpawnSelectOpen")
     net.WriteTable(self:GetAvailableSpawns(client))
@@ -168,17 +168,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 	local effectData
 	local scale = 20
 
-	client:UnLock()
-	client:Freeze(true)
 	client:SetPos(spawnPosition)
-	client:SetEyeAngles(spawnAngles)
-
-	-- For some reason Eye Angles wont set properly without a delay
-	timer.Simple(3, function()
-		if (IsValid(client)) then
-			client:SetEyeAngles(spawnAngles)
-		end
-    end)
 
     local volume = math.Rand(0.8, 0.99)
 	local pitch = math.random(75, 125)
@@ -213,6 +203,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		end
 
 		client:Freeze(false)
+		client:SetEyeAngles(spawnAngles)
 		client:SetNetVar("expChoosingSpawn", false)
 		client:SetRenderMode(RENDERMODE_TRANSCOLOR)
 		client:SetColor(Color(255, 255, 255, 255))
