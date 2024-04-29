@@ -15,7 +15,8 @@ ITEM.functions.Apply = {
 		local data = {}
 		data.start = client:GetShootPos()
 		data.endpos = data.start + client:GetAimVector() * 70
-		data.filter = client
+        data.filter = client
+
 		local target = util.TraceLine(data).Entity
 		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
 

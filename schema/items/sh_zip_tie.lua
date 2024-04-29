@@ -11,16 +11,8 @@ ITEM.functions.Tie = {
 	-- Note that we always return false, because we manually remove the zip tie when not cancelling the action.
 	OnRun = function(itemTable)
 		local client = itemTable.player
-		local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
 		local baseTaskTime = 10
 		local taskTime = Schema.GetDexterityTime(client, baseTaskTime)
-
-		if (hasQuickHands) then
-			taskTime = taskTime * quickHandsPerkTable.tieTimeMultiplier
-		end
-
-		taskTime = math.Clamp(taskTime, 2, baseTaskTime)
-
 		local data = {}
 		data.start = client:GetShootPos()
 		data.endpos = data.start + client:GetAimVector() * 70
@@ -48,6 +40,14 @@ ITEM.functions.Tie = {
 			return false
 		end
 
+        local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
+
+		if (hasQuickHands) then
+			taskTime = taskTime * quickHandsPerkTable.tieTimeMultiplier
+		end
+
+		taskTime = math.Clamp(taskTime, 2, baseTaskTime)
+
 		itemTable.bBeingUsed = true
 
 		client:SetNetVar("tying", true)
@@ -60,11 +60,9 @@ ITEM.functions.Tie = {
             client:SetNetVar("tying")
 			Schema.TiePlayer(target)
 
-			Schema.achievement.Progress("zip_ninja", client)
-            Schema.PlayerClearEntityInfoTooltip(client)
-
 			itemTable:Remove()
 
+            Schema.PlayerClearEntityInfoTooltip(client)
 			hook.Run("OnPlayerBecameTied", target, client)
         end, taskTime, function()
 			if (IsValid(client)) then

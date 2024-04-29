@@ -67,6 +67,20 @@ function Schema:PlayerSecondElapsed(client)
 
 	client:CheckQueuedBoostRemovals(character)
 	Schema.buff.CheckExpired(client)
+
+	local ragdoll = client:GetLocalVar("ragdoll")
+	local ragdollEntity = ragdoll and Entity(ragdoll) or nil
+
+	if (IsValid(ragdollEntity)) then
+		-- We can't rely on velocity, because spazzing ragdolls can have a high velocity whilst not moving much.
+		-- local velocity = ragdollEntity:GetVelocity()
+		local previousPosition = ragdollEntity.expPreviousPosition or ragdollEntity:GetPos()
+		local position = ragdollEntity:GetPos()
+		local downwardChange = position.z - previousPosition.z
+
+		ragdollEntity.expLastDownwardChange = downwardChange
+		ragdollEntity.expPreviousPosition = position
+	end
 end
 
 function Schema:CharacterPreSave(character)
@@ -240,6 +254,53 @@ function Schema:GetPlayerPunchDamage(client, damage, context)
 end
 
 function Schema:EntityTakeDamage(entity, damageInfo)
+	local inflictor = damageInfo:GetInflictor()
+	local isRagdoll = entity:GetClass() == "prop_ragdoll"
+
+	if (inflictor) then
+		local inflictorClass = inflictor:GetClass()
+
+		if (inflictorClass == "exp_belongings"
+				or inflictorClass == "ix_item"
+				or inflictorClass == "ix_money"
+				or inflictorClass == "ix_shipment"
+				or inflictorClass == "ix_container") then
+			damageInfo:SetDamage(0)
+			return
+		end
+
+		-- If it's a ragdoll and it's being damaged by worldspawn, then it's probably getting crushed.
+		if (isRagdoll and inflictor == game.GetWorld()) then
+			local lastDownwardChange = entity.expLastDownwardChange or 0
+
+			-- If they actually fell from a height, then we'll let them take damage.
+			if (lastDownwardChange > -300) then
+				damageInfo:SetDamage(0)
+				return
+			end
+		end
+
+		-- If the inflictor is held by a player, then they may be trying to hurt someone with it.
+		if (inflictor.ixHeldOwner) then
+			damageInfo:SetDamage(0)
+			return
+		end
+
+		-- If the inflictor is a prop_physics, then someone may be trying to prop kill.
+		if (inflictorClass == "prop_physics" and not inflictor.expIsSafeProjectile) then
+			damageInfo:SetDamage(0)
+			return
+		end
+	end
+
+	-- Ragdolls are prone to taking damage a lot of times when spazzing, so we'll prevent them from taking damage too often.
+	if (isRagdoll and entity.expLastDamage and entity.expLastDamage + 0.5 > CurTime()) then
+		damageInfo:SetDamage(0)
+		return
+	end
+
+	entity.expLastDamage = CurTime()
+
 	if (not entity:IsPlayer()) then
 		return
 	end
@@ -249,8 +310,6 @@ function Schema:EntityTakeDamage(entity, damageInfo)
 	if (not character) then
 		return
 	end
-
-	entity.expLastDamage = CurTime()
 
 	if (damageInfo:IsDamageType(Schema.armorAffectedTypes)) then
 		local damage = damageInfo:GetDamage()
@@ -604,8 +663,10 @@ function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 	local money = character:GetMoney()
 
 	local hasConfusingPockets, confusingPocketsPerkTable = Schema.perk.GetOwned("confusing_pockets", client)
-	local dropEquippedArmor = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_ARMOR) == Schema.dropMode.WITH_EQUIPPED_ARMOR
-	local dropEquippedWeapons = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_WEAPONS) == Schema.dropMode.WITH_EQUIPPED_WEAPONS
+	local dropEquippedArmor = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_ARMOR) ==
+		Schema.dropMode.WITH_EQUIPPED_ARMOR
+	local dropEquippedWeapons = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_WEAPONS) ==
+		Schema.dropMode.WITH_EQUIPPED_WEAPONS
 	local dropModeIsRandom = bit.band(dropMode, Schema.dropMode.RANDOM) == Schema.dropMode.RANDOM
 
 	for _, slot in pairs(characterInventory.slots) do
@@ -730,9 +791,9 @@ function Schema:OnPlayerOptionSelected(target, client, option, data)
 end
 
 function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, data)
-    local isCorpse = ragdoll:GetNetVar("isCorpse", false)
+	local isCorpse = ragdoll:GetNetVar("isCorpse", false)
 
-    if (not isCorpse and target:Alive()) then
+	if (not isCorpse and target:Alive()) then
 		if (target:IsRestricted() and not target:GetNetVar("beingUntied")) then
 			if (option == L("untie", client)) then
 				Schema.PlayerTryUntieTarget(client, ragdoll)
@@ -741,8 +802,8 @@ function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, d
 			end
 		end
 
-        return
-    end
+		return
+	end
 
 	if (not isCorpse) then
 		return
@@ -969,4 +1030,8 @@ function Schema:CanPlayerChloroform(client, target)
 	if (client:GetNetVar("tying") or client:GetNetVar("chloroforming")) then
 		return false
 	end
+end
+
+function Schema:OnPlayerBecameTied(client, tiedBy)
+	Schema.achievement.Progress("zip_ninja", tiedBy)
 end
