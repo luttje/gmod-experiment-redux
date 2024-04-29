@@ -61,9 +61,7 @@ function PLUGIN:ResurrectPlayer(client, target, corpse, newHealth)
 	-- Make sure that whoever is inspecting the corpse inventory has their storage menu closed
 	-- Furthermore return all remaining items and money to the resurrected player
     if (corpse.ixInventory) then
-        ix.storage.Close(corpse.ixInventory)
-        -- TODO: Shouldn't this happen automatically? Helix bug?
-        corpse.ixInventory.receivers = {}
+        Schema.CloseInventory(corpse.ixInventory)
 
         local items = corpse.ixInventory:GetItems()
         local money = corpse:GetMoney()

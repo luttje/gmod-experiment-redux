@@ -105,3 +105,187 @@ function META:SaveData()
 
 	self:expSaveData()
 end
+
+-- ! This overrides Helix's SetRagdolled to call the OnCharacterFallover hook also when getting up after the time expires
+-- ! helix/gamemode/core/meta/sh_player.lua is the original file this is based on
+--- Sets this player's ragdoll status.
+-- @realm server
+-- @bool bState Whether or not to ragdoll this player
+-- @number[opt=0] time How long this player should stay ragdolled for. Set to `0` if they should stay ragdolled until they
+-- get back up manually
+-- @number[opt=5] getUpGrace How much time in seconds to wait before the player is able to get back up manually. Set to
+-- the same number as `time` to disable getting up manually entirely
+function META:SetRagdolled(bState, time, getUpGrace)
+	if (!self:Alive()) then
+		return
+	end
+
+	getUpGrace = getUpGrace or time or 5
+
+	if (bState) then
+		if (IsValid(self.ixRagdoll)) then
+			self.ixRagdoll:Remove()
+		end
+
+		local entity = self:CreateServerRagdoll()
+
+		entity:CallOnRemove("fixer", function()
+			if (not IsValid(self)) then
+				return
+			end
+
+			self:SetLocalVar("blur", nil)
+			self:SetLocalVar("ragdoll", nil)
+
+			if (!entity.ixNoReset) then
+				self:SetPos(entity:GetPos())
+			end
+
+			self:SetNoDraw(false)
+			self:SetNotSolid(false)
+			self:SetMoveType(MOVETYPE_WALK)
+			self:SetLocalVelocity(IsValid(entity) and entity.ixLastVelocity or vector_origin)
+
+			hook.Run("OnCharacterFallover", self, nil, false)
+
+			if (not entity.ixIgnoreDelete) then
+				if (entity.ixWeapons) then
+					for _, v in ipairs(entity.ixWeapons) do
+						if (v.class) then
+							local weapon = self:Give(v.class, true)
+
+							if (v.item) then
+								weapon.ixItem = v.item
+							end
+
+							self:SetAmmo(v.ammo, weapon:GetPrimaryAmmoType())
+							weapon:SetClip1(v.clip)
+						elseif (v.item and v.invID == v.item.invID) then
+							v.item:Equip(self, true, true)
+							self:SetAmmo(v.ammo, self.carryWeapons[v.item.weaponCategory]:GetPrimaryAmmoType())
+						end
+					end
+				end
+
+				if (entity.ixActiveWeapon) then
+					if (self:HasWeapon(entity.ixActiveWeapon)) then
+						self:SetActiveWeapon(self:GetWeapon(entity.ixActiveWeapon))
+					else
+						local weapons = self:GetWeapons()
+						if (#weapons > 0) then
+							self:SetActiveWeapon(weapons[1])
+						end
+					end
+				end
+
+				if (self:IsStuck()) then
+					entity:DropToFloor()
+					self:SetPos(entity:GetPos() + Vector(0, 0, 16))
+
+					local positions = ix.util.FindEmptySpace(self, {entity, self})
+
+					for _, v in ipairs(positions) do
+						self:SetPos(v)
+
+						if (!self:IsStuck()) then
+							return
+						end
+					end
+				end
+			end
+		end)
+
+		self:SetLocalVar("blur", 25)
+		self.ixRagdoll = entity
+
+		entity.ixWeapons = {}
+		entity.ixPlayer = self
+
+		if (getUpGrace) then
+			entity.ixGrace = CurTime() + getUpGrace
+		end
+
+		if (time and time > 0) then
+			entity.ixStart = CurTime()
+			entity.ixFinish = entity.ixStart + time
+
+			self:SetAction("@wakingUp", nil, nil, entity.ixStart, entity.ixFinish)
+		end
+
+		if (IsValid(self:GetActiveWeapon())) then
+			entity.ixActiveWeapon = self:GetActiveWeapon():GetClass()
+		end
+
+		for _, v in ipairs(self:GetWeapons()) do
+			if (v.ixItem and v.ixItem.Equip and v.ixItem.Unequip) then
+				entity.ixWeapons[#entity.ixWeapons + 1] = {
+					item = v.ixItem,
+					invID = v.ixItem.invID,
+					ammo = self:GetAmmoCount(v:GetPrimaryAmmoType())
+				}
+				v.ixItem:Unequip(self, false)
+			else
+				local clip = v:Clip1()
+				local reserve = self:GetAmmoCount(v:GetPrimaryAmmoType())
+				entity.ixWeapons[#entity.ixWeapons + 1] = {
+					class = v:GetClass(),
+					item = v.ixItem,
+					clip = clip,
+					ammo = reserve
+				}
+			end
+		end
+
+		self:GodDisable()
+		self:StripWeapons()
+		self:SetMoveType(MOVETYPE_OBSERVER)
+		self:SetNoDraw(true)
+		self:SetNotSolid(true)
+
+		local uniqueID = "ixUnRagdoll" .. self:SteamID()
+
+		if (time) then
+			timer.Create(uniqueID, 0.33, 0, function()
+				if (IsValid(entity) and IsValid(self) and self.ixRagdoll == entity) then
+					local velocity = entity:GetVelocity()
+					entity.ixLastVelocity = velocity
+
+					self:SetPos(entity:GetPos())
+
+					if (velocity:Length2D() >= 8) then
+						if (!entity.ixPausing) then
+							self:SetAction()
+							entity.ixPausing = true
+						end
+
+						return
+					elseif (entity.ixPausing) then
+						self:SetAction("@wakingUp", time)
+						entity.ixPausing = false
+					end
+
+					time = time - 0.33
+
+					if (time <= 0) then
+						entity:Remove()
+					end
+				else
+					timer.Remove(uniqueID)
+				end
+			end)
+		else
+			timer.Create(uniqueID, 0.33, 0, function()
+				if (IsValid(entity) and IsValid(self) and self.ixRagdoll == entity) then
+					self:SetPos(entity:GetPos())
+				else
+					timer.Remove(uniqueID)
+				end
+			end)
+		end
+
+		self:SetLocalVar("ragdoll", entity:EntIndex())
+		hook.Run("OnCharacterFallover", self, entity, true)
+	elseif (IsValid(self.ixRagdoll)) then
+		self.ixRagdoll:Remove()
+	end
+end

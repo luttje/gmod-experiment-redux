@@ -86,6 +86,20 @@ ix.log.AddType("schemaDebug", function(client, ...)
 	return L("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
 end, FLAG_DANGER)
 
+--- ! WORKAROUND for helix bug where inventory that is closed doesn't remove receivers.
+--- @param inventory Inv
+function Schema.CloseInventory(inventory)
+	if (not inventory.storageInfo) then
+		-- Can happen for a character's inventory, while nobody is searching them
+		return
+	end
+
+	ix.storage.Close(inventory)
+
+	-- TODO: Shouldn't this happen automatically? Helix bug?
+	inventory.receivers = {}
+end
+
 --- Use this to force an entity info tooltip to update.
 --- For example when a player is being tied up, you will want to update the tooltip to show its done.
 --- @param client Player

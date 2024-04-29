@@ -722,15 +722,15 @@ function Schema:OnPlayerOptionSelected(target, client, option, data)
 	end
 end
 
-function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
+function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, data)
     local isCorpse = ragdoll:GetNetVar("isCorpse", false)
 
     if (not isCorpse and target:Alive()) then
-		if (ragdollPlayer:IsRestricted() and not ragdollPlayer:GetNetVar("untying")) then
+		if (target:IsRestricted() and not target:GetNetVar("untying")) then
 			if (option == L("untie", client)) then
 				Schema.PlayerTryUntieTarget(client, ragdoll)
 			elseif (option == L("searchTied", client)) then
-				Schema.SearchPlayer(client, ragdollPlayer)
+				Schema.SearchPlayer(client, target)
 			end
 		end
 
@@ -753,7 +753,7 @@ function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, op
 			return
 		end
 
-		if (hook.Run("CanPlayerMutilate", client, ragdollPlayer, ragdoll) == false) then
+		if (hook.Run("CanPlayerMutilate", client, target, ragdoll) == false) then
 			return
 		end
 
@@ -916,4 +916,22 @@ function Schema:OnCorpseMoneyChanged(corpse, newAmount, oldAmount)
 	end
 
 	Schema.achievement.Progress("ransacked", client)
+end
+
+function Schema:OnCharacterFallover(client, ragdoll, isFallenOver)
+	-- Kick anyone inspecting this players inventory
+	if (isFallenOver) then
+		return
+	end
+
+	local inventory = client:GetCharacter():GetInventory()
+
+	if (not inventory) then
+		return
+	end
+
+	-- Check if anyone is searching the player, then close their searching
+	if (inventory.storageInfo) then
+		Schema.CloseInventory(inventory)
+	end
 end

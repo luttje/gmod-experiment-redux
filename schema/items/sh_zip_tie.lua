@@ -79,8 +79,15 @@ ITEM.functions.Tie = {
 		return false
 	end,
 
-	OnCanRun = function(itemTable)
-		return not IsValid(itemTable.entity) or itemTable.bBeingUsed
+	OnCanRun = function(item)
+        local client = item.player
+
+        -- Ensure it's in the player's inventory
+        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+            return false
+        end
+
+		return not item.bBeingUsed
 	end
 }
 
