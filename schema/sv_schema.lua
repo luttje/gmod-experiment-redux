@@ -535,11 +535,3 @@ function Schema.DecayEntity(entity, seconds, callback)
 		timer.Remove(name)
 	end)
 end
-
-function Schema:CanPlayerDropItem(client, itemId)
-	local item = ix.item.instances[itemId]
-
-	if (not IsValid(item:GetOwner())) then
-		return false
-	end
-end
