@@ -13,6 +13,133 @@ function Schema.GetCachedTextSize(font, text)
 	return unpack(Schema.CachedTextSizes[font][text])
 end
 
+-- Called once when a new storage panel can have functions injected by the schema.
+function Schema.SetupStoragePanel(panel, storageInventoryPanel, localInventoryPanel)
+	-- Setup the shortcut for closing the storage panel with the scoreboard key.
+	panel.expCloseShortcutOnKeyCodeReleased =
+		panel.expCloseShortcutOnKeyCodeReleased
+		or panel.OnKeyCodeReleased
+
+	function panel:OnKeyCodeReleased(key)
+		local scoreboardBinding = input.LookupBinding("showscores")
+		local scoreboardKey = scoreboardBinding and input.GetKeyCode(scoreboardBinding) or KEY_TAB
+
+		if (key == scoreboardKey) then
+			self.storageInventory:Close()
+		end
+
+		if (self.expCloseShortcutOnKeyCodeReleased) then
+			self:expCloseShortcutOnKeyCodeReleased(key)
+		end
+	end
+
+	if (not ix.option.Get("openBags", true)) then
+		return
+	end
+
+	-- Open bags in the storage panel automatically and lay them out.
+	local inventoryPanels = {
+		storageInventoryPanel,
+		localInventoryPanel,
+	}
+
+	for i, inventoryPanel in ipairs(inventoryPanels) do
+		local inventory = ix.item.inventories[inventoryPanel.invID]
+
+		local function checkAllBagsSynced()
+			for _, item in pairs(inventory:GetItems()) do
+				if (not item.isBag) then
+					continue
+				end
+
+				local index = item:GetData("id", "")
+				local bagInventory = ix.item.inventories[index]
+
+				if (not bagInventory or not bagInventory.slots) then
+					return false
+				end
+			end
+
+			return true
+		end
+
+		-- Wait a couple of frames for the inventory to be arrive on the client, trying a couple times.
+		local retryTimerName = "ixStoragePanelBagsRetry" .. inventoryPanel.invID
+		timer.Create(retryTimerName, 0.1, 10, function()
+			if (checkAllBagsSynced()) then
+				Schema.SetupStoragePanelBags(inventoryPanel, inventory, i == 1)
+				timer.Remove(retryTimerName)
+			end
+		end)
+	end
+end
+
+function Schema.SetupStoragePanelBags(inventoryPanel, inventory, isStoragePanelBags)
+	local bagPanelsToPosition = {}
+	local totalBagPanelHeight = 0
+
+	for _, item in pairs(inventory:GetItems()) do
+		if (not item.isBag) then
+			continue
+		end
+
+		item.functions.View.OnClick(item)
+
+		local index = item:GetData("id", "")
+		local bagPanel = ix.gui["inv" .. index]
+
+		if (not IsValid(bagPanel)) then
+			continue
+		end
+
+		bagPanelsToPosition[#bagPanelsToPosition + 1] = bagPanel
+		totalBagPanelHeight = totalBagPanelHeight + bagPanel:GetTall()
+	end
+
+	if (#bagPanelsToPosition == 0) then
+		return
+	end
+
+	local screenH = ScrH()
+	local parentX, parentY, parentW, parentH = inventoryPanel:GetBounds()
+	local padding = 4
+
+	if (totalBagPanelHeight > screenH) then
+		local bagHeight = math.floor((screenH - padding * 2) / #bagPanelsToPosition) - 2
+
+		for b, panel in ipairs(bagPanelsToPosition) do
+			local bagWidth = panel:GetWide()
+			local bagY = padding + (bagHeight + 2) * (b - 1)
+			local bagX
+
+			if (isStoragePanelBags) then
+				bagX = parentX - bagWidth - padding
+			else
+				bagX = parentX + parentW + padding
+			end
+
+			panel:SetPos(bagX, bagY)
+		end
+	else
+		local bagY = padding + (screenH - totalBagPanelHeight) * .5
+
+		for _, panel in ipairs(bagPanelsToPosition) do
+			local bagWidth = panel:GetWide()
+			local bagX
+
+			if (isStoragePanelBags) then
+				bagX = parentX - bagWidth - padding
+			else
+				bagX = parentX + parentW + padding
+			end
+
+			panel:SetPos(bagX, bagY)
+
+			bagY = bagY + panel:GetTall() + 2
+		end
+	end
+end
+
 net.Receive("expTearGassed", function()
 	Schema.tearGassed = CurTime() + 20
 end)
