@@ -937,3 +937,19 @@ function Schema:OnCharacterFallover(client, ragdoll, isFallenOver)
 		Schema.CloseInventory(inventory)
 	end
 end
+
+function Schema:CanPlayerTie(client, target)
+	local ragdollEntIndex = target:GetLocalVar("ragdoll")
+
+	if (ragdollEntIndex) then
+		-- Always tie ragdolls, no matter how they're facing
+		return
+	end
+
+	local isFacingAway = (target:GetAimVector():DotProduct(client:GetAimVector()) > 0)
+
+	if (not isFacingAway) then
+		client:Notify("You must be standing behind the target to tie them!")
+		return false
+	end
+end
