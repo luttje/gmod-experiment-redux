@@ -8,6 +8,10 @@ resource.AddWorkshop("3009874388")
 
 -- TODO: Optionally add more weapons: https://steamcommunity.com/workshop/filedetails/?id=3006509287
 
+if (not TacRP) then
+	ix.util.SchemaErrorNoHaltWithStack("TacRP is not installed or enabled! Expect errors!")
+end
+
 -- We override this so TacRP doesnt interfere with our own door busting
 function TacRP.DoorBust(ent, vel, attacker)
 end

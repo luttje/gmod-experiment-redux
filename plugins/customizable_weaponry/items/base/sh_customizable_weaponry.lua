@@ -72,7 +72,7 @@ function ITEM:OnRestored()
 end
 
 ITEM.functions.DetachAttachment = {
-	name = "Detach Attachment",
+	name = "Detach...",
 	icon = "icon16/circlecross.png",
 	isMulti = true,
 	multiOptions = function(item, client)
@@ -83,7 +83,7 @@ ITEM.functions.DetachAttachment = {
 			local attachment = TacRP.GetAttTable(attachmentData.id)
 
 			options[attachmentSlotId] = {
-				name = "Remove " .. (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName),
+				name = (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName),
 				data = {
 					attachmentSlotId = attachmentSlotId,
 				},

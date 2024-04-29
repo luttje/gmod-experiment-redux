@@ -85,7 +85,7 @@ ITEM.functions.ListCompatibleItems = {
 }
 
 ITEM.functions.Attach = {
-	name = "Attach to a Weapon",
+	name = "Attach to...",
 	icon = "icon16/add.png",
 	isMulti = true,
 	multiOptions = function(item, client)
@@ -93,11 +93,9 @@ ITEM.functions.Attach = {
 		local inventory = character:GetInventory()
 		local options = {}
 
-		for _, item in pairs(inventory:GetItemsByNestedBase("base_customizable_weaponry")) do
-			local weaponName = item.name
-
+		for _, item in ipairs(inventory:GetItemsByNestedBase("base_customizable_weaponry")) do
 			options[item.id] = {
-				name = "Add to " .. weaponName,
+				name = item.name,
 				data = {
 					itemID = item.id,
 				},
@@ -105,14 +103,21 @@ ITEM.functions.Attach = {
 		end
 
 		return options
-	end,
+    end,
 
 	OnRun = function(attachmentItem, data)
 		local client = attachmentItem.player
 		local character = client:GetCharacter()
 
-		if (not data.itemID) then
-			client:Notify("You must select a weapon to attach this to.")
+        if (not data.itemID) then
+            local inventory = character:GetInventory()
+            local matchedWeapons = #inventory:GetItemsByNestedBase("base_customizable_weaponry")
+
+			if (matchedWeapons == 0) then
+				client:Notify("You do not have any weapons to attach this to.")
+			else
+				client:Notify("Select one of the listed weapons to attach this to.")
+			end
 
 			return false
 		end
@@ -147,19 +152,23 @@ ITEM.functions.Attach = {
 			return false
 		end
 
-		-- Find the attachment slot on thè SWEP that goes with the attachment category
-		local foundAttachmentSlot
+        -- Find the attachment slot on the SWEP that goes with the attachment category
+        local attachmentCategories = istable(attachment.Category)
+			and attachment.Category
+			or { attachment.Category }
+        local foundAttachmentSlot
 
 		for attachmentSlotId, attachmentSlot in ipairs(swep.Attachments) do
 			local slotCategories = istable(attachmentSlot.Category)
 				and attachmentSlot.Category
-				or { attachmentSlot.Category }
+                or { attachmentSlot.Category }
 
-			for _, slotCategory in ipairs(slotCategories) do
-				if (slotCategory == attachment.Category) then
-					foundAttachmentSlot = attachmentSlotId
-
-					break
+            for _, slotCategory in ipairs(slotCategories) do
+				for _, attachmentCategory in ipairs(attachmentCategories) do
+					if (slotCategory == attachmentCategory) then
+						foundAttachmentSlot = attachmentSlotId
+						break
+					end
 				end
 			end
 		end

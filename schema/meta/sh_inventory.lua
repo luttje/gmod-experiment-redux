@@ -12,8 +12,6 @@ function META:GetItemsByNestedBase(baseID, bOnlyMain)
     for _, item in pairs(self:GetItems(bOnlyMain)) do
 		if (item:IsBasedOn(baseID)) then
 			items[#items + 1] = item
-
-			break
 		end
     end
 
