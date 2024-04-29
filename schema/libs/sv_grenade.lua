@@ -156,5 +156,7 @@ function Schema.grenade.HandleRemoveItem(client, weapon)
 		return
 	end
 
+	weapon.ixItem:RemovePAC(client)
 	inventory:Remove(weapon.ixItem.id)
+	client.carryWeapons[weapon.ixItem.weaponCategory] = nil
 end

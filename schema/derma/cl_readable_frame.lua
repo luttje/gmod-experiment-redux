@@ -113,3 +113,9 @@ function PANEL:OnRemove()
 end
 
 vgui.Register("expReadableFrame", PANEL, "DFrame")
+
+hook.Add("ShouldDrawCrosshair", "expDontDrawCrosshair", function()
+	if (IsValid(ix.gui.expReadableFrame)) then
+		return false
+	end
+end)
