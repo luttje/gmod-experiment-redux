@@ -29,7 +29,7 @@ hook.Add("InputMouseApply", "expStructureBuilderHandleInput", function(userComma
 
 	local isSpeedDown = client:KeyDown(IN_SPEED)
 
-    if (client:KeyDown(IN_ATTACK2)) then
+    if (weapon.expRotation and client:KeyDown(IN_ATTACK2)) then
         userCommand:SetMouseX(0)
         userCommand:SetMouseY(0)
 

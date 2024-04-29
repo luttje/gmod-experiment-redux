@@ -174,7 +174,8 @@ function PLUGIN:AdjustAllowedProps(allowedProps)
         model = "models/props_lab/blastdoor001b.mdl",
 		constructionMaterials = {
 			["material_metal"] = 15
-		}
+		},
+		structureOffset = Vector(0, 0, 1),
     })
 
 	-- Commented because we should only provide small to medium props (in order to prevent prop climbing to high places)
