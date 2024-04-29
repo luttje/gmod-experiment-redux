@@ -36,6 +36,25 @@ function Schema:DoPluginIncludes(path, plugin)
 end
 
 function Schema:Tick()
+	if (CLIENT) then
+		if (IsValid(ix.gui.openedStorage) and not ix.gui.openedStorage.expCloseShortcutOnKeyCodeReleased) then
+			ix.gui.openedStorage.expCloseShortcutOnKeyCodeReleased = ix.gui.openedStorage.OnKeyCodeReleased or true
+
+			function ix.gui.openedStorage:OnKeyCodeReleased(key)
+				local scoreboardBinding = input.LookupBinding("showscores")
+				local scoreboardKey = scoreboardBinding and input.GetKeyCode(scoreboardBinding) or KEY_TAB
+
+				if (key == scoreboardKey) then
+					self.storageInventory:Close()
+				end
+
+				if (isfunction(self.expCloseShortcutOnKeyCodeReleased)) then
+					self:expCloseShortcutOnKeyCodeReleased(key)
+				end
+			end
+		end
+	end
+
 	if (self.nextPlayerTick and CurTime() < self.nextPlayerTick) then
 		return
 	end
