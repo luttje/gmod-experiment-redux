@@ -35,14 +35,16 @@ function Schema:DoPluginIncludes(path, plugin)
 	Schema.map.LoadFromDir(path .. "/maps")
 end
 
-function Schema:PlayerTick(client, moveData)
+function Schema:Tick()
 	if (self.nextPlayerTick and CurTime() < self.nextPlayerTick) then
 		return
 	end
 
 	self.nextPlayerTick = CurTime() + 1
 
-	hook.Run("PlayerSecondElapsed", client)
+	for _, client in ipairs(player.GetAll()) do
+		hook.Run("PlayerSecondElapsed", client)
+	end
 end
 
 function Schema:CanPlayerUseBusiness(client, uniqueID)
