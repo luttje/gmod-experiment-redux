@@ -68,17 +68,17 @@ function Schema:LoadFonts(headingFont, readableFont)
 	})
 
 	surface.CreateFont("expMonitorFont", {
-		font = headingFont,
+		font = "Consolas",
 		size = 256,
 		extended = true,
-		weight = 600
+		weight = 100
 	})
 
 	surface.CreateFont("expMonitorSmall", {
-		font = headingFont,
+		font = "Consolas",
 		size = 64,
 		extended = true,
-		weight = 600
+		weight = 100
 	})
 
 	--[[
