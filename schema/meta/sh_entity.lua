@@ -3,6 +3,7 @@ local META = FindMetaTable("Entity")
 if (SERVER) then
     util.AddNetworkString("PlayerBodyGroupChanged")
     util.AddNetworkString("PlayerBodyGroupsChanged")
+    util.AddNetworkString("expRemoveDecals")
 
 	META.expSetBodygroup = META.expSetBodygroup or META.SetBodygroup
 	META.expSetBodyGroups = META.expSetBodyGroups or META.SetBodyGroups
@@ -56,6 +57,12 @@ if (SERVER) then
 
         self:expSetBodyGroups(bodygroups)
     end
+
+    function META:RemoveAllClientDecals()
+		net.Start("expRemoveDecals")
+		net.WriteEntity(self)
+		net.Broadcast()
+	end
 else
 	net.Receive("PlayerBodyGroupChanged", function()
 		local player = net.ReadEntity()
@@ -72,6 +79,14 @@ else
 		local oldBodygroups = net.ReadString()
 
 		hook.Run("PlayerBodyGroupsChanged", player, bodygroups, oldBodygroups)
+    end)
+
+	net.Receive("expRemoveDecals", function()
+        local entity = net.ReadEntity()
+
+		if (IsValid(entity)) then
+			entity:RemoveAllDecals()
+		end
 	end)
 end
 

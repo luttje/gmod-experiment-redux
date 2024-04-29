@@ -14,9 +14,38 @@ if (not SERVER) then
 	return
 end
 
-local function bufferSound(client)
-	if (not Schema.util.Throttle("QuantumBufferDamageSound", 0.5, client)) then
-		client:EmitSound("ambient/energy/zap7.wav", 45, 100 + math.random(0, 100))
+local function bufferEffect(client)
+    if (not Schema.util.Throttle("QuantumBufferDamageSound", 0.5, client)) then
+        client:EmitSound("ambient/energy/zap7.wav", 75, 100 + math.random(0, 100))
+    end
+
+	local flickerDuration = 1
+    if (not Schema.util.Throttle("QuantumBufferDamageEffect", flickerDuration, client) and not client.expQuantumBufferFlickering) then
+		client.expQuantumBufferFlickering = true
+        client:RemoveAllClientDecals()
+
+        local oldMaterial = client:GetMaterial()
+		local flickerAmount = 5
+        local flickerCount = 0
+		local flickerInterval = flickerDuration / flickerAmount
+
+		timer.Create("QuantumBufferDamageEffect" .. client:EntIndex(), flickerInterval, flickerAmount, function()
+			if (IsValid(client)) then
+                client:SetMaterial("models/effects/vol_light001")
+			end
+
+            timer.Simple(flickerInterval * .5, function()
+				if (IsValid(client)) then
+					client:SetMaterial(oldMaterial)
+
+					flickerCount = flickerCount + 1
+
+					if (flickerCount >= flickerAmount) then
+						client.expQuantumBufferFlickering = false
+					end
+				end
+			end)
+		end)
 	end
 end
 
@@ -36,10 +65,22 @@ function BUFF.hooks:PostPlayerLoadout(client)
 end
 
 function BUFF.hooks:PlayerShouldTakeDamage(client, attacker)
-	if (Schema.buff.GetActive(client, self.index)) then
-		bufferSound(client)
+	-- if (Schema.buff.GetActive(client, self.index)) then
+	-- 	bufferSound(client)
 
-		return false
+	-- 	return false
+	-- end
+end
+
+function BUFF.hooks:EntityTakeDamage(entity, damageInfo)
+    if (not entity:IsPlayer()) then
+        return
+    end
+
+    if (Schema.buff.GetActive(entity, self.index)) then
+		bufferEffect(entity)
+
+		return true
 	end
 end
 

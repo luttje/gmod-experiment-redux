@@ -127,59 +127,6 @@ function Schema:CharacterVarChanged(character, key, oldValue, value)
 	if (value > requiredMoney) then
 		Schema.achievement.Progress("northern_rock", character:GetPlayer())
 	end
-
-	local requiredMoney = Schema.achievement.GetProperty("ransacked", "requiredMoney")
-
-	if (value < requiredMoney) then
-		return
-	end
-
-	local client = character:GetPlayer()
-
-	if (client.ixOpenStorage and client.ixOpenStorage.storageInfo and IsValid(client.ixOpenStorage.storageInfo.entity)) then
-		local target = client.ixOpenStorage.storageInfo.entity
-
-		-- If the ragdoll is the same as the player retrieving the money, they're being resurrected and this achievement doesn't apply.
-		if (target:GetNetVar("player") == client) then
-			return
-		end
-
-		-- If the player is interacting with their locker, don't check for the achievement.
-		if (IsValid(client.expLockersSession)) then
-			return
-		end
-
-		if (client.ixOpenStorage.vars and client.ixOpenStorage.vars.isCorpse) then
-			target = target
-		elseif (target:IsPlayer() and target:IsRestricted()) then
-			-- We're inspecting a tied up player
-			target = target:GetCharacter()
-		end
-
-		local moneyBefore = target:GetMoney()
-
-		if (moneyBefore < requiredMoney) then
-			-- The money couldn't have been taken from the ragdoll, so we don't need to check if it was taken.
-			return
-		end
-
-		-- TODO: This is a bit hacky, but Helix doesn't provide a hook for when money is taken from a storage.
-		-- In sh_storage net.Receive("ixStorageMoneyGive") in Helix, the character money is set, right before it is taken (or given) to the storage.
-		-- For this reason we will wait a frame, to check if the money has been taken from the ragdoll.
-		timer.Simple(0, function()
-			local isValidTarget = IsValid(target) or (target.GetPlayer and IsValid(target:GetPlayer()))
-
-			if (not IsValid(client) or not isValidTarget) then
-				return
-			end
-
-			local moneyAfter = target:GetMoney()
-
-			if (moneyBefore - moneyAfter >= requiredMoney) then
-				Schema.achievement.Progress("ransacked", client)
-			end
-		end)
-	end
 end
 
 function Schema:CharacterAttributeUpdated(client, character, attributeKey, value)
@@ -632,6 +579,7 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 	end
 
 	entity.SetMoney = function(corpse, amount)
+		hook.Run("OnCorpseMoneyChanged", corpse, amount, corpse.ixMoney)
 		corpse.ixMoney = amount
 	end
 
@@ -935,4 +883,26 @@ function Schema:PlayerUseDoor(client, door)
 	end
 
 	door:Fire("open")
+end
+
+function Schema:OnCorpseMoneyChanged(corpse, newAmount, oldAmount)
+	if (oldAmount == nil) then
+		-- When setting up the corpse inventory
+		return
+	end
+
+	local requiredMoney = Schema.achievement.GetProperty("ransacked", "requiredMoney")
+	local change = oldAmount - newAmount
+
+	if (change < requiredMoney) then
+		return
+	end
+
+	local client = corpse:GetNetVar("player")
+
+	if (not IsValid(client)) then
+		return
+	end
+
+	Schema.achievement.Progress("ransacked", client)
 end

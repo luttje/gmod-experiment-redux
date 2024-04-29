@@ -10,4 +10,4 @@ ACHIEVEMENT.foregroundImage = {
 ACHIEVEMENT.reward = 1000
 ACHIEVEMENT.maximum = 1
 ACHIEVEMENT.requiredMoney = 8000
-ACHIEVEMENT.description = "Extract a fortune of over 8000 bolts from someone's remains, proving that fortune favors the bold."
+ACHIEVEMENT.description = "Lose 8000 bolts from someone looting your corpse."

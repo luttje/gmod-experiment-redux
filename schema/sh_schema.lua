@@ -61,6 +61,7 @@ ix.chat.Register("achievement", {
 
 		chat.AddText(icon, Color(139, 174, 179, 255), speaker, " has achieved the ", Color(139, 174, 179, 255), text, " achievement!")
 	end,
+	deadCanChat = true,
 })
 
 ix.chat.Register("broadcast", {

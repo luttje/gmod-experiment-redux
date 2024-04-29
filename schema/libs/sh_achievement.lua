@@ -71,6 +71,8 @@ if (SERVER) then
 		net.WriteUInt(achievementTable.index, 32)
 		net.WriteUInt(achievements[achievementTable.uniqueID], 16)
 		net.Send(client)
+
+		return true
 	end
 
 	function Schema.achievement.LoadProgress(client, character)

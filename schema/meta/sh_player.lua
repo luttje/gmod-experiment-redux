@@ -87,16 +87,16 @@ if (SERVER) then
 		client:PruneInvalidObjects()
 	end)
 
-	function META:AddLimitedObject(objectType, object)
-		local character = self:GetCharacter()
-		local limitedObjects = character:GetVar("limitedObjects", {})
-		local objects = limitedObjects[objectType] or {}
+    function META:AddLimitedObject(objectType, object)
+        local character = self:GetCharacter()
+        local limitedObjects = character:GetVar("limitedObjects", {})
+        local objects = limitedObjects[objectType] or {}
 
-		objects[#objects + 1] = object
-		limitedObjects[objectType] = objects
+        objects[#objects + 1] = object
+        limitedObjects[objectType] = objects
 
-		character:SetVar("limitedObjects", limitedObjects)
-	end
+        character:SetVar("limitedObjects", limitedObjects)
+    end
 end
 
 function META:IsObjectLimited(objectType, limit)
