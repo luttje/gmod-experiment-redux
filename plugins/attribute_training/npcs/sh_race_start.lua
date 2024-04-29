@@ -14,13 +14,13 @@ local raceStart = NPC:RegisterInteraction("raceStart", {
 	text = [[
 		Hey there! I'm Leo Usain.
 
-		You know that running is a great way to train your stamina and endurance, right? How about you show me what you've got?
+		You know that running is a great way to train your stamina and endurance, right? That's something you'll surely need in this
+		forsaken place.
 
-		I'll time you as you run from here to the finish line across the city. My colleague Enda Bolt will be waiting there for you.
+		I organize a race where you run from here to the finish line across the city. My colleague Enda Bolt will be waiting there for you.
+		Other racers might join in, and the first one to talk to Enda Bolt at the finish line wins!
 
 		<b>I only charge a small fee for our services. Do you want to race?</b>
-
-		Other racers might join in, and the first one to talk to Enda Bolt at the finish line wins!
 	]],
 	responses = function(client, npcEntity, answersPanel)
 		local responses = {}
@@ -33,6 +33,11 @@ local raceStart = NPC:RegisterInteraction("raceStart", {
 				text = "Yes, I want to race! (Costs " .. ix.currency.Get(NPC.raceStartCost) .. ")",
 				color = derma.GetColor("Success", answersPanel),
 				next = "raceJoined",
+			}
+		else
+			responses[#responses + 1] = {
+				text = "I don't have enough money...",
+				color = derma.GetColor("Error", answersPanel),
 			}
 		end
 
@@ -47,14 +52,14 @@ local raceStart = NPC:RegisterInteraction("raceStart", {
 local raceJoined = NPC:RegisterInteraction("raceJoined", {
 	text = function(client, npcEntity, answersPanel)
 		return [[
-			Other players can still join in. Stay close to me or I'll consider you forfeiting.
+			Other runners can still join in. Stay close to me or I'll consider you forfeiting.
 
-			The race will start soon. Get ready!"
+			The race will start somewhere within the next ]] .. string.NiceTime(NPC.raceStartsAfterSeconds) .. [[. Stay alert!"
 		]]
 	end,
 	responses = {
 		{
-			text = "I'm ready!",
+			text = "Alright, I'll prepare myself",
 		},
 	}
 })
@@ -69,7 +74,7 @@ local raceAlreadyJoined = NPC:RegisterInteraction("raceAlreadyJoined", {
 			return "You've already joined the race, wait for it to start!"
 		end
 
-		return "You've already joined the race, which has already started! Quick, run to the other side of the city!"
+		return "The race has already started! Quick, run to the other side of the city and talk to Enda Bolt!"
 	end,
 	responses = {}
 })
@@ -80,6 +85,9 @@ local raceAlreadyStarted = NPC:RegisterInteraction("raceAlreadyStarted", {
 	responses = {
 		{
 			text = "I might come back later then"
+		},
+		{
+			text = "Whatever, I don't care"
 		},
 	}
 })
@@ -149,7 +157,15 @@ function NPC:OnInteract(client, npcEntity, desiredInteraction)
 
 		START_NPC_ENTITY = npcEntity
 
-		npcEntity:PrintChat("Get ready to race " .. client:Name() .. "! I'll count down from 3 soon!")
+        npcEntity:PrintChat("Stay close to me, " .. client:Name() .. ". I'll count down from 3 soon!")
+
+        local contestantCount = table.Count(npcEntity.expRaceData.runners)
+
+		if (contestantCount > 1) then
+			npcEntity:PrintChat("We have " .. contestantCount .. " contestants in the race now!")
+		else
+			npcEntity:PrintChat("You're the first contestant in the race. If you have friends, tell them to join!")
+		end
 
 		return raceJoined
 	end
@@ -178,10 +194,18 @@ function NPC:OnThink(npcEntity)
 
 	if (curTime > currentRaceStart) then
 		npcEntity.expRaceData = npcEntity.expRaceData or {}
-		npcEntity.expRaceData.countdown = npcEntity.expRaceData.countdown or 3
+		npcEntity.expRaceData.countdown = npcEntity.expRaceData.countdown or 4
 
 		if (npcEntity.expRaceData.countdown > 0) then
-			if (npcEntity.expRaceData.countdown == 3) then
+			if (npcEntity.expRaceData.countdown == 4) then
+				local names = ""
+
+				for runner, data in pairs(npcEntity.expRaceData.runners) do
+					names = names .. data.name .. ", "
+				end
+
+				npcEntity:PrintChat("Get ready, " .. string.sub(names, 1, -3) .. "!", true)
+			elseif (npcEntity.expRaceData.countdown == 3) then
 				npcEntity:PrintChat("3...", true)
 			elseif (npcEntity.expRaceData.countdown == 2) then
 				npcEntity:PrintChat("2...", true)
@@ -199,6 +223,7 @@ function NPC:OnThink(npcEntity)
 			-- Hide the distance limit for the runners
 			for runner, data in pairs(npcEntity.expRaceData.runners) do
 				runner:SetCharacterNetVar("expRaceJoined", NULL)
+				runner:SetCharacterNetVar("expRaceStartedAt", curTime)
 			end
 		end
 
@@ -245,7 +270,15 @@ function NPC:OnEnd(client, npcEntity)
 end
 
 if (CLIENT) then
-	function NPC:HUDPaint(npcEntity)
+	function NPC:HUDPaintStarted()
+        local client = LocalPlayer()
+        local raceStartedAt = client:GetCharacterNetVar("expRaceStartedAt")
+        local raceTime = string.FormattedTime(CurTime() - raceStartedAt, "%02i:%02i.%02i")
+
+		Schema.draw.DrawLabeledValue("Race Time:", raceTime)
+	end
+
+	function NPC:HUDPaintBeforeStart(npcEntity)
 		local client = LocalPlayer()
 		local raceEntityPosition = npcEntity:GetPos()
 		local distance = client:GetPos():Distance(raceEntityPosition)

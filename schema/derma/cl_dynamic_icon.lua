@@ -51,7 +51,7 @@ function PANEL:DrawSymbol(symbol, x, y, width, height)
 		local spritesheetData = symbol
 		surface.SetDrawColor(255, 255, 255, self.opacity)
 
-		Schema.util.DrawSpritesheetMaterial(
+		Schema.draw.DrawSpritesheetMaterial(
 			spritesheetData.spritesheet,
             x,
 			y,

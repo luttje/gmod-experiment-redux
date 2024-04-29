@@ -54,6 +54,7 @@ function NPC:OnInteract(client, npcEntity)
 		client = client,
 		time = finishTime,
 	}
+	client:SetCharacterNetVar("expRaceStartedAt")
 
 	-- Track remaining players
 	local remainingPlayers = 0

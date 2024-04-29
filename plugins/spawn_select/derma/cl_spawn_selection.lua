@@ -125,7 +125,7 @@ function PANEL:Rebuild()
             local radius = (w * .5) * pulse
             surface.SetDrawColor(color)
             draw.NoTexture()
-            Schema.util.DrawCircle(w * .5, h * .5, radius, 5)
+            Schema.draw.DrawCircle(w * .5, h * .5, radius, 5)
 
             surface.SetDrawColor(color_white)
             surface.SetMaterial(icon)

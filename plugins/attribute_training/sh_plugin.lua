@@ -14,9 +14,16 @@ if (CLIENT) then
 
 		local raceStartEntity = client:GetCharacterNetVar("expRaceJoined")
 
-		if (IsValid(raceStartEntity)) then
-			local npc = Schema.npc.Get(raceStartEntity:GetNpcId())
-			npc:HUDPaint(raceStartEntity)
+        if (IsValid(raceStartEntity)) then
+            local npc = Schema.npc.Get(raceStartEntity:GetNpcId())
+            npc:HUDPaintBeforeStart(raceStartEntity)
+        end
+
+        local raceStartedAt = client:GetCharacterNetVar("expRaceStartedAt")
+
+		if (raceStartedAt) then
+            local npc = Schema.npc.Get("race_start")
+			npc:HUDPaintStarted()
 		end
 
 		local targetPracticeChallenger = client:GetCharacterNetVar("targetPracticeChallenger")

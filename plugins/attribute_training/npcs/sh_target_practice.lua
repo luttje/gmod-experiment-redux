@@ -177,14 +177,6 @@ if (CLIENT) then
 		local client = LocalPlayer()
 		local score = client:GetCharacterNetVar("targetPracticeScore", 0)
 
-		draw.SimpleText(
-			"Score: " .. math.Round(score, 2),
-			"ixSmallTitleFont",
-			ScrW() * 0.5,
-			ScrH() * 0.1,
-			color_white,
-			TEXT_ALIGN_CENTER,
-			TEXT_ALIGN_CENTER
-		)
+		Schema.draw.DrawLabeledValue("Score:", math.Round(score, 2))
 	end
 end
