@@ -73,7 +73,12 @@ function ITEM:OnEarned(entity, amount)
 end
 
 function ITEM:OnUpgraded(entity, upgrades)
-	self:SetData("upgrades", upgrades)
+    self:SetData("upgrades", upgrades)
+end
+
+function ITEM:OnDestroyed(entity, damageInfo)
+    self:SetData("upgrades", 0)
+	self:SetData("power", 0)
 end
 
 function ITEM:OnCanOrder(client)

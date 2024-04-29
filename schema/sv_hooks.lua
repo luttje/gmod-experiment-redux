@@ -522,18 +522,27 @@ function Schema:ScalePlayerDamage(client, hitGroup, damageInfo)
 	end
 end
 
-function Schema:PlayerDestroyGenerator(client, entity, generator)
-	if (entity.PlayerDestroyGenerator and entity:PlayerDestroyGenerator(client, generator) ~= nil) then
+function Schema:PlayerDestroyGenerator(client, entity, generator, item)
+	local destroyReward = 0
+	local upgrades = entity:GetUpgrades()
+
+	for i = 1, upgrades do
+		local upgrade = generator.upgrades[i]
+		destroyReward = destroyReward + upgrade.price
+	end
+
+	if (destroyReward == 0) then
+		-- No upgrades, no money
 		return
 	end
 
 	if (Schema.perk.GetOwned("payback", client)) then
-		client:GetCharacter():GiveMoney(generator.price)
+		destroyReward = destroyReward * .5
 
-		return
+		client:GetCharacter():GiveMoney(destroyReward)
 	end
 
-	client:GetCharacter():GiveMoney(math.ceil(generator.price * .75))
+	client:GetCharacter():GiveMoney(math.ceil(destroyReward * .75))
 end
 
 --[[

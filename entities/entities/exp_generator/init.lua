@@ -65,6 +65,7 @@ function ENT:SetupGenerator(client, item)
 	self.expGenerator = Schema.generator.Get(item.generator.uniqueID)
 
 	self:SetHealth(self.expGenerator.health)
+	self:SetMaxHealth(self.expGenerator.health)
 	self:SetPower(item:GetData("power", self.expGenerator.power))
 
 	self:SetItemID(item.uniqueID)
@@ -288,17 +289,23 @@ function ENT:OnTakeDamage(damageInfo)
 
 	self:SetHealth(math.max(self:Health() - damageInfo:GetDamage(), 0))
 
+	local damageColor = math.max((self:Health() / self:GetMaxHealth()) * 255, 30)
+	self:SetColor(Color(damageColor, damageColor, damageColor, 255))
+
 	if (self:Health() > 0) then
 		return
 	end
 
+	local itemID = self.expItemID
+	local itemTable = ix.item.instances[itemID]
+
 	if (IsValid(attacker) and attacker:IsPlayer()) then
 		self.expLastAttacker = attacker
-		hook.Run("PlayerDestroyGenerator", attacker, self, generator)
+		hook.Run("PlayerDestroyGenerator", attacker, self, generator, itemTable)
 	end
 
-	if (self.OnDestroy) then
-		self:OnDestroy(attacker, damageInfo)
+	if (itemTable.OnDestroyed) then
+		itemTable:OnDestroyed(self, damageInfo)
 	end
 
 	self.expIsDestroying = true

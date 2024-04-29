@@ -24,23 +24,29 @@ function ENT:Initialize()
 end
 
 function ENT:Think()
-	local power = self:GetPower()
+    local power = self:GetPower()
 
-	if (power <= 0) then
-		self:StopSound("ambient/machines/thumper_amb.wav")
-		self:ResetSequence("emptyclick")
-		self:NextThink(CurTime() + 1)
-		return true
-	end
+    if (power <= 0) then
+        self:StopSound("ambient/machines/thumper_amb.wav")
+        self:ResetSequence("emptyclick")
+        self:NextThink(CurTime() + 1)
+        return true
+    end
 
-	if (self:IsSequenceFinished()) then
-		self:ResetSequence("idle")
-		self:StopSound("ambient/machines/thumper_amb.wav")
-		self:EmitSound("ambient/machines/thumper_amb.wav", 40, 250, 1)
-	end
+    if (self:IsSequenceFinished()) then
+        self:ResetSequence("idle")
+        self:StopSound("ambient/machines/thumper_amb.wav")
+        self:EmitSound("ambient/machines/thumper_amb.wav", 40, 250, 1)
+    end
 
-	self:FrameAdvance()
-	self:NextThink(CurTime())
+    self:FrameAdvance()
+    self:NextThink(CurTime())
 
-	return true
+    return true
+end
+
+function ENT:OnRemove()
+    BaseClass.OnRemove(self)
+
+	self:StopSound("ambient/machines/thumper_amb.wav")
 end

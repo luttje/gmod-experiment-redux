@@ -89,9 +89,14 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 	local isStructure = entity:GetClass() == "exp_structure" or entity:GetClass() == "exp_structure_part"
 
 	if (not isStructure) then
-		-- Crowbars should do extra damage to structures, but minimal damage to anything else
+        -- Crowbars should do extra damage to structures and bolt generators, but minimal damage to anything else
 		if (weapon.ixItem.uniqueID == "crowbar") then
-			damageInfo:ScaleDamage(0.01)
+			if (entity.IsBoltGenerator) then
+				damageInfo:ScaleDamage(1.1)
+				Schema.achievement.Progress("freeman", attacker)
+			else
+				damageInfo:ScaleDamage(0.01)
+			end
 		end
 
 		return
