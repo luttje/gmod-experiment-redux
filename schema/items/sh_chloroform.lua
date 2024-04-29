@@ -34,22 +34,31 @@ ITEM.functions.Apply = {
 
 		itemTable.bBeingUsed = true
 
+		client:SetNetVar("chloroforming", true)
 		client:SetAction("@chloroforming", taskTime)
 
 		target:SetNetVar("beingChloroformed", true)
 		target:SetAction("@fBeingChloroformed", taskTime)
 
 		client:DoStaredAction(target, function()
+			client:SetNetVar("chloroforming")
 			Schema.ChloroformPlayer(target)
 
 			itemTable:Remove()
 
+			Schema.PlayerClearEntityInfoTooltip(client)
 			hook.Run("OnPlayerBecameChloroformed", target, client)
 		end, taskTime, function()
-			client:SetAction()
+			if (IsValid(client)) then
+				client:SetAction()
+				client:SetNetVar("chloroforming")
+				Schema.PlayerClearEntityInfoTooltip(client)
+			end
 
-			target:SetAction()
-			target:SetNetVar("beingChloroformed")
+			if (IsValid(target)) then
+				target:SetAction()
+				target:SetNetVar("beingChloroformed")
+			end
 
 			itemTable.bBeingUsed = false
 		end)

@@ -215,9 +215,13 @@ function Schema:PostPlayerLoadout(client)
 	client:SetRestricted(false)
 	client:SetNetVar("tied")
 	client:SetNetVar("tying")
-	client:SetNetVar("untying")
+	client:SetNetVar("beingTied")
+	client:SetNetVar("beingUntied")
 	client.expRunSpeedBeforeTied = nil
 	Schema.SetPlayerTiedBones(client, false)
+
+	client:SetNetVar("chloroforming")
+	client:SetNetVar("beingChloroformed")
 end
 
 --[[
@@ -719,7 +723,7 @@ end
 
 function Schema:OnPlayerOptionSelected(target, client, option, data)
 	if (option == L("untie", client)) then
-		if (not client:IsRestricted() and target:IsPlayer() and target:IsRestricted() and not target:GetNetVar("untying")) then
+		if (not client:IsRestricted() and target:IsPlayer() and target:IsRestricted() and not target:GetNetVar("beingUntied")) then
 			Schema.PlayerTryUntieTarget(client, target)
 		end
 	end
@@ -729,7 +733,7 @@ function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, d
     local isCorpse = ragdoll:GetNetVar("isCorpse", false)
 
     if (not isCorpse and target:Alive()) then
-		if (target:IsRestricted() and not target:GetNetVar("untying")) then
+		if (target:IsRestricted() and not target:GetNetVar("beingUntied")) then
 			if (option == L("untie", client)) then
 				Schema.PlayerTryUntieTarget(client, ragdoll)
 			elseif (option == L("searchTied", client)) then
@@ -940,6 +944,11 @@ function Schema:OnCharacterFallover(client, ragdoll, isFallenOver)
 end
 
 function Schema:CanPlayerTie(client, target)
+	-- Ensure that they're not tying or chloroforming someone already
+	if (client:GetNetVar("tying") or client:GetNetVar("chloroforming")) then
+		return false
+	end
+
 	local ragdollEntIndex = target:GetLocalVar("ragdoll")
 
 	if (ragdollEntIndex) then
@@ -951,6 +960,13 @@ function Schema:CanPlayerTie(client, target)
 
 	if (not isFacingAway) then
 		client:Notify("You must be standing behind the target to tie them!")
+		return false
+	end
+end
+
+function Schema:CanPlayerChloroform(client, target)
+	-- Ensure that they're not tying or chloroforming someone already
+	if (client:GetNetVar("tying") or client:GetNetVar("chloroforming")) then
 		return false
 	end
 end

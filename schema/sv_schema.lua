@@ -210,7 +210,7 @@ function Schema.TiePlayer(client)
 	Schema.SetPlayerTiedBones(client, true)
 	client:SetNetVar("tied", true)
 	client:SetRestricted(true)
-	client:SetNetVar("tying")
+	client:SetNetVar("beingTied")
 	client:NotifyLocalized("fTiedUp")
 	client:Flashlight(false)
 
@@ -225,7 +225,7 @@ function Schema.UntiePlayer(client)
 
 	client:SetNetVar("tied")
 	client:SetRestricted(false)
-	client:SetNetVar("untying")
+	client:SetNetVar("beingUntied")
 	client:NotifyLocalized("fUntied")
 	Schema.SetPlayerTiedBones(client, false)
 
@@ -305,7 +305,7 @@ function Schema.PlayerTryUntieTarget(client, target)
 	end
 
 	target:SetAction("@beingUntied", untieSpeed)
-	target:SetNetVar("untying", true)
+	target:SetNetVar("beingUntied", true)
 
 	client:SetAction("@unTying", untieSpeed)
 
@@ -316,7 +316,7 @@ function Schema.PlayerTryUntieTarget(client, target)
 		hook.Run("OnPlayerBecameUntied", target, client)
 	end, untieSpeed, function()
 		if (IsValid(target)) then
-			target:SetNetVar("untying")
+			target:SetNetVar("beingUntied")
 			target:SetAction()
 		end
 

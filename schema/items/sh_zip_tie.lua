@@ -34,7 +34,7 @@ ITEM.functions.Tie = {
 		end
 
 		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
-			and not target:GetNetVar("tying") and not target:IsRestricted()
+			and not target:GetNetVar("beingTied") and not target:IsRestricted()
 		-- target:GetNetVar("tied", false)
 
 		if (not isTargetValid) then
@@ -50,29 +50,34 @@ ITEM.functions.Tie = {
 
 		itemTable.bBeingUsed = true
 
+		client:SetNetVar("tying", true)
 		client:SetAction("@tying", taskTime)
 
-		target:SetNetVar("tying", true)
+		target:SetNetVar("beingTied", true)
 		target:SetAction("@fBeingTied", taskTime)
 
-		client:DoStaredAction(lookTarget, function()
+        client:DoStaredAction(lookTarget, function()
+            client:SetNetVar("tying")
 			Schema.TiePlayer(target)
 
-			if (IsValid(client)) then
-				Schema.achievement.Progress("zip_ninja", client)
-				Schema.PlayerClearEntityInfoTooltip(client)
-			end
+			Schema.achievement.Progress("zip_ninja", client)
+            Schema.PlayerClearEntityInfoTooltip(client)
 
 			itemTable:Remove()
 
 			hook.Run("OnPlayerBecameTied", target, client)
-		end, taskTime, function()
-			client:SetAction()
+        end, taskTime, function()
+			if (IsValid(client)) then
+				client:SetAction()
+				client:SetNetVar("tying")
+				Schema.PlayerClearEntityInfoTooltip(client)
+			end
 
-			target:SetAction()
-			target:SetNetVar("tying")
+			if (IsValid(target)) then
+				target:SetAction()
+				target:SetNetVar("beingTied")
+			end
 
-			Schema.PlayerClearEntityInfoTooltip(client)
 			itemTable.bBeingUsed = false
 		end)
 

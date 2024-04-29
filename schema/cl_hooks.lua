@@ -541,12 +541,12 @@ function Schema:PopulateCharacterInfo(client, character, tooltip)
 		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
 		panel:SetText(L("tiedUp"))
 		panel:SizeToContents()
-	elseif (client:GetNetVar("tying")) then
+	elseif (client:GetNetVar("beingTied")) then
 		local panel = tooltip:AddRowAfter("name", "ziptie")
 		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
 		panel:SetText(L("beingTied"))
 		panel:SizeToContents()
-	elseif (client:GetNetVar("untying")) then
+	elseif (client:GetNetVar("beingUntied")) then
 		local panel = tooltip:AddRowAfter("name", "ziptie")
 		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
 		panel:SetText(L("beingUntied"))
@@ -612,7 +612,7 @@ function Schema:NetworkEntityCreated(entity)
 end
 
 function Schema:GetPlayerEntityMenu(target, options)
-	if (target:IsRestricted() and target:IsPlayer() and not target:GetNetVar("untying")) then
+	if (target:IsRestricted() and target:IsPlayer() and not target:GetNetVar("beingUntied")) then
 		options[L("untie")] = true
 	end
 end
