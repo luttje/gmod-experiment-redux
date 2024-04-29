@@ -213,10 +213,21 @@ ITEM.functions.Attach = {
 		if (IsValid(weapon) and weapon.ixItem == weaponItem) then
 			weapon:Attach(foundAttachmentSlot, attachmentItem.attachmentId, true, true)
 			weapon:NetworkWeapon()
-			TacRP:PlayerSendAttInv(client)
+            TacRP:PlayerSendAttInv(client)
 		end
 
 		-- We have manually removed the item from the inventory (so the instance isn't destroyed)
 		return false
+    end,
+
+    OnCanRun = function(item)
+        local client = item.player
+
+        -- Ensure it's in the player's inventory
+        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+            return false
+        end
+
+		return true
 	end,
 }

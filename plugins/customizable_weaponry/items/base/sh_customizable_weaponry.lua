@@ -25,6 +25,17 @@ function ITEM:OnEquipWeapon(client, weapon)
 
     weapon:NetworkWeapon()
     TacRP:PlayerSendAttInv(client)
+
+    -- Sometimes networking may be too fast for TacRP to handle clientside (because the weapon wont exist yet),
+	-- so let's fire an update a few hundred ticks later to make doubly sure the client will render the attachments
+	local delayedTickID = SysTime()
+    weapon.expDelayedTickAt = delayedTickID
+
+	timer.Simple(0.1, function()
+		if (IsValid(weapon) and weapon.expDelayedTickAt == delayedTickID) then
+			weapon:NetworkWeapon()
+		end
+	end)
 end
 
 function ITEM:OnRestored()
@@ -99,7 +110,9 @@ ITEM.functions.DetachAttachment = {
 		local attachmentSlotId = data.attachmentSlotId
 		local attachmentData = attachments[attachmentSlotId]
 
-		if (not attachmentData) then
+        if (not attachmentData) then
+			client:Notify("Select one of the listed attachments to detach.")
+
 			return false
 		end
 
@@ -156,7 +169,14 @@ ITEM.functions.DetachAttachment = {
 		return false
 	end,
 
-	OnCanRun = function(item)
+    OnCanRun = function(item)
+        local client = item.player
+
+        -- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
+
 		local attachments = item:GetData("attachments", {})
 
 		return table.Count(attachments) > 0
