@@ -21,7 +21,11 @@ hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 	ix.config.Set("genericFont", "Roman Antique")
 
 	-- We set this to a long time, so it's worth resurrecting someone -- TODO: or getting the perk that speeds up spawn time.
-	ix.config.Set("spawnTime", 60)
+    ix.config.Set("spawnTime", 60)
+
+	-- Make inventory management more bearable by increasing the size.
+	ix.config.Set("inventoryWidth", 6)
+	ix.config.Set("inventoryHeight", 6)
 end)
 
 if (CLIENT) then
