@@ -24,7 +24,7 @@ local footstepSounds = {
 }
 
 ITEM.footstepSounds = {
-	walk = footstepSounds,
+	-- walk = footstepSounds,
 	run = footstepSounds,
 }
 
