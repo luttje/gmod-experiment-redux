@@ -4,7 +4,7 @@ MAP.name = "City 18"
 MAP.mapName = "rp_c18_v2"
 
 MAP.waitingPosition = Vector(4284.469238, 1271.594116, 1974.027466)
-MAP.waitingAngles = Angle(-2.494961, 54.302872, 0)
+MAP.waitingAngles = Angle(89.000000, 89.056053, 0.000000)
 
 if (CLIENT) then
     MAP.backgroundMaterial = Material("experiment-redux/maps/rp_c18_v2_feathered_black.png")

@@ -13,15 +13,15 @@ net.Receive("expSpawnRequestSelect", function(len, client)
 	local index = net.ReadUInt(8)
 	local spawn = PLUGIN.spawns[index]
 
-    if (not spawn) then
-        client:Notify("This spawn point is invalid!")
+	if (not spawn) then
+		client:Notify("This spawn point is invalid!")
 		net.Start("expSpawnSelectResponse")
 		net.WriteUInt(PLUGIN.spawnResult.FAIL, 4)
 		net.Send(client)
-        return
-    end
+		return
+	end
 
-    local canSpawn, reason = hook.Run("PlayerCanSelectSpawnPoint", client, spawn, index)
+	local canSpawn, reason = hook.Run("PlayerCanSelectSpawnPoint", client, spawn, index)
 
 	if (canSpawn == false) then
 		client:Notify(reason or "You cannot spawn at this location!")
@@ -43,111 +43,112 @@ function PLUGIN:SaveData()
 end
 
 function PLUGIN:PostPlayerLoadout(client)
-    local character = client:GetCharacter()
+	local character = client:GetCharacter()
 
-    if (not character or client:IsBot()) then
-        return
-    end
+	if (not character or client:IsBot()) then
+		return
+	end
 
-    if (#PLUGIN.spawns == 0) then
-        ix.util.SchemaPrint("No spawn points have been set! Spawning without spawn selection.\n")
-        return
-    end
+	if (#PLUGIN.spawns == 0) then
+		ix.util.SchemaPrint("No spawn points have been set! Spawning without spawn selection.\n")
+		return
+	end
 
-    local mapDetails = self:GetMapDetails()
+	local mapDetails = self:GetMapDetails()
 
-    if (not mapDetails) then
-        ix.util.SchemaErrorNoHalt("No map details found! Spawning without spawn selection.\n")
-        return
-    end
+	if (not mapDetails) then
+		ix.util.SchemaErrorNoHalt("No map details found! Spawning without spawn selection.\n")
+		return
+	end
 
-    if (client:GetNetVar("expChoosingSpawn", false)) then
-        -- During initial character selection PlayerLoadout is called twice.
-        return
-    end
+	if (client:GetNetVar("expChoosingSpawn", false)) then
+		-- During initial character selection PlayerLoadout is called twice.
+		return
+	end
 
-    local shouldShowSpawnSelection = hook.Run("ShouldShowSpawnSelection", client)
+	local shouldShowSpawnSelection = hook.Run("ShouldShowSpawnSelection", client)
 
 	if (shouldShowSpawnSelection == false) then
 		return
 	end
 
-    -- When a player spawns, lock them so they can't move until they've selected a spawn point.
-    client:SetPos(mapDetails.waitingPosition)
-    client:SetEyeAngles(mapDetails.waitingAngles)
-    client:SetColor(Color(255, 255, 255, 0))
-    client:SetRenderMode(RENDERMODE_TRANSALPHA)
-    client:SetNetVar("expChoosingSpawn", true)
+	-- When a player spawns, lock them so they can't move until they've selected a spawn point.
+	client:SetPos(mapDetails.waitingPosition)
+	client:SetEyeAngles(mapDetails.waitingAngles)
+	client:SetColor(Color(255, 255, 255, 0))
+	client:SetRenderMode(RENDERMODE_TRANSALPHA)
+	client:SetNetVar("expChoosingSpawn", true)
+	client:SetMoveType(MOVETYPE_NONE)
 	client:Freeze(true)
 
-    net.Start("expSpawnSelectOpen")
-    net.WriteTable(self:GetAvailableSpawns(client))
-    net.Send(client)
+	net.Start("expSpawnSelectOpen")
+	net.WriteTable(self:GetAvailableSpawns(client))
+	net.Send(client)
 end
 
 function PLUGIN:PlayerDeath(client, inflictor, attacker)
-    local character = client:GetCharacter()
+	local character = client:GetCharacter()
 
-    if (not character) then
-        return
-    end
+	if (not character) then
+		return
+	end
 
-    -- Store this vector so we can use it to determine if the player can spawn at a spawn point.
-    character:SetData("lastDeathPosition", client:GetPos())
+	-- Store this vector so we can use it to determine if the player can spawn at a spawn point.
+	character:SetData("lastDeathPosition", client:GetPos())
 	character:SetData("lastDeathTime", os.time())
 end
 
 function PLUGIN:GetAvailableSpawns(client)
-    local character = client:GetCharacter()
-    local lastDeathPosition = character:GetData("lastDeathPosition")
+	local character = client:GetCharacter()
+	local lastDeathPosition = character:GetData("lastDeathPosition")
 	local lastDeathTime = character:GetData("lastDeathTime")
-    local spawnNearDeathRange = self.spawnNearDeathRange * self.spawnNearDeathRange
+	local spawnNearDeathRange = self.spawnNearDeathRange * self.spawnNearDeathRange
 	local canSpawnNearDeath = not lastDeathTime or (os.time() - lastDeathTime) > self.spawnNearDeathAfterSeconds
-    local safeCount = 0
-    local spawns = {}
+	local safeCount = 0
+	local spawns = {}
 
-    for k, spawn in ipairs(self.spawns) do
-        local status = self.spawnStatus.SAFE
+	for k, spawn in ipairs(self.spawns) do
+		local status = self.spawnStatus.SAFE
 		local unsafeUntil
 
-        -- Filter out spawns where the player recently died.
-        if (not canSpawnNearDeath and lastDeathPosition) then
-            local distance = spawn.position:DistToSqr(lastDeathPosition)
+		-- Filter out spawns where the player recently died.
+		if (not canSpawnNearDeath and lastDeathPosition) then
+			local distance = spawn.position:DistToSqr(lastDeathPosition)
 
-            if (distance < spawnNearDeathRange) then
-                status = self.spawnStatus.LOCKED
+			if (distance < spawnNearDeathRange) then
+				status = self.spawnStatus.LOCKED
 				unsafeUntil = CurTime() + (self.spawnNearDeathAfterSeconds - (os.time() - lastDeathTime))
-            end
-        end
+			end
+		end
 
 		-- TODO: Unsafe because of nearby players activity
 
-        if (status == self.spawnStatus.SAFE) then
-            safeCount = safeCount + 1
-        end
+		if (status == self.spawnStatus.SAFE) then
+			safeCount = safeCount + 1
+		end
 
-        spawns[k] = {
-            position = spawn.position,
-            angles = spawn.angles,
-            name = spawn.name,
-            status = status,
+		spawns[k] = {
+			position = spawn.position,
+			angles = spawn.angles,
+			name = spawn.name,
+			status = status,
 			unsafeUntil = unsafeUntil
-        }
-    end
+		}
+	end
 
-    -- If everything is unsafe, unlock all spawns, setting CHAOS status.
-    if (safeCount == 0) then
-        for k, spawn in ipairs(spawns) do
-            spawn.status = self.spawnStatus.CHAOS
-        end
-    end
+	-- If everything is unsafe, unlock all spawns, setting CHAOS status.
+	if (safeCount == 0) then
+		for k, spawn in ipairs(spawns) do
+			spawn.status = self.spawnStatus.CHAOS
+		end
+	end
 
-    return spawns
+	return spawns
 end
 
 function PLUGIN:PlayerCanSelectSpawnPoint(client, spawn, spawnIndex)
-    local availableSpawns = self:GetAvailableSpawns(client)
-    local spawn = availableSpawns[spawnIndex]
+	local availableSpawns = self:GetAvailableSpawns(client)
+	local spawn = availableSpawns[spawnIndex]
 
 	if (spawn.status ~= self.spawnStatus.SAFE and spawn.status ~= self.spawnStatus.CHAOS) then
 		return false, "You cannot spawn at this location!"
@@ -170,7 +171,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 
 	client:SetPos(spawnPosition)
 
-    local volume = math.Rand(0.8, 0.99)
+	local volume = math.Rand(0.8, 0.99)
 	local pitch = math.random(75, 125)
 
 	client:SetColor(Color(0, 0, 255, 75))
@@ -203,17 +204,18 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		end
 
 		client:Freeze(false)
+		client:SetMoveType(MOVETYPE_WALK)
 		client:SetEyeAngles(spawnAngles)
 		client:SetNetVar("expChoosingSpawn", false)
 		client:SetRenderMode(RENDERMODE_TRANSCOLOR)
 		client:SetColor(Color(255, 255, 255, 255))
-        client:EmitSound(
-            table.Random(teleportSounds),
+		client:EmitSound(
+			table.Random(teleportSounds),
 			75,
-            pitch,
-            volume,
-            CHAN_AUTO,
-            0,
+			pitch,
+			volume,
+			CHAN_AUTO,
+			0,
 			34 -- "EXPLOSION RING 3" DSP
 		)
 
