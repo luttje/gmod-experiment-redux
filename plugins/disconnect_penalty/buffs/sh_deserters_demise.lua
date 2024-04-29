@@ -19,11 +19,18 @@ if (not SERVER) then
 end
 
 function BUFF:OnSetup(client, buff)
-	if (Schema.util.Throttle("DesertersDemiseWarning", 60 * 15, client)) then
-		return
-	end
+    if (Schema.util.Throttle("DesertersDemiseWarning", 60 * 15, client)) then
+        return
+    end
 
-	client:Notify("Deserters Demise Debuff is active! Disconnecting will cause you to drop all your belongings!")
+    client:Notify("Deserters Demise Debuff is active! Disconnecting will cause you to drop all your belongings!")
+end
+
+function BUFF:OnExpire(client, buff)
+    if (client:GetNetVar("tied")) then
+		buff.activeUntil = CurTime() + self.durationInSeconds
+		return false
+	end
 end
 
 function BUFF.hooks:EntityTakeDamage(victim, damageInfo)

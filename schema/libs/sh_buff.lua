@@ -279,7 +279,16 @@ if (SERVER) then
             buff.activeUntil = curTime - 1
 
             if (buffTable.OnExpire) then
-                buffTable:OnExpire(client, buff, false)
+                if (buffTable:OnExpire(client, buff) == false) then
+                    buff.isExpiring = false
+
+					if (buff.activeUntil < curTime) then
+						ix.util.SchemaErrorNoHaltWithStack("Buff " .. buffTable.index .. " blocked expiring, but left the activeUntil time in the past!\n")
+					end
+
+					Schema.buff.Network(client, buff.index, buff)
+					continue
+				end
             end
 
             table.remove(buffs, buffKey)

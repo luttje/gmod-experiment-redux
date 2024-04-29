@@ -125,8 +125,7 @@ end
 
 --- @param client Player
 --- @param buff ActiveBuff
---- @param expiredThroughDeath boolean
-function META:OnExpire(client, buff, expiredThroughDeath)
+function META:OnExpire(client, buff)
     local attributeBoosts = self:GetAttributeBoosts(client, buff)
 
 	if (attributeBoosts) then
