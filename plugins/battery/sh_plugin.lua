@@ -11,9 +11,9 @@ ix.util.Include("cl_hooks.lua")
 PLUGIN.batteryMax = 100
 PLUGIN.batteryRegeneration = 1
 PLUGIN.batteryDecrement = {
-    passive = 0.1,
-    active = 1.2,
-	running = 2.5,
+    passive = 0.5,
+    active = 2.5,
+	running = 4.0,
 }
 
 local playerMeta = FindMetaTable("Player")

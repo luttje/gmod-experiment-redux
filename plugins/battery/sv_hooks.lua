@@ -11,7 +11,7 @@ function PLUGIN:PlayerSecondElapsed(client)
 	local usingStealth = client:HasStealthActivated()
 	local usingImplant = usingThermal or usingStealth
 
-    if (not usingImplant or client:GetMoveType() == MOVETYPE_NOCLIP) then
+    if (not usingImplant) then
         character:SetData("battery", math.Clamp(character:GetData("battery", 0) + self.batteryRegeneration, 0, PLUGIN.batteryMax))
         client:CheckImplants()
         return
@@ -21,7 +21,10 @@ function PLUGIN:PlayerSecondElapsed(client)
 	local decrease = 0
 
 	local decreaseFunc = function(decrease)
-		return decrease + (client:IsRunning() and self.batteryDecrement.running or (isMoving and self.batteryDecrement.active or self.batteryDecrement.passive))
+		return decrease + (
+			client:IsRunning() and self.batteryDecrement.running
+			or (isMoving and self.batteryDecrement.active or self.batteryDecrement.passive)
+		)
 	end
 
 	if(usingThermal)then
