@@ -45,7 +45,7 @@ end
 function PLUGIN:PostPlayerLoadout(client)
     local character = client:GetCharacter()
 
-    if (not character) then
+    if (not character or client:IsBot()) then
         return
     end
 

@@ -116,13 +116,6 @@ function PLUGIN:ResurrectPlayer(client, target, corpse, newHealth)
 	hook.Run("PlayerResurrectedTarget", client, target)
 end
 
-function PLUGIN:CanPlayerSearchCorpse(client, corpse)
-	if (Schema.perk.GetOwned("phoenix_tamer", client)) then
-		-- Disable searching through USE, since we'll be using the entity menu
-		return false
-	end
-end
-
 function PLUGIN:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
 	if (option ~= L("resurrect", client)) then
 		return

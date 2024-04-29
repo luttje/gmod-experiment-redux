@@ -593,6 +593,10 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 			return
 		end
 
+		if (not corpse.ixInventory or ix.storage.InUse(corpse.ixInventory)) then
+			return
+		end
+
 		local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
 		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
 
@@ -725,21 +729,7 @@ end
 --]]
 
 function Schema:PlayerUse(client, entity)
-	if (entity:GetClass() ~= "prop_ragdoll") then
-		return
-	end
 
-	if (entity.ixInventory and not ix.storage.InUse(entity.ixInventory) and entity.StartSearchCorpse) then
-		local canSearch = hook.Run("CanPlayerSearchCorpse", client, entity) ~= false
-
-		if (not canSearch) then
-			return
-		end
-
-		entity:StartSearchCorpse(client)
-
-		return false
-	end
 end
 
 function Schema:PlayerInteractEntity(client, entity, option, data)
