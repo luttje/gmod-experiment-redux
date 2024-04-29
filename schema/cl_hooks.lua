@@ -618,12 +618,18 @@ function Schema:GetPlayerEntityMenu(target, options)
 end
 
 function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
-	if (target:Alive()) then
-		if (target:IsRestricted()) then
-			options[L("searchTied")] = true
-			options[L("untie")] = true
-		end
+    local isCorpse = ragdoll:GetNetVar("isCorpse", false)
 
+    if (not isCorpse and target:Alive()) then
+        if (target:IsRestricted()) then
+            options[L("searchTied")] = true
+            options[L("untie")] = true
+        end
+
+        return
+    end
+
+	if (not isCorpse) then
 		return
 	end
 

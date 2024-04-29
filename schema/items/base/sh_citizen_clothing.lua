@@ -34,19 +34,6 @@ function ITEM:CanEquipOutfit()
 	return IsValid(client) and client:GetModel():lower():StartsWith("models/hl2rp/citizens/")
 end
 
--- Called when the item's owner spawns.
-function ITEM:OnLoadout()
-	local client = self.player
-
-	if (not client or not self:GetData("equip")) then
-		return
-	end
-
-	self.expNoEquipSound = true
-	self:AddOutfit(client)
-	self.expNoEquipSound = false
-end
-
 function ITEM:AddOutfit(client)
 	local character = client:GetCharacter()
 

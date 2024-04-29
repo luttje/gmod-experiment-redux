@@ -592,12 +592,13 @@ end
 
 function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 	local character = client.expCorpseCharacter or client:GetCharacter()
-	local dropMode = client.expDropMode or Schema.dropMode.RANDOM
+	local dropMode = client.expDropMode or bit.bor(Schema.dropMode.RANDOM, Schema.dropMode.WITH_EQUIPPED_WEAPONS)
 	local characterInventory = character:GetInventory()
 	local money = character:GetMoney()
 
 	local hasConfusingPockets, confusingPocketsPerkTable = Schema.perk.GetOwned("confusing_pockets", client)
-	local evenEquipped = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED) == Schema.dropMode.WITH_EQUIPPED
+	local dropEquippedArmor = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_ARMOR) == Schema.dropMode.WITH_EQUIPPED_ARMOR
+	local dropEquippedWeapons = bit.band(dropMode, Schema.dropMode.WITH_EQUIPPED_WEAPONS) == Schema.dropMode.WITH_EQUIPPED_WEAPONS
 	local dropModeIsRandom = bit.band(dropMode, Schema.dropMode.RANDOM) == Schema.dropMode.RANDOM
 
 	for _, slot in pairs(characterInventory.slots) do
@@ -606,8 +607,12 @@ function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 				continue
 			end
 
-			if (item:GetData("equip") and not evenEquipped) then
-				continue
+			if (item:GetData("equip")) then
+				if (item.isWeapon and not dropEquippedWeapons) then
+					continue
+				elseif (not item.isWeapon and not dropEquippedArmor) then
+					continue
+				end
 			end
 
 			local shouldDropItem = false
@@ -718,7 +723,9 @@ function Schema:OnPlayerOptionSelected(target, client, option, data)
 end
 
 function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, option, data)
-	if (ragdollPlayer:Alive()) then
+    local isCorpse = ragdoll:GetNetVar("isCorpse", false)
+
+    if (not isCorpse and target:Alive()) then
 		if (ragdollPlayer:IsRestricted() and not ragdollPlayer:GetNetVar("untying")) then
 			if (option == L("untie", client)) then
 				Schema.PlayerTryUntieTarget(client, ragdoll)
@@ -727,6 +734,10 @@ function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, op
 			end
 		end
 
+        return
+    end
+
+	if (not isCorpse) then
 		return
 	end
 

@@ -146,13 +146,19 @@ function ITEM:OnRepair()
 	client:EmitSound("ambient/levels/labs/machine_stop1.wav", 25, 1000)
 end
 
+-- Called when the item's owner spawns.
 function ITEM:OnLoadout()
-    if (self:GetData("equip")) then
-        local client = self.player
-        local character = client:GetCharacter()
+	local client = self.player
+	local character = client:GetCharacter()
 
-        Schema.armor.SetArmor(character, self.id)
-    end
+	if (not client or not self:GetData("equip")) then
+		return
+	end
+
+	self.expNoEquipSound = true
+	self:AddOutfit(client)
+	self.expNoEquipSound = false
+	Schema.armor.SetArmor(character, self.id)
 end
 
 ITEM.functions.Repair = {

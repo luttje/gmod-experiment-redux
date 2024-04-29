@@ -21,7 +21,8 @@ Schema.corpses = Schema.corpses or {}
 Schema.dropMode = {
 	RANDOM = 1,
 	ALL = 2,
-	WITH_EQUIPPED = 4
+	WITH_EQUIPPED_WEAPONS = 4,
+	WITH_EQUIPPED_ARMOR = 8,
 }
 
 ix.log.AddType("playerHealed", function(client, ...)
@@ -385,6 +386,8 @@ function Schema.HandlePlayerDeathCorpse(client)
 	local entity = IsValid(client.ixRagdoll) and client.ixRagdoll or client:CreateServerRagdoll()
 	local decayTime = ix.config.Get("corpseDecayTime", 60)
 	local uniqueID = "ixCorpseDecay" .. entity:EntIndex()
+
+	entity:SetNetVar("isCorpse", true)
 
 	entity:RemoveCallOnRemove("fixer")
 	entity:CallOnRemove("expPersistentCorpse", function(ragdoll)
