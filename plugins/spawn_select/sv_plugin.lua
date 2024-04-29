@@ -66,6 +66,12 @@ function PLUGIN:PostPlayerLoadout(client)
         return
     end
 
+    local shouldShowSpawnSelection = hook.Run("ShouldShowSpawnSelection", client)
+
+	if (shouldShowSpawnSelection == false) then
+		return
+	end
+
     -- When a player spawns, lock them so they can't move until they've selected a spawn point.
     client:SetPos(mapDetails.waitingPosition)
     client:SetEyeAngles(mapDetails.waitingAngles)

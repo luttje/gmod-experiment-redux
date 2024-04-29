@@ -41,7 +41,13 @@ if (CLIENT) then
 end
 
 if (not SERVER) then
-	return
+    return
+end
+
+function PLUGIN:ShouldShowSpawnSelection(client)
+	if (client.expIsResurrecting) then
+		return false
+	end
 end
 
 function PLUGIN:ResurrectPlayer(client, target, corpse, newHealth)
@@ -50,34 +56,39 @@ function PLUGIN:ResurrectPlayer(client, target, corpse, newHealth)
 	end
 
 	-- Prevent double resurrection, which might lead to inventory duplication
-	corpse.expIsResurrecting = true
+    corpse.expIsResurrecting = true
 
 	-- Make sure that whoever is inspecting the corpse inventory has their storage menu closed
 	-- Furthermore return all remaining items and money to the resurrected player
-	if (corpse.ixInventory) then
-		ix.storage.Close(corpse.ixInventory)
-		-- TODO: Shouldn't this happen automatically? Helix bug?
-		corpse.ixInventory.receivers = {}
+    if (corpse.ixInventory) then
+        ix.storage.Close(corpse.ixInventory)
+        -- TODO: Shouldn't this happen automatically? Helix bug?
+        corpse.ixInventory.receivers = {}
 
-		local items = corpse.ixInventory:GetItems()
-		local money = corpse:GetMoney()
+        local items = corpse.ixInventory:GetItems()
+        local money = corpse:GetMoney()
 
-		local character = target:GetCharacter()
-		local targetInventory = character:GetInventory()
-		character:GiveMoney(money)
+        local character = target:GetCharacter()
+        local targetInventory = character:GetInventory()
+        character:GiveMoney(money)
 
-		for _, item in ipairs(items) do
-			item:Transfer(targetInventory:GetID(), item.gridX, item.gridY, nil, false, true)
-		end
+        for _, item in ipairs(items) do
+            item:Transfer(targetInventory:GetID(), item.gridX, item.gridY, nil, false, true)
+        end
 
-		corpse.ixInventory = nil
-	end
+        corpse.ixInventory = nil
+    end
+
+	-- Prevent showing the spawn selection menu
+	target.expIsResurrecting = true
 
 	corpse:RemoveWithEffect()
 	target:SetNetVar("deathTime", nil)
 	target:Spawn()
 	target:SetPos(corpse:GetPos())
-	target:SetHealth(newHealth or target:GetMaxHealth())
+    target:SetHealth(newHealth or target:GetMaxHealth())
+
+	target.expIsResurrecting = false
 
 	if (target:IsStuck()) then
 		corpse:DropToFloor()
