@@ -1,6 +1,28 @@
 Schema.stunEffects = Schema.stunEffects or {}
 Schema.CachedTextSizes = Schema.CachedTextSizes or {}
 
+-- ! Overrides default net message for door to check if the door access is being cleared and the gui should be closed.
+net.Receive("ixDoorMenu", function(length)
+	if (IsValid(ix.gui.door)) then
+		return ix.gui.door:Remove()
+	end
+
+    if (length == 0) then
+        -- For some reason Helix doesnt send data and I guess we're the only ones who use this ?!
+		-- I swear I will eventually make a PR to Helix for all these workarounds I'm having to do.
+		return
+	end
+
+    local door = net.ReadEntity()
+	local access = net.ReadTable()
+	local entity = net.ReadEntity()
+
+	if (IsValid(door)) then
+		ix.gui.door = vgui.Create("ixDoorMenu")
+		ix.gui.door:SetDoor(door, access, entity)
+	end
+end)
+
 function Schema.GetCachedTextSize(font, text)
 	Schema.CachedTextSizes[font] = Schema.CachedTextSizes[font] or {}
 
