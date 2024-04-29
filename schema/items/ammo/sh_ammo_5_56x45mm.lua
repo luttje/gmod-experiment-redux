@@ -7,3 +7,4 @@ ITEM.price = 565
 ITEM.model = "models/items/boxmrounds.mdl"
 ITEM.ammoAmount = 64
 ITEM.description = "A large container with the calibre on the side."
+ITEM.requiresGunsmith = true

@@ -7,7 +7,7 @@ ITEM.model = "models/experiment-redux/ammo/45acp.mdl"
 ITEM.noBusiness = true
 ITEM.ammoAmount = 1
 ITEM.description = "A single .45 ACP cartridge"
-ITEM.chanceToScavenge = 2
+ITEM.chanceToScavenge = 4
 
 if (SERVER) then
 	resource.AddFile("models/experiment-redux/ammo/45acp.mdl")

@@ -7,3 +7,4 @@ ITEM.price = 300
 ITEM.model = "models/items/boxbuckshot.mdl"
 ITEM.ammoAmount = 20
 ITEM.description = "A decently sized container with the calibre on the side."
+ITEM.requiresGunsmith = true

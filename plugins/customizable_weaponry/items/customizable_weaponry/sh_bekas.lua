@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_bekas.mdl"
 ITEM.width = 3
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = "16 Gauge"
+ITEM.requiresGunsmith = true

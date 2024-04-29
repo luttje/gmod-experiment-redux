@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_skorpion.mdl"
 ITEM.width = 2
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = ".32 ACP"
+ITEM.requiresGunsmith = true

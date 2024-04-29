@@ -9,3 +9,4 @@ ITEM.model = "models/weapons/tacint/w_spr.mdl"
 ITEM.width = 3
 ITEM.height = 2
 ITEM.forcedWeaponCalibre = ".308 Winchester"
+ITEM.requiresGunsmith = true

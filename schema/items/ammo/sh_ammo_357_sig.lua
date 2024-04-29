@@ -7,3 +7,4 @@ ITEM.price = 150 -- TODO: Set this value
 ITEM.model = "models/items/357ammobox.mdl"
 ITEM.ammoAmount = 24
 ITEM.description = "A container with a big calibre bullet image on the side."
+ITEM.requiresGunsmith = true
