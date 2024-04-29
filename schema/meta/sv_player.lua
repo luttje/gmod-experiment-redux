@@ -289,3 +289,52 @@ function META:SetRagdolled(bState, time, getUpGrace)
 		self.ixRagdoll:Remove()
 	end
 end
+
+-- ! This overrides Helix's CreateServerRagdoll to check whether the bones should be copied over
+-- ! helix/gamemode/core/meta/sh_player.lua is the original file this is based on
+--- Creates a ragdoll entity of this player that will be synced with clients. This does **not** affect the player like
+-- `SetRagdolled` does.
+-- @realm server
+-- @bool[opt=false] bDontSetPlayer Whether or not to avoid setting the ragdoll's owning player
+-- @treturn entity Created ragdoll entity
+function META:CreateServerRagdoll(bDontSetPlayer)
+	local entity = ents.Create("prop_ragdoll")
+	entity:SetPos(self:GetPos())
+	entity:SetAngles(self:EyeAngles())
+	entity:SetModel(self:GetModel())
+	entity:SetSkin(self:GetSkin())
+
+	for i = 0, (self:GetNumBodyGroups() - 1) do
+		entity:SetBodygroup(i, self:GetBodygroup(i))
+	end
+
+	entity:Spawn()
+
+	if (!bDontSetPlayer) then
+		entity:SetNetVar("player", self)
+	end
+
+	entity:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+	entity:Activate()
+
+	local velocity = self:GetVelocity()
+
+	for i = 0, entity:GetPhysicsObjectCount() - 1 do
+		local physObj = entity:GetPhysicsObjectNum(i)
+
+		if (IsValid(physObj)) then
+			physObj:SetVelocity(velocity)
+
+			local index = entity:TranslatePhysBoneToBone(i)
+
+			if (index and (not self.expIgnoreBoneManipulation or not self.expIgnoreBoneManipulation[index])) then
+				local position, angles = self:GetBonePosition(index)
+
+				physObj:SetPos(position)
+				physObj:SetAngles(angles)
+			end
+		end
+	end
+
+	return entity
+end

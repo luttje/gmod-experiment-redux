@@ -163,12 +163,22 @@ local newTiedBoneAngles = {
 	["ValveBiped.Bip01_R_Hand"] = Angle(0, 0, -75),
 	["ValveBiped.Bip01_R_UpperArm"] = Angle(-20, 16.6, 0),
 }
-function Schema.SetPlayerTiedBones(clientOrRagdoll, enabled)
+function Schema.SetPlayerTiedBones(client, enabled)
+	if (enabled) then
+		client.expIgnoreBoneManipulation = {}
+	else
+		client.expIgnoreBoneManipulation = nil
+	end
+
 	for boneName, angles in pairs(newTiedBoneAngles) do
-		local boneIndex = clientOrRagdoll:LookupBone(boneName)
+		local boneIndex = client:LookupBone(boneName)
 
 		if (boneIndex) then
-			clientOrRagdoll:ManipulateBoneAngles(boneIndex, enabled and angles or Angle(0, 0, 0))
+			client:ManipulateBoneAngles(boneIndex, enabled and angles or Angle(0, 0, 0))
+
+			if (enabled) then
+				client.expIgnoreBoneManipulation[boneIndex] = true
+			end
 		end
 	end
 end

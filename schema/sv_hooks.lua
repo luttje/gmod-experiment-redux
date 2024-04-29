@@ -217,6 +217,7 @@ function Schema:PostPlayerLoadout(client)
 	client:SetNetVar("tying")
 	client:SetNetVar("untying")
 	client.expRunSpeedBeforeTied = nil
+	Schema.SetPlayerTiedBones(client, false)
 end
 
 --[[
