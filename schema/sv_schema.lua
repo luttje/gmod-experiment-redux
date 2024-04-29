@@ -155,6 +155,24 @@ function Schema.BloodEffect(entity, position, scale, force)
 	util.Decal("Blood", trace.HitPos + trace.HitNormal, trace.HitPos - trace.HitNormal)
 end
 
+local newTiedBoneAngles = {
+	["ValveBiped.Bip01_L_UpperArm"] = Angle(20, 8.8, 0),
+	["ValveBiped.Bip01_L_Forearm"] = Angle(15, 0, 0),
+	["ValveBiped.Bip01_L_Hand"] = Angle(0, 0, 75),
+	["ValveBiped.Bip01_R_Forearm"] = Angle(-15, 0, 0),
+	["ValveBiped.Bip01_R_Hand"] = Angle(0, 0, -75),
+	["ValveBiped.Bip01_R_UpperArm"] = Angle(-20, 16.6, 0),
+}
+function Schema.SetPlayerTiedBones(clientOrRagdoll, enabled)
+	for boneName, angles in pairs(newTiedBoneAngles) do
+		local boneIndex = clientOrRagdoll:LookupBone(boneName)
+
+		if (boneIndex) then
+			clientOrRagdoll:ManipulateBoneAngles(boneIndex, enabled and angles or Angle(0, 0, 0))
+		end
+	end
+end
+
 function Schema.TiePlayer(client)
 	local ragdollIndex = client:GetLocalVar("ragdoll")
 	local ragdoll = ragdollIndex and Entity(ragdollIndex) or nil
@@ -179,11 +197,16 @@ function Schema.TiePlayer(client)
 		end
 	end
 
+	Schema.SetPlayerTiedBones(client, true)
 	client:SetNetVar("tied", true)
 	client:SetRestricted(true)
 	client:SetNetVar("tying")
 	client:NotifyLocalized("fTiedUp")
 	client:Flashlight(false)
+
+	client.expRunSpeedBeforeTied = client:GetRunSpeed()
+
+	client:SetRunSpeed(client:GetWalkSpeed())
 end
 
 function Schema.UntiePlayer(client)
@@ -194,6 +217,12 @@ function Schema.UntiePlayer(client)
 	client:SetRestricted(false)
 	client:SetNetVar("untying")
 	client:NotifyLocalized("fUntied")
+	Schema.SetPlayerTiedBones(client, false)
+
+	if (client.expRunSpeedBeforeTied) then
+		client:SetRunSpeed(client.expRunSpeedBeforeTied)
+		client.expRunSpeedBeforeTied = nil
+	end
 
 	-- If they have weapon information stored, give it back to their ragdoll.
 	if (IsValid(ragdoll)) then

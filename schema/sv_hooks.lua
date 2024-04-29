@@ -213,8 +213,10 @@ function Schema:PostPlayerLoadout(client)
 
 	-- Make sure they're not still tied up (or tying or being tied) from a previous session.
 	client:SetRestricted(false)
+	client:SetNetVar("tied")
 	client:SetNetVar("tying")
 	client:SetNetVar("untying")
+	client.expRunSpeedBeforeTied = nil
 end
 
 --[[
