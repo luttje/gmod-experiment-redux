@@ -785,7 +785,7 @@ function Schema:OnPlayerRagdollOptionSelected(client, ragdollPlayer, ragdoll, op
 			return
 		end
 
-		if (hook.Run("CanPlayerMutilate", client, target, ragdoll) == false) then
+		if (hook.Run("CanPlayerMutilate", client, ragdollPlayer, ragdoll) == false) then
 			return
 		end
 
