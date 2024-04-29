@@ -189,7 +189,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 		75,
 		pitch,
 		volume,
-		CHAN_STATIC
+		CHAN_AUTO
 	)
 
 	net.Start("expSpawnSelectResponse")
@@ -221,7 +221,7 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 			75,
             pitch,
             volume,
-            CHAN_STATIC,
+            CHAN_AUTO,
             0,
 			34 -- "EXPLOSION RING 3" DSP
 		)

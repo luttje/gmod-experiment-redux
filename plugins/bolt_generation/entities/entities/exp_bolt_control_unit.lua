@@ -13,6 +13,10 @@ ENT.IsBoltControlUnit = true
 
 DEFINE_BASECLASS("exp_generator")
 
+if (not SERVER) then
+	return
+end
+
 function ENT:Initialize()
 	BaseClass.Initialize(self)
 
@@ -32,7 +36,7 @@ function ENT:Think()
 	if (self:IsSequenceFinished()) then
 		self:ResetSequence("idle")
 		self:StopSound("ambient/machines/thumper_amb.wav")
-		self:EmitSound("ambient/machines/thumper_amb.wav", 40, 250, 1, CHAN_STATIC)
+		self:EmitSound("ambient/machines/thumper_amb.wav", 40, 250, 1)
 	end
 
 	self:FrameAdvance()
