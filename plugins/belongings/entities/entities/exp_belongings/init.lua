@@ -79,7 +79,7 @@ function ENT:OpenInventory(activator)
 		return
 	end
 
-	local name = self:GetDisplayName()
+	local name = L("belongingsOwnerName", activator, self:GetOwnerName(activator))
 	local baseTaskTime = ix.config.Get("containerOpenTime", 0.7)
 	local searchTime = Schema.GetDexterityTime(activator, baseTaskTime)
 

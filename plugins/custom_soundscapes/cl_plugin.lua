@@ -217,7 +217,6 @@ function PLUGIN:ShouldPlayRandomAmbientSound(rule, name)
 	local character = client:GetCharacter()
 
 	if (character and Schema.perk.GetOwned("earplugs")) then
-		print("earplugs")
 		return false
 	end
 end

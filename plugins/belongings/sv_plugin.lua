@@ -3,12 +3,17 @@ local PLUGIN = PLUGIN
 function PLUGIN:LoadBelongings()
 	local belongings = self:GetData()
 
-	for _, belongingsData in pairs(belongings) do
+    for _, belongingsData in pairs(belongings) do
+        if (not belongingsData.ownerID) then
+			-- Legacy check that we can remove after 1 map change
+            continue
+        end
+
 		local entity = ents.Create("exp_belongings")
 		local inventoryID = tonumber(belongingsData.inventoryID)
 
 		entity:SetAngles(belongingsData.angles)
-		entity:SetDisplayName(belongingsData.displayName or "")
+		entity:SetOwnerID(belongingsData.ownerID)
 		entity:SetMoney(belongingsData.money)
 		entity:SetPos(belongingsData.position)
 		entity:Spawn()
@@ -70,7 +75,7 @@ function PLUGIN:SaveBelongings()
 			invHeight = height,
 			money = entity:GetMoney(),
 
-			displayName = entity:GetDisplayName(),
+			ownerID = entity:GetOwnerID(),
 
 			position = entity:GetPos(),
 			angles = entity:GetAngles(),
@@ -128,12 +133,11 @@ function PLUGIN:CreateBelongings(client, storageEntity)
 	end
 
 	entity.ixInventory = inventory
-	inventory.vars.isCorpse = true -- So Ransacked check will work
 	inventory.vars.belongingsEntity = entity
 
 	entity:SetInventory(inventory)
 	entity:SetAngles(storageEntity and storageEntity:GetAngles() or Angle(0, 0, -90))
-	entity:SetDisplayName(character:GetName() .. "'s Belongings")
+	entity:SetOwnerID(character:GetID())
 	entity:SetPos((storageEntity and storageEntity:GetPos() or client:GetPos()) + Vector(0, 0, 48))
 	entity:Spawn()
 end

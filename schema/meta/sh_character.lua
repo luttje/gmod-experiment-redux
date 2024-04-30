@@ -16,10 +16,12 @@ function META:DoesRecognize(id)
 		return false
 	end
 
-	local hasSkullMask = client:GetCharacterNetVar("expSkullMask", false)
+	if (self ~= character) then
+		local hasSkullMask = client:GetCharacterNetVar("expSkullMask", false)
 
-	if (hasSkullMask and not Schema.perk.GetOwned("rouseless", self:GetPlayer(), self)) then
-		return false
+		if (hasSkullMask and not Schema.perk.GetOwned("rouseless", self:GetPlayer(), self)) then
+			return false
+		end
 	end
 
 	return hook.Run("IsCharacterRecognized", self, id)

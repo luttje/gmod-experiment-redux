@@ -445,7 +445,7 @@ function Schema.HandlePlayerDeathCorpse(client)
 	local decayTime = ix.config.Get("corpseDecayTime", 60)
 	local uniqueID = "ixCorpseDecay" .. entity:EntIndex()
 
-	entity:SetNetVar("isCorpse", true)
+	entity:SetNetVar("corpseOwnerID", client:GetCharacter():GetID())
 
 	entity:RemoveCallOnRemove("fixer")
 	entity:CallOnRemove("expPersistentCorpse", function(ragdoll)

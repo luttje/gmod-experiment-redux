@@ -3,22 +3,16 @@ include("shared.lua")
 ENT.PopulateEntityInfo = true
 
 function ENT:OnPopulateEntityInfo(tooltip)
-	local ownerName = L"someone"
-    local upgrades = self:GetUpgrades() or 0
-
-    local character = ix.char.loaded[self:GetOwnerID()]
-
-	if (character) then
-        local ourCharacter = LocalPlayer():GetCharacter()
-
-		if (ourCharacter and character and ourCharacter:DoesRecognize(character) and hook.Run("IsPlayerRecognized", client) ~= false) then
-			ownerName = character:GetName()
-		end
-	end
-
+	local ownerName, isOwner = self:GetOwnerName()
 	local name = tooltip:AddRow("name")
-	name:SetImportant()
-	name:SetText(L("generatorOwnerName", ownerName))
+    name:SetImportant()
+
+    if (isOwner) then
+        name:SetText(L("generatorOwnerSelf"))
+    else
+        name:SetText(L("generatorOwnerName", ownerName))
+    end
+
     name:SizeToContents()
 
     local itemTable = self:GetItemTable()
@@ -32,6 +26,7 @@ function ENT:OnPopulateEntityInfo(tooltip)
     powerBar:SetMaxPower(itemTable.generator.power)
 	powerBar:Dock(BOTTOM)
 
+    local upgrades = self:GetUpgrades() or 0
 	local description = tooltip:AddRow("description")
     description:SetText("Upgrades: " .. upgrades .. " / " .. #itemTable.generator.upgrades)
     description:SizeToContents()

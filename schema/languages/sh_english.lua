@@ -25,7 +25,8 @@ LANGUAGE = {
 
 	upgrade = "'%s' (-%s)",
 	withdraw = "Withdraw (+%s)",
-	generatorOwnerName = "%s's Generator",
+    generatorOwnerName = "%s's Generator",
+	generatorOwnerSelf = "Your Generator",
 
 	generator = "Generator",
 	generatorDesc = "A generator that produces energy.",
@@ -70,7 +71,10 @@ LANGUAGE = {
 
 	searchCorpse = "Search corpse",
 	searchingCorpse = "Searching corpse...",
-	resurrectingCorpse = "Resurrecting corpse...",
+    resurrectingCorpse = "Resurrecting corpse...",
+    corpseOwnerName = "Corpse of %s",
+    corpseOwnerSelf = "Your Corpse",
+	corpseDeceased = "Deceased",
 
 	mutilateCorpse = "Mutilate corpse",
 	mutilatingCorpse = "Mutilating corpse...",

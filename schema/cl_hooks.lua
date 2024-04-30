@@ -618,10 +618,10 @@ function Schema:GetPlayerEntityMenu(target, options)
 end
 
 function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
-    local isCorpse = ragdoll:GetNetVar("isCorpse", false)
+    local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
-    if (not isCorpse and target:Alive()) then
-        if (target:IsRestricted()) then
+    if (not corpseOwnerID) then
+        if (target:Alive() and target:IsRestricted()) then
             options[L("searchTied")] = true
             options[L("untie")] = true
         end
@@ -629,19 +629,66 @@ function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
         return
     end
 
-	if (not isCorpse) then
-		return
-	end
+    options[L("searchCorpse")] = true
 
-	options[L("searchCorpse")] = true
-
-	local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
+    local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
 
     if (hasMutilatorPerk and ragdoll:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
-		if (hook.Run("CanPlayerMutilate", LocalPlayer(), target, ragdoll) ~= false) then
-			options[L("mutilateCorpse")] = true
+        if (hook.Run("CanPlayerMutilate", LocalPlayer(), target, ragdoll) ~= false) then
+            options[L("mutilateCorpse")] = true
+        end
+    end
+end
+
+function Schema:ShouldPopulateEntityInfo(entity)
+    local corpseOwnerID = entity:GetNetVar("corpseOwnerID")
+
+    if (corpseOwnerID) then
+        local character = ix.char.loaded[corpseOwnerID]
+		local player = character and character:GetPlayer() or nil
+
+        if (IsValid(player)) then
+			-- Annoying how Helix doesnt keep a record of the real entity being looked at, but replaces that information with the player (from the NetVar)
+            player.expPopulatingCorpse = CurTime()
+
+			return true
+		end
+    end
+end
+
+function Schema:PopulateCharacterInfo(client, character, tooltip)
+    if (not client.expPopulatingCorpse or client.expPopulatingCorpse < CurTime() - 1) then
+        return
+    end
+
+	local ownerName = L"someone"
+
+	if (character) then
+		local ourCharacter = LocalPlayer():GetCharacter()
+
+		if (ourCharacter and character and ourCharacter:DoesRecognize(character)) then
+            ownerName = character:GetName()
 		end
 	end
+
+    local name = L("corpseOwnerName", ownerName)
+
+    -- Remove the default name and description
+	-- Needed because Helix doesnt keep a record of the real entity being looked at (see expPopulatingCorpse above)
+    tooltip:Clear()
+
+	-- Clear only removes children the next frame, so we need this hacky delay
+    timer.Simple(0, function()
+        if (not IsValid(tooltip)) then
+            return
+        end
+
+		local corpse = tooltip:AddRow("corpse")
+		corpse:SetImportant()
+		corpse:SetText(name)
+        corpse:SizeToContents()
+		tooltip:SizeToContents()
+	end)
 end
 
 -- TODO: We could use weaponItemTable.pacData to let PAC3 handle the attachment

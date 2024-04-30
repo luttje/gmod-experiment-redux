@@ -619,25 +619,31 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 			return
 		end
 
+		local ownerName = CLIENT and L"someone" or L("someone", client)
+
+		if (character) then
+			local ourCharacter = client:GetCharacter()
+
+			if (ourCharacter and character and ourCharacter:DoesRecognize(character)) then
+				ownerName = character:GetName()
+			end
+		end
+
+		local name = L("corpseOwnerName", client, ownerName)
 		local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
 		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
 
 		ix.storage.Open(client, entity.ixInventory, {
 			entity = entity,
-			name = "Corpse",
+			name = name,
 			searchText = "@searchingCorpse",
 			searchTime = searchTime
 		})
 	end
 
-	entity.GetDisplayName = function(corpse)
-		local name = "Someone"
-
-		if (IsValid(client)) then
-			name = client:Name()
-		end
-
-		return name .. "'s Corpse"
+	-- Used to satisfy the saving for belongings
+	entity.GetOwnerID = function(corpse)
+		return character:GetID()
 	end
 
 	entity.GetInventory = function(corpse)
@@ -791,10 +797,10 @@ function Schema:OnPlayerOptionSelected(target, client, option, data)
 end
 
 function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, data)
-	local isCorpse = ragdoll:GetNetVar("isCorpse", false)
+	local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
-	if (not isCorpse and target:Alive()) then
-		if (target:IsRestricted() and not target:GetNetVar("beingUntied")) then
+	if (not corpseOwnerID) then
+		if (target:Alive() and target:IsRestricted() and not target:GetNetVar("beingUntied")) then
 			if (option == L("untie", client)) then
 				Schema.PlayerTryUntieTarget(client, ragdoll)
 			elseif (option == L("searchTied", client)) then
@@ -802,10 +808,6 @@ function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, d
 			end
 		end
 
-		return
-	end
-
-	if (not isCorpse) then
 		return
 	end
 
