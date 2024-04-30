@@ -1037,3 +1037,9 @@ end
 function Schema:OnPlayerBecameTied(client, tiedBy)
 	Schema.achievement.Progress("zip_ninja", tiedBy)
 end
+
+function Schema:PlayerButtonDown(client, button)
+	if (client:GetNetVar("tied")) then
+		Schema.TiedPlayerPressedBreakFree(client, button)
+	end
+end

@@ -519,6 +519,28 @@ function Schema:RenderScreenspaceEffects()
 	end
 end
 
+function Schema:HUDPaintBackground()
+	local client = LocalPlayer()
+
+    if (not client:GetCharacter()) then
+        return
+    end
+
+    if (not client:GetLocalVar("tied")) then
+        return
+    end
+
+    local canBreakFreeKey = client:GetNetVar("canBreakFreeKey")
+	local breakFreeText
+
+    if (canBreakFreeKey) then
+		local keyName = input.GetKeyName(canBreakFreeKey):upper()
+		breakFreeText = L("tiedBreakFreeStart", keyName)
+    end
+
+	Schema.draw.DrawLabeledValue(L"fTiedUp", breakFreeText or "")
+end
+
 function Schema:PostDrawHUD()
 	local curTime = CurTime()
 

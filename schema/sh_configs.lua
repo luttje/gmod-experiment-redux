@@ -51,6 +51,21 @@ if (CLIENT) then
 	})
 end
 
+ix.config.Add("breakFreeIntervalSeconds", 60, "After how many seconds does the player start getting chances to break free.", nil, {
+	data = { min = 1, max = 600 },
+	category = "restraints"
+})
+
+ix.config.Add("breakFreeChancePercent", 5, "How likely a tied player is to get a chance to break free in percent.", nil, {
+	data = { min = 1, max = 100 },
+	category = "restraints"
+})
+
+ix.config.Add("breakFreeMaxReactDuration", 1, "How long a tied player has to react to the break free prompt in seconds.", nil, {
+	data = { min = 1, max = 10 },
+	category = "restraints"
+})
+
 ix.config.Add("allianceCost", 10000, "How much an alliance costs to create.", nil, {
 	data = { min = 0, max = 1000000 },
 	category = "alliances"

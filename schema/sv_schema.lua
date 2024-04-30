@@ -15,8 +15,6 @@ resource.AddWorkshop("1741790902")
 -- We send the generated HTML to the client so it can be loaded when its needed.
 AddCSLuaFile("cl_html.generated.lua")
 
-local L = Format
-
 Schema.corpses = Schema.corpses or {}
 Schema.dropMode = {
 	RANDOM = 1,
@@ -27,68 +25,68 @@ Schema.dropMode = {
 
 ix.log.AddType("playerHealed", function(client, ...)
 	local arg = {...}
-	return L("%s has healed %s for %d hp", client:Name(), arg[1], arg[2])
+	return Format("%s has healed %s for %d hp", client:Name(), arg[1], arg[2])
 end, FLAG_WARNING)
 
 ix.log.AddType("perkBought", function(client, ...)
 	local arg = { ... }
-	return L("%s bought the perk '%s'", client:Name(), arg[1])
+	return Format("%s bought the perk '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
 ix.log.AddType("perkTaken", function(client, ...)
 	local arg = { ... }
-	return L("%s lost the perk '%s'", client:Name(), arg[1])
+	return Format("%s lost the perk '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
 ix.log.AddType("generatorEarn", function(client, ...)
 	local arg = { ... }
-	return L("%s earned %s from their generator", client:Name(), ix.currency.Get(arg[1]))
+	return Format("%s earned %s from their generator", client:Name(), ix.currency.Get(arg[1]))
 end, FLAG_SUCCESS)
 
 ix.log.AddType("generatorDestroy", function(client, ...)
 	local arg = { ... }
-	return L("%s destroyed a generator belonging to %s", IsValid(client) and client:Name() or "an unknown player",
+	return Format("%s destroyed a generator belonging to %s", IsValid(client) and client:Name() or "an unknown player",
 		IsValid(arg[1]) and arg[1]:Name() or "an unknown player")
 end, FLAG_WARNING)
 
 ix.log.AddType("achievementAchieved", function(client, ...)
 	local arg = { ... }
-	return L("%s achieved the achievement '%s' and earned %d", client:Name(), arg[1], arg[2])
+	return Format("%s achieved the achievement '%s' and earned %d", client:Name(), arg[1], arg[2])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceCreated", function(client, ...)
 	local arg = { ... }
-	return L("%s created the alliance '%s'", client:Name(), arg[1])
+	return Format("%s created the alliance '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceDeleted", function(client, ...)
 	local arg = { ... }
-	return L("%s deleted the alliance '%s'", client:Name(), arg[1])
+	return Format("%s deleted the alliance '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceInvited", function(client, ...)
 	local arg = { ... }
-	return L("%s invited %s to the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])
+	return Format("%s invited %s to the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceKicked", function(client, ...)
 	local arg = { ... }
-	return L("%s kicked %s from the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])
+	return Format("%s kicked %s from the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceLeft", function(client, ...)
 	local arg = { ... }
-	return L("%s left the alliance '%s'", client:Name(), arg[1])
+	return Format("%s left the alliance '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
 ix.log.AddType("allianceRankSet", function(client, ...)
 	local arg = { ... }
-	return L("%s set %s's rank to %s in the alliance '%s'", client:Name(), arg[1]:Name(), arg[2], arg[3])
+	return Format("%s set %s's rank to %s in the alliance '%s'", client:Name(), arg[1]:Name(), arg[2], arg[3])
 end, FLAG_WARNING)
 
 ix.log.AddType("schemaDebug", function(client, ...)
 	local arg = { ... }
-	return L("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
+	return Format("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
 end, FLAG_DANGER)
 
 --- ! WORKAROUND for helix bug where inventory that is closed doesn't remove receivers.
@@ -214,20 +212,123 @@ function Schema.TiePlayer(client)
 
 	Schema.SetPlayerTiedBones(client, true)
 	client:SetNetVar("tied", true)
-	client:SetRestricted(true)
+	client:SetRestricted(true, true)
 	client:SetNetVar("beingTied")
 	client:NotifyLocalized("fTiedUp")
 	client:Flashlight(false)
 
 	client.expRunSpeedBeforeTied = client:GetRunSpeed()
-
 	client:SetRunSpeed(client:GetWalkSpeed())
+
+	-- Allow them to break free, if they react fast enough to a key press.
+	local breakFreeTimerName = "expBreakFree" .. client:SteamID64()
+	local breakFreeMaxReactDuration = ix.config.Get("breakFreeMaxReactDuration")
+
+	Schema.TiedPlayerResetBreakFree(client)
+
+	timer.Create(breakFreeTimerName, breakFreeMaxReactDuration, 0, function()
+		if (not IsValid(client)) then
+			timer.Remove(breakFreeTimerName)
+			return
+		end
+
+		if (client.expNextBreakFreeTime > CurTime()) then
+			return
+		end
+
+		if (client.expCanBreakFree) then
+			if (client.expCanBreakFree.untilTime < CurTime()) then
+				Schema.TiedPlayerResetBreakFree(client)
+			end
+
+			return
+		end
+
+		-- Random check to see if player can break free, agility only increases how often the chance is checked.
+		local breakFreeChancePercent = ix.config.Get("breakFreeChancePercent")
+		local canBreakFree = math.random(1, 100) <= breakFreeChancePercent
+
+		if (not canBreakFree) then
+			return
+		end
+
+		-- Send a message to the client to show a break free prompt.
+		client.expCanBreakFree = {
+			untilTime = CurTime() + breakFreeMaxReactDuration,
+			randomKey = math.random(KEY_1, KEY_9), -- TODO: Let's hope nobody rebound these keys, we should make this configurable.
+		}
+		client:SetNetVar("canBreakFreeKey", client.expCanBreakFree.randomKey)
+	end)
+end
+
+function Schema.TiedPlayerResetBreakFree(client, additionalTime)
+	local breakFreeMaxReactDuration = ix.config.Get("breakFreeMaxReactDuration")
+	local baseBreakFreeInterval = ix.config.Get("breakFreeIntervalSeconds")
+	local agilityFraction = Schema.GetAttributeFraction(client:GetCharacter(), "agility")
+
+	client.expCanBreakFree = nil
+	client:SetNetVar("canBreakFreeKey")
+
+	baseBreakFreeInterval = math.max(baseBreakFreeInterval - (baseBreakFreeInterval * agilityFraction), breakFreeMaxReactDuration + (baseBreakFreeInterval * .05))
+	client.expNextBreakFreeTime = CurTime() + baseBreakFreeInterval + (additionalTime or 0)
+end
+
+function Schema.TiedPlayerPressedBreakFree(client, key)
+	local canBreakFreeKey = client:GetNetVar("canBreakFreeKey")
+
+	if (not canBreakFreeKey) then
+		return
+	end
+
+	-- Wrong button, remove their chance to break free (or they'd just spam all buttons)
+	if (canBreakFreeKey ~= key) then
+		Schema.TiedPlayerResetBreakFree(client)
+		return
+	end
+
+	client.expCanBreakFree = nil
+	client:SetNetVar("canBreakFreeKey")
+
+	local baseTaskTime = 15
+	local taskTime = Schema.GetDexterityTime(client, baseTaskTime)
+
+	local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
+
+	if (hasQuickHands) then
+		taskTime = taskTime * quickHandsPerkTable.tieTimeMultiplier
+	end
+
+	taskTime = math.Clamp(taskTime, 2, baseTaskTime)
+
+	client:SetNetVar("tiedBreakingFree", true)
+	client:SetAction("@tiedBreakingFree", taskTime)
+
+	ix.chat.Send(client, "me", L("tiedBreakingFreeMe", client))
+
+	Schema.TiedPlayerResetBreakFree(client, taskTime)
+
+	client:DoStandStillAction(function()
+		client:SetNetVar("tiedBreakingFree")
+
+		Schema.UntiePlayer(client)
+
+		hook.Run("OnPlayerBecameUntied", client, client)
+	end, taskTime, function()
+		if (IsValid(client)) then
+			client:SetAction()
+			client:SetNetVar("tiedBreakingFree")
+		end
+	end)
 end
 
 function Schema.UntiePlayer(client)
 	local ragdollIndex = client:GetLocalVar("ragdoll")
 	local ragdoll = ragdollIndex and Entity(ragdollIndex) or nil
 
+	local breakFreeTimerName = "expBreakFree" .. client:SteamID64()
+	timer.Remove(breakFreeTimerName)
+
+	client:SetNetVar("canBreakFreeKey")
 	client:SetNetVar("tied")
 	client:SetRestricted(false)
 	client:SetNetVar("beingUntied")

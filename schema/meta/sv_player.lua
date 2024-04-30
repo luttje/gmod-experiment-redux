@@ -94,6 +94,32 @@ function META:RegisterEntityToRemoveOnLeave(entity)
 	character:SetVar("charEnts", characterEntities, true)
 end
 
+--- Performs a time-delay action that requires this player to stand still.
+--- @param callback function The function to call after the delay
+--- @param delay number The delay in seconds
+--- @param onCancel function The function to call if the player moves before the delay is up
+function META:DoStandStillAction(callback, delay, onCancel)
+	local uniqueID = "expStandStill"..self:SteamID64()
+	local startPos = self:GetPos()
+	local moveMargin = 4
+
+	timer.Create(uniqueID, 0.1, delay / 0.1, function()
+		local currentPos = self:GetPos()
+
+		if (IsValid(self) and startPos:DistToSqr(currentPos) < moveMargin) then
+			if (callback and timer.RepsLeft(uniqueID) == 0) then
+				callback()
+			end
+		else
+			timer.Remove(uniqueID)
+
+			if (onCancel) then
+				onCancel()
+			end
+		end
+	end)
+end
+
 -- ! WORKAROUND: This fixes a bug where Helix tries to SaveData for bots
 -- ! Since bots never have LoadData called, ixData wont be set. Since we dont want to save data for bots, we just return
 META.expSaveData = META.expSaveData or META.SaveData

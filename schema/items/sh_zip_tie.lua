@@ -11,7 +11,7 @@ ITEM.functions.Tie = {
 	-- Note that we always return false, because we manually remove the zip tie when not cancelling the action.
 	OnRun = function(itemTable)
 		local client = itemTable.player
-		local baseTaskTime = 10
+		local baseTaskTime = 15
 		local taskTime = Schema.GetDexterityTime(client, baseTaskTime)
 		local data = {}
 		data.start = client:GetShootPos()

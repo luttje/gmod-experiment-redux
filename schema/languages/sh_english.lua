@@ -61,7 +61,11 @@ LANGUAGE = {
 	tiedUp = "They have been tied up.",
 	fUntied = "You have been untied.",
 	beingTied = "They are being tied up.",
-	beingUntied = "They are being untied.",
+    beingUntied = "They are being untied.",
+
+    tiedBreakFreeStart = "Press %s to attempt to break free.",
+    tiedBreakingFree = "Struggling to break free.",
+	tiedBreakingFreeMe = "starts struggling to break free from their restraints...",
 
 	chloroforming = "Chloroforming...",
 	fBeingChloroformed = "You are being chloroformed.",

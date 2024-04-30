@@ -1,5 +1,5 @@
 ATTRIBUTE.name = "Agility"
-ATTRIBUTE.description = "Affects your overall nimbleness, like how fast you duck or climb ladders."
+ATTRIBUTE.description = "Your overal nimbleness. Affects how fast you duck, climb ladders and break free from restraints."
 
 function ATTRIBUTE:OnSetup(client, value, character)
 	local maximum = self.maxValue or ix.config.Get("maxAttributes", 100)
