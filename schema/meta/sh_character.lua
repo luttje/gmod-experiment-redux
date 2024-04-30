@@ -18,7 +18,7 @@ function META:DoesRecognize(id)
 
 	local hasSkullMask = client:GetCharacterNetVar("expSkullMask", false)
 
-	if (hasSkullMask) then
+	if (hasSkullMask and not Schema.perk.GetOwned("rouseless", self:GetPlayer(), self)) then
 		return false
 	end
 
