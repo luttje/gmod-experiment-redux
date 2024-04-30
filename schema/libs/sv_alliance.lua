@@ -5,6 +5,8 @@ util.AddNetworkString("AllianceRequestInviteAccept")
 util.AddNetworkString("AllianceRequestInviteDecline")
 util.AddNetworkString("AllianceInviteDeclined")
 util.AddNetworkString("AllianceRequestUpdateMembers")
+util.AddNetworkString("AllianceRequestUpdateMembersDeclined")
+util.AddNetworkString("AllianceForceUpdate")
 util.AddNetworkString("AllianceUpdateMembers")
 util.AddNetworkString("AllianceRequestSetRank")
 util.AddNetworkString("AllianceRequestKick")
@@ -39,18 +41,22 @@ hook.Add("OnWipeTables", "expWipeTables_AllianceWipeTables", function()
 end)
 
 function Schema.alliance.Create(client, allianceName, callback)
-	local ownerId = client:GetCharacter():GetID()
-	local query
+	local character = client:GetCharacter()
+    local ownerId = character:GetID()
+	local rank = RANK_GEN
+    local query
+
+	local members = {
+		{
+			id = ownerId,
+			rank = rank,
+			name = character:GetName(),
+		}
+	}
 
 	query = mysql:Insert("exp_alliances")
 	query:Insert("name", allianceName)
-	query:Insert("members", util.TableToJSON({
-		{
-			id = ownerId,
-			rank = RANK_GEN,
-			name = client:GetCharacter():GetName(),
-		}
-	}))
+	query:Insert("members", util.TableToJSON(members))
 	query:Insert("created", os.time())
 	query:Callback(function(result, status, lastID)
 		if (not IsValid(client)) then
@@ -63,7 +69,8 @@ function Schema.alliance.Create(client, allianceName, callback)
 			return
 		end
 
-		callback(lastID)
+		character:SetData("rank", rank)
+		callback(lastID, members)
 	end)
 	query:Execute()
 end
@@ -292,7 +299,7 @@ function Schema.alliance.RequestCreate(client, allianceName)
 				return
 			end
 
-			Schema.alliance.Create(client, allianceName, function(allianceId)
+			Schema.alliance.Create(client, allianceName, function(allianceId, members)
 				if (not IsValid(client)) then
 					release()
 					return
@@ -311,7 +318,10 @@ function Schema.alliance.RequestCreate(client, allianceName)
 				character:TakeMoney(allianceCost, "creating an alliance")
 
 				ix.util.Notify("You have created the '" .. allianceName .. "' alliance.", client)
-				ix.log.Add(client, "allianceCreated", "RequestCreate", allianceName)
+                ix.log.Add(client, "allianceCreated", allianceName)
+
+				net.Start("AllianceForceUpdate")
+				net.Send(client)
 
 				release()
 			end)
@@ -344,8 +354,13 @@ function Schema.alliance.RequestKick(client, member)
 		return
 	end
 
-	if (member:GetAllianceRank() >= client:GetAllianceRank()) then
-		ix.util.Notify("You cannot kick this member as their rank is equal to or higher than yours!", client)
+    if (member:GetAllianceRank() == client:GetAllianceRank()) then
+        client:Notify("You cannot kick this member as they have the same rank as you.")
+        return
+    end
+
+    if (member:GetAllianceRank() > client:GetAllianceRank()) then
+		client:Notify("You cannot kick this member as they have a higher rank than you.")
 		return
 	end
 
@@ -381,9 +396,10 @@ function Schema.alliance.RequestKick(client, member)
 
 		ix.util.Notify("You have kicked " .. member:Name() .. " from the '" .. alliance.name .. "' alliance.", client)
 		ix.util.Notify("You have been kicked from the '" .. alliance.name .. "' alliance.", member)
-		ix.log.Add(client, "allianceKicked", "RequestKick", member, alliance.name)
+		ix.log.Add(client, "allianceKicked", member, alliance.name)
 
 		member:SetAlliance(nil)
+		Schema.alliance.RequestSendMembersToAlliance(alliance.id)
 	end)
 
 	if (not canRun) then
@@ -404,11 +420,6 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 		return
 	end
 
-	if (not client:IsLeader()) then
-		ix.util.Notify("You are not the leader of this alliance!", client)
-		return
-	end
-
 	local alliance = client:GetAlliance()
 	local memberAlliance = member:GetAlliance()
 
@@ -417,39 +428,34 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 		return
 	end
 
-	if (not rank or rank < RANK_RCT or rank >= RANK_GEN) then
-		ix.util.Notify("You entered an invalid rank!", client)
+    if (not rank or rank < RANK_RCT or rank > RANK_GEN) then
+        ix.util.Notify("You entered an invalid rank!", client)
+        return
+    end
+
+    local clientRank = client:GetAllianceRank()
+    local rankIsLower = rank < member:GetAllianceRank()
+	local canSetRank = (clientRank >= RANK_LT and rankIsLower) or (clientRank == RANK_GEN)
+
+    if (not canSetRank) then
+        ix.util.Notify("You cannot set this rank!", client)
+        return
+    end
+
+    -- If the leader tries to demote themselves, reject it
+	if (clientRank == RANK_GEN and member == client) then
+		ix.util.Notify("You cannot demote yourself!", client)
 		return
 	end
 
-	if (rank >= RANK_MAJ and (client:IsLeader() or (client:IsCoLeader() and rank < RANK_COL))) then
-		ix.util.Notify("You cannot set this rank!", client)
-		return
-	end
-
-	if (rank == RANK_COL and client:IsLeader()) then
-		ix.util.Notify("You cannot set this rank!", client)
-		return
-	end
-
-	if (rank <= RANK_MAJ and member:GetAllianceRank() > RANK_MAJ) then
-		ix.util.Notify("You cannot set this rank!", client)
-		return
-	end
-
-	if (rank < RANK_MAJ and member:GetAllianceRank() == RANK_MAJ) then
-		ix.util.Notify("You cannot set this rank!", client)
-		return
-	end
-
-	local canRun = Schema.alliance.SetMemberRank(alliance.id, member:GetID(), rank,
+	local canRun = Schema.alliance.SetMemberRank(alliance.id, member:GetCharacter():GetID(), rank,
 		function(success, reason)
 			if (not IsValid(client)) then
 				return
 			end
 
 			if (not success) then
-				ix.util.Notify("Failed to make member a leader: " .. reason, client)
+				ix.util.Notify("Failed to change member rank: " .. reason, client)
 				return
 			end
 
@@ -458,12 +464,13 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 				return
 			end
 
-			ix.util.Notify("You have made " .. member:Name() .. " the leader of the '" .. alliance.name .. "' alliance.",
+			ix.util.Notify("You have set " .. member:Name() .. " to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.",
 				client)
-			ix.util.Notify("You have been made the leader of the '" .. alliance.name .. "' alliance.", member)
-			ix.log.Add(client, "allianceLeaderSet", "RequestSetRank", member, alliance.name)
+			ix.util.Notify("You have been set to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.", member)
+			ix.log.Add(client, "allianceRankSet", member, RANKS[rank], alliance.name)
 
 			member:SetAllianceRank(rank)
+			Schema.alliance.RequestSendMembersToAlliance(alliance.id)
 		end)
 
 	if (not canRun) then
@@ -473,13 +480,34 @@ end
 
 net.Receive("AllianceRequestSetRank", function(len, client)
 	local member = net.ReadEntity()
-	local rank = net.ReadUInt(8)
+    local rank = net.ReadUInt(8)
 
 	Schema.alliance.RequestSetRank(client, member, rank)
 end)
 
+function Schema.alliance.GetAllMembers(allianceId, callback)
+	-- TODO: Cache this data in memory instead of doing a query every time
+	local query
+
+	query = mysql:Select("exp_alliances")
+	query:Select("members")
+	query:Where("alliance_id", allianceId)
+	query:Callback(function(result)
+		if (not result or #result < 1) then
+			callback({})
+			return
+		end
+
+        local members = util.JSONToTable(result[1].members) or {}
+		callback(members)
+	end)
+	query:Execute()
+end
+
 function Schema.alliance.RequestSendMembers(client)
-	if (Schema.util.Throttle("RequestSendMembers", 5, client)) then
+    if (Schema.util.Throttle("RequestSendMembers", 5, client)) then
+        net.Start("AllianceRequestUpdateMembersDeclined")
+		net.Send(client)
 		return
 	end
 
@@ -490,34 +518,40 @@ function Schema.alliance.RequestSendMembers(client)
 		return
 	end
 
-	-- TODO: Cache this data in memory instead of doing a query every time
-	local query
-
-	query = mysql:Select("exp_alliances")
-	query:Select("members")
-	query:Where("alliance_id", alliance.id)
-	query:Callback(function(result)
+	Schema.alliance.GetAllMembers(alliance.id, function(members)
 		if (not IsValid(client)) then
 			return
 		end
 
-		if (not result or #result < 1) then
-			ix.util.Notify("Your alliance does not exist!", client)
+		if (#members == 0) then
+			ix.util.Notify("Your alliance does not exist anymore!", client)
 			return
 		end
-
-		local members = util.JSONToTable(result[1].members) or {}
 
 		net.Start("AllianceUpdateMembers")
 		net.WriteTable(members)
 		net.Send(client)
 	end)
-	query:Execute()
 end
 
 net.Receive("AllianceRequestUpdateMembers", function(len, client)
 	Schema.alliance.RequestSendMembers(client)
 end)
+
+--- Inform all alliance members of the current members in the alliance.
+function Schema.alliance.RequestSendMembersToAlliance(allianceId)
+	Schema.alliance.GetAllMembers(allianceId, function(members)
+        local onlineMembers = Schema.alliance.GetOnlineMembers(allianceId)
+
+		if (#members == 0) then
+			return
+		end
+
+		net.Start("AllianceUpdateMembers")
+		net.WriteTable(members)
+		net.Send(onlineMembers)
+	end)
+end
 
 function Schema.alliance.RequestInviteMember(client, member)
 	if (Schema.util.Throttle("RequestInviteMember", 5, client)) then
@@ -557,7 +591,7 @@ function Schema.alliance.RequestInviteMember(client, member)
 
 	ix.util.Notify("You have invited " .. member:Name() .. " to the '" .. alliance.name .. "' alliance.", client)
 	ix.util.Notify(client:Name() .. " has invited you to the '" .. alliance.name .. "' alliance. Go to the alliance panel to accept.", member)
-	ix.log.Add(client, "allianceInvited", "RequestInviteMember", member, alliance.name)
+	ix.log.Add(client, "allianceInvited", member, alliance.name)
 
 	net.Start("AllianceMemberInvitation")
 	net.WriteUInt(alliance.id, 32)
@@ -618,7 +652,8 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 			client:SetAllianceRank(RANK_RCT)
 
 			ix.util.Notify("You have joined the '" .. allianceName .. "' alliance.", client)
-			ix.log.Add(client, "allianceJoined", "RequestInviteAccept", allianceName)
+			ix.log.Add(client, "allianceJoined", allianceName)
+			Schema.alliance.RequestSendMembersToAlliance(allianceId)
 		end)
 
 	if (not canRun) then
@@ -649,7 +684,7 @@ function Schema.alliance.RequestInviteDecline(client, allianceId)
 	local inviter = client.expAllianceInvites[allianceId]
 
 	if (IsValid(inviter)) then
-		ix.util.Notify(client:Name() .. " has accepted your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.", inviter)
+		ix.util.Notify(client:Name() .. " has declined your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.", inviter)
 	end
 
 	client.expAllianceInvites[allianceId] = nil
@@ -689,7 +724,8 @@ function Schema.alliance.RequestLeave(client)
 		client:SetAlliance(nil)
 
 		ix.util.Notify("You have left the '" .. alliance.name .. "' alliance.", client)
-		ix.log.Add(client, "allianceLeft", "RequestLeave", alliance.name)
+		ix.log.Add(client, "allianceLeft", alliance.name)
+		Schema.alliance.RequestSendMembersToAlliance(alliance.id)
 	end)
 
 	if (not canRun) then

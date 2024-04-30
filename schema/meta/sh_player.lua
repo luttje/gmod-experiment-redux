@@ -1,15 +1,7 @@
 local META = FindMetaTable("Player")
 
-function META:IsLeader()
-	return self:GetCharacter():GetData("rank") == RANK_GEN
-end
-
-function META:IsCoLeader()
-	return self:GetCharacter():GetData("rank") == RANK_COL
-end
-
 function META:GetAllianceRank()
-	local rank = self:GetCharacter():GetData("rank")
+	local rank = self:GetCharacter():GetData("rank", RANK_RCT)
 
 	return rank
 end

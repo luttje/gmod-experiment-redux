@@ -69,6 +69,11 @@ ix.log.AddType("allianceInvited", function(client, ...)
 	return Format("%s invited %s to the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])
 end, FLAG_WARNING)
 
+ix.log.AddType("allianceJoined", function(client, ...)
+	local arg = { ... }
+	return Format("%s joined the alliance '%s'", client:Name(), arg[1])
+end, FLAG_WARNING)
+
 ix.log.AddType("allianceKicked", function(client, ...)
 	local arg = { ... }
 	return Format("%s kicked %s from the alliance '%s'", client:Name(), arg[1]:Name(), arg[2])

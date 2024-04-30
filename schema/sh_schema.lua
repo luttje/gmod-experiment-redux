@@ -47,6 +47,17 @@ RANK_MAJ = 5
 RANK_COL = 6
 RANK_GEN = 7
 
+RANKS = {
+	[RANK_RCT] = "Recruit",
+	[RANK_PVT] = "Private",
+	[RANK_SGT] = "Sergeant",
+	[RANK_LT] = "Lieutenant",
+	[RANK_CPT] = "Captain",
+	[RANK_MAJ] = "Major",
+	[RANK_COL] = "Colonel",
+	[RANK_GEN] = "General",
+}
+
 ix.util.IncludeDir("meta")
 
 Schema.achievement.LoadFromDir(Schema.folder .. "/schema/achievements")

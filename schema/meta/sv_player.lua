@@ -3,14 +3,6 @@ util.AddNetworkString("AllianceMemberLeft")
 
 local META = FindMetaTable("Player")
 
-function META:IsLeader()
-	return self:GetCharacter():GetData("rank") == RANK_GEN
-end
-
-function META:IsCoLeader()
-	return self:GetCharacter():GetData("rank") == RANK_COL
-end
-
 function META:SetAllianceRank(rank)
 	local character = self:GetCharacter()
 	local alliance = character:GetData("alliance")
