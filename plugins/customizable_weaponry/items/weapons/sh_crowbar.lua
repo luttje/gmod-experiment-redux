@@ -20,3 +20,8 @@ ITEM.attachmentOffsetAngles = Angle(-57, 12.2, 0.7)
 ITEM.mergeIntoSwep = {
 	MeleeRange = 64,
 }
+
+function ITEM:CanTransfer(oldInventory, newInventory)
+    -- Only allow moving within the same inventory
+    return newInventory == nil
+end
