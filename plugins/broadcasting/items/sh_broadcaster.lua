@@ -53,6 +53,13 @@ ITEM.functions.Deploy = {
         -- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		-- For this reason we manually transfer the item to the world(0)
 		return false
+	end,
+
+	OnCanRun = function(item)
+        local client = item.player
+
+        -- Ensure it's in the player's inventory
+		return client and item.invID == client:GetCharacter():GetInventory():GetID()
 	end
 }
 

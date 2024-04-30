@@ -1,5 +1,28 @@
 local PLUGIN = PLUGIN
 
+local playerMeta = FindMetaTable("Player")
+
+function playerMeta:IsCharacterOnFrequency(frequencyOrFrequencies)
+    local character = self:GetCharacter()
+
+	if (not character) then
+		return false
+	end
+
+	local frequencies = type(frequencyOrFrequencies) == "table" and frequencyOrFrequencies or { frequencyOrFrequencies }
+	local localFrequencies = PLUGIN:GetCharacterFrequencies(character)
+
+    for _, characterFrequency in ipairs(localFrequencies) do
+		for _, frequency in ipairs(frequencies) do
+			if (characterFrequency == frequency) then
+				return true
+			end
+		end
+	end
+
+	return false
+end
+
 local relevantChatTypeDistances = {
 	ic = 256,
 	w = 128,
@@ -27,23 +50,8 @@ function PLUGIN:PostPlayerSay(client, chatType, message, anonymous)
 			handledFrequencies[frequency] = true
 
 			ix.chat.Send(entity, "radio", message, false, nil, {
-				character = client,
+				realSpeaker = client,
 			})
 		end
 	end
-end
-
-function PLUGIN:GetRadioEntityToSetFrequency(client, frequency)
-	local trace = client:GetEyeTraceNoCursor()
-
-    if (not IsValid(trace.Entity) or trace.Entity:GetClass() ~= "exp_stationary_radio") then
-		return
-	end
-
-    if (trace.HitPos:Distance(client:GetShootPos()) > ix.config.Get("maxInteractionDistance")) then
-        ix.util.Notify("This stationary radio is too far away!", client)
-        return
-    end
-
-	return trace.Entity
 end

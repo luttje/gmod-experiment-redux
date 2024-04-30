@@ -8,6 +8,8 @@ if (SERVER) then
     resource.AddFile("resource/fonts/RomanAntique-Italic.ttf")
 end
 
+-- We probably shouldn't be forcing these configs, but I have yet to look for another way to "recommend" them.
+-- If anyone starts using this besides us, we should probably move this behind a command or something.
 hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 	ix.config.Set("intro", false)
 	ix.config.Set("music", "music/HL2_song26.mp3")
@@ -25,7 +27,10 @@ hook.Add("InitializedConfig", "expInitializedConfigWhyNotSooner", function()
 
 	-- Make inventory management more bearable by increasing the size.
 	ix.config.Set("inventoryWidth", 6)
-	ix.config.Set("inventoryHeight", 6)
+    ix.config.Set("inventoryHeight", 6)
+
+	-- Don't show descriptions of unrecognized characters.
+    ix.config.Set("scoreboardRecognition", true)
 end)
 
 if (CLIENT) then

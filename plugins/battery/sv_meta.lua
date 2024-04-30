@@ -14,7 +14,7 @@ function playerMeta:EnableStealth()
 	self:SetRenderMode(RENDERMODE_TRANSCOLOR)
     self:SetColor(Color(255, 255, 255, 0))
 
-    self:EmitSound("items/nvg_on.wav")
+    self:EmitSound("items/night_vision_on.wav")
 
     character:SetData("stealth", true)
 	self:SetCharacterNetVar("expStealth", true)
@@ -27,7 +27,7 @@ function playerMeta:DisableStealth()
 
     self:SetColor(Color(255, 255, 255, 255))
 
-	self:EmitSound("items/nvg_off.wav")
+	self:EmitSound("items/night_vision_off.wav")
 
 	character:SetData("stealth", false)
     self:SetCharacterNetVar("expStealth", false)
@@ -53,7 +53,7 @@ function playerMeta:EnableThermal()
 	end
 
     Schema.achievement.Progress("go_thermal", self)
-    self:EmitSound("items/nvg_on.wav")
+    self:EmitSound("items/night_vision_on.wav")
 
     character:SetData("thermal", true)
 	self:SetCharacterNetVar("expThermal", true)
@@ -62,7 +62,7 @@ end
 function playerMeta:DisableThermal()
     local character = self:GetCharacter()
 
-	self:EmitSound("items/nvg_off.wav")
+	self:EmitSound("items/night_vision_off.wav")
 
     character:SetData("thermal", false)
 	self:SetCharacterNetVar("expThermal", false)

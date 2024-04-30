@@ -4,32 +4,51 @@ PLUGIN.name = "Radioing"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds stationary and handheld radios that can be used to communicate with others over frequencies."
 
-ix.util.Include("sv_hooks.lua")
+ix.util.Include("sv_plugin.lua")
 ix.util.Include("sh_commands.lua")
 
+CHAT_RECOGNIZED = CHAT_RECOGNIZED or {}
+CHAT_RECOGNIZED["radio"] = true
+
 ix.chat.Register("radio", {
-	CanHear = function(self, speaker, listener)
+	prefix = { "/R", "/Radio" },
+    indicator = "chatRadioing",
+
+	OnChatAdd = function(self, speaker, text, anonymous, data)
+        if (not speaker:IsPlayer()) then
+            speaker = data.realSpeaker
+
+			if (speaker == LocalPlayer())then
+				return
+			end
+        end
+
+		local name = anonymous and
+			L"someone" or hook.Run("GetCharacterName", speaker, "radio") or
+			(IsValid(speaker) and speaker:Name() or "Console")
+
+		chat.AddText("(Radio) ", Color(75, 150, 50, 255), name .. " radios in \"" .. text .. "\"")
+    end,
+
+    CanHear = function(self, speaker, listener)
 		local listenerCharacter = listener:GetCharacter()
 
 		if (not listenerCharacter) then
 			return false
 		end
 
-		local speakerFrequency
+        local speakerFrequencies = {}
+
 
 		if (speaker:IsPlayer()) then
-			local speakerCharacter = speaker:GetCharacter()
-			speakerFrequency = speakerCharacter:GetData("frequency")
+            speakerFrequencies = PLUGIN:GetCharacterFrequencies(speaker:GetCharacter())
 		elseif (speaker:GetClass() == "exp_stationary_radio") then
-			speakerFrequency = speaker:GetFrequency()
+            speakerFrequencies = { speaker:GetFrequency() }
 		end
 
-		if (listenerCharacter:GetInventory():HasItem("handheld_radio")) then
-			local listenerFrequency = listenerCharacter:GetData("frequency")
-
-			if (listenerFrequency and listenerFrequency == speakerFrequency) then
-				return true
-			end
+		-- If the listener has handheld radios with the same frequency as the speaker, they can hear them.
+		if (listener:IsCharacterOnFrequency(speakerFrequencies)) then
+			return true
 		end
 
 		-- If the listener is near a stationary radio, they can hear the speaker if they're on the same frequency.
@@ -39,7 +58,7 @@ ix.chat.Register("radio", {
 			if (entity:GetClass() == "exp_stationary_radio" and not entity:GetTurnedOff()) then
 				local frequency = entity:GetFrequency()
 
-				if (frequency == speakerFrequency) then
+                if (frequency == speakerFrequency) then
 					return true
 				end
 			end
@@ -52,37 +71,36 @@ ix.chat.Register("radio", {
 		if (speaker:IsPlayer()) then
 			local character = speaker:GetCharacter()
 
-			if (not character) then
-				return false
-			end
-
-			if (not character:GetInventory():HasItem("handheld_radio")) then
+			if (not character or not character:GetInventory():HasItem("handheld_radio")) then
 				return false
 			end
 
 			return true
 		end
 
-		local isStationaryRadio = speaker:GetClass() == "exp_stationary_radio"
+        local isStationaryRadio = speaker:GetClass() == "exp_stationary_radio"
 
 		if (not isStationaryRadio) then
 			return false
 		end
 
 		return true
-	end,
-
-	OnChatAdd = function(self, speaker, text, anonymous, data)
-		if (not speaker:IsPlayer()) then
-			speaker = data.character
-		end
-
-		chat.AddText("(Radio) ", Color(75, 150, 50, 255), speaker:Name() .. " radios in \"" .. text .. "\"")
-	end,
-
-	prefix = { "/R", "/Radio" },
-	indicator = "chatRadioing",
+    end,
 })
+
+--- Finds the frequencies a character is listening to by handheld radios they have in their inventory
+--- @param character table The character to get the frequencies of.
+function PLUGIN:GetCharacterFrequencies(character)
+	local handheldRadios = character:GetInventory():GetItemsByUniqueID("handheld_radio")
+	local frequencies = {}
+
+	for _, item in pairs(handheldRadios) do
+		local frequency = item:GetData("frequency", "101.1")
+		table.insert(frequencies, frequency)
+	end
+
+	return frequencies
+end
 
 function PLUGIN:ValidateFrequency(frequency)
 	if (not string.find(frequency, "^%d%d%d%.%d$")) then

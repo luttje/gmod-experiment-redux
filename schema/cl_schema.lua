@@ -23,6 +23,33 @@ net.Receive("ixDoorMenu", function(length)
 	end
 end)
 
+-- ! Overrides default net message for the recognition menu, to change the font
+local function Recognize(level)
+	net.Start("ixRecognize")
+		net.WriteUInt(level, 2)
+	net.SendToServer()
+end
+net.Receive("ixRecognizeMenu", function(length)
+    local menu = DermaMenu()
+
+	menu:AddOption(L"rgnLookingAt", function()
+		Recognize(0)
+	end):SetFont("ixMenuButtonFont")
+	menu:AddOption(L"rgnWhisper", function()
+		Recognize(1)
+	end):SetFont("ixMenuButtonFont")
+	menu:AddOption(L"rgnTalk", function()
+		Recognize(2)
+	end):SetFont("ixMenuButtonFont")
+	menu:AddOption(L"rgnYell", function()
+		Recognize(3)
+    end):SetFont("ixMenuButtonFont")
+
+	menu:Open()
+	menu:MakePopup()
+	menu:Center()
+end)
+
 function Schema.GetCachedTextSize(font, text)
 	Schema.CachedTextSizes[font] = Schema.CachedTextSizes[font] or {}
 

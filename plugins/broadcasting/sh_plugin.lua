@@ -6,8 +6,12 @@ PLUGIN.description = "Adds a broadcaster entity that can be used to broadcast me
 
 ix.util.Include("sv_hooks.lua")
 
+CHAT_RECOGNIZED = CHAT_RECOGNIZED or {}
+CHAT_RECOGNIZED["broadcast"] = true
+
 ix.chat.Register("broadcast", {
-	OnChatAdd = function(self, speaker, text)
-		chat.AddText("(Broadcast) ", Color(150, 125, 175, 255), speaker:Name() .. ": " .. text)
+	format = "(Broadcast) %s %s",
+	GetColor = function(self, speaker, text)
+		return  Color(150, 125, 175, 255)
 	end,
 })

@@ -24,15 +24,23 @@ function ENT:Initialize()
 end
 
 function ENT:SetupRadio(client, item)
-	self:SetItemID(item.uniqueID)
-	self.expClient = client
+    self:SetItemID(item.uniqueID)
+    self.expClient = client
     self.expItemID = item.id
 
-	self:SetFrequency(item:GetData("frequency", item.data.frequency or "101.1"))
+    self:SetFrequency(item:GetData("frequency", "101.1"))
 
-	if (item.OnEntityCreated) then
-		item:OnEntityCreated(self)
-	end
+    if (item.OnEntityCreated) then
+        item:OnEntityCreated(self)
+    end
+end
+
+function ENT:ChangeFrequency(frequency)
+	local itemID = self.expItemID
+	local itemTable = ix.item.instances[itemID]
+
+	itemTable:SetData("frequency", frequency)
+	self:SetFrequency(frequency)
 end
 
 function ENT:OnDuplicated(entTable)
@@ -68,6 +76,11 @@ function ENT:OnOptionSelected(client, option, data)
 		inventory:Add(self.expItemID)
         self:Remove()
     elseif (option == L("setFrequency", client)) then
+        if (Schema.util.Throttle("SetFrequency", 2, client)) then
+			client:Notify("You must wait a moment before setting the frequency again!")
+            return
+        end
+
 		local frequency = data
         local success, fault = PLUGIN:ValidateFrequency(frequency)
 
@@ -75,11 +88,8 @@ function ENT:OnOptionSelected(client, option, data)
             return client:Notify(fault)
         end
 
-		local itemID = self.expItemID
-        local itemTable = ix.item.instances[itemID]
-
-		itemTable:SetData("frequency", data)
-        self:SetFrequency(frequency)
+		self:ChangeFrequency(frequency)
+        hook.Run("PlayerSetFrequency", client, frequency, radio)
 
 		client:Notify("You have set the frequency to " .. frequency .. ".")
 	elseif (option == L("turnOff", client)) then
