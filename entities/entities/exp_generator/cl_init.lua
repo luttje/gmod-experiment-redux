@@ -3,12 +3,22 @@ include("shared.lua")
 ENT.PopulateEntityInfo = true
 
 function ENT:OnPopulateEntityInfo(tooltip)
-	local ownerName = self:GetOwnerName() or "Unnamed"
-	local upgrades = self:GetUpgrades() or 0
+	local ownerName = L"someone"
+    local upgrades = self:GetUpgrades() or 0
+
+    local character = ix.char.loaded[self:GetOwnerID()]
+
+	if (character) then
+        local ourCharacter = LocalPlayer():GetCharacter()
+
+		if (ourCharacter and character and ourCharacter:DoesRecognize(character) and hook.Run("IsPlayerRecognized", client) ~= false) then
+			ownerName = character:GetName()
+		end
+	end
 
 	local name = tooltip:AddRow("name")
 	name:SetImportant()
-	name:SetText(ownerName)
+	name:SetText(L("generatorOwnerName", ownerName))
     name:SizeToContents()
 
     local itemTable = self:GetItemTable()
@@ -43,12 +53,12 @@ function ENT:GetEntityMenu(client)
 		return false
 	end
 
-	local owner = self:GetItemOwner()
+	local characterID = self:GetOwnerID()
 
 	itemTable.entity = self
     itemTable.player = client
 
-	if (IsValid(owner) and owner == client) then
+	if (characterID and characterID == client:GetCharacter():GetID()) then
         options[L("pickup")] = function() end
 	end
 

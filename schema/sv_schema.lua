@@ -35,6 +35,11 @@ ix.log.AddType("perkBought", function(client, ...)
 	return L("%s bought the perk '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
+ix.log.AddType("perkTaken", function(client, ...)
+	local arg = { ... }
+	return L("%s lost the perk '%s'", client:Name(), arg[1])
+end, FLAG_WARNING)
+
 ix.log.AddType("generatorEarn", function(client, ...)
 	local arg = { ... }
 	return L("%s earned %s from their generator", client:Name(), ix.currency.Get(arg[1]))

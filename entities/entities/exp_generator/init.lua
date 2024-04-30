@@ -71,8 +71,7 @@ function ENT:SetupGenerator(client, item)
 	self:SetItemID(item.uniqueID)
 	self:SetUpgrades(item:GetData("upgrades", 0))
 
-	self:SetItemOwner(client)
-	self:SetOwnerName(L("generatorOwnerName", client, client:Name()))
+	self:SetOwnerID(client:GetCharacter():GetID())
 	self.expItemID = item.id
 
 	if (item.OnEntityCreated) then
@@ -94,6 +93,13 @@ function ENT:SetupPayTimer(item)
 			timer.Remove(uniqueID)
 		end
 	end)
+end
+
+function ENT:GetItemOwner()
+	local itemID = self.expItemID
+	local item = ix.item.instances[itemID]
+
+	return item and item:GetOwner()
 end
 
 function ENT:GetCanEarn()

@@ -20,10 +20,33 @@ end
 
 if (SERVER) then
 	util.AddNetworkString("PerkGive")
+	util.AddNetworkString("PerkTake")
 	util.AddNetworkString("PerkLoadOwned")
 	util.AddNetworkString("PerkRequestBuy")
 
-	function Schema.perk.Give(client, perk)
+    function Schema.perk.Give(client, perk)
+        local perkTable = Schema.perk.Get(perk)
+        local perks = client:GetCharacter():GetData("perks", {})
+
+        if (not perkTable) then
+            return false, "That is not a valid perk!"
+        end
+
+        perks[perkTable.uniqueID] = true
+        client:GetCharacter():SetData("perks", perks)
+
+        net.Start("PerkGive")
+        net.WriteUInt(perkTable.index, 32)
+        net.Send(client)
+
+        if (perkTable.OnGiven) then
+            perkTable:OnGiven(client)
+        end
+
+        ix.log.Add(client, "perkBought", perkTable.name)
+    end
+
+	function Schema.perk.Take(client, perk)
 		local perkTable = Schema.perk.Get(perk)
 		local perks = client:GetCharacter():GetData("perks", {})
 
@@ -31,18 +54,18 @@ if (SERVER) then
 			return false, "That is not a valid perk!"
 		end
 
-		perks[perkTable.uniqueID] = true
+		perks[perkTable.uniqueID] = nil
 		client:GetCharacter():SetData("perks", perks)
 
-		net.Start("PerkGive")
+		net.Start("PerkTake")
 		net.WriteUInt(perkTable.index, 32)
 		net.Send(client)
 
-		if (perkTable.OnGiven) then
-			perkTable:OnGiven(client)
+		if (perkTable.OnTaken) then
+			perkTable:OnTaken(client)
 		end
 
-		ix.log.Add(client, "perkBought", perkTable.name)
+		ix.log.Add(client, "perkTaken", perkTable.name)
 	end
 
 	function Schema.perk.LoadOwned(client, character)
@@ -161,6 +184,20 @@ else
 		Schema.perk.UpdatePanel()
 
 		hook.Run("PlayerPerkBought", LocalPlayer(), perkTable)
+    end)
+
+	net.Receive("PerkTake", function()
+		local perkIndex = net.ReadUInt(32)
+		local perkTable = Schema.perk.Get(perkIndex)
+
+		if (not perkTable) then
+			error("Perk with index " .. perkIndex .. " does not exist.")
+			return
+		end
+
+		Schema.perk.localOwned[perkTable.uniqueID] = nil
+
+		Schema.perk.UpdatePanel()
 	end)
 
 	net.Receive("PerkLoadOwned", function()

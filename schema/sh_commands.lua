@@ -373,3 +373,55 @@ do
 
 	ix.command.Add("CharBring", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Give the specified character a perk."
+	COMMAND.arguments = {
+		ix.type.character,
+		ix.type.string
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, perkUniqueID)
+        local perkTable = Schema.perk.Get(perkUniqueID)
+
+		if (not perkTable) then
+			ix.util.Notify("Invalid Perk Unique ID!", client)
+			return
+		end
+
+		Schema.perk.Give(target:GetPlayer(), perkUniqueID)
+		client:Notify("You have given " .. target:GetName() .. " the '" .. perkTable.name .. "' perk.")
+	end
+
+	ix.command.Add("CharPerkGive", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove the specified perk from the given character."
+	COMMAND.arguments = {
+		ix.type.character,
+		ix.type.string
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, perkUniqueID)
+        local perkTable = Schema.perk.Get(perkUniqueID)
+
+		if (not perkTable) then
+			ix.util.Notify("Invalid Perk Unique ID!", client)
+			return
+		end
+
+		Schema.perk.Take(target:GetPlayer(), perkUniqueID)
+		client:Notify("You have removed the '" .. perkTable.name .. "' perk from " .. target:GetName() .. ".")
+	end
+
+	ix.command.Add("CharPerkRemove", COMMAND)
+end
