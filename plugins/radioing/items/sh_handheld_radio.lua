@@ -3,7 +3,7 @@ local ITEM = ITEM
 
 ITEM.name = "Handheld Radio"
 ITEM.price = 100
-ITEM.model = "models/props/cs_office/phone_p2.mdl"
+ITEM.model = "models/deadbodies/dead_male_civilian_radio.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Reusables"
@@ -11,6 +11,9 @@ ITEM.description = "A shiny handheld radio with a frequency tuner."
 
 if (SERVER) then
     util.AddNetworkString("RadioSetFrequency")
+
+	resource.AddFile("models/deadbodies/dead_male_civilian_radio.mdl")
+	resource.AddFile("materials/models/deadbodies/corpse_01_radio.vmt")
 elseif (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)
 		local panel = tooltip:AddRowAfter("name", "frequency")
