@@ -17,10 +17,19 @@ net.Receive("ixDoorMenu", function(length)
 	local access = net.ReadTable()
 	local entity = net.ReadEntity()
 
-	if (IsValid(door)) then
-		ix.gui.door = vgui.Create("ixDoorMenu")
-		ix.gui.door:SetDoor(door, access, entity)
+    if (not IsValid(door)) then
+        return
+    end
+
+    local doorMenu = hook.Run("GetDoorMenu", door, access, entity)
+
+	if (doorMenu) then
+		ix.gui.door = doorMenu
+		return
 	end
+
+	ix.gui.door = vgui.Create("ixDoorMenu")
+	ix.gui.door:SetDoor(door, access, entity)
 end)
 
 -- ! Overrides default net message for the recognition menu, to change the font

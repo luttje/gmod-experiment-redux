@@ -6,5 +6,7 @@ LANGUAGE = {
     abortConstruction = "Abort Construction",
 	fillMaterials = "Fill %s x%d",
 	finishConstruction = "Finish Construction",
-	readyToFinishConstruction = "Ready to Finish",
+    readyToFinishConstruction = "Ready to Finish",
+
+	structureSettings = "Structure Settings",
 }

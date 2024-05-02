@@ -11,6 +11,12 @@ ix.config.Add("maxBuildGroundLevel", 2, "The maximum distance from the ground pl
 	category = "Building"
 })
 
+function PLUGIN:EntityIsDoor(entity)
+    if (entity.IsStructureOrPart) then
+        return true
+    end
+end
+
 if (CLIENT) then
 	-- Have the blueprint weapon not show the hazardous environment sheet, but a custom one with blueprints on them
     Schema.util.ReplaceMaterialTexture(
@@ -24,6 +30,18 @@ if (CLIENT) then
         net.WriteAngle(angles)
         net.SendToServer()
     end
+
+    function PLUGIN:GetDoorMenu(door, access, entity)
+        if (not entity.IsStructureOrPart) then
+            return
+        end
+
+		door = door.IsStructurePart and door:GetParent() or door
+
+		local menu = vgui.Create("expStructureAccessMenu")
+        menu:SetStructure(door, access, entity)
+		return menu
+	end
 end
 
 function PLUGIN:InitializedPlugins()

@@ -7,7 +7,11 @@ end
 ENT.Type = "anim"
 ENT.PrintName = "Structure Base"
 ENT.IsStructure = true
+ENT.IsStructureOrPart = true
 ENT.PopulateEntityInfo = true
+
+AccessorFunc(ENT, "expIsPassable", "IsPassable")
+AccessorFunc(ENT, "expIsLocked", "IsLocked")
 
 function ENT:SetupDataTables()
 	self:NetworkVar("String", "ItemID")
@@ -165,6 +169,7 @@ function ENT:BuildStructure(client, item)
 		structureEntity:SetParent(self)
 		structureEntity:Spawn()
 		structureEntity:Activate()
+        structureEntity:SetNetVar("disabled", true) -- disables selling, buying and other commands
 	end
 end
 
@@ -243,45 +248,68 @@ function ENT:ForEachPart(callback)
 
 	for _, child in ipairs(children) do
 		if (IsValid(child) and child.IsStructurePart) then
-			local result = callback(child)
-
-			if (result ~= nil) then
-				return result
-			end
+			callback(child)
 		end
 	end
 end
 
-function ENT:FinishConstruction(client)
-	self:ForEachPart(function(child)
-		child.expIsTouched = false
-		child:SetTrigger(true)
-	end)
+function ENT:CheckSpaceToMakeSolid(callback)
+    self:ForEachPart(function(child)
+        child.expIsTouched = false
+        child:SetTrigger(true)
+    end)
 
-	timer.Simple(0.1, function()
-		if (not IsValid(self)) then
-			return
-		end
+    timer.Simple(0.1, function()
+        if (not IsValid(self)) then
+            return
+        end
 
-		local isTouched = self:ForEachPart(function(child)
-			child:SetTrigger(false)
-
-			if (child.expIsTouched) then
-				return true
-			end
-		end)
-
-		if (isTouched) then
-			if (IsValid(client)) then
-				client:Notify("You cannot finish the construction while it's intersecting with another object.")
-			end
-		end
-
-		self:SetUnderConstruction(false)
+        local isTouched = false
 
 		self:ForEachPart(function(child)
-			child:SetCollisionGroup(COLLISION_GROUP_NONE)
-		end)
+            child:SetTrigger(false)
+
+			if (child.expIsTouched) then
+				isTouched = true
+			end
+
+			child.expIsTouched = nil
+        end)
+
+        callback(not isTouched)
+    end)
+end
+
+function ENT:FinishConstruction(client)
+    self:CheckSpaceToMakeSolid(function(hasSpaceToMakeSolid)
+        if (not hasSpaceToMakeSolid) then
+            if (IsValid(client)) then
+                client:Notify("You cannot finish the construction while it's intersecting with another object.")
+            end
+
+			return
+        end
+
+        self:SetUnderConstruction(false)
+
+        self:ForEachPart(function(child)
+            child:SetCollisionGroup(COLLISION_GROUP_NONE)
+        end)
+
+        self:SetupDoorAccess(client, DOOR_OWNER)
+    end)
+end
+
+function ENT:SetupDoorAccess(client, role)
+	self:ForEachPart(function(child)
+        child.ixAccess = child.ixAccess or {}
+
+        if (not IsValid(client)) then
+            return
+        end
+
+        child:SetDTEntity(0, client)
+        child.ixAccess[client] = role or DOOR_GUEST
 	end)
 end
 
@@ -292,6 +320,106 @@ function ENT:Think()
         self:Remove()
         return
     end
+end
+
+function ENT:AcceptInput(inputName, activator, caller, data)
+    if (inputName == "lock") then
+        self:SetIsLocked(true)
+        self:MakeUnpassable()
+    elseif (inputName == "unlock") then
+        self:SetIsLocked(false)
+    end
+end
+
+function ENT:TryUse(client)
+    if (Schema.util.Throttle("StructureUse", 1, self)) then
+        return
+    end
+
+	if (self:GetUnderConstruction()) then
+		return
+	end
+
+    if (self.expIsDecaying) then
+        return
+    end
+
+    if (self:GetIsLocked()) then
+        return
+    end
+
+    self:MakePassable(4)
+end
+
+--- Makes the children of the structure passable for a duration, not reapplying the collision group
+--- until no more players are inside the structure
+function ENT:MakePassable(duration)
+    if (self:GetIsPassable()) then
+        return
+    end
+
+    self:SetIsPassable(true)
+	self:EmitSound("ambient/energy/zap1.wav", 60, 50)
+
+    local alpha = 160
+
+    self:ForEachPart(function(child)
+        child:SetCollisionGroup(COLLISION_GROUP_WORLD)
+
+        if (child.expColorBefore == nil) then
+            child.expColorBefore = child:GetColor()
+        end
+
+        if (child.expRenderModeBefore == nil) then
+            child.expRenderModeBefore = child:GetRenderMode()
+        end
+
+        child:SetRenderMode(RENDERMODE_TRANSALPHA)
+        child:SetColor(Color(child.expColorBefore.r, child.expColorBefore.g, child.expColorBefore.b, alpha))
+    end)
+
+    local name = "expStructureMakeUnpassable" .. self:EntIndex()
+
+    timer.Create(name, duration, 0, function()
+        if (not IsValid(self)) then
+            timer.Remove(name)
+            return
+        end
+
+        self:MakeUnpassable()
+    end)
+end
+
+function ENT:MakeUnpassable()
+    if (not self:GetIsPassable()) then
+        return
+    end
+
+    local name = "expStructureMakeUnpassable" .. self:EntIndex()
+
+	self:CheckSpaceToMakeSolid(function(hasSpaceToMakeSolid)
+        if (not hasSpaceToMakeSolid) then
+            return
+        end
+
+		timer.Remove(name)
+
+		if (self.expIsDecaying) then
+			return
+		end
+
+		self:ForEachPart(function(child)
+			child:SetCollisionGroup(COLLISION_GROUP_NONE)
+			child:SetColor(child.expColorBefore)
+            child:SetRenderMode(child.expRenderModeBefore)
+
+			child.expColorBefore = nil
+            child.expRenderModeBefore = nil
+        end)
+
+		self:SetIsPassable(false)
+		self:EmitSound("ambient/energy/zap8.wav", 60, 50)
+	end)
 end
 
 --- Checks if the client has an active siege surge buff against the builder or their alliance
@@ -364,8 +492,9 @@ function ENT:OnTakeDamage(damageInfo)
 	self:SetHealth(self:Health() - damageInfo:GetDamage())
 
 	local damageColor = math.max((self:Health() / self:GetMaxHealth()) * 255, 30)
-	self:ForEachPart(function(child)
-		child:SetColor(Color(damageColor, damageColor, damageColor, 255))
+    self:ForEachPart(function(child)
+		local ownAlpha = child:GetColor().a -- Match passable alpha
+		child:SetColor(Color(damageColor, damageColor, damageColor, ownAlpha))
 	end)
 
 	if (self:Health() <= 0) then

@@ -92,14 +92,20 @@ end
 
 -- Override the default IsDoor logic to not include entities that are not doors. We call a hook to check.
 function META:IsDoor()
-	local class = self:GetClass()
+    local class = self:GetClass()
+    local pluginIsDoor = hook.Run("EntityIsDoor", self)
+
+	if (pluginIsDoor == true) then
+		return true
+	end
+
     local baseIsDoor = (class and class:find("door") ~= nil)
 
     if (not baseIsDoor) then
         return false
     end
 
-	return hook.Run("EntityIsDoor", self) ~= false
+	return pluginIsDoor ~= false
 end
 
 if (SERVER) then

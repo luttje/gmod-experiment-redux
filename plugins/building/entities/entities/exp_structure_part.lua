@@ -7,6 +7,7 @@ end
 ENT.Type = "anim"
 ENT.PrintName = "Structure Part"
 ENT.IsStructurePart = true
+ENT.IsStructureOrPart = true
 ENT.PopulateEntityInfo = true
 
 function ENT:GetUnderConstruction()
@@ -53,8 +54,6 @@ if (SERVER) then
 
         -- Start off with no collision, we'll be attached to the player until we're fully constructed
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
-
-        -- self:SetUseType(SIMPLE_USE) -- TODO: Repairability?
     end
 
     function ENT:OnTakeDamage(damageInfo)
@@ -73,14 +72,26 @@ if (SERVER) then
 		end
 	end
 
-	function ENT:Touch(entity)
-		-- Allow parts to only clip eachother
-		if (entity.IsStructure or entity.IsStructurePart) then
-			return
-		end
+    function ENT:Touch(entity)
+        if (self.expIsTouched == nil) then
+            return
+        end
 
-		self.expIsTouched = true
-	end
+        -- Allow parts to only clip eachother
+        if (entity.IsStructure or entity.IsStructurePart) then
+            return
+        end
+
+        self.expIsTouched = true
+    end
+
+    function ENT:AcceptInput(inputName, activator, caller, data)
+        local parent = self:GetParent()
+
+        if (IsValid(parent)) then
+            parent:AcceptInput(inputName, activator, caller, data)
+        end
+    end
 
 	function ENT:OnRemove()
 		local parent = self:GetParent()
