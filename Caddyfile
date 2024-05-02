@@ -27,4 +27,9 @@
 fastdl.experiment.games:80 {
 	root * /srv/experiment-redux/content
 	file_server
+
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods: GET, OPTIONS
+	}
 }
