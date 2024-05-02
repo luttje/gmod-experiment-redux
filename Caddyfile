@@ -2,23 +2,26 @@
 # 1.    Clone this repository to `/srv/experiment-redux/`:
 #       sudo git clone https://github.com/luttje/gmod-experiment-redux /srv/experiment-redux/
 #
-# 2.    Change ownership to the 'caddy' user:
-#       sudo chown -R caddy:caddy /srv/experiment-redux
+# 2.    Add caddy to the 'www-data' group:
+#       sudo usermod -aG www-data caddy
 #
-# 3.    Navigate to the directory:
+# 3.    Change ownership to the 'www-data' group:
+#       sudo chown -R www-data:www-data /srv/experiment-redux/
+#
+# 4.    Navigate to the directory:
 #       cd /srv/experiment-redux/
 #
-# 4.    Have caddy load the configuration: (https://caddyserver.com/docs/running#overrides)
+# 5.    Have caddy load the configuration: (https://caddyserver.com/docs/running#overrides)
 #       sudo systemctl edit caddy
 #
-# 5.    Add the following configuration:
+# 6.    Add the following configuration:
 #       [Service]
 #       ExecStart=
 #       ExecStart=/usr/bin/caddy run --environ --config /srv/experiment-redux/Caddyfile
 #       ExecReload=
 #       ExecReload=/usr/bin/caddy reload --config /srv/experiment-redux/Caddyfile
 #
-# 6.    Make caddy restart:
+# 7.    Make caddy restart:
 #       sudo systemctl restart caddy
 
 # Specifically set HTTP for the FastDL server to avoid issues with GMod
@@ -61,7 +64,8 @@ http://fastdl.experiment.games {
 # 27. exit
 # 28. sudo -u caddy php artisan key:generate
 # 29. sudo -u caddy php artisan migrate
-# 30. sudo systemctl restart caddy
+# 30. https://deploy-laravel.com/laravel-file-permissions
+# 31. sudo systemctl restart caddy
 
 leaderboards.experiment.games {
 	root * /srv/experiment-redux/plugins/leaderboards/web/public
