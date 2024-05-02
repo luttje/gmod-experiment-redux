@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('characters', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('player_id')->constrained()->onDelete('cascade');
+            $table->string('steam_id', 20);
+            $table->foreign('steam_id')->references('steam_id')->on('players')->onDelete('cascade');
             $table->foreignId('epoch_id')->constrained()->onDelete('cascade');
 
             $table->string('name');

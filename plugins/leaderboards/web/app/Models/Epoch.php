@@ -23,11 +23,11 @@ class Epoch extends Model
                     'metric_id' => $metric->id,
                     // Only get the last score value for each character
                     'scores' => $metric->characters->groupBy('id')
-                        ->limit(1)
-                        ->map(function ($character) {
+                        ->map(function ($characters) {
+                            $character = $characters->first();
                             return [
                                 'character_id' => $character->id,
-                                'player_id' => $character->player->id,
+                                'steam_id' => $character->player->steam_id,
                                 'value' => $character->pivot->value,
                                 'timestamp' => $character->pivot->created_at,
                             ];

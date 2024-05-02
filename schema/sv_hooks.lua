@@ -880,6 +880,8 @@ function Schema:CreateShipment(client, shipmentEntity)
 		Schema.achievement.Progress("master_trader", client)
 	end
 
+	hook.Run("PlayerShipmentPurchased", client, itemSum, shipmentEntity)
+
 	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
 
 	if (hasMercantilePerk) then

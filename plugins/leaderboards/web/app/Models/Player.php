@@ -17,6 +17,6 @@ class Player extends Model
 
     public function characters()
     {
-        return $this->hasMany(Character::class);
+        return $this->hasMany(Character::class, 'steam_id', 'steam_id');
     }
 }

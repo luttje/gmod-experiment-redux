@@ -1,4 +1,5 @@
 {
+    "name": "experiment-leaderboards",
     "private": true,
     "type": "module",
     "scripts": {

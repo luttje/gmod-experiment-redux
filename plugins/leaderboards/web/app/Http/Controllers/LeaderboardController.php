@@ -11,6 +11,10 @@ class LeaderboardController extends Controller
     {
         $metrics = Metric::getLatest();
 
+        if ($metrics->isEmpty()) {
+            return view('leaderboards.no-data');
+        }
+
         // TODO: How many queries are being run here? Do we need to run all of them to get just the overall leader?
         $overallLeader = Metric::getOverallScores($metrics)->first();
 

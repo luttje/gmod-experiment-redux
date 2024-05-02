@@ -20,12 +20,12 @@ class MetricsTest extends TestCase
                 'ends_at' => '2024-01-31',
             ],
             'players' => [
-                ['name' => 'Player 1', 'steam_id' => '90071996842377318'],
-                ['name' => 'Player 2', 'steam_id' => '90071996842377319'],
+                ['steam_name' => 'Player 1', 'steam_id' => '90071996842377318'],
+                ['steam_name' => 'Player 2', 'steam_id' => '90071996842377319'],
             ],
             'characters' => [
-                ['name' => 'Character 1', 'player_id' => 1],
-                ['name' => 'Character 2', 'player_id' => 2],
+                ['name' => 'Character 1', 'steam_id' => '90071996842377318'],
+                ['name' => 'Character 2', 'steam_id' => '90071996842377319'],
             ],
             'character_metrics' => [
                 ['character_id' => 1, 'metric_id' => 1, 'value' => 100],
@@ -41,7 +41,7 @@ class MetricsTest extends TestCase
                 ['name' => 'Metric 1', 'description' => 'Metric 1 description'],
                 ['name' => 'Metric 2', 'description' => 'Metric 2 description'],
             ],
-        ])->dump();
+        ]);
 
         $response->assertStatus(200);
 
@@ -51,8 +51,8 @@ class MetricsTest extends TestCase
 
         // assert that the epoch, players, characters, alliances and metrics were created
         $this->assertDatabaseHas('epochs', ['name' => 'Epoch 1']);
-        $this->assertDatabaseHas('players', ['name' => 'Player 1']);
-        $this->assertDatabaseHas('players', ['name' => 'Player 2']);
+        $this->assertDatabaseHas('players', ['steam_name' => 'Player 1']);
+        $this->assertDatabaseHas('players', ['steam_name' => 'Player 2']);
 
         $this->assertDatabaseHas('characters', ['name' => 'Character 1']);
         $this->assertDatabaseHas('characters', ['name' => 'Character 2']);

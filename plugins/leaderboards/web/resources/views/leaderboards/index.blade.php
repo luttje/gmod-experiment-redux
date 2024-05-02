@@ -22,7 +22,7 @@
                     <span class="font-normal">Leader:</span>
                     <span class="flex-1 text-center">
                         <span class="font-bold">{{ $leadingCharacter['character']->name }}</span>
-                        <span class="text-amber-600">({{ $leadingCharacter['character']->player->name }})</span>
+                        <span class="text-amber-600">({{ $leadingCharacter['character']->player->steam_name }})</span>
                     </span>
                     <span>{{ $leadingCharacter['value'] }}</span>
                 </p>
@@ -46,7 +46,7 @@
                         <span class="font-normal">Leader:</span>
                         <span class="flex-1 text-center">
                             <span class="font-bold">{{ $leadingCharacter->name }}</span>
-                            <span class="text-amber-600">({{ $leadingCharacter->player->name }})</span>
+                            <span class="text-amber-600">({{ $leadingCharacter->player->steam_name }})</span>
                         </span>
                         <span>{{ $leadingCharacter->pivot->value }}</span>
                     </p>

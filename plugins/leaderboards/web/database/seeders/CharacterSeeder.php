@@ -15,25 +15,27 @@ class CharacterSeeder extends Seeder
         $characters = [
             [
                 'name' => 'Lorraine Ipsum',
-                'player_id' => 1,
+                'steam_id' => '76561198002016569',
                 'epoch_id' => 1,
             ],
             [
                 'name' => 'Doland Sitar',
-                'player_id' => 2,
+                'steam_id' => '90071996842377216',
                 'epoch_id' => 1,
             ],
             [
                 'name' => 'Sally Ipsum',
-                'player_id' => 3,
+                'steam_id' => '90071996842377217',
                 'epoch_id' => 1,
             ],
         ];
 
+        $steam_ids = \App\Models\Player::pluck('steam_id')->toArray();
+
         for ($i = 1; $i <= 100; $i++) {
             $characters[] = [
                 'name' => fake()->name,
-                'player_id' => $i,
+                'steam_id' => $steam_ids[array_rand($steam_ids)],
                 'epoch_id' => 1,
             ];
         }

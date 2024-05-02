@@ -20,11 +20,9 @@
 #
 # 6.    Make caddy restart:
 #       sudo systemctl restart caddy
-{
-	auto_https off
-}
 
-fastdl.experiment.games:80 {
+# Specifically set HTTP for the FastDL server to avoid issues with GMod
+http://fastdl.experiment.games {
 	root * /srv/experiment-redux/content
 	file_server
 
@@ -32,4 +30,20 @@ fastdl.experiment.games:80 {
 		Access-Control-Allow-Origin *
 		Access-Control-Allow-Methods: GET, OPTIONS
 	}
+}
+
+leaderboards.experiment.games {
+	root * /srv/experiment-redux/plugins/leaderboards/web/public
+	encode gzip
+
+	php_fastcgi unix//run/php/php8.2-fpm.sock
+    # ? For testing on Windows:
+    # ? 1. run php-cgi.exe like: `php-cgi.exe -b 127.0.0.1:9001`
+    # ? 2. Above, replace leaderboards with `:80`
+    # ? 3. Use NGROK to expose the webserver, so GMod's http.Post can reach it (needs valid SSL)
+    # ? 4. Comment the line above and uncomment the line below
+    # ? 5. Expose with caddy using: `caddy run` in this directory
+	# php_fastcgi 127.0.0.1:9001
+
+	file_server
 }

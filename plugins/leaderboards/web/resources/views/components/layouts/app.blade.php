@@ -40,8 +40,14 @@
     </main>
 
     <footer class="bg-slate-900 text-center">
-        <div class="container mx-auto p-6 px-8 text-xs">
-            &copy; {{ date('Y') }} Experiment Redux
+        <div class="container mx-auto p-6 px-8 text-xs flex flex-col gap-1">
+            <p>
+                &copy; {{ date('Y') }} Experiment Redux
+            </p>
+            <p class="italic">
+                Experiment Redux is open-source software released under the MIT license.
+                Found a bug? <x-link href="https://github.com/luttje/gmod-experiment-redux/issues" target="_blank">Thanks for reporting it!</x-link>
+            </p>
         </div>
     </footer>
 </body>

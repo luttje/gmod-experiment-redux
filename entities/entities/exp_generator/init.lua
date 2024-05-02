@@ -163,6 +163,7 @@ function ENT:OnEarned(money)
 
 	self:EmitSound("ambient/levels/labs/coinslot1.wav", 75)
 
+	hook.Run("PlayerGeneratorEarnedMoney", client, money, self)
 	ix.log.Add(client, "generatorEarn", money)
 
 	-- Update tooltips for any player looking at this generator

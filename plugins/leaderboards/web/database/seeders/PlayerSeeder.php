@@ -14,17 +14,17 @@ class PlayerSeeder extends Seeder
     {
         $players = [
             [
-                'name' => 'Luttje',
+                'steam_name' => 'Luttje',
                 'steam_id' => '76561198002016569',
                 'opt_out_leaderboard_at' => null,
             ],
             [
-                'name' => 'ejttul',
+                'steam_name' => 'ejttul',
                 'steam_id' => '90071996842377216',
                 'opt_out_leaderboard_at' => null,
             ],
             [
-                'name' => 'ttulje',
+                'steam_name' => 'ttulje',
                 'steam_id' => '90071996842377217',
                 'opt_out_leaderboard_at' => null,
             ],
@@ -32,7 +32,7 @@ class PlayerSeeder extends Seeder
 
         for ($i = 1; $i <= 100; $i++) {
             $players[] = [
-                'name' => fake()->name,
+                'steam_name' => fake()->name,
                 'steam_id' => '90071996842377' . (217 + $i),
                 'opt_out_leaderboard_at' => null,
             ];
