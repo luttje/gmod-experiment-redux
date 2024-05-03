@@ -114,13 +114,15 @@ if (SERVER) then
         query = mysql:Delete("ix_players")
         query:Where("steamid", steamID)
 		query:Callback(function(result)
-			if (not IsValid(client)) then
-				return
-			end
+            if (not IsValid(client)) then
+                return
+            end
 
-			if(not noKick) then
-				client:Kick("Data removal requested.")
-			end
+			hook.Run("PlayerDataRemoved", client, steamID)
+
+            if (not noKick) then
+                client:Kick("Data removal requested.")
+            end
 		end)
         query:Execute()
     end

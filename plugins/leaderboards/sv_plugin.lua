@@ -14,7 +14,7 @@ function PLUGIN:OnLoaded()
         error("The .env file is missing from the web folder.")
     end
 
-    local variables = self:EnvToTable(envFile)
+    local variables = Schema.util.EnvToTable(envFile)
 
     API_KEY = variables.API_SECRET
     APP_URL = variables.APP_URL
@@ -28,21 +28,6 @@ function PLUGIN:IncrementMetric(client, name, value)
     end
 
 	metric:Log(client, value)
-end
-
-function PLUGIN:EnvToTable(envFile)
-	local variables = {}
-
-	for line in envFile:gmatch("[^\r\n]+") do
-		local key, value = line:match("([^=]+)=(.+)")
-
-		if (key and value) then
-			-- Trim whitespace and quotes from the start and end of the value.
-			variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
-		end
-	end
-
-	return variables
 end
 
 function PLUGIN:DatabaseConnected()

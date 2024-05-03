@@ -128,6 +128,23 @@ function Schema.util.TracePointsHit(points, filter, drawDebug)
 	end
 end
 
+--- Converts a .env file to a table.
+--- @param envFileContents string
+function Schema.util.EnvToTable(envFileContents)
+	local variables = {}
+
+	for line in envFileContents:gmatch("[^\r\n]+") do
+		local key, value = line:match("([^=]+)=(.+)")
+
+		if (key and value) then
+			-- Trim whitespace and quotes from the start and end of the value.
+			variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
+		end
+	end
+
+	return variables
+end
+
 if (CLIENT) then
     function Schema.util.RunInventoryAction(itemID, inventoryID, action, data)
         net.Start("ixInventoryAction")
