@@ -2,12 +2,20 @@
 
 # This script is used to start the server.
 # Add it to your crontab to start the server on boot. We use tmux to be able to reattach to the server console.
+#
+#       (As the `steam` user:)
 # 1.    Install tmux: `sudo apt-get install tmux`
+#
 # 2.    Run `crontab -e`
+#
 # 3.    Add `@reboot /home/steam/start_server.sh`
+#
 # 4.    Save and exit the editor
+#
 # 5.    Reboot the server: `sudo reboot`
+#
 # 6.    To reattach execute the ./reattach_server.sh script
+#
 
 echo "============================================" >> /home/steam/server_launcher.log
 echo "Experiment Server Launch @ $(date):" >> /home/steam/server_launcher.log

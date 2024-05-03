@@ -9,8 +9,9 @@
 # 2.    Make this script executable:
 #       chmod +x /srv/experiment-redux/tools/discord-process-errors.sh
 #
-# 3.    `crontab -e` and add the following line to run the script every 5 minutes:
-#       */5 * * * * /srv/experiment-redux/tools/discord-process-errors.sh
+# 3.    `sudo -u steam crontab -e` and add the following line to run the script every minute:
+#       */1 * * * * /srv/experiment-redux/tools/discord-process-errors.sh
+#       We run this as the steam user, which is part of the `www-data` group (for /srv/experiment-redux) and has read access to the error files.
 #
 # 4.    Make sure to set up the Discord webhook config file at `/srv/experiment-redux/tools/.env`
 #       with the webhook URL as the content of the file and the paths to the error files.
