@@ -19,16 +19,22 @@ function PLUGIN:OnLoaded()
 		return
 	end
 
-	require("eightbit")
+	local success, errorMessage = pcall(function()
+		require("eightbit")
 
-	if (not eightbit) then
-		-- https://github.com/Meachamp/gm_8bit
-		error("The eightbit library is missing. Please ensure it is installed.")
+		if (not eightbit) then
+			-- https://github.com/Meachamp/gm_8bit
+			ix.util.SchemaErrorNoHalt("The eightbit library is missing. Please ensure it is installed.")
+		end
+
+		eightbit.SetBroadcastIP("127.0.0.1")
+		eightbit.SetBroadcastPort(4000)
+		eightbit.EnableBroadcast(true)
+    end)
+
+	if (not success) then
+		ix.util.SchemaErrorNoHaltWithStack("Failed to load eightbit: " .. errorMessage)
 	end
-
-	eightbit.SetBroadcastIP("127.0.0.1")
-	eightbit.SetBroadcastPort(4000)
-	eightbit.EnableBroadcast(true)
 end
 
 -- When the player uses normal chat, we send the chat log to the moderation API.
