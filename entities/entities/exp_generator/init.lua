@@ -200,17 +200,26 @@ function ENT:OnOptionSelected(client, option, data)
 	local heldBolts = self:GetHeldBolts() or 0
 
 	if (option == L("pickup", client) and client == self:GetItemOwner()) then
-		if (heldBolts > 0) then
-			client:GetCharacter():GiveMoney(heldBolts)
-			client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
-		end
+		local pickupSpeed = ix.config.Get("generatorPickupInterval")
 
-		self.ixIsSafe = true
-		self:Remove()
+		client:SetAction("@pickingUpGenerator", pickupSpeed)
+		client:DoStaredAction(self, function()
+			if (heldBolts > 0) then
+				client:GetCharacter():GiveMoney(heldBolts)
+				client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
+			end
 
-		if (itemTable.OnRemoved) then
-			itemTable:OnRemoved()
-		end
+			self.ixIsSafe = true
+			self:Remove()
+
+			if (itemTable.OnRemoved) then
+				itemTable:OnRemoved()
+			end
+		end, pickupSpeed, function()
+			if (IsValid(client)) then
+				client:SetAction()
+			end
+		end)
 	end
 
     local nextUpgrade, upgradeLabel = self:GetNextUpgrade(client)

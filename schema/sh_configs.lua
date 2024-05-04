@@ -97,7 +97,11 @@ ix.config.Add("generatorPayTime", 300, "How often generators pay out income in s
 end, {
 	data = { min = 1, max = 3600 },
     category = "income",
+})
 
+ix.config.Add("generatorPickupInterval", 30, "How long it takes to pick up a generator in seconds.", nil, {
+	data = { min = 1, max = 60 },
+    category = "income",
 })
 
 ix.config.Add("teleportGeneratorEarnings", false,

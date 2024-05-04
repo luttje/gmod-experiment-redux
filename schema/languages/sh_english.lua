@@ -36,7 +36,9 @@ LANGUAGE = {
 	generatorRecharge = "Recharge",
 	generatorRecharged = "You have successfully recharged the generator with %d scrap.",
 
-	pickup = "Pick Up",
+    pickup = "Pick Up",
+    pickingUpGenerator = "Picking up generator...",
+
 	turnOn = "Turn On",
 	turnOff = "Turn Off",
 
