@@ -102,7 +102,7 @@
                     <x-table.cell class="text-xs">
                         @if ($chatLog->isVoiceChat())
                         <a class="text-emerald-600"
-                           @click="$wire.listen('{{ $chatLog->id }}').then((url) => { playAudio(url); })"
+                           @click="$wire.listen('{{ $chatLog->id }}').then((url) => { url ? playAudio(url) : void(0); })"
                            href="javascript:void(0)">(Voice)</a>
                         @else
                         ({{ strtoupper($chatLog->chat_type) }})

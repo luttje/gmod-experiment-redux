@@ -4,7 +4,7 @@ PLUGIN.name = "Message of the Day"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Show rules, terms of service, or other information to players when they join the server."
 
-PLUGIN.termsOfServiceVersion = "2024-04-26"
+PLUGIN.termsOfServiceVersion = "2024-05-04"
 
 ix.config.Add("privacyEmail", "privacy@experiment.games", "The email address for privacy concerns.", nil, {
 	category = "Message of the Day"

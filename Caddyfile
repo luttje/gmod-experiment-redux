@@ -143,3 +143,56 @@ leaderboards.experiment.games {
 
 	file_server
 }
+
+#
+# 1.  Ensure the above steps are completed before proceeding.
+#
+# 2.  Login to the `caddy` user:
+#     sudo -u caddy -s
+#
+# 2.  Change to the moderation directory:
+#     cd /srv/experiment-redux/plugins/external_moderation/web
+#
+# 3.  Run Composer install to install the PHP dependencies:
+#     composer install
+#
+# 4.  Install all JavaScript dependencies using NPM:
+#     npm install
+#
+# 5.  Compile and build the front-end JavaScript/CSS files for production:
+#     npm run build
+#
+# 6.  Copy the example environment file to create a new environment file:
+#     cp .env.example .env
+#
+# 7.  Edit the environment file to set up database and API key configurations:
+#     nano .env # Fill in the database details and API_KEY
+#
+# 8.  Generate an application key using Laravel artisan commands as 'caddy':
+#     sudo -u caddy php artisan key:generate
+#
+# 9.  Run the database migrations to set up the database schema:
+#     sudo -u caddy php artisan migrate
+#
+# 10. Setup the voice server to run on startup using crontab, we've prepared a bash script that will keep it running in the background:
+#     crontab -e
+#
+#     Add the following line to the end of the file:
+#
+#     @reboot /srv/experiment-redux/plugins/external_moderation/voice-server/start.sh
+#
+#     Save and exit the file.
+#
+# 11. Ensure the voice server script is executable:
+#     chmod +x /srv/experiment-redux/plugins/external_moderation/voice-server/start.sh
+#
+# 12. Just reboot the server to have the voice-server start and apply the changes to caddy:
+#     sudo reboot
+#
+moderation.experiment.games {
+    root * /srv/experiment-redux/plugins/external_moderation/web/public
+    encode gzip
+
+    php_fastcgi unix//run/php/php8.3-fpm.sock
+	file_server
+}
