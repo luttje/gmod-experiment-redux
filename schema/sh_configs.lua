@@ -76,7 +76,7 @@ ix.config.Add("incomeMultiplier", 1, "The income multiplier for generators and s
 	category = "income"
 })
 
-ix.config.Add("generatorPayTime", 600, "How often generators pay out income in seconds.", function(oldValue, newValue)
+ix.config.Add("generatorPayTime", 300, "How often generators pay out income in seconds.", function(oldValue, newValue)
 	if (SERVER) then
         -- Go through all entities, check if IsBoltGenerator and set the payTimeInSeconds
 		for _, entity in ipairs(ents.GetAll()) do

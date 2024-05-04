@@ -22,14 +22,14 @@ function ITEM:OnRegistered()
         self.generator.name,
         self.generator.power,
         self.generator.health,
-        self.generator.price,
+        self.generator.produce,
         self.generator.uniqueID,
         self.generator.upgrades
     )
 end
 
 function ITEM:GetPayTimeInSeconds()
-	return self.payTimeInSeconds or ix.config.Get("generatorPayTime", 600)
+	return self.payTimeInSeconds or ix.config.Get("generatorPayTime", 300)
 end
 
 if (CLIENT) then

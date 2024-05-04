@@ -30,41 +30,28 @@ end
 
 ITEM.generator = {
 	uniqueID = "exp_bolt_control_unit",
-	currency = 50,
     health = 200,
-	produce = 50, -- Base production
+	produce = 100, -- Base production
 	power = 4,
 	name = "Bolt Generator",
 	upgrades = {
 		{
 			name = "Minor Augmentation",
 			price = 350,
-			produce = 25
+			produce = 50
 		},
 		{
 			name = "Major Augmentation",
 			price = 1000,
-			produce = 50
+			produce = 100
 		},
 		{
 			name = "Ultra Augmentation",
 			price = 2500,
-			produce = 100
+			produce = 200
 		},
 		{
 			name = "Minor+",
-			price = 5000,
-			produce = 50,
-			condition = function(client, entity)
-				if(client ~= entity:GetItemOwner())then
-					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
-				end
-
-				return Schema.perk.GetOwned("master_of_logistics", client), "You do not have the master of logistics perk!"
-			end
-		},
-		{
-			name = "Major+",
 			price = 5000,
 			produce = 100,
 			condition = function(client, entity)
@@ -76,9 +63,21 @@ ITEM.generator = {
 			end
 		},
 		{
-			name = "Ultra+",
+			name = "Major+",
 			price = 5000,
 			produce = 200,
+			condition = function(client, entity)
+				if(client ~= entity:GetItemOwner())then
+					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
+				end
+
+				return Schema.perk.GetOwned("master_of_logistics", client), "You do not have the master of logistics perk!"
+			end
+		},
+		{
+			name = "Ultra+",
+			price = 5000,
+			produce = 400,
 			condition = function(client, entity)
 				if(client ~= entity:GetItemOwner())then
 					return false, "You can not upgrade this CBU to a Master of Logistics upgrade!"
