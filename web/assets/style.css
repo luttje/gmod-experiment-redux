@@ -1,0 +1,240 @@
+@font-face {
+    font-family: "LightsOut";
+    src: url(./lightout.woff)
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background: black;
+    color: white;
+    padding: 1em;
+    font-size: 16px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #A33426;
+    font-family: "LightsOut";
+    margin: 0;
+}
+
+h2 {
+    font-size: 1.8em;
+    font-weight: 900;
+    position: relative;
+    z-index: 1;
+}
+
+.wrapper {
+    max-width: 512px;
+    margin: 0 auto;
+}
+
+.with-aside {
+    display: flex;
+    gap: 1em;
+}
+
+.with-aside aside {
+    flex: 1;
+}
+
+.with-aside main {
+    flex: 3;
+}
+
+.logo {
+    max-width: 512px;
+    transform: scale(1.1);
+}
+
+img {
+    position: relative;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+img.max-content {
+    max-width: max-content;
+}
+
+p {
+    line-height: 1.5em;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0.25em 0 0 0;
+    padding: 0;
+    position: relative;
+    z-index: 1;
+}
+
+ul li::before {
+    content: "•";
+    color: #A33426;
+    display: inline-block;
+    margin: 0.5em;
+}
+
+.hidden {
+    display: none;
+}
+
+.center {
+    text-align: center;
+}
+
+.my {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+.mt-s {
+    margin-top: 1em;
+}
+
+a, .highlight {
+    color: #A33426;
+}
+
+button {
+    background: #A33426;
+    color: white;
+    border: none;
+    font-size: 1em;
+    padding: .5em 1em;
+    margin: 0.5em 0;
+    cursor: pointer;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    width: 100%;
+}
+
+button.huge {
+    font-size: 2em;
+    padding: .8em 1em;
+}
+
+button.gray {
+    background: #333;
+}
+
+input {
+    width: 100%;
+    padding: .5em;
+    margin: 0.5em 0;
+    font-size: 1em;
+}
+
+.range {
+    display: flex;
+    gap: 1em;
+    align-items: center;
+    flex: 1;
+}
+
+.range input[type="range"] {
+    width: 100%;
+}
+
+.range input[type="number"] {
+    width: 60px;
+}
+
+.bg-gray {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.p {
+    padding: 0.5em 1em;
+}
+
+.parameter {
+    display: flex;
+    gap: 1em;
+    font-size: 0.8em;
+    align-items: center;
+}
+
+.parameter label {
+    width: 100px;
+}
+
+.parameter input:disabled {
+    color: black;
+    font-weight: bold;
+}
+
+.flex {
+    display: flex;
+    gap: 1em;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-2 {
+    flex: 2;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1em;
+}
+
+.grid.tight {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+.h-300 {
+    max-height: 300px;
+    overflow: auto;
+}
+
+.duration {
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+}
+
+.duration span {
+    font-size: 1.5em;
+    flex-grow: 1;
+}
+
+.duration span:last-of-type {
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.3);
+    flex: 0;
+}

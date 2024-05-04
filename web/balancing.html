@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Experiment Redux</title>
+
+    <link rel="stylesheet"
+          href="assets/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/@ryangjchandler/alpine-tooltip@1.x.x/dist/cdn.min.js"
+            defer></script>
+    <script src="//unpkg.com/alpinejs"
+            defer></script>
+
+    <link rel="apple-touch-icon"
+          sizes="180x180"
+          href="assets/favicon/apple-touch-icon.png">
+    <link rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="assets/favicon/favicon-32x32.png">
+    <link rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="assets/favicon/favicon-16x16.png">
+    <link rel="manifest"
+          href="assets/favicon/site.webmanifest">
+    <link rel="shortcut icon"
+          href="assets/favicon/favicon.ico">
+</head>
+
+<body>
+    <div class="wrapper logo">
+        <img src="assets/logo.png">
+    </div>
+    <div class="with-aside">
+        <aside>
+            <div>
+                <h2>BALANCING TOOL</h2>
+                <p>
+                    This tool is used to balance the game. It is used to calculate how long it will take for a player to buy a certain item, based on the player's income.
+                    It is designed to be used on a desktop device, as it requires a lot of screen space.
+                </p>
+                <p>
+                    Using the tool, we can make sure that players don't reach end-game content too quickly, but also that they don't have to grind for hours to get there.
+                </p>
+            </div>
+            <div class="my">
+                <h2>POWER OVER TIME</h2>
+                <p class="center my">
+                    <img src="assets/graph.png"
+                         class="max-content">
+                </p>
+                <p>
+                    The above graph intends to communicate the relationship between the player's power and time during an 'Epoch'.
+                    An 'Epoch' is single 'match' in the game, lasting between 20-30 days.
+                </p>
+                <p>
+                    We want to reward the player for enduring setbacks and challenges. Rewards should feel well-earned, but not impossible to achieve.
+                </p>
+            </div>
+        </aside>
+        <main>
+            <div id="parameters"
+                 x-data="{
+                    epochDurationInDays: 20,
+                    generatorOutputPerPayday: 100,
+                    generatorIntervalInMinutes: 5,
+                    averagePlaytimeInMinutes: 60,
+
+                    itemFilter: '',
+                    items: [],
+                    selectedItems: [],
+                    categories: [],
+
+                    getGeneratorOutputPerHour() {
+                        return 60 / this.generatorIntervalInMinutes * this.generatorOutputPerPayday;
+                    },
+
+                    getGeneratorOutputPerDay(hours) {
+                        return this.getGeneratorOutputPerHour() * (hours || 24);
+                    },
+
+                    addItem(name, price, category = 'Miscellaneous') {
+                        this.items.push({
+                            name,
+                            price,
+                            category
+                        });
+                    },
+
+                    removeItem(index) {
+                        this.items.splice(index, 1);
+                    },
+
+                    loadItemsFromJson() {
+                        // See ./tools/generate-items-json.sh for the script that generates this file
+                        fetch('assets/items.json')
+                            .then(response => response.json())
+                            .then(data => {
+                                for (const item of data) {
+                                    this.addItem(item.name, item.price, item.category);
+                                    this.selectedItems.push(this.items.length - 1);
+
+                                    if (!this.categories.includes(item.category)) {
+                                        this.categories.push(item.category);
+                                    }
+                                }
+                            });
+                    },
+
+                    priceOfAll(items) {
+                        return items.reduce((acc, item) => acc + parseInt(item.price), 0);
+                    },
+
+                    convertFromTo(targetElement, originalUnit, targetUnit) {
+                        const value = parseFloat(targetElement.textContent);
+                        let changed = undefined;
+
+                        if (originalUnit === 'hours' && targetUnit === 'days') {
+                            changed = value / 24;
+                        }
+
+                        if (originalUnit === 'days' && targetUnit === 'hours') {
+                            changed = value * 24;
+                        }
+
+                        if (changed !== undefined) {
+                            if (changed > 50) {
+                                changed = changed.toFixed(0);
+                            } else if (changed > 10) {
+                                changed = changed.toFixed(1);
+                            } else {
+                                changed = changed.toFixed(2);
+                            }
+
+                            return changed + ' ' + targetUnit;
+                        }
+
+                        throw new Error('Unsupported conversion');
+                    },
+
+                    getConversionTooltipArgs(targetElement, originalUnit, targetUnit) {
+                        return [this.convertFromTo(targetElement, originalUnit, targetUnit), {
+                            placement: 'bottom',
+                        }];
+                    },
+
+                    itemMatchesFilter(item, itemFilter) {
+                        if (itemFilter === '@') {
+                            return this.selectedItems.includes(this.items.indexOf(item));
+                        }
+
+                        return itemFilter === '' || item.name.toLowerCase().includes(itemFilter.toLowerCase()) || item.category.toLowerCase().includes(itemFilter.toLowerCase())
+                    }
+                }"
+                 x-init="loadItemsFromJson()">
+                <div>
+                    <h2>GLOBAL</h2>
+                    <div class="grid">
+                        <div class="parameter">
+                            <label for="epoch-duration">Epoch Duration (in days)</label>
+                            <div class="range">
+                                <input type="range"
+                                       id="epoch-duration"
+                                       x-model="epochDurationInDays"
+                                       min="10"
+                                       max="30">
+                                <input type="number"
+                                       x-model="epochDurationInDays"
+                                       min="10"
+                                       max="30">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-s">
+                    <h2>INCOME</h2>
+                    <div class="grid">
+                        <div class="parameter">
+                            <label for="generator-output">Generator Bolts output</label>
+                            <div class="range">
+                                <input type="range"
+                                       id="generator-output"
+                                       x-model="generatorOutputPerPayday"
+                                       min="50"
+                                       max="1000">
+                                <input type="number"
+                                       x-model="generatorOutputPerPayday"
+                                       min="50"
+                                       max="1000">
+                            </div>
+                        </div>
+                        <div class="parameter">
+                            <label for="generator-interval">Generator Bolts interval (in minutes)</label>
+                            <div class="range">
+                                <input type="range"
+                                       id="generator-interval"
+                                       x-model="generatorIntervalInMinutes"
+                                       min="1"
+                                       max="60">
+                                <input type="number"
+                                       x-model="generatorIntervalInMinutes"
+                                       min="1"
+                                       max="60">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-s">
+                    <h2>ITEMS</h2>
+                    <div class="flex">
+                        <input type="text"
+                               x-model="itemFilter"
+                               placeholder="Filter items">
+                        <button type="button"
+                                x-on:click="selectedItems = []">Clear selection</button>
+                        <select x-model="itemFilter">
+                            <option value="">All categories</option>
+                            <option value="@">Selected</option>
+                            <template x-for="category in categories"
+                                      :key="category">
+                                <option x-text="category"></option>
+                            </template>
+                        </select>
+                        <button type="button"
+                                x-on:click="selectedItems = items.map((_, index) => itemMatchesFilter(items[index], itemFilter) ? index : -1).filter(index => index !== -1)">
+                                Select all visible
+                        </button>
+                    </div>
+                    <div class="grid h-300">
+                        <template x-for="(item, index) in items"
+                                  :key="index">
+                            <div class="parameter bg-gray p"
+                                 x-show="itemMatchesFilter(item, itemFilter)">
+                                <input type="text"
+                                        x-model="item.name"
+                                        disabled
+                                        placeholder="Name">
+                                <input type="text"
+                                        x-model="item.category"
+                                        disabled
+                                        placeholder="Category">
+                                <input type="number"
+                                       x-model="item.price"
+                                       placeholder="Cost">
+                                <input type="checkbox"
+                                       class="w-fit"
+                                       x-model="selectedItems"
+                                       :value="index">
+                                <!-- <button type="button"
+                                        class="flex-1"
+                                        x-on:click="removeItem(index)">Remove</button> -->
+                            </div>
+                        </template>
+                    </div>
+                    <!-- <button type="button"
+                            x-on:click="addItem('', 100)">Add Item</button> -->
+                </div>
+                <div class="mt-s">
+                    <h2>SIMULATED PLAYTIME</h2>
+                    <div class="grid">
+                        <div class="parameter">
+                            <label for="averagePlaytimeInMinutes">Playtime (in average minutes per day)</label>
+                            <div class="range">
+                                <input type="range"
+                                       id="averagePlaytimeInMinutes"
+                                       x-model="averagePlaytimeInMinutes"
+                                       min="1"
+                                       max="3600">
+                                <input type="number"
+                                       x-model="averagePlaytimeInMinutes"
+                                       min="1"
+                                       max="3600">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-s">
+                    <h2>DURATIONS</h2>
+                    <div class="grid tight">
+                        <div class="duration bg-gray">
+                            <h3>Bolt income</h3>
+                            <span x-text="getGeneratorOutputPerHour().toFixed(0)"></span>
+                            <span>Every Hour</span>
+                        </div>
+                        <div class="duration bg-gray">
+                            <h3>Bolt income</h3>
+                            <span x-text="(averagePlaytimeInMinutes / 60 * getGeneratorOutputPerHour()).toFixed(0)"></span>
+                            <span>Every Day of playtime</span>
+                        </div>
+                        <div class="duration bg-gray">
+                            <h3>Bolts in total</h3>
+                            <span x-text="(getGeneratorOutputPerHour() * epochDurationInDays * 24).toFixed(0)"></span>
+                            <span>Bolts</span>
+                        </div>
+                    </div>
+                    <div class="grid tight mt-s">
+                        <div class="duration bg-gray">
+                            <h3>Cost of selected items</h3>
+                            <span x-text="priceOfAll(selectedItems.map(index => items[index])).toFixed(0)"></span>
+                            <span>Bolts</span>
+                        </div>
+                        <div class="duration bg-gray"
+                             @click="$tooltip(...getConversionTooltipArgs($refs.timeToBuySelectedItems, 'hours', 'days'))">
+                            <h3>Time to buy selected items</h3>
+                            <span x-ref="timeToBuySelectedItems"
+                                  x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerHour()).toFixed(1)"></span>
+                            <span>hours</span>
+                        </div>
+                        <div class="duration bg-gray"
+                             @click="$tooltip(...getConversionTooltipArgs($refs.playtimeToBuySelectedItems, 'days', 'hours'))">
+                            <h3>Playtime to buy selected items</h3>
+                            <span x-ref="playtimeToBuySelectedItems"
+                                  x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerDay(averagePlaytimeInMinutes / 60)).toFixed(1)"></span>
+                            <span>days</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>
