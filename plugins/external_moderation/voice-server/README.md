@@ -6,13 +6,13 @@ For a standalone example see [the `gmod-voice-chat-recorder` repository](https:/
 
 ## 🚀 Getting Started
 
-1. Ensure you have [Node.js](https://nodejs.org/en/) installed.
+1. Ensure you have [Node.js](https://nodejs.org/en/) installed and also: `sudo apt-get install build-essential` on Linux.
 
 2. Clone (or download) this repository.
 
 3. Open a terminal (or command prompt) in this directory.
 
-4. Run `npm install` in this directory.
+4. Run `npm ci` in this directory.
 
 5. Set this server up to run on startup using crontab, we've prepared a bash script that will keep it running in the background:
 
