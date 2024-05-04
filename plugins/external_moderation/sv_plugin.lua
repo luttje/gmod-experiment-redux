@@ -15,7 +15,8 @@ function PLUGIN:OnLoaded()
     API_KEY = variables.API_SECRET
     APP_URL = variables.APP_URL
 
-    if (eightbit) then
+	-- gmsv_eightbit doesn't work in singleplayer or on listen servers, so we only load it on dedicated servers.
+    if (eightbit or not game.IsDedicated()) then
 		return
 	end
 

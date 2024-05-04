@@ -42,13 +42,29 @@ function MAP:EntityKeyValue(entity, key, value)
 	local class = entity:GetClass()
 	local entityIndex = entity:EntIndex()
 
-	-- Remove the monitor and camera and ambient alarm sounds
-	if (class == "point_camera" or class == "func_monitor" or class == "ambient_generic") then
+	-- Remove the monitor and camera and ambient alarm sounds, also judgement waiver timer
+	if (class == "point_camera" or class == "func_monitor" or class == "ambient_generic" or class == "logic_timer") then
 		if (IsValid(entity)) then
 			entity:Remove()
 		end
 
-		return
+        return
+    elseif (class == "logic_relay") then
+        local bannedNames = {
+			["jw_start"] = true,
+            ["jw_end"] = true,
+			["logic_tv_turnon"] = true,
+			["logic_tv_camswitch"] = true,
+			["logic_tv_camswitch2"] = true,
+			-- ["ration_open"] = true, -- Terminal
+			-- ["ration_close"] = true,
+        }
+
+		if (bannedNames[entity:GetName():lower()]) then
+			if (IsValid(entity)) then
+				entity:Remove()
+			end
+		end
 	end
 end
 

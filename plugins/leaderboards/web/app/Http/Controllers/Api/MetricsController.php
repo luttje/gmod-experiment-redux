@@ -30,7 +30,7 @@ class MetricsController extends Controller
             'epoch' => 'required|array:name,ends_at,started_at',
             'players' => 'required|array',
             'characters' => 'required|array',
-            'alliances' => 'required|array',
+            'alliances' => 'present|array',
             'metrics' => 'present|array',
             'character_metrics' => 'present|array',
         ]);
@@ -68,7 +68,20 @@ class MetricsController extends Controller
         $currentTimestamp = now();
         $metrics = $data['character_metrics'];
 
-        foreach ($metrics as $metric) {
+        $alliances = Alliance::pluck('id');
+
+        foreach ($metrics as &$metric) {
+            // Make sure every metric has the same columns
+            $metric['character_id'] = $metric['character_id'] ?? null;
+
+            // The alliance may not exist anymore if it was removed
+            // TODO: Leave the alliance? Remove the foreign keys on client? I dunno.
+            $metric['alliance_id'] = $alliances->contains($metric['alliance_id']) ? $metric['alliance_id'] : null;
+            $metric['alliance_id'] = $metric['alliance_id'] ?? null;
+
+            $metric['metric_id'] = $metric['metric_id'] ?? null;
+            $metric['value'] = $metric['value'] ?? null;
+
             $metric['created_at'] = $currentTimestamp;
             $metric['updated_at'] = $currentTimestamp;
         }
