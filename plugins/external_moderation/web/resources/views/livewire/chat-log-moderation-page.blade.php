@@ -192,7 +192,7 @@
                             @csrf
                             @method('PATCH')
 
-                            <x-primary-button type="submit">
+                            <x-primary-button type="submit" class="whitespace-nowrap">
                                 Mark Safe
                             </x-primary-button>
                         </form>

@@ -104,30 +104,26 @@ process_new_errors() {
 
     # Find new errors not yet handled
     if [ -s "${input_file}" ]; then
-        grep -Fxf "${handled_file}" "${input_file}" > /dev/null
+        # Keep reading lines, starting from [ERROR], until we reach a line with only a carriage return or new line
+        error_message=""
+        while read line; do
+            if [[ "$line" == \[ERROR\]* ]]; then
+                error_message="${error_message}\n${line}"
+            elif [[ ! -z "$error_message" ]]; then
+                error_message="${error_message}\n${line}"
 
-        if [ $? -ne 0 ]; then
-            # Keep reading lines, starting from [ERROR], until we reach a line with only a carriage return or new line
-            error_message=""
-            while read line; do
-                if [[ "$line" == \[ERROR\]* ]]; then
-                    error_message="${error_message}\n${line}"
-                elif [[ ! -z "$error_message" ]]; then
-                    error_message="${error_message}\n${line}"
-
-                    if [[ "$line" == $'\r' || "$line" == $'\n' ]]; then
-                        error_message=$(echo -e "${error_message}" | sed 's/"/\\"/g')
-                        send_to_discord "${file_type}" "${error_message}"
-                        error_message=""
-                    fi
+                if [[ "$line" == $'\r' || "$line" == $'\n' ]]; then
+                    error_message=$(echo -e "${error_message}" | sed 's/"/\\"/g')
+                    send_to_discord "${file_type}" "${error_message}"
+                    error_message=""
                 fi
-            done < <(diff --changed-group-format='%>' --unchanged-group-format='' "${handled_file}" "${input_file}")
-
-            # If we have an error message that wasn't sent yet
-            if [ ! -z "$error_message" ]; then
-                error_message=$(echo -e "${error_message}" | sed 's/"/\\"/g')
-                send_to_discord "${file_type}" "${error_message}"
             fi
+        done < <(diff --changed-group-format='%>' --unchanged-group-format='' "${handled_file}" "${input_file}")
+
+        # If we have an error message that wasn't sent yet
+        if [ ! -z "$error_message" ]; then
+            error_message=$(echo -e "${error_message}" | sed 's/"/\\"/g')
+            send_to_discord "${file_type}" "${error_message}"
         fi
 
         # Update the handled file, so we don't send the same error again
