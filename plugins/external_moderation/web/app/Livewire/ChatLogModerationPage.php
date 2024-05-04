@@ -88,4 +88,16 @@ class ChatLogModerationPage extends Component
 
         $this->alert('success', 'Chat log has been marked safe.');
     }
+
+    public function listen(ChatLog $chatLog)
+    {
+        $voicePath = realpath($chatLog->voice_chat_path);
+
+        if (!$voicePath) {
+            $this->alert('error', 'Voice chat file not found. It may have been deleted to save disk space.');
+            return;
+        }
+
+        return route('play-audio', $chatLog);
+    }
 }

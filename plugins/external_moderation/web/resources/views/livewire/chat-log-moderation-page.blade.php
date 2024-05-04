@@ -9,7 +9,57 @@
         </p>
     </section>
 
-    <section class="rounded bg-slate-700 p-4 flex flex-col gap-4">
+    <section class="rounded bg-slate-700 p-4 flex flex-col gap-4"
+        x-data="{
+            volume: 1,
+            isPlayingAudio: false,
+            audioPlayer: null,
+            playAudio: function (url) {
+                if (this.isPlayingAudio) {
+                    return;
+                }
+
+                this.isPlayingAudio = true;
+
+                this.audioPlayer = new Audio(url);
+                this.audioPlayer.volume = this.volume;
+                this.audioPlayer.play();
+
+                this.audioPlayer.addEventListener('ended', () => {
+                    this.isPlayingAudio = false;
+                });
+            },
+            stopAudio: function () {
+                if (this.audioPlayer) {
+                    this.audioPlayer.pause();
+                    this.isPlayingAudio = false;
+                }
+            },
+        }">
+        <div class="fixed bottom-0 right-0 p-4 bg-slate-800 rounded shadow-lg">
+            <div class="flex gap-4 items-center">
+                <button @click="stopAudio()"
+                        class="text-red-600">
+                    <svg class="w-6 h-6"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                <input type="range"
+                       min="0"
+                       max="1"
+                       step="0.01"
+                       value="1"
+                       x-model="volume"
+                       class="w-32">
+            </div>
+        </div>
         <h2 class="text-2xl font-bold">
             Chat Logs
         </h2>
@@ -43,7 +93,7 @@
                     <x-table.cell class="w-0 pr-0">
                         @if ($chatLog->isFlagged())
                         <span class="text-red-600 text-bold"
-                            title="Flagged">❗</span>
+                              title="Flagged">❗</span>
                         @endif
                     </x-table.cell>
                     <x-table.cell>
@@ -51,7 +101,9 @@
                     </x-table.cell>
                     <x-table.cell class="text-xs">
                         @if ($chatLog->isVoiceChat())
-                        <span class="text-emerald-600">(Voice)</span>
+                        <a class="text-emerald-600"
+                           @click="$wire.listen('{{ $chatLog->id }}').then((url) => { playAudio(url); })"
+                           href="javascript:void(0)">(Voice)</a>
                         @else
                         ({{ strtoupper($chatLog->chat_type) }})
                         @endif
@@ -85,34 +137,42 @@
                                     @method('PATCH')
 
                                     <div class="flex flex-col">
-                                        <x-input-label for="type" :value="__('Reason')" />
+                                        <x-input-label for="type"
+                                                       :value="__('Reason')" />
                                         <select wire:model="type"
                                                 class="bg-slate-800 text-white rounded p-2">
-                                            <option value="" disabled selected>Select a sanction type</option>
+                                            <option value=""
+                                                    disabled
+                                                    selected>Select a sanction type</option>
                                             <option value="mute">Mute</option>
                                             <option value="kick">Kick</option>
                                             <option value="ban">Ban</option>
                                         </select>
-                                        <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                                        <x-input-error :messages="$errors->get('type')"
+                                                       class="mt-2" />
                                     </div>
 
                                     <div class="flex flex-col">
-                                        <x-input-label for="reason" :value="__('Reason')" />
+                                        <x-input-label for="reason"
+                                                       :value="__('Reason')" />
                                         <input type="text"
-                                        wire:model="reason"
-                                            placeholder="Reason"
-                                            class="bg-slate-800 text-white rounded p-2">
-                                        <x-input-error :messages="$errors->get('reason')" class="mt-2" />
+                                               wire:model="reason"
+                                               placeholder="Reason"
+                                               class="bg-slate-800 text-white rounded p-2">
+                                        <x-input-error :messages="$errors->get('reason')"
+                                                       class="mt-2" />
                                     </div>
 
                                     <div class="flex flex-col">
-                                        <x-input-label for="expires_at" :value="__('Expires at (UTC)')" />
+                                        <x-input-label for="expires_at"
+                                                       :value="__('Expires at (UTC)')" />
                                         <input type="datetime-local"
-                                        wire:model="expires_at"
+                                               wire:model="expires_at"
                                                class="bg-slate-800 text-white rounded p-2"
                                                required>
                                         <span class="text-xs text-gray-400">Current UTC time: {{ now()->format('Y-m-d H:i') }}</span>
-                                        <x-input-error :messages="$errors->get('expires_at')" class="mt-2" />
+                                        <x-input-error :messages="$errors->get('expires_at')"
+                                                       class="mt-2" />
                                     </div>
 
                                     <x-danger-button type="submit">
