@@ -92,3 +92,13 @@ To get started transcribing voice chat automatically:
 > [!WARNING]
 > Note that transcription isn't perfect and will not work well with noisy audio or non-English speakers. In my experience it only works well if you articulate clearly and speak English with a neutral accent.
 > Nevertheless, seeing how this is all done on-device (offline) it's still pretty impressive!
+
+## 📦 Troubleshooting
+
+In order to get the library to work on `Ubuntu 24.04 LTS (x86_64)` I had to run:
+
+```bash
+ln -s libtier0_s.so libtier0.so
+```
+
+Inside my servers `/bin` directory (not the `garrysmod/bin` and not the `garrysmod/lua/bin` directory).

@@ -183,10 +183,12 @@ leaderboards.experiment.games {
 #
 #     Save and exit the file.
 #
-# 11. Ensure the voice server script is executable:
+# 11. Read the README in that voice-server directory for more information on setting up the voice server.
+#
+# 12. Ensure the voice server script is executable:
 #     chmod +x /srv/experiment-redux/plugins/external_moderation/voice-server/start.sh
 #
-# 12. Just reboot the server to have the voice-server start and apply the changes to caddy:
+# 13. Just reboot the server to have the voice-server start and apply the changes to caddy:
 #     sudo reboot
 #
 moderation.experiment.games {
