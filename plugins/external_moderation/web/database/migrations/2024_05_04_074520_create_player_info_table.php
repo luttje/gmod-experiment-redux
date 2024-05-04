@@ -11,21 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sanctions', function (Blueprint $table) {
+        // When the voice server sends transcribed chat logs to the API, they only include the steam_id of the speaker.
+        // For that reason, we need to track other information of the speaker before the time of the chat log.
+        Schema::create('player_infos', function (Blueprint $table) {
             $table->id();
 
             $table->string('steam_name'); // if anonymized, this is a hash of the steam_id
-            $table->string('steam_id')->index(); // if anonymized, this is a hash of the steam_id
+            $table->string('steam_id')->unique(); // if anonymized, this is a hash of the steam_id
             $table->string('character_name')->nullable();
-            $table->bigInteger('character_id')->nullable()->index();
+            $table->bigInteger('character_id')->nullable()->index(); // can still be null if the player is not yet in-game
             $table->string('ip_address')->index(); // if anonymized, this is a hash of the ip_address
             $table->timestamp('anonymized_at')->nullable();
-
-            $table->string('type'); // mute, kick, ban, etc.
-            $table->text('reason')->nullable();
-            $table->timestamp('expires_at')->nullable();
-
-            $table->foreignId('issued_by')->nullable()->constrained('users');
 
             $table->timestamps();
         });
@@ -36,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sanctions');
+        Schema::dropIfExists('player_infos');
     }
 };

@@ -23,6 +23,9 @@
                     Character Name
                 </x-table.heading>
                 <x-table.heading>
+                    Type
+                </x-table.heading>
+                <x-table.heading>
                     Message
                 </x-table.heading>
                 <x-table.heading>
@@ -46,15 +49,16 @@
                     <x-table.cell>
                         {{ $chatLog->character_name }}
                     </x-table.cell>
-                    <x-table.cell>
+                    <x-table.cell class="text-xs">
                         @if ($chatLog->isVoiceChat())
-                        <span class="text-emerald-600 text-xs">(Voice Chat)</span>
-
+                        <span class="text-emerald-600">(Voice)</span>
+                        @else
+                        ({{ strtoupper($chatLog->chat_type) }})
+                        @endif
+                    </x-table.cell>
+                    <x-table.cell>
                         @if (empty($chatLog->message))
                         <span class="text-gray-400 text-xs">Pending transcription...</span>
-                        @else
-                        {{ $chatLog->message }}
-                        @endif
                         @else
                         {{ $chatLog->message }}
                         @endif

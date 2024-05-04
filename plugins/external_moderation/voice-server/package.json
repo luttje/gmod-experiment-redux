@@ -1,0 +1,19 @@
+{
+  "name": "experiment-redux-voice-server",
+  "description": "",
+  "private": true,
+  "author": "luttje",
+  "license": "MIT",
+  "version": "0.1.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "sherpa-onnx": "^1.9.21",
+    "wav": "^1.0.2"
+  }
+}

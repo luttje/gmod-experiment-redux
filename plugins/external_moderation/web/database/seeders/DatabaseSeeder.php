@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 InviteCodeSeeder::class,
                 ChatLogSeeder::class,
                 SanctionSeeder::class,
+                PlayerInfoSeeder::class,
             ]);
         }
     }

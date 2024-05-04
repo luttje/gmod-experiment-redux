@@ -131,18 +131,37 @@ end
 --- Converts a .env file to a table.
 --- @param envFileContents string
 function Schema.util.EnvToTable(envFileContents)
-	local variables = {}
+    local variables = {}
 
-	for line in envFileContents:gmatch("[^\r\n]+") do
-		local key, value = line:match("([^=]+)=(.+)")
+    for line in envFileContents:gmatch("[^\r\n]+") do
+        local key, value = line:match("([^=]+)=(.+)")
 
-		if (key and value) then
-			-- Trim whitespace and quotes from the start and end of the value.
-			variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
-		end
+        if (key and value) then
+            -- Trim whitespace and quotes from the start and end of the value.
+            variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
+        end
+    end
+
+    return variables
+end
+
+--- Gets the player's IP address and port as a table.
+--- @param clientOrAddress Player|string
+--- @return table
+function Schema.util.GetPlayerAddress(clientOrAddress)
+	local address = isstring(clientOrAddress) and clientOrAddress or clientOrAddress:IPAddress()
+
+    if (address == "loopback") then
+		-- Helpful for testing locally
+		address = "127.0.0.1:27005"
 	end
 
-	return variables
+	local ip, port = address:match("([^:]+):(%d+)")
+
+	return {
+		ip = ip,
+		port = tonumber(port)
+	}
 end
 
 if (CLIENT) then

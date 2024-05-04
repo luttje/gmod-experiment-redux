@@ -24,21 +24,7 @@ class MetricsController extends Controller
      */
     public function submitMetrics(Request $request)
     {
-        // If the request is x-www-form-urlencoded, then expand the 'json' value from the request into the request data.
-        if ($request->header('Content-Type') === 'application/x-www-form-urlencoded') {
-            $json = json_decode($request->input('json'), true);
-
-            foreach ($json as $key => $value) {
-                $request->request->set($key, $value);
-            }
-
-            $request->request->remove('json');
-        } else {
-            $headers = collect($request->header())->transform(function ($item) {
-                return $item[0];
-            });
-            die(json_encode($headers, JSON_PRETTY_PRINT) . '    /    ' . json_encode($request->all(), JSON_PRETTY_PRINT));
-        }
+        $this->fixRequest($request);
 
         $data = $request->validate([
             'epoch' => 'required|array:name,ends_at,started_at',

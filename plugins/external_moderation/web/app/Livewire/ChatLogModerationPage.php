@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\ChatLog;
 use App\Models\Sanction;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Jantinnerezo\LivewireAlert\LivewireAlert;
 use Livewire\Component;
 
@@ -69,6 +70,15 @@ class ChatLogModerationPage extends Component
 
                 $this->alert('success', 'Chat log has been sanctioned.');
             });
+        }
+
+        if ($chatLog->isVoiceChat()) {
+            $voicePath = realpath($chatLog->voice_chat_path);
+
+            if ($voicePath) {
+                // Remove the voice chat file to save space
+                unlink($voicePath);
+            }
         }
 
         $chatLog->update([
