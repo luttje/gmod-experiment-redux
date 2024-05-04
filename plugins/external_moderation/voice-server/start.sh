@@ -13,6 +13,8 @@ RESTART_COUNT=0
 
 cd $SCRIPT_DIR
 
+source ~/.nvm/nvm.sh
+
 echo "Starting voice server at $(date)" >> "$LOG_DIR/$(date +%Y-%m-%d).log"
 
 while [ $RESTART_COUNT -lt $MAX_RESTARTS ]; do
