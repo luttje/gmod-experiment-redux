@@ -169,10 +169,10 @@ leaderboards.experiment.games {
 #     nano .env # Fill in the database details and API_KEY
 #
 # 8.  Generate an application key using Laravel artisan commands as 'caddy':
-#     sudo -u caddy php artisan key:generate
+#     php artisan key:generate
 #
 # 9.  Run the database migrations to set up the database schema:
-#     sudo -u caddy php artisan migrate
+#     php artisan migrate
 #
 # 10. Setup the voice server to run on startup using crontab, we've prepared a bash script that will keep it running in the background:
 #     crontab -e
