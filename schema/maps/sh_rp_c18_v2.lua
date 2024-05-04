@@ -42,8 +42,8 @@ function MAP:EntityKeyValue(entity, key, value)
 	local class = entity:GetClass()
 	local entityIndex = entity:EntIndex()
 
-	-- Remove the monitor and camera
-	if (class == "point_camera" or class == "func_monitor") then
+	-- Remove the monitor and camera and ambient alarm sounds
+	if (class == "point_camera" or class == "func_monitor" or class == "ambient_generic") then
 		if (IsValid(entity)) then
 			entity:Remove()
 		end
