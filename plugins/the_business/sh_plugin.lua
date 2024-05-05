@@ -139,23 +139,35 @@ function PLUGIN:CreateWallReplacement(position, angles, plane)
     entity:Spawn()
     entity:SetNoDraw(true)
 
+    self:SetRenderTargetMaterial(entity, renderTarget)
+
     local outletAngles = Angle(surfaceAngles)
     outletAngles:RotateAroundAxis(outletAngles:Right(), 180)
     outletAngles:RotateAroundAxis(outletAngles:Up(), -90)
 
     local forward = surfaceAngles:Up() * -INTO_SURFACE_BY
 
-    local element = vgui.Create("expBusinessTerminal")
+	local element = vgui.Create("expBusinessTerminal")
 	element:SetSize(512, 512)
-    element:SetPaintedManually(true)
+	element:SetPaintedManually(true)
 
-    PLUGIN.businessOutlets[#PLUGIN.businessOutlets + 1] = {
-        entity = entity,
-        position = surfacePosition + forward + (surfaceAngles:Right() * -23.5) + (surfaceAngles:Forward() * -23.5),
-        angles = outletAngles,
-        vgui = element,
+	local businessOutlet = {
+		entity = entity,
+		position = surfacePosition + forward + (surfaceAngles:Right() * -23.5) + (surfaceAngles:Forward() * -23.5),
+		angles = outletAngles,
+		vgui = element,
 		vguiShowAt = CurTime() + 2 -- When the wall is done moving forward
 	}
+	PLUGIN.businessOutlets[#PLUGIN.businessOutlets + 1] = businessOutlet
+
+	---
+	businessOutlet.shopkeeperRenderTarget = businessOutlet.shopkeeperRenderTarget or GetRenderTarget("ShopKeeperView", TEXTURE_SIZE, TEXTURE_SIZE) -- TODO: Reuse render targets, allow multiple
+	businessOutlet.shopkeeperRenderTargetMaterial = businessOutlet.shopkeeperRenderTargetMaterial or CreateMaterial("ShopKeeperViewMaterial", "UnlitGeneric", {
+		["$basetexture"] = businessOutlet.shopkeeperRenderTarget:GetName(),
+		["$translucent"] = 0,
+		["$vertexcolor"] = 1
+    })
+	---
 
     local targets = {
         { transform = forward, time = 2 },
@@ -169,8 +181,6 @@ function PLUGIN:CreateWallReplacement(position, angles, plane)
         endTime = ANIMATE_WALL_OPEN.move(entity, previousPosition, targetPosition, target.time, endTime)
         previousPosition = targetPosition
     end
-
-    self:SetRenderTargetMaterial(entity, renderTarget)
 end
 
 function PLUGIN:Think()
@@ -197,6 +207,8 @@ function PLUGIN:Think()
         local position = Lerp(progress, start, finish)
         model:SetPos(position)
     end
+
+	self:RenderScene()
 end
 
 function PLUGIN:PostDrawOpaqueRenderables(drawingDepth, drawingSkybox, drawingSkybox3d)
@@ -246,8 +258,23 @@ function PLUGIN:PostDrawOpaqueRenderables(drawingDepth, drawingSkybox, drawingSk
 		surface.SetDrawColor(255, 255, 255, 255)
 		businessOutlet.vgui:PaintManual()
 		cam.End3D2D()
-    end
+	end
 
+	-- -- Draw the shopkeepers as 3D2D on the wall
+	-- for _, businessOutlet in ipairs(PLUGIN.businessOutlets) do
+	-- 	if (not businessOutlet.shopkeeperRenderTargetMaterial) then
+	-- 		continue
+	-- 	end
+
+	-- 	local scale = 0.093
+	-- 	cam.Start3D2D(businessOutlet.position, businessOutlet.angles, scale)
+	-- 	surface.SetDrawColor(255, 255, 255, 255)
+	-- 	surface.SetMaterial(businessOutlet.shopkeeperRenderTargetMaterial)
+	-- 	surface.DrawTexturedRect(0, 0, 512, 512)
+	-- 	cam.End3D2D()
+	-- end
+
+	-- Draw the wall models
     render.SuppressEngineLighting(true)
     render.ResetModelLighting(.5, .5, .5) -- Why does this make the models exactly the right brightness?
     for _, businessOutlet in ipairs(PLUGIN.businessOutlets) do
@@ -262,109 +289,95 @@ function PLUGIN:PostDrawOpaqueRenderables(drawingDepth, drawingSkybox, drawingSk
     end
 end
 
---[[
-Sadly I can't figure out how to render a 3d shopkeeper with parallax effect. The code below is a failed attempt at that.
+--[=====[
+Nope, the math for this is beyond me. Can't get it to look like looking through a hole in the wall... :(
+--- lua_run_cl ix.plugin.Get("the_business"):SetShopKeeperCameraPositionFromEyeTrace()
+function PLUGIN:SetShopKeeperCameraPositionFromEyeTrace()
+    local trace = LocalPlayer():GetEyeTraceNoCursor()
 
--- function PLUGIN:SpawnShopKeeper(path)
--- 	local model = ClientsideModel(path, RENDERGROUP_OTHER)
---     model:SetNoDraw(true)
---     model:SetIK(false)
---     model:ResetSequence("idle01")
+    self.shopKeeperCamera = {
+		origin = LocalPlayer():EyePos(),
+		subjectPosition = trace.HitPos,
+    }
 
--- 	return {
--- 		path = path,
--- 		model = model
--- 	}
--- end
+    PrintTable(self.shopKeeperCamera)
 
--- --- Renders a parallax effect for a shopkeeper, making an apparant hole in the wall
--- --- even though the wall is solid and the shop keeper is somewhere else
--- --- @param businessOutlet table
--- function PLUGIN:RenderShopKeeperViewToRenderTarget(businessOutlet)
---     businessOutlet.modelInfo = businessOutlet.modelInfo or
---     	self:SpawnShopKeeper("models/stalker.mdl")
+	print([[
+		Don't forget to add this to the server:
 
---     if (self.nextRender and self.nextRender > CurTime()) then
---         return
---     end
+		hook.Add("SetupPlayerVisibility", "ShopKeeperCamera", function(client)
+			AddOriginToPVS(Vector(]] .. self.shopKeeperCamera.origin.x .. ", " .. self.shopKeeperCamera.origin.y .. ", " .. self.shopKeeperCamera.origin.z .. [[))
+		end)
+	]]])
+end
 
--- 	self.nextRender = CurTime() + (1 / 60)
+--- Update the render target for the shopkeeper
+function PLUGIN:RenderScene()
+	if (not self.shopKeeperCamera) then
+		return
+	end
 
--- 	-- local holePosition = businessOutlet.position
+	local fps = 1 / 30
 
---     -- -- -- Now we want to know how the player is in relation to the hole. So we can decide how to render the shop keeper
---     -- local client = LocalPlayer()
---     -- local clientPosition = client:EyePos()
---     -- -- -- Calculate the line of sight from the player through the hole
---     -- local lookDirection = client:GetAimVector()
---     -- local toHoleDistance = (holePosition - clientPosition):Dot(lookDirection)
---     -- local cameraPosition = clientPosition + (lookDirection * toHoleDistance)  -- Position camera at the hole on the line of sight
+	if (RealTime() - (PLUGIN.lastShopkeeperUpdate or 0) < fps) then
+		return
+	end
 
---     -- -- -- Camera should look towards the shopkeeper from the hole
---     -- local cameraAngles = (holePosition - clientPosition):Angle()
+	PLUGIN.lastShopkeeperUpdate = RealTime()
 
--- 	-- -- print("Camera position: " .. tostring(cameraPosition), "Camera angles: " .. tostring(cameraAngles))
+	local client = LocalPlayer()
+    local playerPosition = client:GetPos()
+    local playerAngles = client:EyeAngles()
+	local fovRadians = math.rad(client:GetFOV())
 
---     -- self:RenderCameraView(businessOutlet, holePosition, cameraAngles)--client:EyeAngles())
--- 	self:RenderCameraView(businessOutlet)
--- end
+	for _, businessOutlet in ipairs(PLUGIN.businessOutlets) do
+		if (not businessOutlet.shopkeeperRenderTarget) then
+			continue
+		end
 
--- function PLUGIN:RenderCameraView(businessOutlet)
--- 	local modelInfo = businessOutlet.modelInfo
--- 	businessOutlet.renderTarget = businessOutlet.renderTarget or GetRenderTarget("ShopKeeperView", TEXTURE_SIZE, TEXTURE_SIZE) -- TODO: Reuse render targets, allow multiple
--- 	businessOutlet.material = businessOutlet.material or CreateMaterial("ShopKeeperViewMaterial", "UnlitGeneric", {
--- 		["$basetexture"] = businessOutlet.renderTarget:GetName(),
--- 		["$translucent"] = 0,
--- 		["$vertexcolor"] = 1
---     })
+        -- Slightly towards the camera from the subject
+		local subjectPosition = self.shopKeeperCamera.subjectPosition + Vector(0, 0, 25)
+		local cameraOrigin = subjectPosition + (self.shopKeeperCamera.origin + Vector(0, 0, 25) - subjectPosition):GetNormalized() * 109
+        local subjectDirection = (subjectPosition - cameraOrigin):GetNormalized()
+		local cameraToSubjectAngle = subjectDirection:Angle()
+        local cameraAngles = Angle(playerAngles) -- subjectDirection:Angle()
 
---     local position = Vector(2649.434082, 245.188919, 2729.738770)--setang 0.912670 89.275322 0.000000)
--- 	local angles = LocalPlayer():EyeAngles()
+        cameraAngles.yaw = cameraToSubjectAngle.yaw
+		cameraAngles.pitch = cameraToSubjectAngle.pitch + (playerAngles.pitch * 0.1)
 
--- 	render.PushRenderTarget(businessOutlet.renderTarget)
---     render.Clear(10, 10, 10, 255, true, true)
+        -- cameraAngles.pitch = cameraAngles.pitch + differenceWithPlayerAnglesPitch
 
---     -- local anglesModified = Angle(angles.p, -angles.y, angles.r)
---     -- anglesModified:RotateAroundAxis(anglesModified:Up(), 90)
+        -- Only add the difference, so the direction is correct, but the camera moves as if the player is looking through a window
+        -- cameraAngles.yaw = cameraAngles.yaw + (playerAngles.yaw - differenceWithPlayerAnglesYaw)
+        -- cameraAngles.yaw = cameraAngles.yaw + differenceWithPlayerAnglesYaw
 
---     -- local cameraPosition = position - Vector(0, 0, 9000)
+        -- Distance
+		local distanceToHole = (businessOutlet.position - playerPosition):Length()
+		local distanceFromCameraToSubject = (subjectPosition - cameraOrigin):Length()
+        local totalDistance = distanceFromCameraToSubject --+ (distanceToHole * 0.02)
+		local parallaxDepth = totalDistance * math.tan(fovRadians / 2)
+        local cameraPosition = subjectPosition - subjectDirection * parallaxDepth
 
--- 	-- cam.Start3D(
---     --     position,
---     --     Angle(),
---     --     LocalPlayer():GetFOV()
---     -- )
+		render.PushRenderTarget(businessOutlet.shopkeeperRenderTarget)
+		render.Clear(0, 0, 0, 255, true, true)
 
---     render.SuppressEngineLighting(true)
+		cam.Start2D()
+        render.RenderView({
+			origin = cameraPosition,
+			angles = cameraAngles,
+			x = 0,
+			y = 0,
+			w = TEXTURE_SIZE,
+			h = TEXTURE_SIZE,
+			drawviewmodel = false,
+			viewid = VIEW_MONITOR,
 
---     modelInfo.model:FrameAdvance()
---     render.Model({
---         model = modelInfo.path,
---         pos = position + Vector(100, 0, -64.5),
---         angle = Angle(0, 180, 0),
---     }, modelInfo.model)
---     -- modelInfo.model:SetPos(position)
---     -- modelInfo.model:SetAngles(Angle(0, 180, 0))
--- 	-- modelInfo.model:DrawModel()
--- 	render.RenderView({
--- 		origin = position, -- (cameraPosition - position), -- (position + Vector(0, 0, 100)
--- 		angles = Angle(angles.p * .5, angles.y * .5, 0), -- cameraAngles,
--- 		x = 0,
--- 		y = 0,
--- 		w = TEXTURE_SIZE,
--- 		h = TEXTURE_SIZE,
--- 		drawviewmodel = false,
--- 		viewid = VIEW_MONITOR,
+			znear = 1,
+			zfar = 32768,
+		})
+		cam.End2D()
 
--- 		znear = 1,
---         zfar = 32768,
--- 		fov = LocalPlayer():GetFOV()
--- 	})
-
--- 	render.SuppressEngineLighting(false)
-
---     -- cam.End3D()
-
--- 	render.PopRenderTarget()
--- end
-]]
+		render.PopRenderTarget()
+	end
+end
+]=====]

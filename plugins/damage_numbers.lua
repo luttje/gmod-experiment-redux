@@ -90,9 +90,22 @@ if (SERVER) then
 			return
 		end
 
+		if (not entity:IsPlayer() and not entity:IsNPC()) then
+			return
+		end
+
+		local attacker = damageInfo:GetAttacker()
+
+		if (not IsValid(attacker) or (not attacker:IsPlayer() and not attacker:IsNPC())) then
+			return
+		end
+
 		net.Start("expDamageNumbers")
 		net.WriteEntity(entity)
 		net.WriteUInt(math.ceil(damageInfo:GetDamage()), 32)
-		net.Broadcast()
+		net.Send({
+			entity,
+			attacker,
+		})
 	end
 end
