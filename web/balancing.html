@@ -8,7 +8,7 @@
     <title>Experiment Redux</title>
 
     <link rel="stylesheet"
-          href="assets/style.css">
+          href="assets/style.css?bust=1714892748">
 
     <script src="https://cdn.jsdelivr.net/npm/@ryangjchandler/alpine-tooltip@1.x.x/dist/cdn.min.js"
             defer></script>
@@ -228,7 +228,7 @@
                         </select>
                         <button type="button"
                                 x-on:click="selectedItems = items.map((_, index) => itemMatchesFilter(items[index], itemFilter) ? index : -1).filter(index => index !== -1)">
-                                Select all visible
+                            Select all visible
                         </button>
                     </div>
                     <div class="grid h-300">
@@ -237,13 +237,13 @@
                             <div class="parameter bg-gray p"
                                  x-show="itemMatchesFilter(item, itemFilter)">
                                 <input type="text"
-                                        x-model="item.name"
-                                        disabled
-                                        placeholder="Name">
+                                       x-model="item.name"
+                                       disabled
+                                       placeholder="Name">
                                 <input type="text"
-                                        x-model="item.category"
-                                        disabled
-                                        placeholder="Category">
+                                       x-model="item.category"
+                                       disabled
+                                       placeholder="Category">
                                 <input type="number"
                                        x-model="item.price"
                                        placeholder="Cost">
