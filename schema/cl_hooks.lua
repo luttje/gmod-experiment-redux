@@ -624,6 +624,10 @@ function Schema:NetworkEntityCreated(entity)
     end
 
     entity.GetEntityMenu = function(entity)
+		if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+			return
+		end
+
         local target = entity:GetNetVar("player", NULL)
         local options = {}
 
@@ -634,12 +638,24 @@ function Schema:NetworkEntityCreated(entity)
 end
 
 function Schema:GetPlayerEntityMenu(target, options)
+	local client = LocalPlayer()
+
+	if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+		return
+	end
+
 	if (target:IsRestricted() and target:IsPlayer() and not target:GetNetVar("beingUntied")) then
 		options[L("untie")] = true
 	end
 end
 
 function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
+	local client = LocalPlayer()
+
+	if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+		return
+	end
+
     local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
     if (not corpseOwnerID) then
@@ -663,6 +679,10 @@ function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
 end
 
 function Schema:ShouldPopulateEntityInfo(entity)
+	if (not LocalPlayer():Alive()) then
+		return false
+	end
+
     local corpseOwnerID = entity:GetNetVar("corpseOwnerID")
 
     if (corpseOwnerID) then
@@ -679,9 +699,13 @@ function Schema:ShouldPopulateEntityInfo(entity)
 end
 
 function Schema:PopulateCharacterInfo(client, character, tooltip)
-    if (not client.expPopulatingCorpse or client.expPopulatingCorpse < CurTime() - 1) then
-        return
-    end
+	if (not client.expPopulatingCorpse or client.expPopulatingCorpse < CurTime() - 1) then
+		return
+	end
+
+	if (not LocalPlayer():Alive() or not LocalPlayer():GetCharacter()) then
+		return
+	end
 
 	local ownerName = L"someone"
 

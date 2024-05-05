@@ -797,6 +797,10 @@ function Schema:OnPlayerOptionSelected(target, client, option, data)
 end
 
 function Schema:OnPlayerRagdollOptionSelected(client, target, ragdoll, option, data)
+	if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+		return
+	end
+
 	local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
 	if (not corpseOwnerID) then
