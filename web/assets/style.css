@@ -1,6 +1,17 @@
 @font-face {
     font-family: "LightsOut";
-    src: url(./lightout.woff)
+    src: url(./lightout.woff);
+}
+
+@font-face {
+    font-family: "RomanAntique";
+    src: url(./RomanAntique.woff);
+}
+
+@font-face {
+    font-family: "RomanAntique";
+    src: url(./RomanAntique-Italic.woff);
+    font-style: italic;
 }
 
 * {
@@ -20,6 +31,11 @@ body {
     padding: 1em;
     font-size: 16px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.stylized-font {
+    font-family: "RomanAntique", 'Times New Roman', Times, serif;
+    font-size: 1.4em;
 }
 
 h1,
@@ -60,7 +76,6 @@ h2 {
 
 .logo {
     max-width: 512px;
-    transform: scale(1.1);
 }
 
 img {
@@ -201,6 +216,13 @@ input {
     width: fit-content;
 }
 
+.discord {
+    height: 0.9em;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -237,4 +259,30 @@ input {
     font-size: 1em;
     color: rgba(255, 255, 255, 0.3);
     flex: 0;
+}
+
+.illustration {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: -1;
+    margin: 0 auto;
+    opacity: .1;
+}
+
+.illustration img {
+    position: absolute;
+    max-width: 960px;
+
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    mask-image: url(./vignette.png);
+    mask-mode: luminance;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
 }
