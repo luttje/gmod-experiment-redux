@@ -344,6 +344,7 @@ function PLUGIN:Think()
 		self.isSubmittingMetrics = nil
 	end, function(message)
 		ix.util.SchemaErrorNoHaltWithStack("Failed to submit metrics." .. tostring(message))
+		self.lastSubmittedDay = forDay -- So it doesnt keep retrying
 		self.isSubmittingMetrics = nil
 	end)
 end

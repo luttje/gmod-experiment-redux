@@ -49,3 +49,16 @@ end
 function PLUGIN:OnPlayerCorpseCreated(client, corpse)
 	corpse.expIsBelongings = true
 end
+
+function PLUGIN:EntityTakeDamage(entity, damageInfo)
+	local inflictor = damageInfo:GetInflictor()
+
+	if (inflictor) then
+		local inflictorClass = inflictor:GetClass()
+
+		if (inflictorClass == "exp_belongings") then
+			damageInfo:SetDamage(0)
+			return
+		end
+	end
+end

@@ -260,11 +260,10 @@ function Schema:EntityTakeDamage(entity, damageInfo)
 	if (inflictor) then
 		local inflictorClass = inflictor:GetClass()
 
-		if (inflictorClass == "exp_belongings"
-				or inflictorClass == "ix_item"
-				or inflictorClass == "ix_money"
-				or inflictorClass == "ix_shipment"
-				or inflictorClass == "ix_container") then
+		if (inflictorClass == "ix_item"
+			or inflictorClass == "ix_money"
+			or inflictorClass == "ix_shipment"
+			or inflictorClass == "ix_container") then
 			damageInfo:SetDamage(0)
 			return
 		end
@@ -780,7 +779,7 @@ function Schema:PlayerInteractEntity(client, entity, option, data)
 	end
 
 	entity.OnOptionSelected = function(entity, client, option, data)
-		if (client:IsRestricted()) then
+		if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
 			return
 		end
 

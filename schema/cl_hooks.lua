@@ -617,6 +617,23 @@ function Schema:NetworkEntityCreated(entity)
         return
     end
 
+    local monsterCorpse = entity:GetNetVar("monsterCorpse")
+
+	if (monsterCorpse) then
+        entity.GetEntityMenu = function(entity)
+            if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+                return
+            end
+
+            local options = {}
+            options[L("searchCorpse")] = true
+
+            return options
+        end
+
+		return
+	end
+
     local player = entity:GetNetVar("player", NULL)
 
     if (not IsValid(player)) then

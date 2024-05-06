@@ -109,8 +109,53 @@ function META:IsDoor()
 end
 
 if (SERVER) then
-	function META:RemoveWithEffect()
-		Schema.ImpactEffect(self:GetPos(), 8, true)
-		self:Remove()
+    function META:RemoveWithEffect()
+        Schema.ImpactEffect(self:GetPos(), 8, true)
+        self:Remove()
+    end
+
+	function META:CreateServerRagdoll()
+		local entity = ents.Create("prop_ragdoll")
+		entity:SetPos(self:GetPos())
+		entity:SetAngles(self:EyeAngles())
+		entity:SetModel(self:GetModel())
+        entity:SetSkin(self:GetSkin())
+
+		for i = 0, (self:GetNumBodyGroups() - 1) do
+			entity:SetBodygroup(i, self:GetBodygroup(i))
+		end
+
+		entity:Spawn()
+
+		entity:SetCollisionGroup(COLLISION_GROUP_WEAPON)
+		entity:Activate()
+
+		local modelScale = self:GetModelScale()
+        local modelScaleVector = Vector(modelScale, modelScale, modelScale)
+
+		for i = 0, entity:GetBoneCount() do
+			entity:ManipulateBoneScale(i, modelScaleVector)
+		end
+
+		local velocity = self:GetVelocity() * modelScale
+
+        for i = 0, entity:GetPhysicsObjectCount() - 1 do
+            local physObj = entity:GetPhysicsObjectNum(i)
+
+            if (IsValid(physObj)) then
+                physObj:SetVelocity(velocity)
+
+                local index = entity:TranslatePhysBoneToBone(i)
+
+                if (index) then
+                    local position, angles = self:GetBonePosition(index)
+
+                    physObj:SetPos(position)
+                    physObj:SetAngles(angles)
+                end
+            end
+        end
+
+		return entity
 	end
 end

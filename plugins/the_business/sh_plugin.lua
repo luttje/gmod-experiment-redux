@@ -208,7 +208,7 @@ function PLUGIN:Think()
         model:SetPos(position)
     end
 
-	self:RenderScene()
+	-- self:RenderScene()
 end
 
 function PLUGIN:PostDrawOpaqueRenderables(drawingDepth, drawingSkybox, drawingSkybox3d)
