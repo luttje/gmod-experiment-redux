@@ -5,4 +5,5 @@
 	"author"	"Experiment Redux"
 	"category"	"rp"
 	"menusystem" "1"
+	"maps"		"^exp_"
 }

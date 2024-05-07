@@ -84,7 +84,13 @@ local function ForEachSubMaterial(client, callback)
 end
 
 function ITEM:RemoveOutfit(client)
-	local client = self.player -- client was nil somehow?
+	client = IsValid(client) and client or self.player  -- TODO: Sometimes not valid, find out when
+
+	if (not IsValid(client)) then
+		ix.util.SchemaErrorNoHaltWithStack("ITEM:RemoveOutfit: client is not valid in this case.")
+		return
+	end
+
 	local character = client:GetCharacter()
 
 	self:SetData("equip", false)
@@ -96,7 +102,7 @@ function ITEM:RemoveOutfit(client)
 	end)
 
 	-- Save outfit submaterials
-	if (!table.IsEmpty(materials)) then
+	if (not table.IsEmpty(materials)) then
 		self:SetData("submaterial", materials)
 	end
 
