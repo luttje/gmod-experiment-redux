@@ -1,6 +1,6 @@
 # 🔮 Vision
 
-> ![NOTE]
+> [!NOTE]
 > This document outlines the vision we currently have for *Experiment Redux*. It is a living document and subject to change as the project evolves.
 > If you have any feedback or suggestions, please feel free to share them with us by [creating an issue or commenting on an existing one](https://github.com/luttje/gmod-experiment-redux/issues).
 
