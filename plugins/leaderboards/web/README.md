@@ -1,6 +1,6 @@
-# 🕹 Experiment Leaderboards
+# 🕹 Experiment Leaderboards: 'Heroes of the Epoch'
 
-Backend for the Experiment gamemode to communicate metrics to. This project will then display the metrics on the leaderboards.
+Backend for the Experiment gamemode to communicate metrics to. This project will then display the metrics on the leaderboards. The leaderboards are named 'Heroes of the Epoch'.
 
 ## 🚀 Getting Started
 

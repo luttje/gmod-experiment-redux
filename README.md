@@ -22,6 +22,12 @@
 
 3. (Re-)start Garry's Mod and start a game with the `Experiment Redux` gamemode.
 
+## About
+
+**Experiment Redux** is a reimagining of the original *Experiment* gamemode for Garry's Mod. It combines elements of first-person shooters, role-playing games, and survival games, along with a month-long competitive cycle to create a unique gameplay experience.
+
+&raquo; **Read more in our [🔮 Vision](docs/vision.md) document**
+
 ## Hosting a Server
 
 For a quick overview check out the [🏗 Dev Server Guide](docs/dev-server-guide.md). This guide will walk you through setting up a dedicated server for development purposes.
