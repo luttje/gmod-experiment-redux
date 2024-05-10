@@ -6,6 +6,7 @@ ix.currency.model = "models/props_lab/box01a.mdl"
 if (SERVER) then
     resource.AddFile("resource/fonts/RomanAntique.ttf")
     resource.AddFile("resource/fonts/RomanAntique-Italic.ttf")
+    resource.AddFile("resource/fonts/lightout.ttf")
 end
 
 -- We probably shouldn't be forcing these configs, but I have yet to look for another way to "recommend" them.
