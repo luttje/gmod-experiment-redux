@@ -6,12 +6,12 @@ ITEM.model = "models/props_wasteland/prison_padlock001a.mdl"
 ITEM.plural = "Breaches"
 ITEM.width = 1
 ITEM.height = 1.5
-ITEM.description = "A small device which looks similiar to a padlock."
+ITEM.description = "A device that will breach a door when placed on it and shot."
 
 ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
-		local success, message, trace = client:TryTraceInteractAtDistance()
+		local success, message, trace = client:TryTraceInteractAtDistance(true)
 
         if (not success) then
 			client:Notify(message)
@@ -22,7 +22,7 @@ ITEM.functions.Place = {
 		local entity = trace.Entity
 
 		if (not IsValid(entity)) then
-			client:Notify("You are not looking at a valid entity!")
+			client:Notify("You are not looking at an entity that can be breached!")
 
 			return false
 		end
@@ -45,7 +45,7 @@ ITEM.functions.Place = {
 
 	OnCanRun = function(item)
 		local client = item.player
-		local success, message, trace = client:TryTraceInteractAtDistance()
+		local success, message, trace = client:TryTraceInteractAtDistance(true)
 
 		if (not success) then
 			return false

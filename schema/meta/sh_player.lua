@@ -104,15 +104,15 @@ function META:IsObjectLimited(objectType, limit)
 	return #objects >= limit
 end
 
-function META:TryTraceInteractAtDistance(distance)
+function META:TryTraceInteractAtDistance(allowHitNonWorld)
     local trace = self:GetEyeTraceNoCursor()
-	distance = ix.config.Get("maxInteractionDistance", distance)
+	local distance = ix.config.Get("maxInteractionDistance")
 
 	if (trace.HitPos:Distance(trace.StartPos) > distance) then
 		return false, "You can not do that this far away!"
 	end
 
-    if (trace.HitNonWorld) then
+    if (not allowHitNonWorld and trace.HitNonWorld) then
         return false, "You can not do that here!"
     end
 
