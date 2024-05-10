@@ -149,7 +149,6 @@
   {"name": "Skull Mask", "price": 300, "category": "Clothing"},
   {"name": "Chloroform", "price": 800, "category": "items"},
   {"name": "Cyanide", "price": 100, "category": "items"},
-  {"name": "Spray Can", "price": 150, "category": "Reusables"},
   {"name": "Vegetable Oil", "price": 100, "category": "items"},
   {"name": "Zip Tie", "price": 150, "category": "items"}
 ]
