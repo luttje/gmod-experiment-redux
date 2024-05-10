@@ -191,7 +191,7 @@ function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter
     end
 
 	if (soundName:StartsWith("player/footsteps/wood")) then
-		local shouldPlaySqueekSound = math.random(0, 100) <= 2
+		local shouldPlaySqueekSound = math.Rand(0, 100) <= 0.5
 
 		if (shouldPlaySqueekSound) then
 			soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or "ambient/materials/squeekyfloor2.wav"
