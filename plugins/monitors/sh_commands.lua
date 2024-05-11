@@ -30,7 +30,16 @@ do
 				return
 			end
 
-			preset.spawn(client, trace)
+            local parent = ents.Create("prop_physics")
+            parent:SetPos(trace.HitPos + (preset.spawnOffset or Vector(0, 0, 0)))
+			PLUGIN:SetupParentEntity(parent, preset)
+            parent:Spawn()
+
+			for _, monitor in ipairs(preset.monitors) do
+				local monitorEnt = PLUGIN:SpawnMonitor(parent, monitor)
+				monitorEnt:SetHelper(true)
+			end
+
 			client:Notify("Monitor spawned with preset: " .. presetKey)
 
 			return

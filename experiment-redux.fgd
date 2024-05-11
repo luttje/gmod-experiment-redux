@@ -1,0 +1,11 @@
+//==================================================================//
+//  Defines entities and available keyvalues for Experiment Redux:  //
+//          https://github.com/luttje/gmod-experiment-redux         //
+//==================================================================//
+@include "base.fgd"
+
+@PointClass base(prop_static) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_monitor_static :
+	"Experiment Monitor that matches the position and angles of a prop_static with the same model"
+[
+    monitorPreset(string) : "Monitor Preset" : "combine_big" : "Preset used to determine the monitor's screen size"
+]

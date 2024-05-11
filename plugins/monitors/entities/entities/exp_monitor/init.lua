@@ -53,9 +53,11 @@ function ENT:ConfigureParent(parent, vector, angles)
 
 	-- !!! Because we set Solid to SOLID_NONE, we will always be relative to the world when positioning
 	self:SetPos(parent:LocalToWorld(vector))
-	self:SetAngles(parent:LocalToWorldAngles(angles))
+    self:SetAngles(parent:LocalToWorldAngles(angles))
 
-	PLUGIN:RelateMonitorToParent(self, parent)
+	if (IsValid(parent) and parent:GetClass() ~= "exp_monitor_static") then
+		PLUGIN:RelateMonitorToParent(self, parent)
+	end
 end
 
 function ENT:Think()

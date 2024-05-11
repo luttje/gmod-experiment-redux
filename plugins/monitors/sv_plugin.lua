@@ -9,6 +9,23 @@ resource.AddFile("materials/experiment-redux/arrow_forward.png")
 resource.AddFile("materials/experiment-redux/arrow_backward.png")
 resource.AddSingleFile("materials/experiment-redux/combinescanline.vmt")
 
+function PLUGIN:SpawnMonitor(parent, monitor)
+    local monitorEnt = ents.Create("exp_monitor")
+    monitorEnt:SetMonitorWidth(monitor.width)
+    monitorEnt:SetMonitorHeight(monitor.height)
+    monitorEnt:SetMonitorScale(monitor.scale or 1)
+    monitorEnt:ConfigureParent(parent, monitor.offsetPosition, monitor.offsetAngles)
+    monitorEnt:Spawn()
+    monitorEnt:SetPoweredOn(false)
+
+    return monitorEnt
+end
+
+function PLUGIN:SetupParentEntity(parent, preset)
+	parent:SetModel(preset.model)
+	parent:SetModelScale(preset.modelScale or 1)
+end
+
 function PLUGIN:DramaticDelayEachMonitor(callback)
 	local monitorEntities = ents.FindByClass("exp_monitor")
 
@@ -52,7 +69,7 @@ function PLUGIN:SaveData()
 	local parentEntities = {}
 
 	for _, monitor in ipairs(ents.FindByClass("exp_monitor")) do
-		if (not IsValid(monitor)) then
+		if (not IsValid(monitor) or not monitor._parentUniqueName) then
 			continue
 		end
 
@@ -63,7 +80,6 @@ function PLUGIN:SaveData()
 			parentName = monitor._parentUniqueName,
 			angles = monitor:GetLocalAngles(),
 			pos = monitor:GetLocalPos(),
-			on = monitor:GetPoweredOn()
 		}
 
 		parentEntities[monitor._parentUniqueName] = parentEntities[monitor._parentUniqueName] or monitor:GetParent()
@@ -113,15 +129,17 @@ function PLUGIN:LoadData()
 
 	for uniqueName, parentData in pairs(data.parentEntities or {}) do
 		local parent = ents.Create("prop_physics")
-		parent:SetModel(parentData.model)
-		parent:SetModelScale(parentData.scale)
+        PLUGIN:SetupParentEntity(parent, {
+            model = parentData.model,
+            modelScale = parentData.scale,
+		})
 		parent:SetPos(parentData.pos)
 		parent:SetAngles(parentData.angles)
 		parent:Spawn()
 
 		local physicsObject = parent:GetPhysicsObject()
 
-		if (IsValid(physicsObject)) then
+		if (IsValid(physicsObject) and parentData.movable) then
 			physicsObject:EnableMotion(parentData.movable)
 		else
 			parent:SetMoveType(MOVETYPE_NONE)
@@ -141,12 +159,12 @@ function PLUGIN:LoadData()
 			continue
 		end
 
-		local monitor = ents.Create("exp_monitor")
-		monitor:SetMonitorWidth(monitorData.width)
-		monitor:SetMonitorHeight(monitorData.height)
-		monitor:SetMonitorScale(monitorData.scale)
-		monitor:ConfigureParent(parent, monitorData.pos, monitorData.angles)
-		monitor:Spawn()
-		monitor:SetPoweredOn(monitorData.on)
+        self:SpawnMonitor(parent, {
+			width = monitorData.width,
+			height = monitorData.height,
+			scale = monitorData.scale,
+			offsetPosition = monitorData.pos,
+            offsetAngles = monitorData.angles,
+		})
 	end
 end
