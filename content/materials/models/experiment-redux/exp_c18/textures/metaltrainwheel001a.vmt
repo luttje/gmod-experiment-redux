@@ -1,0 +1,5 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "vehicle/metaltrainwheel001a"
+	"$surfaceprop" "metal"
+}

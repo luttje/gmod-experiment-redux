@@ -1,0 +1,12 @@
+// envmaptint_fix
+"vertexlitgeneric"
+{
+	"$basetexture" "vehicle/rubbertrainfloor002a"
+	"$surfaceprop" "rubber"
+	"$bumpmap" "vehicle/rubbertrainfloor002a_normal"
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" 1
+	"$envmaptint" "[ .56 .56 .56 ]"
+}

@@ -1,0 +1,9 @@
+"vertexlitgeneric"
+{
+	// original shader: basetimeslightmap
+	"$basetexture" "metal/metalcombinegrate001a"
+	"%compilepassbullets" 1
+	"$surfaceprop" "metalgrate"
+	"$translucent" "1"
+	"%keywords" "c17industrial,wasteland"
+}
