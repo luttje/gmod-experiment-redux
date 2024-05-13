@@ -1,0 +1,13 @@
+// envmaptint_fix
+"vertexlitgeneric"
+{
+	"$basetexture" "metal/metalroof008a"
+	"$surfaceprop" "metal"
+	"%keywords" "c17industrial"
+	"$envmap" "env_cubemap"
+	"$bumpmap" "metal/metalroof008a_normal"
+	"$normalmapalphaenvmapmask" 1
+	"$envmapcontrast" 1
+	"$envmapsaturation" 1
+	"$envmaptint" "[ .6 .6 .6 ]"
+}

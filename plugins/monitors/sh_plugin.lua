@@ -24,6 +24,21 @@ PLUGIN.presets = {
 		},
     },
 
+	combine_medium = {
+        description = "Medium wall mounted combine monitor",
+		model = "models/combine_room/combine_monitor002.mdl",
+		spawnOffset = Vector(0, 0, 300),
+        monitors = {
+            {
+                width = 2000,
+                height = 3520,
+                scale = 0.1,
+                offsetPosition = Vector(134, -73, 174),
+                offsetAngles = Angle(1, 0, -1),
+			},
+		},
+    },
+
 	combine_small = {
 		description = "A small combine display",
 		model = "models/props_combine/combine_smallmonitor001.mdl",
