@@ -24,3 +24,9 @@
 [
     model(studio) : "World model" : "models/props_c17/lockers001a.mdl" : "Model of the lockers"
 ]
+
+@PointClass base(Angles) studio("models/editor/playerstart.mdl") = exp_spawn_point :
+	"This entity indicates the position and facing direction at which the player can choose to spawn."
+[
+    name(string) : "Name" : "" : "Name of the spawn point"
+]

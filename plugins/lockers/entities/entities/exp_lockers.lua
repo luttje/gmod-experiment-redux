@@ -7,6 +7,7 @@ local PLUGIN = PLUGIN
 ENT.Type = "anim"
 ENT.Model = "models/props_c17/lockers001a.mdl"
 ENT.PrintName = "Lockers"
+ENT.Author = "Experiment Redux"
 ENT.IsLockers = true
 
 if (CLIENT) then

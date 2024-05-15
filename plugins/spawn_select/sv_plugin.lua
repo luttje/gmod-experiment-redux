@@ -1,5 +1,6 @@
 local PLUGIN = PLUGIN
 
+PLUGIN.mapSpawns = PLUGIN.mapSpawns or {}
 PLUGIN.spawns = PLUGIN.spawns or {}
 
 PLUGIN.spawnNearDeathRange = 4096
@@ -36,10 +37,24 @@ end)
 
 function PLUGIN:LoadData()
 	self.spawns = self:GetData() or {}
+
+	for _, spawn in ipairs(self.mapSpawns) do
+		self.spawns[#self.spawns + 1] = spawn
+	end
 end
 
 function PLUGIN:SaveData()
-	self:SetData(self.spawns)
+	local spawnsWithoutMap = {}
+
+	for k, spawn in ipairs(self.spawns) do
+		if (spawn.shouldNotSave) then
+			continue
+		end
+
+		spawnsWithoutMap[k] = spawn
+	end
+
+	self:SetData(spawnsWithoutMap)
 end
 
 function PLUGIN:PostPlayerLoadout(client)
