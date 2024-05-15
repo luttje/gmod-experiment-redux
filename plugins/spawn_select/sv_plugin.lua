@@ -56,11 +56,6 @@ function PLUGIN:PostPlayerLoadout(client)
 
 	local mapDetails = self:GetMapDetails()
 
-	if (not mapDetails) then
-		ix.util.SchemaErrorNoHalt("No map details found! Spawning without spawn selection.\n")
-		return
-	end
-
 	if (client:GetNetVar("expChoosingSpawn", false)) then
 		-- During initial character selection PlayerLoadout is called twice.
 		return
@@ -73,8 +68,8 @@ function PLUGIN:PostPlayerLoadout(client)
 	end
 
 	-- When a player spawns, lock them so they can't move until they've selected a spawn point.
-	client:SetPos(mapDetails.waitingPosition)
-	client:SetEyeAngles(mapDetails.waitingAngles)
+	client:SetPos(mapDetails and mapDetails.waitingPosition or vector_origin)
+	client:SetEyeAngles(mapDetails and mapDetails.waitingAngles or angle_zero)
 	client:SetColor(Color(255, 255, 255, 0))
 	client:SetRenderMode(RENDERMODE_TRANSALPHA)
 	client:SetNetVar("expChoosingSpawn", true)

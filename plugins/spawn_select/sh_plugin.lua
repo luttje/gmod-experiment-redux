@@ -22,7 +22,7 @@ ix.util.Include("cl_plugin.lua")
 ix.util.Include("sh_commands.lua")
 
 function PLUGIN:GetMapDetails()
-	local maps = Schema.map.FindByProperty("mapName", game.GetMap())
+	local maps = Schema.map.FindByProperty("mapName", game.GetMap(), true)
 
 	if (#maps == 0) then
 		return nil

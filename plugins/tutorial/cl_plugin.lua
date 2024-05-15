@@ -1,7 +1,13 @@
 local PLUGIN = PLUGIN
 
 ix.option.Add("showTutorial", ix.type.bool, true, {
-	category = "general"
+    category = "general",
+	OnChanged = function(oldValue, newValue)
+		if (newValue) then
+			PLUGIN.isDisabled = false
+			ix.util.Notify("The tutorial will now be shown when you rejoin the server.")
+		end
+	end,
 })
 
 PLUGIN.tutorials = PLUGIN.tutorials or {}
@@ -9,6 +15,32 @@ PLUGIN.tutorials = PLUGIN.tutorials or {}
 PLUGIN.currentTutorial = PLUGIN.currentTutorial or 0
 PLUGIN.currentFade = PLUGIN.currentFade or 0
 PLUGIN.undimmedRectsCache = PLUGIN.undimmedRectsCache or {}
+
+-- Let the player skip by holding backspace for 3 seconds.
+function PLUGIN:Think()
+    if (self.isDisabled) then
+        return
+    end
+
+	if (not self.skipButtonDownAt and input.IsKeyDown(KEY_BACKSPACE)) then
+		self.skipButtonDownAt = CurTime()
+	elseif (self.skipButtonDownAt and not input.IsKeyDown(KEY_BACKSPACE)) then
+		self.skipButtonDownAt = nil
+    elseif (self.skipButtonDownAt and CurTime() - self.skipButtonDownAt >= 3) then
+		ix.util.Notify("Tutorial disabled, you can always re-enable it in the settings.")
+		self:DisableTutorial()
+	end
+end
+
+function PLUGIN:DisableTutorial()
+    if (self.isDisabled) then
+        return
+    end
+
+    self.isDisabled = true
+
+	ix.option.Set("showTutorial", false)
+end
 
 local function importantText(text)
 	return {
@@ -125,6 +157,22 @@ local lastOrder = PLUGIN:AddTutorial(1, {
 	end,
 })
 
+function PLUGIN:FindMenuButton(buttonName)
+	local menuPanel = ix.gui.menu
+
+	if (not IsValid(menuPanel) or not IsValid(menuPanel.tabs) or menuPanel.bClosing) then
+		return
+	end
+
+	for k, tabButton in pairs(menuPanel.tabs.buttons) do
+		if (tabButton.name ~= buttonName) then
+			continue
+		end
+
+		return tabButton
+	end
+end
+
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnSpawnSelectSuccess",
 	ActivateOnDelay = 5,
@@ -143,31 +191,23 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnMainMenuCreated",
 
-	OnActivate = function(tutorial, menuPanel)
-		local youButton
-
-		for k, tabButton in pairs(menuPanel.tabs.buttons) do
-			if (tabButton.name ~= "you") then
-				continue
-			end
-
-			youButton = tabButton
-			break
-		end
-
-		tutorial.youButton = youButton
-		tutorial.menuPanel = menuPanel
+    OnActivate = function(tutorial, menuPanel)
+		--
 	end,
 
 	DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
-		if (not IsValid(tutorial.menuPanel) or tutorial.menuPanel.bClosing) then
-			return
-		end
+        local youButton = PLUGIN:FindMenuButton("you")
 
-		local x, y = tutorial.youButton:LocalToScreen(0, 0)
-		local w, h = tutorial.youButton:GetSize()
+        if (not youButton or not IsValid(youButton)) then
+            return
+        end
 
-		if (tutorial.youButton:GetSelected()) then
+		tutorial.youButton = youButton
+
+		local x, y = youButton:LocalToScreen(0, 0)
+		local w, h = youButton:GetSize()
+
+		if (youButton:GetSelected()) then
 			PLUGIN:NextTutorial()
 			return
 		end
@@ -176,13 +216,19 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	end,
 
 	GetText = function(tutorial)
-		if (not IsValid(tutorial.menuPanel) or tutorial.menuPanel.bClosing) then
-			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+        local menuPanel = ix.gui.menu
 
-			return {
-				importantText("Press " .. menuKey .. " once to open the main menu."),
-			}
-		end
+        if (not IsValid(menuPanel) or menuPanel.bClosing) then
+            local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+
+            return {
+                importantText("Press " .. menuKey .. " once to open the main menu."),
+            }
+        end
+
+        if (not tutorial.youButton or not IsValid(tutorial.youButton)) then
+            return
+        end
 
 		local x, y = tutorial.youButton:LocalToScreen(0, 0)
 		local w, h = tutorial.youButton:GetSize()
@@ -206,22 +252,15 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			return
 		end
 
-		local inventoryButton = tutorial.inventoryButton
+        local inventoryButton = PLUGIN:FindMenuButton("inv")
 
-		if (not IsValid(inventoryButton)) then
-			for k, tabButton in pairs(menuPanel.tabs.buttons) do
-				if (tabButton.name ~= "inv") then
-					continue
-				end
-
-				inventoryButton = tabButton
-				break
-			end
-		end
+        if (not inventoryButton or not IsValid(inventoryButton)) then
+            return
+        end
 
 		tutorial.inventoryButton = inventoryButton
 
-		if (IsValid(inventoryButton) and inventoryButton:GetSelected()) then
+		if (inventoryButton:GetSelected()) then
 			local tabs = inventoryButton:GetParent()
 			local buttons = tabs:GetParent()
 			local menu = buttons:GetParent()
@@ -254,7 +293,6 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 
 			return {
 				importantText("Press " .. menuKey .. " once to open the main menu."),
-				importantText("Go to the 'You' tab to continue."),
 			}
 		end
 
@@ -262,7 +300,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		local w, h = tutorial.buffsPanel:GetSize()
 		local combinedW, combinedH = w, h
 
-		if (IsValid(tutorial.inventoryButton)) then
+		if (tutorial.inventoryButton and IsValid(tutorial.inventoryButton)) then
 			local inventoryX, inventoryY = tutorial.inventoryButton:LocalToScreen(0, 0)
 
 			combinedW = w + (x - inventoryX)
@@ -284,39 +322,23 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnMainMenuCreated",
 
-	OnActivate = function(tutorial, menuPanel)
-		local inventoryButton
-
-		if (not IsValid(menuPanel.tabs)) then
-			-- TODO: I had this happen once during Lua OnReloaded. I doubt it happens during normal gameplay.
-			ix.util.SchemaErrorNoHalt(
-				"Tracking whether this ever happens. If you see this tell the developer: YES IT DOES #010 - Thanks!"
-			)
-			return
-		end
-
-		for k, tabButton in pairs(menuPanel.tabs.buttons) do
-			if (tabButton.name ~= "inv") then
-				continue
-			end
-
-			inventoryButton = tabButton
-			break
-		end
-
-		tutorial.inventoryButton = inventoryButton
-		tutorial.menuPanel = menuPanel
+    OnActivate = function(tutorial, menuPanel)
+		--
 	end,
 
-	DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
-		if (not IsValid(tutorial.menuPanel) or tutorial.menuPanel.bClosing) then
-			return
-		end
+    DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
+        local inventoryButton = PLUGIN:FindMenuButton("inv")
 
-		local x, y = tutorial.inventoryButton:LocalToScreen(0, 0)
-		local w, h = tutorial.inventoryButton:GetSize()
+        if (not inventoryButton or not IsValid(inventoryButton)) then
+            return
+        end
 
-		if (tutorial.inventoryButton:GetSelected()) then
+		tutorial.inventoryButton = inventoryButton
+
+		local x, y = inventoryButton:LocalToScreen(0, 0)
+		local w, h = inventoryButton:GetSize()
+
+		if (inventoryButton:GetSelected()) then
 			PLUGIN:NextTutorial()
 			return
 		end
@@ -325,7 +347,9 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	end,
 
 	GetText = function(tutorial)
-		if (not IsValid(tutorial.menuPanel) or tutorial.menuPanel.bClosing) then
+        local menuPanel = ix.gui.menu
+
+        if (not IsValid(menuPanel) or menuPanel.bClosing) then
 			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
 			return {
@@ -354,11 +378,19 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	end,
 
 	GetText = function(tutorial)
-		if (not IsValid(ix.gui.inv1)) then
-			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+        local menuPanel = ix.gui.menu
 
+        if (not IsValid(menuPanel) or menuPanel.bClosing) then
+            local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+
+            return {
+                importantText("Press " .. menuKey .. " once to open the main menu."),
+            }
+        end
+
+		if (not IsValid(ix.gui.inv1) or not ix.gui.inv1:IsVisible()) then
 			return {
-				importantText("Press " .. menuKey .. " once to open the main menu and continue."),
+				importantText("Click on the inventory tab to continue."),
 			}
 		end
 
@@ -366,10 +398,9 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		local w, h = ix.gui.inv1:GetSize()
 
 		return {
-			"Here you can see your inventory.",
+			"Here you see your inventory. Hover over an item to show more information.",
 			"You can drag items around to organize them.",
-			"Hovering over an item will show more information.",
-			importantText("Now, first right-click the piece of paper,"),
+			importantText("Now, first right-click the piece of paper named 'An Introduction',"),
 			importantText("then select 'Read' to continue."),
 		}, x, y + h, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP
 	end,
@@ -388,7 +419,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		if (tutorial.item.uniqueID ~= "tutorial") then
 			return {
 				"That's not the right item.",
-				importantText("Right click the piece of paper and select 'Read'."),
+				importantText("Right click the piece of paper named 'An Introduction' then select 'Read'."),
 			}
 		end
 
@@ -399,13 +430,13 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	end,
 
 	OnDeactivate = function()
-		-- After the last one, we are done and disable the tutorial.
-		ix.option.Set("showTutorial", false)
+        -- After the last one, we are done and disable the tutorial.
+		PLUGIN:DisableTutorial()
 	end,
 })
 
 function PLUGIN:DrawOverlay()
-	local showTutorial = ix.option.Get("showTutorial", true)
+	local showTutorial = ix.option.Get("showTutorial")
 
     if (not showTutorial or self.hasAlreadyNotShown) then
 		-- Prevent the tutorial from starting during gameplay (awkward, since it starts from spawn selection).
@@ -449,24 +480,30 @@ function PLUGIN:DrawOverlay()
 		text = { text }
 	end
 
-	for i = 1, #text do
-		local line = textAlignY == TEXT_ALIGN_BOTTOM and text[#text - i + 1] or text[i]
-		local yOffset = textAlignY == TEXT_ALIGN_BOTTOM and -1 or 1
-		local color = color_white
+    for i = 1, #text do
+        local line = textAlignY == TEXT_ALIGN_BOTTOM and text[#text - i + 1] or text[i]
+        local yOffset = textAlignY == TEXT_ALIGN_BOTTOM and -1 or 1
+        local color = color_white
 
-		if (istable(line)) then
-			if (line.color) then
-				color = line.color
-			end
+        if (istable(line)) then
+            if (line.color) then
+                color = line.color
+            end
 
-			line = line.text
-		end
+            line = line.text
+        end
 
-		color = Color(color.r, color.g, color.b, self.currentFade * 255)
+        color = Color(color.r, color.g, color.b, self.currentFade * 255)
 
-		draw.SimpleTextOutlined(line, "ixMediumFont", textX, textY + (i - 1) * 20 * yOffset, color, textAlignX,
-			textAlignY, 1, color_black)
-	end
+        draw.SimpleTextOutlined(line, "ixMediumFont", textX, textY + (i - 1) * 20 * yOffset, color, textAlignX,
+            textAlignY, 1, color_black)
+    end
+
+    -- Show disable tutorial hint in bottom right corner.
+    local disableTutorialText = "Hold BACKSPACE for 3 seconds to disable tutorial."
+
+	draw.SimpleTextOutlined(disableTutorialText, "expSmallerFont", scrW - 8, scrH - 8, color_white, TEXT_ALIGN_RIGHT,
+		TEXT_ALIGN_BOTTOM, 1, color_black)
 
 	if (not currentTutorial.Skippable) then
 		return
