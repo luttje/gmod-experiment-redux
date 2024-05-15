@@ -11,9 +11,10 @@ function PANEL:Init()
 
     self:ParentToHUD()
 
-	self.lastHeartbeatAmount = 0
-	self.nextHeartbeatCheck = 0
-	self.heartbeatPoints = {}
+    self.lastHeartbeatAmount = 0
+    self.nextHeartbeatCheck = 0
+    self.heartbeatPoints = {}
+    self.currentScanLineY = 0
 
     ix.gui.heartbeatDisplay = self
 end
@@ -34,6 +35,7 @@ end
 
 function PANEL:DrawHeartbeatPoint(heartbeatPoint)
     local client = LocalPlayer()
+    local curTime = UnPredictedCurTime()
     local position = heartbeatPoint.position
     local aimVector = Angle(0, client:EyeAngles().y, 0):Forward()
     local direction = (position - client:GetPos()):GetNormalized()
@@ -42,108 +44,143 @@ function PANEL:DrawHeartbeatPoint(heartbeatPoint)
     local cross = aimVector:Cross(direction)
     local crossZ = -cross.z
 
-    local heartbeatLifetime = PLUGIN.heartbeatScanInterval
-    local discoveredAt = heartbeatPoint.discoveredAt
-    local curTime = UnPredictedCurTime()
-
-    local alpha = 255
-    local size = 32
-
-    alpha = alpha * math.Clamp(1 - math.abs((curTime - discoveredAt) / heartbeatLifetime - 0.5) * 2, 0, 1)
-
-    if (alpha <= 0) then
-        return
-    end
-
     local distanceRatio = math.Clamp(distance / PLUGIN.heartbeatScanRange, 0, 1)
     local edgeDistance = distanceRatio * (self:GetWide() / 2)
 
     local x = self:GetWide() / 2 + edgeDistance * crossZ
     local y = self:GetTall() / 2 - edgeDistance * dot
 
-    surface.SetDrawColor(255, 0, 0, alpha)
+    if (not heartbeatPoint.discoveredAt) then
+        if (y > self.currentScanLineY + self:GetScanLineHeight()) then
+            return
+        end
+
+        heartbeatPoint.discoveredAt = curTime
+    end
+
+    local heartbeatLifetime = PLUGIN.heartbeatScanInterval
+    local discoveredAt = heartbeatPoint.discoveredAt
+
+    local alpha = 0
+    local size = 32
+
+    -- Draw a heartbeat since we've discovered it, beating twice during its lifetime
+    if (curTime - discoveredAt < heartbeatLifetime) then
+
+        local beatTime = heartbeatLifetime * .5
+
+        -- Ensures the beat is at 1 at the start of the beat
+		local fraction = math.abs((curTime - discoveredAt) % beatTime - beatTime * .5) / (beatTime * .5)
+        alpha = 255 * fraction
+        size = 32 + 8 * fraction
+
+		surface.SetDrawColor(255, 0, 0, alpha)
+	elseif (heartbeatPoint.staleAt) then
+		-- Fade out the heartbeat point if it's outdated
+		local staleAt = heartbeatPoint.staleAt
+		local fadeTime = heartbeatLifetime * .5
+		local fadeFraction = math.Clamp((curTime - staleAt) / fadeTime, 0, 1)
+
+		alpha = math.Clamp(40 * (1 - fadeFraction), 0, 255)
+        size = 14
+
+		surface.SetDrawColor(255, 0, 0, alpha)
+	end
+
+    if (alpha <= 0) then
+        return
+    end
+
     surface.SetMaterial(PLUGIN.heartbeatPoint)
     surface.DrawTexturedRect(x - size / 2, y - size / 2, size, size)
 end
 
-function PANEL:DrawHeartbeatScan(heartbeatScanUntil)
+function PANEL:GetScanLineHeight()
+	return self:GetTall() * .1
+end
+
+function PANEL:DrawHeartbeatScan()
     local curTime = UnPredictedCurTime()
-	local fraction = math.max(heartbeatScanUntil - curTime, 0)
-	local scanAlpha = math.min(255 * fraction, 255 * .5)
-	local y = self:GetTall() * (1 - fraction)
+    local fraction = (curTime % PLUGIN.heartbeatScanInterval) / PLUGIN.heartbeatScanInterval
+    local maxAlpha = 200
+	local scanAlpha = maxAlpha * (1 - math.abs(fraction - 0.5) * 2)
+    self.currentScanLineY = self:GetTall() * fraction
 
-    if (scanAlpha > 0) then
-        surface.SetDrawColor(100, 0, 0, scanAlpha * 0.8)
-        surface.SetMaterial(PLUGIN.heartbeatGradient)
-        surface.DrawTexturedRect(0, y, self:GetWide(), self:GetTall() * .1)
-
-        return true
-    end
-
-	return false
+    surface.SetDrawColor(100, 0, 0, scanAlpha)
+    surface.SetMaterial(PLUGIN.heartbeatGradient)
+    surface.DrawTexturedRect(0, self.currentScanLineY, self:GetWide(), self:GetScanLineHeight())
 end
 
 function PANEL:Paint(width, height)
-	local client = LocalPlayer()
-	local position = client:GetPos()
+    local client = LocalPlayer()
+    local position = client:GetPos()
     local curTime = UnPredictedCurTime()
 
     local alpha = 255 * .5
 
-	surface.SetDrawColor(255, 255, 255, alpha)
-	surface.SetMaterial(PLUGIN.heartbeatOverlay)
+    surface.SetDrawColor(255, 255, 255, alpha)
+    surface.SetMaterial(PLUGIN.heartbeatOverlay)
     surface.DrawTexturedRect(0, 0, width, height)
 
     -- Draw ourselves manually
-	if (not client:GetCharacterNetVar("hasGhostheartPerk", false)) then
-		surface.SetDrawColor(255, 255, 255, (alpha * .8) + (math.sin(curTime * 10) * (alpha * .3)))
-		surface.SetMaterial(PLUGIN.heartbeatPoint)
-		surface.DrawTexturedRect(width / 2 - 8, height / 2 - 8, 16, 16)
-	end
+    if (not client:GetCharacterNetVar("hasGhostheartPerk", false)) then
+        surface.SetDrawColor(255, 255, 255, (alpha * .8) + (math.sin(curTime * 10) * (alpha * .3)))
+        surface.SetMaterial(PLUGIN.heartbeatPoint)
+        surface.DrawTexturedRect(width / 2 - 8, height / 2 - 8, 16, 16)
+    end
 
-    if (self.heartbeatScanUntil) then
-		if (not self:DrawHeartbeatScan(self.heartbeatScanUntil)) then
-			self.heartbeatScanUntil = nil
-		end
-	end
+    self:DrawHeartbeatScan()
 
-	if (curTime >= self.nextHeartbeatCheck) then
-		self.nextHeartbeatCheck = curTime + PLUGIN.heartbeatScanInterval
-        self.heartbeatScanUntil = curTime + PLUGIN.heartbeatScanInterval
-		self.heartbeatPoints = {}
+    if (curTime >= self.nextHeartbeatCheck) then
+        local newHeartbeatPoints = 0
 
-		local heartbeatScanRange = PLUGIN.heartbeatScanRange
+        self.nextHeartbeatCheck = curTime + PLUGIN.heartbeatScanInterval
 
-		for _, entity in ipairs(ents.FindInSphere(position, heartbeatScanRange)) do
-            if (not entity:IsPlayer() and not entity.IsBot) then
-				continue
+        -- Mark all old heartbeat points as outdated, removing those that are too old
+        for k = #self.heartbeatPoints, 1, -1 do
+            local heartbeatPoint = self.heartbeatPoints[k]
+
+            if (not heartbeatPoint.staleAt) then
+				heartbeatPoint.staleAt = curTime
+            else
+				table.remove(self.heartbeatPoints, k)
 			end
+		end
+
+        local heartbeatScanRange = PLUGIN.heartbeatScanRange
+
+        for _, entity in ipairs(ents.FindInSphere(position, heartbeatScanRange)) do
+            if (not entity:IsPlayer() and not entity.IsBot) then
+                continue
+            end
 
             if (client == entity or entity:GetMoveType() == MOVETYPE_NOCLIP) then
-				continue
-			end
+                continue
+            end
 
             if (entity:GetCharacterNetVar("hasGhostheartPerk", false)) then
-				continue
-			end
+                continue
+            end
 
             local otherPlayerPosition = entity:GetPos()
 
-			table.insert(self.heartbeatPoints, {
+			newHeartbeatPoints = newHeartbeatPoints + 1
+            table.insert(self.heartbeatPoints, {
                 position = otherPlayerPosition,
-                discoveredAt = curTime,
             })
-		end
+        end
 
-		if (self.lastHeartbeatAmount > #self.heartbeatPoints) then
-			LocalPlayer():EmitSound("items/flashlight1.wav", 25)
-		end
+        if (self.lastHeartbeatAmount < newHeartbeatPoints) then
+            LocalPlayer():EmitSound("items/flashlight1.wav", 30, 150)
+		elseif (self.lastHeartbeatAmount > newHeartbeatPoints) then
+            LocalPlayer():EmitSound("items/flashlight1.wav", 30, 70)
+        end
 
-		self.lastHeartbeatAmount = #self.heartbeatPoints
-	end
+        self.lastHeartbeatAmount = newHeartbeatPoints
+    end
 
     for _, heartbeatPoint in ipairs(self.heartbeatPoints) do
-        self:DrawHeartbeatPoint(heartbeatPoint)
+		self:DrawHeartbeatPoint(heartbeatPoint)
     end
 
     -- Draw a nice border
@@ -154,5 +191,5 @@ end
 vgui.Register("expHeartbeatDisplay", PANEL, "Panel")
 
 if (IsValid(ix.gui.heartbeatDisplay)) then
-	vgui.Create("expHeartbeatDisplay")
+    vgui.Create("expHeartbeatDisplay")
 end
