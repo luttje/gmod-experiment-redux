@@ -5,7 +5,7 @@ ITEM.price = 150
 ITEM.model = "models/props_wasteland/prison_padlock001a.mdl"
 ITEM.plural = "Breaches"
 ITEM.width = 1
-ITEM.height = 1.5
+ITEM.height = 2
 ITEM.description = "A device that will breach a door when placed on it and shot."
 
 ITEM.functions.Place = {
