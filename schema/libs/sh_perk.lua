@@ -104,16 +104,6 @@ if (SERVER) then
 	net.Receive("PerkRequestBuy", function(len, client)
 		local perkIndex = net.ReadUInt(32)
 		local character = client:GetCharacter()
-
-		if (client.NextBuyPerk and client.NextBuyPerk > CurTime()) then
-			ix.util.Notify(
-				"Please wait another " ..
-				math.ceil(client.NextBuyPerk - CurTime()) .. " seconds before buying a perk again.",
-				client)
-			return
-		end
-
-		client.NextBuyPerk = CurTime() + 5
 		local perkTable = Schema.perk.Get(perkIndex)
 
 		if (not perkTable) then

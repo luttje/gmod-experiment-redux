@@ -2,19 +2,19 @@ local PLUGIN = PLUGIN
 local PANEL = {}
 
 function PANEL:GetItemsForCategory(category)
-	local items = {}
+    local items = {}
 
-	for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
-		if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
-			continue
-		end
+    for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
+        if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
+            continue
+        end
 
-		if (itemTable.category == category) then
-			items[#items + 1] = itemTable
-		end
-	end
+        if (itemTable.category == category) then
+            items[#items + 1] = itemTable
+        end
+    end
 
-	return items
+    return items
 end
 
 function PANEL:Init()

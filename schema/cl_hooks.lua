@@ -605,8 +605,8 @@ function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
 end
 
 function Schema:PlayerPerkBought(client, perk)
-	if (IsValid(Schema.businessPanel)) then
-		Schema.businessPanel:Refresh()
+	if (IsValid(Schema.businessPanel) and IsValid(ix.gui.menu)) then
+		ix.gui.menu:FullRefresh()
 	end
 end
 
