@@ -115,12 +115,29 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 		return library.Get(name) ~= nil
 	end
 
-	library.FindByProperty = function(key, value)
+	library.FindByProperty = function(key, value, handleLibraryValueAsPattern)
 		local results = {}
 
-		for _, libraryObject in pairs(library.stored) do
-			if (libraryObject[key] == value) then
-				results[#results + 1] = libraryObject
+        for _, libraryObject in pairs(library.stored) do
+			local libraryValues = libraryObject[key]
+
+            if (not libraryValues) then
+                continue
+            end
+
+            if (not istable(libraryValues)) then
+                libraryValues = { libraryValues }
+            end
+
+			for _, libraryValue in ipairs(libraryValues) do
+                local matched = handleLibraryValueAsPattern
+                    and string.find(value, libraryValue)
+					or libraryValue == value
+
+				if (matched) then
+                    results[#results + 1] = libraryObject
+					break
+				end
 			end
 		end
 

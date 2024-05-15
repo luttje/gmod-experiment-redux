@@ -139,7 +139,7 @@ function ENT:OnRemove()
 
 	if (IsValid(parent)) then
 		-- Remove the related monitors and the parent
-		for _, monitor in ipairs(parent._relatedMonitors) do
+		for _, monitor in ipairs(parent._relatedMonitors or {}) do
 			if (IsValid(monitor)) then
 				monitor:Remove()
 			end

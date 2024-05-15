@@ -1,7 +1,10 @@
 local MAP = MAP
 
 MAP.name = "City 18"
-MAP.mapName = "rp_c18_v2"
+MAP.mapName = {
+	"rp_c18_v2",
+	"exp_c18_v1",
+}
 
 MAP.waitingPosition = Vector(4284.469238, 1271.594116, 1974.027466)
 MAP.waitingAngles = Angle(89.000000, 89.056053, 0.000000)

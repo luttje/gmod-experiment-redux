@@ -141,7 +141,7 @@ function Schema:InitializedPlugins()
 end
 
 function Schema:EntityKeyValue(entity, key, value)
-    local maps = Schema.map.FindByProperty("mapName", game.GetMap())
+    local maps = Schema.map.FindByProperty("mapName", game.GetMap(), true)
 
     for _, map in ipairs(maps) do
         if (map.EntityKeyValue) then

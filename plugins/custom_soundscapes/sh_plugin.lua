@@ -14,7 +14,7 @@ function PLUGIN:GetCustomSoundscapes()
 
 	-- Let Experiment Redux maps adjust custom soundscapes first.
 	if (Schema.map) then
-		local maps = Schema.map.FindByProperty("mapName", game.GetMap())
+		local maps = Schema.map.FindByProperty("mapName", game.GetMap(), true)
 
 		for _, map in ipairs(maps) do
 			if (map.AdjustCustomSoundscapes) then
