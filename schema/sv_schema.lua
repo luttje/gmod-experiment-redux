@@ -105,7 +105,14 @@ function Schema.CloseInventory(inventory)
 	ix.storage.Close(inventory)
 
 	-- TODO: Shouldn't this happen automatically? Helix bug?
-	inventory.receivers = {}
+	for receiver, _ in pairs(inventory.receivers) do
+		-- Remove all receivers, except the owner (or they wont be able to interact in their own inventory)
+		if (receiver == inventory:GetOwner()) then
+			continue
+		end
+
+		inventory.receivers[receiver] = nil
+	end
 end
 
 --- Use this to force an entity info tooltip to update.
