@@ -149,19 +149,47 @@ end
 --- @param clientOrAddress Player|string
 --- @return table
 function Schema.util.GetPlayerAddress(clientOrAddress)
-	local address = isstring(clientOrAddress) and clientOrAddress or clientOrAddress:IPAddress()
+    local address = isstring(clientOrAddress) and clientOrAddress or clientOrAddress:IPAddress()
 
     if (address == "loopback") then
-		-- Helpful for testing locally
-		address = "127.0.0.1:27005"
+        -- Helpful for testing locally
+        address = "127.0.0.1:27005"
+    end
+
+    local ip, port = address:match("([^:]+):(%d+)")
+
+    return {
+        ip = ip,
+        port = tonumber(port)
+    }
+end
+
+function Schema.util.ForceConVars(conVarsToSet)
+	for conVarName, value in pairs(conVarsToSet) do
+		if (value.isServer and not SERVER) then
+			continue
+		elseif (!value.isServer and not CLIENT) then
+			continue
+		end
+
+		local conVar = GetConVar(conVarName)
+		value = value.value
+
+		if (!conVar) then
+			ix.util.SchemaErrorNoHalt("ConVar " .. conVarName .. " does not exist in conVarsToSet.")
+			continue
+		end
+
+		if (isbool(value)) then
+			conVar:SetBool(value)
+		elseif (isnumber(value)) then
+			conVar:SetInt(value)
+		elseif (isstring(value)) then
+			conVar:SetString(value)
+		else
+			ix.util.SchemaErrorNoHalt("Invalid value type for conVar " .. conVarName .. " in conVarsToSet.")
+		end
 	end
-
-	local ip, port = address:match("([^:]+):(%d+)")
-
-	return {
-		ip = ip,
-		port = tonumber(port)
-	}
 end
 
 if (CLIENT) then

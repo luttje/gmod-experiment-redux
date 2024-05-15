@@ -176,65 +176,6 @@ ix.config.Add("dropItemsOnDeath", true, "Whether or not to drop specific items o
 	category = "Persistent Corpses"
 })
 
-Schema.implantPacData = {
-	[1] = {
-		["children"] = {
-			[1] = {
-				["children"] = {
-				},
-				["self"] = {
-					["Skin"] = 0,
-					["UniqueID"] = "88e3e8489e963c739a45cb011fc9fa10803471b8d6ad2575fc3cacfef2e390a8",
-					["NoLighting"] = false,
-					["AimPartName"] = "",
-					["IgnoreZ"] = false,
-					["AimPartUID"] = "",
-					["Materials"] = "",
-					["Name"] = "",
-					["LevelOfDetail"] = 0,
-					["NoTextureFiltering"] = false,
-					["PositionOffset"] = Vector(0, 0, 0),
-					["IsDisturbing"] = false,
-					["EyeAngles"] = false,
-					["DrawOrder"] = 0,
-					["TargetEntityUID"] = "",
-					["Alpha"] = 1,
-					["Material"] = "",
-					["Invert"] = false,
-					["ForceObjUrl"] = false,
-					["Bone"] = "eyes",
-					["Angles"] = Angle(21.10000038147, 23.200000762939, -4.5999999046326),
-					["AngleOffset"] = Angle(0, 0, 0),
-					["BoneMerge"] = false,
-					["Color"] = Vector(1, 1, 1),
-					["Position"] = Vector(-1.82373046875, -0.5068359375, -0.1075439453125),
-					["ClassName"] = "model2",
-					["Brightness"] = 1,
-					["Hide"] = false,
-					["NoCulling"] = false,
-					["Scale"] = Vector(1.5, 1.2999999523163, 1.2000000476837),
-					["LegacyTransform"] = false,
-					["EditorExpand"] = false,
-					["Size"] = 1,
-					["ModelModifiers"] = "",
-					["Translucent"] = false,
-					["BlendMode"] = "",
-					["EyeTargetUID"] = "",
-					["Model"] = "models/gibs/shield_scanner_gib1.mdl",
-				},
-			},
-		},
-		["self"] = {
-			["DrawOrder"] = 0,
-			["UniqueID"] = "809ca082ce58a4fd10cd900777123d09ead082b54a7212111d2f2e3de22d154a",
-			["Hide"] = false,
-			["TargetEntityUID"] = "",
-			["EditorExpand"] = true,
-			["OwnerName"] = "self",
-			["IsDisturbing"] = false,
-			["Name"] = "my outfit",
-			["Duplicate"] = false,
-			["ClassName"] = "group",
-		},
-	},
-}
+Schema.util.ForceConVars({
+	["cl_showhints"] = { isServer = false, value = false },
+})

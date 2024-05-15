@@ -38,31 +38,7 @@ local conVarsToSet = {
 	-- ["tacrp_penalty_melee"] = false,
 }
 
-for conVarName, value in pairs(conVarsToSet) do
-	if (value.isServer and not SERVER) then
-		continue
-	elseif (!value.isServer and not CLIENT) then
-		continue
-	end
-
-    local conVar = GetConVar(conVarName)
-	value = value.value
-
-	if (!conVar) then
-		ix.util.SchemaErrorNoHalt("ConVar " .. conVarName .. " does not exist in conVarsToSet.")
-		continue
-	end
-
-	if (isbool(value)) then
-		conVar:SetBool(value)
-	elseif (isnumber(value)) then
-        conVar:SetInt(value)
-	elseif (isstring(value)) then
-        conVar:SetString(value)
-    else
-		ix.util.SchemaErrorNoHalt("Invalid value type for conVar " .. conVarName .. " in conVarsToSet.")
-	end
-end
+Schema.util.ForceConVars(conVarsToSet)
 
 PLUGIN.compatibleItemsLookup = PLUGIN.compatibleItemsLookup or {}
 
