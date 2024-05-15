@@ -1,11 +1,35 @@
+if SERVER then
+	AddCSLuaFile()
+end
+
 local PLUGIN = PLUGIN
 
-AddCSLuaFile("shared.lua")
-AddCSLuaFile("cl_init.lua")
-include("shared.lua")
+ENT.Type = "anim"
+ENT.Model = "models/props_c17/lockers001a.mdl"
+ENT.PrintName = "Lockers"
+ENT.IsLockers = true
+
+if (CLIENT) then
+	ENT.PopulateEntityInfo = true
+
+	function ENT:OnPopulateEntityInfo(tooltip)
+		local name = tooltip:AddRow("name")
+		name:SetImportant()
+		name:SetText(L("lockers"))
+		name:SizeToContents()
+
+		local description = tooltip:AddRow("description")
+		description:SetText(L("lockersDesc"))
+		description:SizeToContents()
+	end
+end
+
+if (not SERVER) then
+	return
+end
 
 function ENT:Initialize()
-	self:SetModel(self.Model)
+	self:SetModel(self.expModelReplacement or self.Model)
 
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:PhysicsInit(SOLID_VPHYSICS)
@@ -17,6 +41,12 @@ function ENT:Initialize()
 	end
 
 	self:SetUseType(SIMPLE_USE)
+end
+
+function ENT:KeyValue(key, value)
+	if (key == "model") then
+		self.expModelReplacement = value
+	end
 end
 
 function ENT:OnTakeDamage(damageInfo)
@@ -58,6 +88,10 @@ function ENT:Use(client)
 		client:SetAction("@openingLockers", searchTime)
 		client:DoStaredAction(self, function()
 			if (not IsValid(client) or not IsValid(self)) then
+				if (IsValid(session)) then
+					session:Remove()
+				end
+
 				return
 			end
 
@@ -84,6 +118,10 @@ function ENT:Use(client)
 		end, searchTime, function()
 			if (IsValid(client)) then
 				client:SetAction()
+			end
+
+			if (IsValid(session)) then
+				session:Remove()
 			end
 		end)
 	end)

@@ -11,10 +11,16 @@
 ]
 
 @PointClass base(Origin, Angles) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_scavenging_source :
-    "Scavenging Source"
+    "Scavenging Source where players can scavenge for items"
 [
     model(studio) : "World model" : "models/props_junk/trashcluster01a.mdl" : "Model of the source"
     inventoryType(string) : "Inventory Type" : "scavenging:base" : "Type of inventory this source will provide"
     sourceName(string) : "Source Name" : "" : "Name of the source"
     invisible(boolean) : "Invisible" : 0 : "Whether the source is invisible"
+]
+
+@PointClass base(Origin, Angles) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_lockers :
+    "Lockers where players can permanently store items"
+[
+    model(studio) : "World model" : "models/props_c17/lockers001a.mdl" : "Model of the lockers"
 ]
