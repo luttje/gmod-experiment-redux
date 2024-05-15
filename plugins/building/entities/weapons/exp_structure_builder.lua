@@ -257,6 +257,10 @@ function SWEP:PrimaryAttack()
 
 	local position = self.expLastStructurePosition
 
+	if (not position) then
+		return
+	end
+
 	if (self.ixItem.structureOffset) then
 		position = position - self.ixItem.structureOffset
 	end
