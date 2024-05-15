@@ -5,7 +5,8 @@ local scanLinesMaterial = Material("experiment-redux/combinescanline")
 net.Receive("expSetMonitorTarget", function(length)
 	local entity = net.ReadEntity()
 
-	PLUGIN.targetedEntity = IsValid(entity) and entity or nil
+    PLUGIN.targetedEntity = IsValid(entity) and entity or nil
+	PLUGIN.monitorVgui = "expMonitorTarget"
 
 	local monitors = ents.FindByClass("exp_monitor")
 
@@ -19,13 +20,14 @@ net.Receive("expSetMonitorTarget", function(length)
 end)
 
 net.Receive("expSetMonitorVgui", function(length)
-	local vguiFunction = net.ReadString()
+	local vguiClass = net.ReadString()
 
 	local monitors = ents.FindByClass("exp_monitor")
+	PLUGIN.monitorVgui = vguiClass
 
 	for _, monitor in pairs(monitors) do
 		PLUGIN:SetMonitorTargetVgui(monitor, function(parent)
-			return vgui.Create(vguiFunction, parent)
+			return vgui.Create(vguiClass, parent)
 		end)
 	end
 end)
@@ -38,6 +40,17 @@ net.Receive("expMonitorsPrintPresets", function(length)
 		print("\t" .. key .. ": " .. preset.description)
 	end
 end)
+
+-- When a monitor comes into PVS, set it up with the correct vgui
+function PLUGIN:NetworkEntityCreated(entity)
+    if (entity:GetClass() ~= "exp_monitor" or not self.monitorVgui) then
+        return
+    end
+
+	self:SetMonitorTargetVgui(entity, function(parent)
+		return vgui.Create(self.monitorVgui, parent)
+	end)
+end
 
 function PLUGIN:GetDirectionToTarget(monitor)
 	if not IsValid(self.targetedEntity) then return end
