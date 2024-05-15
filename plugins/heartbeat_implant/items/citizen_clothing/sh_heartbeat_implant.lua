@@ -8,4 +8,3 @@ ITEM.height = 1
 ITEM.category = "Perpetuities"
 ITEM.outfitCategory = "utility"
 ITEM.description = "An implant that allows you to sense the heartbeats of others."
-ITEM.pacData = Schema.implantPacData

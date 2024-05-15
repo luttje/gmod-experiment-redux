@@ -8,7 +8,6 @@ ITEM.height = 1
 ITEM.category = "Perpetuities"
 ITEM.outfitCategory = "utility"
 ITEM.description = "Tactical goggles which work with radio frequencies, it has some very interesting features."
-ITEM.pacData = Schema.implantPacData
 
 function ITEM:OnEquipped()
 	local client = self.player
