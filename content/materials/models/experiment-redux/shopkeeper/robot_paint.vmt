@@ -1,0 +1,13 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/experiment-redux/shopkeeper/robot_paint"
+	"$bumpmap" "models/experiment-redux/shopkeeper/robot_paint_normal"
+	"$surfaceprop" "metal"
+	"%keywords" "robot,experiment"
+
+	"$model" 1
+
+	"$phong" "1"
+	"$phongexponenttexture" "models/experiment-redux/shopkeeper/robot_paint_metallic"
+	"$phongboost"	6
+}

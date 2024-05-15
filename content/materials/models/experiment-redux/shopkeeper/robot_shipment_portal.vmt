@@ -1,0 +1,8 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/experiment-redux/shopkeeper/robot_shipment_portal"
+	"$surfaceprop" "metal"
+	"%keywords" "robot,experiment"
+
+	"$model" 1
+}

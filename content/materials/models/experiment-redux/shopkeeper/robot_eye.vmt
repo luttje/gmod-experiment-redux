@@ -1,0 +1,9 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/experiment-redux/shopkeeper/robot_steel"
+	"$bumpmap" "models/experiment-redux/shopkeeper/robot_steel_normal"
+	"$surfaceprop" "metal"
+	"%keywords" "robot,experiment"
+
+	"$model" 1
+}
