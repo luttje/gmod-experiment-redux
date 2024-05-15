@@ -203,9 +203,19 @@ function PLUGIN:CharacterLoaded(character)
 end
 
 function PLUGIN:PlayerBodyGroupChanged(client, index, value, oldValue)
+    if (not IsValid(client)) then
+		-- May happen if player changing bodygroup is outside of the local player's PVS.
+        return
+    end
+
 	self:PlayerModelChanged(client, client:GetModel(), nil)
 end
 
 function PLUGIN:PlayerBodyGroupsChanged(client, bodygroups, oldBodygroups)
+    if (not IsValid(client)) then
+        -- May happen if player changing bodygroup is outside of the local player's PVS.
+        return
+    end
+
 	self:PlayerModelChanged(client, client:GetModel(), nil)
 end

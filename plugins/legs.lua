@@ -301,7 +301,7 @@ if (CLIENT) then
 	end
 
 	function PLUGIN:PlayerModelChanged(client, model)
-		if (client == LocalPlayer()) then
+		if (IsValid(client) and client == LocalPlayer()) then
 			PLUGIN.legs:Setup(model)
 			PLUGIN.legs:FixBones()
 		end
