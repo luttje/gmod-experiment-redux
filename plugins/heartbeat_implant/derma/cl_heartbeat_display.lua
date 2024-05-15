@@ -19,17 +19,17 @@ function PANEL:Init()
 end
 
 function PANEL:PerformLayout(width, height)
-	local newWidth = math.min(ScrW() * .3, 400)
+    local newWidth = math.min(ScrW() * .3, 400)
     local newHeight = newWidth / ASPECT_RATIO
 
     self.padding = newHeight * 0.05
 
-	if (newWidth == width and newHeight == height) then
-		return
-	end
+    if (newWidth == width and newHeight == height) then
+        return
+    end
 
     self:SetSize(newWidth, newHeight)
-	self:SetPos(ScrW() - newWidth - self.padding, ScrH() - newHeight - self.padding)
+    self:SetPos(ScrW() - newWidth - self.padding, ScrH() - newHeight - self.padding)
 end
 
 function PANEL:DrawHeartbeatPoint(heartbeatPoint)
@@ -37,30 +37,28 @@ function PANEL:DrawHeartbeatPoint(heartbeatPoint)
     local position = heartbeatPoint.position
     local aimVector = Angle(0, client:EyeAngles().y, 0):Forward()
     local direction = (position - client:GetPos()):GetNormalized()
-	local distance = (position - client:GetPos()):Length()
+    local distance = (position - client:GetPos()):Length()
     local dot = direction:Dot(aimVector)
     local cross = aimVector:Cross(direction)
     local crossZ = -cross.z
 
-    local angleInRadians = math.acos(dot)
-
-	local heartbeatLifetime = PLUGIN.heartbeatScanInterval
+    local heartbeatLifetime = PLUGIN.heartbeatScanInterval
     local discoveredAt = heartbeatPoint.discoveredAt
     local curTime = UnPredictedCurTime()
 
-    local alpha = 255 * .4
-    local size = 16
+    local alpha = 255
+    local size = 32
 
-	alpha = alpha * math.Clamp(1 - math.abs((curTime - discoveredAt) / heartbeatLifetime - 0.5) * 2, 0, 1)
+    alpha = alpha * math.Clamp(1 - math.abs((curTime - discoveredAt) / heartbeatLifetime - 0.5) * 2, 0, 1)
 
     if (alpha <= 0) then
         return
     end
 
     local distanceRatio = math.Clamp(distance / PLUGIN.heartbeatScanRange, 0, 1)
-    local edgeDistance = (0.5 + (0.5 * distanceRatio)) * (self:GetWide() / 2)
+    local edgeDistance = distanceRatio * (self:GetWide() / 2)
 
-    local x = self:GetWide() / 2 + (crossZ > 0 and 1 or -1) * edgeDistance * math.sin(angleInRadians)
+    local x = self:GetWide() / 2 + edgeDistance * crossZ
     local y = self:GetTall() / 2 - edgeDistance * dot
 
     surface.SetDrawColor(255, 0, 0, alpha)
@@ -75,7 +73,7 @@ function PANEL:DrawHeartbeatScan(heartbeatScanUntil)
 	local y = self:GetTall() * (1 - fraction)
 
     if (scanAlpha > 0) then
-        surface.SetDrawColor(100, 0, 0, scanAlpha * 0.5)
+        surface.SetDrawColor(100, 0, 0, scanAlpha * 0.8)
         surface.SetMaterial(PLUGIN.heartbeatGradient)
         surface.DrawTexturedRect(0, y, self:GetWide(), self:GetTall() * .1)
 
@@ -103,7 +101,7 @@ function PANEL:Paint(width, height)
 		surface.DrawTexturedRect(width / 2 - 8, height / 2 - 8, 16, 16)
 	end
 
-	if (self.heartbeatScanUntil) then
+    if (self.heartbeatScanUntil) then
 		if (not self:DrawHeartbeatScan(self.heartbeatScanUntil)) then
 			self.heartbeatScanUntil = nil
 		end
@@ -151,7 +149,6 @@ function PANEL:Paint(width, height)
     -- Draw a nice border
     surface.SetDrawColor(0, 0, 0, alpha)
     surface.DrawOutlinedRect(0, 0, width, height, 4)
-
 end
 
 vgui.Register("expHeartbeatDisplay", PANEL, "Panel")
