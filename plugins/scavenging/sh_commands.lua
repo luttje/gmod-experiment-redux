@@ -140,3 +140,33 @@ do
 
 	ix.command.Add("ScavengeToggleNoDraw", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Removes any inventories from the database that are not attached to a scavenging source."
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local inventoryIds = {}
+
+		for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
+			local inventory = entity:GetInventory()
+
+			if (inventory) then
+				inventoryIds[#inventoryIds + 1] = inventory:GetID()
+			end
+		end
+
+		local query = mysql:Delete("ix_items")
+		query:WhereIn("inventory_id", inventoryIds)
+		query:Execute()
+
+		query = mysql:Delete("ix_inventories")
+		query:WhereIn("inventory_id", inventoryIds)
+		query:Execute()
+	end
+
+	ix.command.Add("ScavengeCleanInventories", COMMAND)
+end

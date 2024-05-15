@@ -5,7 +5,6 @@ if (SERVER) then
 end
 
 ENT.Type = "anim"
-ENT.Base = "base_gmodentity"
 
 ENT.PrintName = "Scavenging Source"
 ENT.Author = "Experiment Redux"
@@ -22,7 +21,13 @@ function ENT:SetupDataTables()
 end
 
 function ENT:GetInventory()
-	return ix.item.inventories[self:GetID()]
+	local inventoryID = self:GetID()
+
+	if (inventoryID == 0) then
+		return nil
+	end
+
+	return ix.item.inventories[inventoryID]
 end
 
 if (SERVER) then
@@ -153,6 +158,21 @@ if (SERVER) then
 
 				hook.Run("ContainerRemoved", self, inventory)
 			end
+		end
+	end
+
+	-- Let the map spawn scavenging sources
+	function ENT:KeyValue(key, value)
+		key = key:lower()
+
+		if (key == "inventorytype") then
+			self:SetInventoryType(value)
+		elseif (key == "sourcename") then
+			self:SetSourceName(value)
+		elseif (key == "model") then
+			self:SetModel(value)
+		elseif (key == "invisible") then
+			self:SetInvisible(tobool(value))
 		end
 	end
 end

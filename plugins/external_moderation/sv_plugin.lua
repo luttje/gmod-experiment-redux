@@ -105,9 +105,6 @@ end
 function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
     endpoint = APP_URL .. "/" .. endpoint
 
-    print("Posting JSON to " .. endpoint)
-	PrintTable(data)
-
     http.Post(endpoint, {
 		json = util.TableToJSON(data),
 	}, function(body, length, headers, code)

@@ -244,10 +244,6 @@ function PLUGIN:SubmitMetrics()
 
         query:Callback(function(result)
             queriedData[#queriedData + 1] = result
-
-            print("Queried data for " .. data.name .. " successfully:")
-            PrintTable(result)
-            print("=========================")
         end)
 
         query:Execute()
@@ -351,9 +347,6 @@ end
 
 function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
     endpoint = APP_URL .. "/" .. endpoint
-
-    print("Posting JSON to " .. endpoint)
-	PrintTable(data)
 
     http.Post(endpoint, {
 		json = util.TableToJSON(data),
