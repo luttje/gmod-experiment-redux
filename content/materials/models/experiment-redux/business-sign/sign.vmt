@@ -1,0 +1,5 @@
+VertexLitGeneric
+{
+  "$basetexture" "models/experiment-redux/business-sign/sign"
+  "$selfillum" 1
+}

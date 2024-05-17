@@ -1,0 +1,15 @@
+VertexLitGeneric
+{
+  "$basetexture" "models/experiment-redux/business-sign/sign-pattern1"
+  "$selfillum" 1
+
+  "Proxies"
+  {
+    "AnimatedTexture"
+    {
+      "animatedTextureVar" "$basetexture"
+      "animatedTextureFrameNumVar" "$frame"
+      "animatedTextureFrameRate" "1"
+    }
+  } 
+}
