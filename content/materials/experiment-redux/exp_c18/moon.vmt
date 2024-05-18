@@ -1,0 +1,6 @@
+UnlitGeneric
+{
+  "$basetexture" "experiment-redux/exp_c18/moon"
+  "$selfillum" "1"
+  "$translucent" 1
+}
