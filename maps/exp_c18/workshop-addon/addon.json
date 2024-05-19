@@ -1,0 +1,11 @@
+{
+  "title"		:	"Experiment City 18",
+  "type"		:	"map",
+  "tags"		:	[ "roleplay", "realism" ],
+  "ignore"	:
+  [
+    ".vscode*",
+    "maps/.gitignore",
+    "exp_c18.jpg"
+  ]
+}
