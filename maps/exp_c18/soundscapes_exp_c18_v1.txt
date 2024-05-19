@@ -1,0 +1,278 @@
+// Variation of "d1_trainstation.Occupants" with less sounds of people, longer time between sounds, and a lower volume.
+"experiment.Apartments"
+{
+	"playlooping"
+	{
+		"volume"	"0.05"
+		"wave"		"*ambient/atmosphere/town_ambience.wav"
+		"pitch"		"95"
+		"attenuation"	"0"
+		"soundlevel" "SNDLVL_20dB"
+	}
+
+	"playrandom"
+	{
+		"time"		"5,25"
+		"volume"	"0.1,0.2"
+		"pitch"		"95,105"
+		"position"	"random"
+		"soundlevel" "SNDLVL_40dB"
+
+		"rndwave"
+		{
+			"wave"  "ambient/materials/squeeker2.wav"
+			"wave"  "ambient/materials/squeekyfloor1.wav"
+			"wave"  "ambient/materials/squeekyfloor2.wav"
+			"wave"  "ambient/materials/flush1.wav"
+			"wave"  "ambient/materials/flush2.wav"
+			"wave"  "ambient/materials/footsteps_wood1.wav"
+			"wave"  "ambient/materials/footsteps_wood2.wav"
+			"wave"  "ambient/materials/rustypipes1.wav"
+			"wave"  "ambient/materials/rustypipes2.wav"
+			"wave"  "ambient/materials/rustypipes3.wav"
+		}
+	}
+
+	"playrandom"
+	{
+		"time"		"10,60"
+		"volume"	"0.1,0.15"
+		"pitch"		"95,105"
+		"position"	"random"
+		"soundlevel" "SNDLVL_30dB"
+
+		"rndwave"
+		{
+			// Item/armor sounds to trip up the player
+			"wave"  "physics/wood/wood_box_impact_hard3.wav"
+			"wave"  "physics/body/body_medium_impact_hard1.wav"
+			"wave"  "physics/body/body_medium_impact_soft1.wav"
+			"wave"  "physics/body/body_medium_impact_soft2.wav"
+			"wave"  "physics/body/body_medium_impact_soft3.wav"
+			"wave"  "physics/body/body_medium_impact_soft4.wav"
+			"wave"  "physics/body/body_medium_impact_soft5.wav"
+			"wave"  "physics/body/body_medium_impact_soft6.wav"
+			"wave"  "physics/body/body_medium_impact_soft7.wav"
+		}
+	}
+}
+
+"experiment.House"
+{
+	"playlooping"
+	{
+		"volume"	"0.1"
+		"wave"		"*ambient/atmosphere/town_ambience.wav"
+		"pitch"		"95"
+		"attenuation"	"0"
+		"soundlevel" "SNDLVL_20dB"
+	}
+}
+
+// Variation of d1_trainstation.util_city, but very far away sounds and very quiet.
+"experiment.UtilCity"
+{
+	// COURTYARD DIFFUSE HUGE  DULL
+	"dsp"    "129"
+
+	"playrandom"
+	{
+		"time"		"10,45"
+		"volume"	"0.02,0.08"
+		"pitch"		"100"
+		"position"	"random"
+		"soundlevel"	"SNDLVL_20dB"
+		"rndwave"
+		{
+			"wave"	"ambient/machines/heli_pass1.wav"
+			"wave"	"ambient/machines/aircraft_distant_flyby1.wav"
+			"wave"	"ambient/machines/aircraft_distant_flyby3.wav"
+		}
+	}
+}
+
+// Variation of d1_trainstation.QuietCourtyard with a lower volume.
+"experiment.QuietCourtyard"
+{
+	"dsp"	"1"
+	"dsp_volume" "1.0"
+
+	"playsoundscape"
+	{
+		"name"		"experiment.UtilCity"
+		"volume"	"0.6"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.1"
+		"wave"		"*ambient/atmosphere/plaza_amb.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+// Variation of d1_trainstation.TerminalSquare with a lower volume and less sounds of people.
+"experiment.PlazaSquare"
+{
+	"dsp"	"1"
+	"dsp_volume" "1.0"
+
+	"playsoundscape"
+	{
+		"name"		"experiment.UtilCity"
+		"volume"	"1.0"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.2"
+		"wave"		"*ambient/atmosphere/plaza_amb.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+"experiment.Offices"
+{
+    "dsp"	"25"
+
+    "playlooping"
+    {
+        "volume"	"0.1"
+        "pitch"		"100"
+        "wave"		"ambient/atmosphere/corridor2.wav"
+    }
+}
+"experiment.OfficesDistant"
+{
+	"dsp"	"25"
+
+	"playlooping"
+	{
+		"volume"	"0.08"
+		"pitch"		"100"
+		"wave"		"ambient/atmosphere/corridor2.wav"
+	}
+}
+
+// Variation of d1_trainstation.Turnstyle with less train sounds and a lower volume.
+"experiment.TurnStyle"
+{
+	"dsp"	"1"
+	"dsp_volume" "0.7"
+
+	"playsoundscape"
+	{
+		"name"		"experiment.UtilCity"
+		"volume"	"0.2"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.1"
+		"wave"		"*ambient/atmosphere/plaza_amb.wav"
+		"pitch"		"100"
+		"attenuation"	"0"
+	}
+}
+
+// Variation of d1_canals.waterpuzzleroom with a lower volume.
+"experiment.LeakingTunnel"
+{
+	"dsp"	"1"
+
+	"playsoundscape"
+	{
+		"name"		"d1_canals.util_fardrips"
+		"volume"	"0.15"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.1"
+		"wave"		"ambient/water/drip_loop1.wav"
+		"pitch"		"100"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.15"
+		"pitch"		"100"
+		"wave"		"ambient/atmosphere/corridor2.wav"
+	}
+
+	"playlooping"
+	{
+		"volume"	"0.05"
+		"pitch"		"100"
+		"wave"		"ambient/atmosphere/cargo_hold2.wav"
+	}
+}
+
+"experiment.AbandonedLabs"
+{
+  "dsp"	"1"
+
+  "playlooping"
+  {
+    "volume"	"0.08"
+    "wave"		"ambient/machines/lab_loop1.wav"
+    "pitch"		"100"
+  }
+
+	"playlooping"
+	{
+		"volume"	"0.05"
+		"pitch"		"110"
+		"wave"		"ambient/machines/machine6.wav"
+	}
+}
+
+"experiment.AbandonedLabsDistant"
+{
+  "dsp"	"1"
+
+  "playlooping"
+  {
+    "volume"	"0.02"
+    "wave"		"ambient/machines/lab_loop1.wav"
+    "pitch"		"100"
+  }
+
+  "playlooping"
+  {
+    "volume"	"0.01"
+    "pitch"		"100"
+    "wave"		"ambient/machines/machine6.wav"
+  }
+}
+
+"experiment.AbandonedLabsAI"
+{
+  "dsp"	"1"
+
+  "playlooping"
+  {
+    "volume"	"0.08"
+    "wave"		"ambient/machines/lab_loop1.wav"
+    "pitch"		"100"
+  }
+
+  "playlooping"
+  {
+    "volume"	"0.2"
+    "pitch"		"100"
+    "wave"		"ambient/atmosphere/indoor2.wav"
+  }
+
+	"playrandom"
+	{
+		"time"		"1,10"
+		"volume"	"0.1,0.2"
+		"pitch"		"60,165"
+		"position"	"random"
+		"soundlevel" "SNDLVL_40dB"
+    "wave"		"npc/turret_floor/ping.wav"
+  }
+}

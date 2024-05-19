@@ -170,7 +170,7 @@ if (SERVER) then
 		elseif (key == "sourcename") then
 			self:SetSourceName(value)
 		elseif (key == "model") then
-			self:SetModel(value)
+			self.Model = value
 		elseif (key == "invisible") then
 			self:SetInvisible(tobool(value))
 		end

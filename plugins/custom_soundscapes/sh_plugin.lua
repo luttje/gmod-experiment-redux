@@ -10,6 +10,10 @@ ix.config.Add("replaceSoundscapes", true,
 ix.util.Include("cl_plugin.lua")
 
 function PLUGIN:GetCustomSoundscapes()
+    if (self.cachedCustomSoundscapes) then
+        return self.cachedCustomSoundscapes
+    end
+
 	local customSoundscapes = {}
 
 	-- Let Experiment Redux maps adjust custom soundscapes first.
@@ -26,7 +30,9 @@ function PLUGIN:GetCustomSoundscapes()
 	-- This provides which soundscapes to replace and what to replace them with
 	-- This function is called once when the map is loaded (SERVER) and everytime a player
 	-- walks into the trigger zone of a soundscape (CLIENT). Keep it as fast as possible.
-	hook.Run("AdjustCustomSoundscapes", customSoundscapes)
+    hook.Run("AdjustCustomSoundscapes", customSoundscapes)
+
+	self.cachedCustomSoundscapes = customSoundscapes
 
 	return customSoundscapes
 end
@@ -36,6 +42,12 @@ function PLUGIN:GetCustomSoundscapeName(soundscapeKey, ruleIndex)
 end
 
 function PLUGIN:InitPostEntity()
+    local customSoundscapes = self:GetCustomSoundscapes()
+
+	if (#customSoundscapes == 0) then
+		return
+	end
+
 	if (SERVER) then
 		self:ReplaceSoundscapes()
 	else
@@ -57,6 +69,12 @@ end
 
 function PLUGIN:EntityKeyValue(entity, key, value)
 	if (entity:GetClass() ~= "env_soundscape") then
+		return
+	end
+
+    local customSoundscapes = self:GetCustomSoundscapes()
+
+	if (#customSoundscapes == 0) then
 		return
 	end
 

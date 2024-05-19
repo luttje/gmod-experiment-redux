@@ -49,9 +49,29 @@ function PANEL:Rebuild()
     local scrW = ScrW()
     local scrH = ScrH()
 
-    local mapHeight = scrH * .75
+	self:SetSize(scrW, scrH)
+
+    local mapHeight = scrH * .9
     local mapScale = mapHeight / self.mapDetails.backgroundOriginalHeight
     local mapWidth = self.mapDetails.backgroundOriginalWidth * mapScale
+	local mapRotation = self.mapDetails.backgroundRotation or 0
+
+    self.mapBackground = self:Add("EditablePanel")
+    self.mapBackground:SetSize(mapWidth, mapHeight)
+    self.mapBackground:SetPos((scrW * .5) - (mapWidth * .5), scrH - mapHeight)
+    self.mapBackground.Paint = function(panel, w, h)
+        surface.SetDrawColor(255, 255, 255, 255)
+        surface.SetMaterial(self:GetMapMaterial())
+
+		if (mapRotation == 0) then
+        	surface.DrawTexturedRect(0, 0, w, h)
+		else
+			local centerX = w * .5
+			local centerY = h * .5
+
+			surface.DrawTexturedRectRotated(centerX, centerY, w, h, -mapRotation)
+		end
+    end
 
     self.infoLabel = self:Add("DLabel")
     self.infoLabel:SetText("Spawn Selection")
@@ -60,17 +80,8 @@ function PANEL:Rebuild()
     self.infoLabel:SizeToContents()
     self.infoLabel:SetPos(
         (scrW * .5) - (self.infoLabel:GetWide() * .5),
-        (scrH * .5) - (mapHeight * .5) - self.infoLabel:GetTall() - 20
+        scrH * .1
     )
-
-    self.mapBackground = self:Add("EditablePanel")
-    self.mapBackground:SetSize(mapWidth, mapHeight)
-    self.mapBackground:SetPos((scrW * .5) - (mapWidth * .5), (scrH * .5) - (mapHeight * .5))
-    self.mapBackground.Paint = function(panel, w, h)
-        surface.SetDrawColor(255, 255, 255, 255)
-        surface.SetMaterial(self:GetMapMaterial())
-        surface.DrawTexturedRect(0, 0, w, h)
-    end
 
     self.spawnLocationPanels = {}
 
@@ -104,6 +115,18 @@ function PANEL:Rebuild()
         if (self.mapDetails.TransformSpawnPositionToUI) then
             x, y = self.mapDetails:TransformSpawnPositionToUI(spawn.position, mapWidth, mapHeight)
         end
+
+        -- Rotate x and y around the center of the map
+        local centerX = mapWidth * .5
+        local centerY = mapHeight * .5
+
+        local xRotated = math.cos(math.rad(mapRotation)) * (x - centerX) -
+			math.sin(math.rad(mapRotation)) * (y - centerY) + centerX
+        local yRotated = math.sin(math.rad(mapRotation)) * (x - centerX) +
+			math.cos(math.rad(mapRotation)) * (y - centerY) + centerY
+
+        x = xRotated
+		y = yRotated
 
         spawnIcon:SetText("")
         spawnIcon:SetPos(x - ICON_SIZE_HALF, y - ICON_SIZE_HALF)
