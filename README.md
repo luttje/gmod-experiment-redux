@@ -12,15 +12,19 @@
 
 ## Installation
 
-1. Clone this repository into your `garrysmod/gamemodes` directory and name the directory `experiment-redux`:
+1. Subscribe to the required addons on the [Steam Workshop Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=3215035081).
+
+2. Install Git LFS by following the [official installation instructions](https://git-lfs.github.com/).
+
+3. Clone this repository into your `garrysmod/gamemodes` directory and name the directory `experiment-redux`:
 
     ```sh
     git clone https://github.com/luttje/gmod-experiment-redux experiment-redux
     ```
 
-2. Ensure you have the Helix based installed [following the Helix documentation](https://docs.gethelix.co/manual/getting-started/).
+4. Ensure you have the Helix based installed [following the Helix documentation](https://docs.gethelix.co/manual/getting-started/).
 
-3. (Re-)start Garry's Mod and start a game with the `Experiment Redux` gamemode.
+5. (Re-)start Garry's Mod and start a game with the `Experiment Redux` gamemode.
 
 ## About
 
