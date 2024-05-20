@@ -30,3 +30,18 @@
 [
     name(string) : "Name" : "" : "Name of the spawn point"
 ]
+
+@PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_npc :
+    "Entity that represents an NPC in the world"
+[
+    npcid(string) : "NPC UniqueID" : "" : "Unique ID of the NPC"
+]
+
+//
+// Attribute Training plugin entities
+//
+
+@PointClass base(Angles) studio("models/props_phx/construct/metal_plate_curve360.mdl") = exp_target_practice_spawn :
+    "Entity that represents a spawn point for a target in the target practice attribute training"
+[
+]

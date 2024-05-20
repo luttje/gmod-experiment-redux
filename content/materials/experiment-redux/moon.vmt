@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+	"$basetexture"	"experiment-redux/moon"
+	"$translucent" "1"
+	"$selfillum" "1"
+	"$nofog" "1"
+}

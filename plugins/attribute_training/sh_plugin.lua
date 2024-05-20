@@ -40,6 +40,11 @@ if (SERVER)then
 		local targetPracticeSpawners = {}
 
 		for _, targetPracticeSpawner in pairs(ents.FindByClass("exp_target_practice_spawn")) do
+			if (npc:MapCreationID() > 0) then
+				-- Don't save map spawners
+				continue
+			end
+
 			targetPracticeSpawners[#targetPracticeSpawners + 1] = {
 				position = targetPracticeSpawner:GetPos(),
 				angles = targetPracticeSpawner:GetAngles(),

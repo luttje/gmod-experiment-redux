@@ -64,12 +64,16 @@ function ENT:Initialize()
 		self:SetupRandomVoiceSet(model)
 	end
 
-	if (self:GetDisplayName() == "") then
-		if (model:find("female", nil, true) ~= nil) then
-			self:SetDisplayName("Jane Doe")
-		else
-			self:SetDisplayName("John Doe")
-		end
+    if (self:GetDisplayName() == "") then
+        if (model:find("female", nil, true) ~= nil) then
+            self:SetDisplayName("Jane Doe")
+        else
+            self:SetDisplayName("John Doe")
+        end
+    end
+
+	if (self.expNpcData.OnSpawn) then
+		self.expNpcData:OnSpawn(self)
 	end
 end
 
@@ -133,9 +137,19 @@ function ENT:SetupNPC(npc)
 		self:SetVoiceSet(npc.voiceSet)
 	end
 
-	if (npc.voicePitch) then
-		self:SetVoicePitch(npc.voicePitch)
-	end
+    if (npc.voicePitch) then
+        self:SetVoicePitch(npc.voicePitch)
+    end
+
+    self:CapabilitiesRemove(bit.bor(
+        CAP_MOVE_GROUND,
+        CAP_MOVE_JUMP,
+        CAP_MOVE_FLY,
+        CAP_MOVE_CLIMB,
+		CAP_MOVE_SWIM,
+        CAP_MOVE_CRAWL,
+		CAP_MOVE_SHOOT
+	))
 end
 
 function ENT:Think()
@@ -194,4 +208,13 @@ function ENT:Use(activator, caller)
 	end
 
 	self:SpeakFromSet()
+end
+
+-- Let the map spawn npc's
+function ENT:KeyValue(key, value)
+	key = key:lower()
+
+	if (key == "npcid") then
+		self:SetupNPC(Schema.npc.Get(value))
+	end
 end

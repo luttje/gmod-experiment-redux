@@ -45,14 +45,14 @@ function ENT:Initialize()
 		physicsObject:EnableGravity(false)
 	end
 
-	local scale = math.Rand(1, 4)
+	local scale = math.Rand(1, 3)
 
     self:SetForce(math.random(10, 20) * scale)
     self:SetColor(self.Colors[math.random(1, #self.Colors)])
 	self:SetModelScale(scale, 0)
 	self:Activate() -- update physics size to scale
 	self:StartMotionController()
-	self:SetKillAt(CurTime() + 8)
+	self:SetKillAt(CurTime() + 1.5)
 end
 
 function ENT:SetTrainees(trainees)

@@ -185,17 +185,27 @@ function PLUGIN:LoadData()
         for _, scavengingSourceData in pairs(scavengingSources) do
             if (scavengingSourceData.mapCreationID and scavengingSourceData.mapCreationID > -1) then
                 -- Only restore inventory for map entities
-                local mapEntity = ents.FindInSphere(scavengingSourceData.position, 1)[1]
+                local nearbyEntities = ents.FindInSphere(scavengingSourceData.position, 1)
+				local mapEntity = nil
 
-                if (not IsValid(mapEntity)) then
-                    ix.util.SchemaErrorNoHalt("Attempt to restore a scavenging source with invalid map entity: " ..
-                    scavengingSourceData.mapCreationID .. "\n")
-                    continue
-                end
+				for _, entity in ipairs(nearbyEntities) do
+					if (entity:MapCreationID() == scavengingSourceData.mapCreationID) then
+						mapEntity = entity
+						break
+					end
+				end
 
-                restore(scavengingSourceData, mapEntity)
+				if (not IsValid(mapEntity)) then
+					ix.util.SchemaErrorNoHalt(
+						"Attempt to restore a scavenging source with invalid map entity: "
+						.. scavengingSourceData.mapCreationID .. "\n")
+					PrintTable(nearbyEntities)
+					continue
+				end
 
-                continue
+				restore(scavengingSourceData, mapEntity)
+
+				continue
             end
 
             local entity = ents.Create("exp_scavenging_source")

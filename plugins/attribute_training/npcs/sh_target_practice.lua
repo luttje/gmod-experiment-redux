@@ -38,7 +38,7 @@ local challengeStarted = NPC:RegisterInteraction("challengeStarted", {
 	]],
 	responses = {
 		{
-			text = "I'm ready!",
+			text = "Alright, let me get to shooting!",
 		},
 	}
 })

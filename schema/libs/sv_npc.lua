@@ -13,20 +13,6 @@ function Schema.npc.SpawnEntity(npc, position, angles)
 	npcEntity:SetAngles(angles)
     npcEntity:Spawn()
 
-    npcEntity:CapabilitiesRemove(bit.bor(
-        CAP_MOVE_GROUND,
-        CAP_MOVE_JUMP,
-        CAP_MOVE_FLY,
-        CAP_MOVE_CLIMB,
-		CAP_MOVE_SWIM,
-        CAP_MOVE_CRAWL,
-		CAP_MOVE_SHOOT
-	))
-
-	if (npc.OnSpawn) then
-		npc:OnSpawn(npcEntity)
-	end
-
 	return npcEntity
 end
 
@@ -143,7 +129,12 @@ end)
 hook.Add("SaveData", "expSaveNpcData", function()
 	local npcData = {}
 
-	for _, npc in pairs(ents.FindByClass("exp_npc")) do
+    for _, npc in pairs(ents.FindByClass("exp_npc")) do
+        if (npc:MapCreationID() > 0) then
+			-- Don't save map npcs
+            continue
+        end
+
 		npcData[#npcData + 1] = {
             id = npc:GetNpcId(),
             position = npc:GetPos(),
