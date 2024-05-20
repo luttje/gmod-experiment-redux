@@ -40,7 +40,7 @@ if (SERVER)then
 		local targetPracticeSpawners = {}
 
 		for _, targetPracticeSpawner in pairs(ents.FindByClass("exp_target_practice_spawn")) do
-			if (npc:MapCreationID() > 0) then
+			if (targetPracticeSpawner:MapCreationID() > 0) then
 				-- Don't save map spawners
 				continue
 			end

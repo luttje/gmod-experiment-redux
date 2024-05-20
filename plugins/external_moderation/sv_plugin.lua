@@ -7,7 +7,9 @@ function PLUGIN:OnLoaded()
     local envFile = file.Read(PLUGIN.folder .. "/web/.env", "LUA")
 
     if (not envFile) then
-        error("The .env file is missing from the web folder.")
+		ix.util.SchemaErrorNoHalt("The .env file is missing from the web folder for External Moderation.")
+		self.disabled = true
+		return
     end
 
     local variables = Schema.util.EnvToTable(envFile)
@@ -103,6 +105,10 @@ function PLUGIN:player_connect(data)
 end
 
 function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
+	if (self.disabled) then
+		return
+	end
+
     endpoint = APP_URL .. "/" .. endpoint
 
     http.Post(endpoint, {
