@@ -7,40 +7,24 @@ DESCRIPTION_FACIAL_FEATURES,
 DESCRIPTION_TRAITS,
 DESCRIPTION_BEHAVIOR
 
-local function getRandomCombination(...)
-	local args = { ... }
-	local result = ""
-
-	for i = 1, #args do
-		local randomIndex = math.random(1, #args[i])
-		result = result .. args[i][randomIndex]
-
-		if (i < #args) then
-			result = result .. " "
-		end
-	end
-
-	return result
+local function randomElement(table)
+	return table[math.random(1, #table)]
 end
 
 function Schema.GetRandomName()
-	return getRandomCombination(
-		NAMES_FIRST,
-		NAMES_LAST
-	)
+	return randomElement(NAMES_FIRST) .. " " .. randomElement(NAMES_LAST)
 end
 
 function Schema.GetRandomDescription()
-	return getRandomCombination(
-		DESCRIPTION_AGE_INDICATOR,
-		DESCRIPTION_BODY_TYPE_HEIGHT:format("person"),
-		"with",
-		DESCRIPTION_BODY_TYPE_FRAME .. ".",
-		"They've got",
-		DESCRIPTION_FACIAL_FEATURES .. ".",
-		DESCRIPTION_TRAITS .. ".",
-		DESCRIPTION_BEHAVIOR
-	)
+    return randomElement(DESCRIPTION_AGE_INDICATOR)
+        .. " "
+        .. randomElement(DESCRIPTION_BODY_TYPE_HEIGHT):format("person")
+        .. " "
+        .. randomElement(DESCRIPTION_BODY_TYPE_FRAME)
+        .. ". They've got "
+        .. randomElement(DESCRIPTION_FACIAL_FEATURES)
+        .. ". " .. randomElement(DESCRIPTION_TRAITS)
+		.. "."
 end
 
 NAMES_FIRST = {

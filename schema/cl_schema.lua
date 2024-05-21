@@ -61,41 +61,45 @@ net.Receive("ixRecognizeMenu", function(length)
 end)
 
 -- ! Overrides the default name and description vars so they display a 'Random' button in the character creation menu.
-ix.char.vars["name"].OnDisplay = function(self, container, payload)
-    local panel = container:Add("ixTextEntry")
-	panel:Dock(TOP)
-	panel:SetFont("ixMenuButtonHugeFont")
-	panel:SetUpdateOnType(true)
-	panel.OnValueChange = function(this, text)
-		payload:Set("name", text)
-	end
+local characterVarOverrides = {
+	["name"] = {
+		randomizer = function ()
+			return Schema.GetRandomName()
+		end
+	},
+    ["description"] = {
+		randomizer = function ()
+			return Schema.GetRandomDescription()
+		end
+	},
+}
 
-    local random = container:Add("DButton")
-    random:SetText(L "random")
-    random:SetFont("ixMenuButtonFont")
-    random:Dock(TOP)
-    random:DockMargin(0, 4, 0, 0)
-    random.DoClick = function()
-        panel:SetValue(Schema.GetRandomName())
-    end
-end
+for varName, characterVarOverride in pairs(characterVarOverrides) do
+	local var = ix.char.vars[varName]
 
-ix.char.vars["description"].OnDisplay = function(self, container, payload)
-	local panel = container:Add("ixTextEntry")
-	panel:Dock(TOP)
-	panel:SetFont("ixMenuButtonHugeFont")
-	panel:SetUpdateOnType(true)
-	panel.OnValueChange = function(this, text)
-		payload:Set("description", text)
-	end
+	var.OnDisplay = function(self, container, payload)
+		local textEntry = container:Add("ixTextEntry")
+		textEntry:Dock(TOP)
+		textEntry:SetFont("ixMenuButtonHugeFont")
+		textEntry:SetUpdateOnType(true)
+        textEntry.OnValueChange = function(self, text)
+            payload:Set(varName, text)
+        end
 
-	local random = container:Add("DButton")
-	random:SetText(L "random")
-	random:SetFont("ixMenuButtonFont")
-	random:Dock(TOP)
-	random:DockMargin(0, 4, 0, 0)
-	random.DoClick = function()
-		panel:SetValue(Schema.GetRandomDescription())
+        local random = textEntry:Add("DImageButton")
+		random:SetImage("icon16/arrow_refresh.png")
+		random:SetTooltip(L("random"))
+		random:Dock(RIGHT)
+		random:SetStretchToFit(false)
+		random:DockMargin(5, 5, 5, 5)
+        random:SizeToContents()
+        random.DoClick = function()
+            textEntry:SetValue(characterVarOverride.randomizer())
+        end
+
+		textEntry:SetValue(characterVarOverride.randomizer())
+
+        return textEntry
 	end
 end
 

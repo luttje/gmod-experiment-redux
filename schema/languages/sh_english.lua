@@ -5,7 +5,9 @@ LANGUAGE = {
 	optdAccessibilityFont =
 	"Enables a more readable font for those who have trouble reading the default font.",
 	optAccessibilityFontScale = "Font scaling",
-	optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
+    optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
+
+	random = "Random",
 
 	achievements = "Achievements",
     alliance = "Alliance",
