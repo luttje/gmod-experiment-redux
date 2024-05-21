@@ -62,12 +62,12 @@ end)
 
 -- ! Overrides the default name and description vars so they display a 'Random' button in the character creation menu.
 ix.char.vars["name"].OnDisplay = function(self, container, payload)
-    local name = container:Add("ixTextEntry")
+    local panel = container:Add("ixTextEntry")
 	panel:Dock(TOP)
 	panel:SetFont("ixMenuButtonHugeFont")
 	panel:SetUpdateOnType(true)
 	panel.OnValueChange = function(this, text)
-		self.payload:Set(k, text)
+		payload:Set("name", text)
 	end
 
     local random = container:Add("DButton")
@@ -76,17 +76,17 @@ ix.char.vars["name"].OnDisplay = function(self, container, payload)
     random:Dock(TOP)
     random:DockMargin(0, 4, 0, 0)
     random.DoClick = function()
-        name:SetValue(Schema.GetRandomName())
+        panel:SetValue(Schema.GetRandomName())
     end
 end
 
 ix.char.vars["description"].OnDisplay = function(self, container, payload)
-	local description = container:Add("ixTextEntry")
+	local panel = container:Add("ixTextEntry")
 	panel:Dock(TOP)
 	panel:SetFont("ixMenuButtonHugeFont")
 	panel:SetUpdateOnType(true)
 	panel.OnValueChange = function(this, text)
-		self.payload:Set(k, text)
+		payload:Set("description", text)
 	end
 
 	local random = container:Add("DButton")
@@ -95,7 +95,7 @@ ix.char.vars["description"].OnDisplay = function(self, container, payload)
 	random:Dock(TOP)
 	random:DockMargin(0, 4, 0, 0)
 	random.DoClick = function()
-		description:SetValue(Schema.GetRandomDescription())
+		panel:SetValue(Schema.GetRandomDescription())
 	end
 end
 
