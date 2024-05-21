@@ -34,10 +34,11 @@ end)
 
 -- ! Overrides default net message for the recognition menu, to change the font
 local function Recognize(level)
-	net.Start("ixRecognize")
-		net.WriteUInt(level, 2)
-	net.SendToServer()
+    net.Start("ixRecognize")
+    net.WriteUInt(level, 2)
+    net.SendToServer()
 end
+
 net.Receive("ixRecognizeMenu", function(length)
     local menu = DermaMenu()
 
@@ -58,6 +59,49 @@ net.Receive("ixRecognizeMenu", function(length)
 	menu:MakePopup()
 	menu:Center()
 end)
+
+-- ! Overrides the default name and description vars so they display a 'Random' button in the character creation menu.
+local characterVarOverrides = {
+	["name"] = {
+		randomizer = function ()
+			return Schema.GetRandomName()
+		end
+	},
+    ["description"] = {
+		randomizer = function ()
+			return Schema.GetRandomDescription()
+		end
+	},
+}
+
+for varName, characterVarOverride in pairs(characterVarOverrides) do
+	local var = ix.char.vars[varName]
+
+	var.OnDisplay = function(self, container, payload)
+		local textEntry = container:Add("ixTextEntry")
+		textEntry:Dock(TOP)
+		textEntry:SetFont("ixMenuButtonHugeFont")
+		textEntry:SetUpdateOnType(true)
+        textEntry.OnValueChange = function(self, text)
+            payload:Set(varName, text)
+        end
+
+        local random = textEntry:Add("DImageButton")
+		random:SetImage("icon16/arrow_refresh.png")
+		random:SetTooltip(L("random"))
+		random:Dock(RIGHT)
+		random:SetStretchToFit(false)
+		random:DockMargin(5, 5, 5, 5)
+        random:SizeToContents()
+        random.DoClick = function()
+            textEntry:SetValue(characterVarOverride.randomizer())
+        end
+
+		textEntry:SetValue(characterVarOverride.randomizer())
+
+        return textEntry
+	end
+end
 
 function Schema.GetCachedTextSize(font, text)
 	Schema.CachedTextSizes[font] = Schema.CachedTextSizes[font] or {}

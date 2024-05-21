@@ -34,6 +34,7 @@ ix.util.Include("cl_hooks.lua")
 
 ix.util.Include("sh_configs.lua")
 ix.util.Include("sh_hooks.lua")
+ix.util.Include("sh_random.lua")
 
 ix.util.Include("sv_schema.lua")
 ix.util.Include("sv_hooks.lua")
