@@ -19,7 +19,7 @@ SWEP.WorldModel = "models/weapons/w_grenade.mdl"
 SWEP.ViewModel = "models/weapons/cstrike/c_eq_smokegrenade.mdl"
 SWEP.UseHands = true
 
-SWEP.AdminSpawnable = false
+SWEP.AdminOnly = true
 SWEP.Spawnable = false
 
 SWEP.Primary.DefaultClip = 0

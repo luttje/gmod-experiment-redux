@@ -6,9 +6,12 @@ end
 
 ENT.Type = "anim"
 ENT.PrintName = "Structure Part"
+ENT.Category = "Experiment Redux"
 ENT.IsStructurePart = true
 ENT.IsStructureOrPart = true
 ENT.PopulateEntityInfo = true
+ENT.Spawnable = false
+ENT.AdminOnly = true
 
 function ENT:GetUnderConstruction()
     local parent = self:GetParent()

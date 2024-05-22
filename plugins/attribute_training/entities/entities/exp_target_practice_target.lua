@@ -2,6 +2,8 @@ AddCSLuaFile()
 DEFINE_BASECLASS("base_gmodentity")
 
 ENT.PrintName = "Target Practice Target"
+ENT.Author = "Experiment Redux"
+ENT.Category = "Experiment Redux"
 ENT.Colors = {
     Color(255, 255, 255),
     Color(30, 255, 30),

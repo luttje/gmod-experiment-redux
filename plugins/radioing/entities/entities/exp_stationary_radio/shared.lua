@@ -5,7 +5,7 @@ ENT.Base = "base_gmodentity"
 ENT.Author = "Experiment Redux"
 ENT.PrintName = "Stationary Radio"
 ENT.Spawnable = false
-ENT.AdminSpawnable = false
+ENT.AdminOnly = true
 
 function ENT:SetupDataTables()
 	self:NetworkVar("Bool", "TurnedOff")

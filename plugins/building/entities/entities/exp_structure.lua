@@ -6,6 +6,9 @@ end
 
 ENT.Type = "anim"
 ENT.PrintName = "Structure Base"
+ENT.Category = "Experiment Redux"
+ENT.Spawnable = false
+ENT.AdminOnly = true
 ENT.IsStructure = true
 ENT.IsStructureOrPart = true
 ENT.PopulateEntityInfo = true

@@ -2,8 +2,9 @@ AddCSLuaFile()
 DEFINE_BASECLASS("base_gmodentity")
 
 ENT.PrintName = "Target Practice Spawn"
+ENT.Author = "Experiment Redux"
 ENT.Category = "Experiment Redux"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminOnly = true
 ENT.SpawnRadius = 32
 

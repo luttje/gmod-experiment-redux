@@ -1,9 +1,10 @@
 ENT.Type = "anim"
 ENT.Base = "base_gmodentity"
-ENT.Author = "Experiment Redux"
 ENT.PrintName = "Bolt Informer"
+ENT.Author = "Experiment Redux"
+ENT.Category = "Experiment Redux"
 ENT.Spawnable = false
-ENT.AdminSpawnable = false
+ENT.AdminOnly = true
 
 function ENT:SetupDataTables()
 	self:NetworkVar("Int", "ProtectedCount")

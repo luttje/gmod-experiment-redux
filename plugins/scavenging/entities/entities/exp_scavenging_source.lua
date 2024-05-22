@@ -10,7 +10,7 @@ ENT.PrintName = "Scavenging Source"
 ENT.Author = "Experiment Redux"
 
 ENT.Spawnable = false
-ENT.AdminSpawnable = false
+ENT.AdminOnly = true
 
 ENT.Model = Model("models/props_junk/trashcluster01a.mdl")
 

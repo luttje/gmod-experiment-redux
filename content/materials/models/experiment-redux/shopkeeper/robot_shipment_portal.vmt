@@ -1,8 +1,13 @@
 "VertexlitGeneric"
 {
 	"$basetexture" "models/experiment-redux/shopkeeper/robot_shipment_portal"
+	"$normalmap" "models/experiment-redux/shopkeeper/robot_shipment_portal_normal"
 	"$surfaceprop" "metal"
 	"%keywords" "robot,experiment"
 
 	"$model" 1
+
+	"$phong" "1"
+	"$phongexponent" "100"
+	"$phongboost" "0.5"
 }

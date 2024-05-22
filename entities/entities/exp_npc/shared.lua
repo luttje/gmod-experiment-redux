@@ -4,11 +4,10 @@ ENT.Base = "base_ai"
 ENT.Type = "ai"
 ENT.PrintName = "Experiment NPC"
 ENT.Author = "Experiment Redux"
-ENT.Information = ""
 ENT.Category = "Experiment Redux"
 
 ENT.Editable = true
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminOnly = true
 
 function ENT:SetupDataTables()

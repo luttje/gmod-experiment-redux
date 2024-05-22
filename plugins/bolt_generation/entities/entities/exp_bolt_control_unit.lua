@@ -8,8 +8,12 @@ ENT.Type = "anim"
 ENT.Base = "exp_generator"
 ENT.Model = "models/props_combine/suit_charger001.mdl"
 ENT.PrintName = "Bolt Generator"
+ENT.Author = "Experiment Redux"
+ENT.Category = "Experiment Redux"
 ENT.PhysgunDisabled = true
 ENT.IsBoltControlUnit = true
+ENT.Spawnable = false
+ENT.AdminOnly = true
 
 DEFINE_BASECLASS("exp_generator")
 

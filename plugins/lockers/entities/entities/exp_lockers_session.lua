@@ -5,6 +5,9 @@ end
 ENT.Type = "anim"
 ENT.Model = "models/props_lab/huladoll.mdl"
 ENT.PrintName = "Lockers (Session)"
+ENT.Category = "Experiment Redux"
+ENT.Spawnable = false
+ENT.AdminOnly = true
 ENT.IsLockersSession = true
 
 if (not SERVER) then

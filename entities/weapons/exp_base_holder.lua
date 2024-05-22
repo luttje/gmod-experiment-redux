@@ -23,7 +23,7 @@ SWEP.UseHands = true
 
 SWEP.IsAlwaysRaised = true
 
-SWEP.AdminSpawnable = false
+SWEP.AdminOnly = true
 SWEP.Spawnable = false
 
 SWEP.Primary.DefaultClip = 0

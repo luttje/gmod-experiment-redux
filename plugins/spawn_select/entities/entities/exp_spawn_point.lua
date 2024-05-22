@@ -7,6 +7,9 @@ local PLUGIN = PLUGIN
 ENT.Type = "anim"
 ENT.PrintName = "Spawn Point"
 ENT.Author = "Experiment Redux"
+ENT.Category = "Experiment Redux"
+ENT.Spawnable = false
+ENT.AdminOnly = true
 ENT.IsSpawnPoint = true
 
 if (not SERVER) then

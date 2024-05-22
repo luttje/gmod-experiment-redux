@@ -188,7 +188,12 @@ function ENT:PrintChat(message, isYelling)
 end
 
 function ENT:SpeakFromSet(randomVoiceLines, index)
-	randomVoiceLines = randomVoiceLines or self:GetVoiceSet()
+    randomVoiceLines = randomVoiceLines or self:GetVoiceSet()
+
+    if (not randomVoiceLines) then
+        return
+    end
+
 	local randomVoiceLine = randomVoiceLines[index or math.random(#randomVoiceLines)]
 
 	self:SpeakSound(randomVoiceLine)

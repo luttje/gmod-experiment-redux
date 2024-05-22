@@ -1,6 +1,8 @@
 ENT.Type = "anim"
 ENT.Model = "models/props_combine/combine_mine01.mdl"
 ENT.PrintName = "Bolt Generator"
+ENT.Author = "Experiment Redux"
+ENT.Category = "Experiment Redux"
 ENT.IsBoltGenerator = true
 
 function ENT:SetupDataTables()

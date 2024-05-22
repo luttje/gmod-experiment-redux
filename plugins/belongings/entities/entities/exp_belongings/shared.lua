@@ -3,7 +3,7 @@ ENT.Base = "base_gmodentity"
 ENT.Author = "Experiment Redux"
 ENT.PrintName = "Belongings"
 ENT.Spawnable = false
-ENT.AdminSpawnable = false
+ENT.AdminOnly = true
 ENT.UsableInVehicle = true
 
 function ENT:SetupDataTables()
