@@ -48,7 +48,7 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_STEP)
 	self:SetUseType(SIMPLE_USE)
 
-	self:CapabilitiesAdd(bit.bor(CAP_MOVE_GROUND, CAP_ANIMATEDFACE, CAP_TURN_HEAD))
+	self:CapabilitiesAdd(bit.bor(CAP_ANIMATEDFACE, CAP_TURN_HEAD))
 
 	if (self:GetModel() == nil) then
 		self:SetModel(randomModels[math.random(#randomModels)])

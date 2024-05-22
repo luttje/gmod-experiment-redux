@@ -91,7 +91,7 @@ function ENT:Draw()
         self.open = self:GetNWBool("open", false)
 	end
 
-	offset = self:GetUp() * 19 -- TODO: Match the doors origin to the shopkeeper model origin so we don't need to offset it.
+	offset = self:GetUp() * 38 -- TODO: Match the doors origin to the shopkeeper model origin so we don't need to offset it.
 	door:SetPos(self:GetPos() + offset)
 	door:SetAngles(self:GetAngles())
 
