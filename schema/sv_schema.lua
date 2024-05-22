@@ -12,8 +12,10 @@ resource.AddFile("materials/experiment-redux/close.png")
 -- Higher quality ammo boxes, they replace the default ones.
 resource.AddWorkshop("1741790902")
 
--- We send the generated HTML to the client so it can be loaded when its needed.
-AddCSLuaFile("cl_html.generated.lua")
+-- We send the generated HTML and random content to the client so it can be loaded only when its needed.
+AddCSLuaFile("content/cl_html.generated.lua")
+AddCSLuaFile("content/sh_names.lua")
+AddCSLuaFile("content/sh_descriptions.lua")
 
 Schema.corpses = Schema.corpses or {}
 Schema.dropMode = {

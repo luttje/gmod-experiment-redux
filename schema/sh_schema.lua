@@ -34,7 +34,6 @@ ix.util.Include("cl_hooks.lua")
 
 ix.util.Include("sh_configs.lua")
 ix.util.Include("sh_hooks.lua")
-ix.util.Include("sh_random.lua")
 
 ix.util.Include("sv_schema.lua")
 ix.util.Include("sv_hooks.lua")
@@ -126,9 +125,9 @@ function Schema.GetWeaponAttachment(class)
 end
 
 function Schema.RegisterMaterialSources()
-	local helperMetaTable = {}
-	helperMetaTable.__index = helperMetaTable
-	local toBeRemoved = {}
+    local helperMetaTable = {}
+    helperMetaTable.__index = helperMetaTable
+    local toBeRemoved = {}
 
     function helperMetaTable:Add(data)
         table.insert(self, data)
@@ -138,36 +137,66 @@ function Schema.RegisterMaterialSources()
         table.insert(toBeRemoved, uniqueID)
     end
 
-	function helperMetaTable:RemoveQueued()
-		for _, uniqueID in ipairs(toBeRemoved) do
-			for i, data in ipairs(self) do
-				if (data.uniqueID == uniqueID) then
-					table.remove(self, i)
-				end
-			end
-		end
+    function helperMetaTable:RemoveQueued()
+        for _, uniqueID in ipairs(toBeRemoved) do
+            for i, data in ipairs(self) do
+                if (data.uniqueID == uniqueID) then
+                    table.remove(self, i)
+                end
+            end
+        end
 
-		toBeRemoved = {}
-	end
+        toBeRemoved = {}
+    end
 
     local materialSources = setmetatable({}, helperMetaTable)
 
     hook.Run("AdjustMaterialSources", materialSources)
 
-	materialSources:RemoveQueued()
+    materialSources:RemoveQueued()
 
-	-- Register the allowed props as blueprint items
+    -- Register the allowed props as blueprint items
     for _, data in ipairs(materialSources) do
-		local uniqueID = string.lower(data.uniqueID)
+        local uniqueID = string.lower(data.uniqueID)
         local ITEM = ix.item.Register(
-			uniqueID,
+            uniqueID,
             "base_material_sources",
             false,
-			nil,
+            nil,
             true
         )
 
         table.Merge(ITEM, data, true)
-		ITEM.uniqueID = uniqueID
-	end
+        ITEM.uniqueID = uniqueID
+    end
+end
+
+local function randomElement(table)
+	return table[math.random(1, #table)]
+end
+
+function Schema.GetRandomName()
+    local NAMES_FIRST,
+		NAMES_LAST = include(Schema.folder .. "/schema/content/sh_names.lua")
+
+	return randomElement(NAMES_FIRST) .. " " .. randomElement(NAMES_LAST)
+end
+
+function Schema.GetRandomDescription()
+	local DESCRIPTION_AGE_INDICATOR,
+		DESCRIPTION_BODY_TYPE_HEIGHT,
+		DESCRIPTION_BODY_TYPE_FRAME,
+		DESCRIPTION_FACIAL_FEATURES,
+		DESCRIPTION_TRAITS,
+		DESCRIPTION_BEHAVIOR = include(Schema.folder .. "/schema/content/sh_descriptions.lua")
+
+    return randomElement(DESCRIPTION_AGE_INDICATOR)
+        .. " "
+        .. randomElement(DESCRIPTION_BODY_TYPE_HEIGHT):format("person")
+        .. " "
+        .. randomElement(DESCRIPTION_BODY_TYPE_FRAME)
+        .. ". They've got "
+        .. randomElement(DESCRIPTION_FACIAL_FEATURES)
+        .. ". " .. randomElement(DESCRIPTION_TRAITS)
+    	.. "."
 end

@@ -293,7 +293,8 @@ if (CLIENT) then
 	--- @param path string
 	--- @return string
 	function Schema.util.GetHtml(path)
-		local allHtml = include(Schema.folder .. "/schema/cl_html.generated.lua")
+		-- Only include the file inside the function, so the HTML isn't kept in memory for the entire game session.
+		local allHtml = include(Schema.folder .. "/schema/content/cl_html.generated.lua")
 		local html = allHtml[path]
 
 		if (not html) then
