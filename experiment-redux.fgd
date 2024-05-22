@@ -37,6 +37,11 @@
     npcid(string) : "NPC UniqueID" : "" : "Unique ID of the NPC"
 ]
 
+@PointClass base(Angles) studio("models/experiment-redux/shopkeeper.mdl") = exp_shopkeeper :
+    "Shopkeeper where players can buy and sell items"
+[
+]
+
 //
 // Attribute Training plugin entities
 //
