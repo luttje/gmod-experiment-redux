@@ -12,7 +12,8 @@ ITEM.weaponCategory = "utility"
 ITEM.description = "A flashlight to help you see in the dark."
 
 function ITEM:OnEntityCreated(entity)
-	entity:SetModelScale(self.modelScale)
+    entity:SetModelScale(self.modelScale)
+	entity:Activate()
 end
 
 ix.pac.RegisterPart("expFlashLightWorldModelPacData", {

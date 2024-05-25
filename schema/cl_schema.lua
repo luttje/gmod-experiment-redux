@@ -111,14 +111,14 @@ end
 -- @entity[opt] entity Entity to send commands to
 -- @treturn boolean Whether or not the menu opened successfully. It will fail when there is already a menu open.
 function ix.menu.Open(options, entity)
-	if (IsValid(ix.menu.panel)) then
-		return false
-	end
+    if (IsValid(ix.menu.panel)) then
+        return false
+    end
 
-	local panel = vgui.Create("ixEntityMenu")
+    local panel = vgui.Create("ixEntityMenu")
     panel:SetEntity(entity)
 
-	local listEndOptions = {}
+    local listEndOptions = {}
 
     for text, callbackOrData in SortedPairs(options) do
         local callback = isfunction(callbackOrData) and callbackOrData or callbackOrData.callback
@@ -131,29 +131,101 @@ function ix.menu.Open(options, entity)
     end
 
     if (table.Count(listEndOptions) > 0) then
-		local spacerHeight = 16
+        local spacerHeight = 16
         local spacer = panel.list:Add("EditablePanel")
         panel.list.list[#panel.list.list + 1] = spacer
 
-		spacer:Dock(TOP)
-		spacer:SetTall(spacerHeight)
+        spacer:Dock(TOP)
+        spacer:SetTall(spacerHeight)
 
         spacer.Paint = function(self, w, h)
-			local color = ix.config.Get("color")
-			surface.SetDrawColor(color)
-			surface.DrawRect(0, spacerHeight * .5, w, 1)
-		end
+            local color = ix.config.Get("color")
+            surface.SetDrawColor(color)
+            surface.DrawRect(0, spacerHeight * .5, w, 1)
+        end
 
-		for text, callback in SortedPairs(listEndOptions) do
-			panel.list:AddOption(text, callback)
+        for text, callback in SortedPairs(listEndOptions) do
+            panel.list:AddOption(text, callback)
+        end
+    end
+
+    panel.list:SizeToContents()
+    panel.list:Center()
+
+    return true
+end
+
+-- ! Workaround for scaled items not being found by traces
+-- Related? https://github.com/Facepunch/garrysmod-issues/issues/5867
+local function getScaledObjectRay(client)
+	local startPosition = client:GetShootPos()
+	local endPosition = startPosition + client:GetAimVector() * 96
+	local entities = ents.FindAlongRay(startPosition, endPosition)
+
+	for _, entity in ipairs(entities) do
+		if (IsValid(entity) and entity ~= client and entity:GetOwner() ~= client) then
+			return entity
 		end
 	end
 
-	panel.list:SizeToContents()
-	panel.list:Center()
-
-	return true
+	return NULL
 end
+
+function Schema:PlayerBindPress(client, bind, pressed)
+	bind = bind:lower()
+
+	if (bind:find("use") and pressed) then
+		local pickupTime = ix.config.Get("itemPickupTime", 0.5)
+
+		if (pickupTime > 0) then
+			local entity = getScaledObjectRay(client)
+
+			if (IsValid(entity) and entity.ShowPlayerInteraction and not ix.menu.IsOpen()) then
+				client.ixInteractionTarget = entity
+				client.ixInteractionStartTime = SysTime()
+
+				timer.Create("ixItemUse", pickupTime, 1, function()
+					client.ixInteractionTarget = nil
+					client.ixInteractionStartTime = nil
+				end)
+			end
+		end
+	end
+end
+
+function ix.hud.DrawItemPickup()
+	local pickupTime = ix.config.Get("itemPickupTime", 0.5)
+
+	if (pickupTime == 0) then
+		return
+	end
+
+	local client = LocalPlayer()
+	local entity = client.ixInteractionTarget
+	local startTime = client.ixInteractionStartTime
+
+	if (IsValid(entity) and startTime) then
+		local sysTime = SysTime()
+		local endTime = startTime + pickupTime
+
+		if (sysTime >= endTime or getScaledObjectRay(client) ~= entity) then
+			client.ixInteractionTarget = nil
+			client.ixInteractionStartTime = nil
+
+			return
+		end
+
+		local fraction = math.min((endTime - sysTime) / pickupTime, 1)
+		local x, y = ScrW() / 2, ScrH() / 2
+		local radius, thickness = 32, 6
+		local startAngle = 90
+		local endAngle = startAngle + (1 - fraction) * 360
+		local color = ColorAlpha(color_white, fraction * 255)
+
+		ix.util.DrawArc(x, y, radius, thickness, startAngle, endAngle, 2, color)
+	end
+end
+-- ! End of workaround for scaled items not being found by traces
 
 function Schema.GetCachedTextSize(font, text)
 	Schema.CachedTextSizes[font] = Schema.CachedTextSizes[font] or {}
