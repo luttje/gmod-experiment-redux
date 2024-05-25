@@ -20,8 +20,27 @@ function PLUGIN:ShouldBarDraw(bar)
 end
 
 function PLUGIN:ShouldDrawLocalPlayer(client)
-	if (client:HasStealthActivated()) then
-		return false
+    if (client:HasStealthActivated()) then
+        return false
+    end
+end
+
+function PLUGIN:Think()
+    -- Without throttling we would force the player to drop noticable frames (about 30 fps for 128 players on my machine)
+	-- With this I notice no difference in performance.
+    if (Schema.util.Throttle("StealthThink", 0.1)) then
+        return
+    end
+
+	for _, client in ipairs(player.GetAll()) do
+        if (client:HasStealthActivated()) then
+			-- We repeat this every think so any new PAC parts are hidden.
+			client.expIsHidingPacForStealth = true
+			pac.TogglePartDrawing(client, false)
+		elseif (client.expIsHidingPacForStealth) then
+			client.expIsHidingPacForStealth = nil
+			pac.TogglePartDrawing(client, true)
+		end
 	end
 end
 
@@ -81,7 +100,7 @@ function PLUGIN:RenderScreenspaceEffects()
 
 	cam.Start3D(EyePos(), EyeAngles())
     for _, otherClient in ipairs(player.GetAll()) do
-        if (otherClient == client) then
+        if (otherClient == client and GetViewEntity() == client) then
             continue
         end
 
