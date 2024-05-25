@@ -54,7 +54,10 @@ function ENT:GetEntityMenu(client)
     itemTable.player = client
 
 	if (characterID and characterID == client:GetCharacter():GetID()) then
-        options[L("pickup")] = function() end
+        options[L("pickup")] = {
+			callback = function() end,
+			forceListEnd = true,
+		}
 	end
 
 	local nextUpgrade, upgradeLabel = self:GetNextUpgrade()

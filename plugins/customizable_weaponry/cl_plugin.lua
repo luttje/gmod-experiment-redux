@@ -127,7 +127,6 @@ net.Receive("tacrp_networkweapon", function(len)
 
 				if (retries > 10000) then
 					timer.Remove(retryTimerName)
-					ix.util.SchemaErrorNoHalt("Failed to receive networked weapon after 10000 ticks. A developer might want to know if you weren't just lagging badly.\n")
 				end
 
 				return

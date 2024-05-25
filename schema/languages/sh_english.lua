@@ -25,7 +25,7 @@ LANGUAGE = {
 
 	noBuffs = "No active nano buffs.",
 
-	upgrade = "'%s' (-%s)",
+	upgrade = "Upgrade '%s' (-%s)",
 	withdraw = "Withdraw (+%s)",
     generatorOwnerName = "%s's Generator",
 	generatorOwnerSelf = "Your Generator",

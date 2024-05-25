@@ -75,32 +75,84 @@ local characterVarOverrides = {
 }
 
 for varName, characterVarOverride in pairs(characterVarOverrides) do
-	local var = ix.char.vars[varName]
+    local var = ix.char.vars[varName]
 
-	var.OnDisplay = function(self, container, payload)
-		local textEntry = container:Add("ixTextEntry")
-		textEntry:Dock(TOP)
-		textEntry:SetFont("ixMenuButtonHugeFont")
-		textEntry:SetUpdateOnType(true)
+    var.OnDisplay = function(self, container, payload)
+        local textEntry = container:Add("ixTextEntry")
+        textEntry:Dock(TOP)
+        textEntry:SetFont("ixMenuButtonHugeFont")
+        textEntry:SetUpdateOnType(true)
         textEntry.OnValueChange = function(self, text)
             payload:Set(varName, text)
         end
 
         local random = textEntry:Add("DImageButton")
-		random:SetImage("icon16/arrow_refresh.png")
-		random:SetTooltip(L("random"))
-		random:Dock(RIGHT)
-		random:SetStretchToFit(false)
-		random:DockMargin(5, 5, 5, 5)
+        random:SetImage("icon16/arrow_refresh.png")
+        random:SetTooltip(L("random"))
+        random:Dock(RIGHT)
+        random:SetStretchToFit(false)
+        random:DockMargin(5, 5, 5, 5)
         random:SizeToContents()
         random.DoClick = function()
             textEntry:SetValue(characterVarOverride.randomizer())
         end
 
-		textEntry:SetValue(characterVarOverride.randomizer())
+        textEntry:SetValue(characterVarOverride.randomizer())
 
         return textEntry
+    end
+end
+
+-- ! Overrides ix.menu.Open in helix /libs/sh_menu.lua to ensure options are alphabetically sorted.`
+-- ! Additionally it allows for a forceListEnd option to be passed in the options table to ensure the option is displayed at the end of the list.
+--- Opens up a context menu for the given entity.
+-- @realm client
+-- @tparam MenuOptionsStructure options Data describing what options to display
+-- @entity[opt] entity Entity to send commands to
+-- @treturn boolean Whether or not the menu opened successfully. It will fail when there is already a menu open.
+function ix.menu.Open(options, entity)
+	if (IsValid(ix.menu.panel)) then
+		return false
 	end
+
+	local panel = vgui.Create("ixEntityMenu")
+    panel:SetEntity(entity)
+
+	local listEndOptions = {}
+
+    for text, callbackOrData in SortedPairs(options) do
+        local callback = isfunction(callbackOrData) and callbackOrData or callbackOrData.callback
+
+        if (istable(callbackOrData) and callbackOrData.forceListEnd) then
+            listEndOptions[text] = callback
+        else
+            panel.list:AddOption(text, callback)
+        end
+    end
+
+    if (table.Count(listEndOptions) > 0) then
+		local spacerHeight = 16
+        local spacer = panel.list:Add("EditablePanel")
+        panel.list.list[#panel.list.list + 1] = spacer
+
+		spacer:Dock(TOP)
+		spacer:SetTall(spacerHeight)
+
+        spacer.Paint = function(self, w, h)
+			local color = ix.config.Get("color")
+			surface.SetDrawColor(color)
+			surface.DrawRect(0, spacerHeight * .5, w, 1)
+		end
+
+		for text, callback in SortedPairs(listEndOptions) do
+			panel.list:AddOption(text, callback)
+		end
+	end
+
+	panel.list:SizeToContents()
+	panel.list:Center()
+
+	return true
 end
 
 function Schema.GetCachedTextSize(font, text)

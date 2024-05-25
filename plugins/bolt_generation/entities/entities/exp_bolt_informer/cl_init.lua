@@ -16,7 +16,10 @@ end
 function ENT:GetEntityMenu(client)
 	local options = {}
 
-	options[L("pickup")] = function() end
+	options[L("pickup")] = {
+		callback = function() end,
+		forceListEnd = true,
+	}
 
 	return options
 end

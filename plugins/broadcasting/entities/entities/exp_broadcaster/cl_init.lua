@@ -56,7 +56,10 @@ function ENT:GetEntityMenu(client)
 		options[L("turnOff")] = function() end
 	end
 
-	options[L("pickup")] = function() end
+	options[L("pickup")] = {
+		callback = function() end,
+		forceListEnd = true,
+	}
 
 	itemTable.player = nil
 	itemTable.entity = nil
