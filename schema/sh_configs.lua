@@ -100,6 +100,11 @@ end, {
     category = "income",
 })
 
+ix.config.Add("generatorPickupGracePeriod", 20, "How long after placing a generator it can be picked up without delay (in seconds).", nil, {
+	data = { min = 0, max = 120 },
+	category = "income",
+})
+
 ix.config.Add("generatorPickupInterval", 30, "How long it takes to pick up a generator in seconds.", nil, {
 	data = { min = 1, max = 60 },
     category = "income",

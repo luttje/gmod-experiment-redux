@@ -79,6 +79,8 @@ function ENT:SetupGenerator(client, item)
 	end
 
 	self:SetupPayTimer(item)
+
+	self.expSpawnTime = CurTime()
 end
 
 function ENT:SetupPayTimer(item)
@@ -200,10 +202,13 @@ function ENT:OnOptionSelected(client, option, data)
 	local heldBolts = self:GetHeldBolts() or 0
 
 	if (option == L("pickup", client) and client == self:GetItemOwner()) then
-		local pickupSpeed = ix.config.Get("generatorPickupInterval")
+		local function pickup()
+			if (not IsValid(client) or not client:GetCharacter()) then
+				return
+			end
 
-		client:SetAction("@pickingUpGenerator", pickupSpeed)
-		client:DoStaredAction(self, function()
+			heldBolts = self:GetHeldBolts() or 0
+
 			if (heldBolts > 0) then
 				client:GetCharacter():GiveMoney(heldBolts)
 				client:Notify("You have withdrawn ".. ix.currency.Get(heldBolts) .." from the generator.")
@@ -215,6 +220,21 @@ function ENT:OnOptionSelected(client, option, data)
 			if (itemTable.OnRemoved) then
 				itemTable:OnRemoved()
 			end
+		end
+
+		local pickupGracePeriod = ix.config.Get("generatorPickupGracePeriod")
+
+		-- Within the grace period, the generator can be picked up without delay
+		if (self.expSpawnTime + pickupGracePeriod > CurTime()) then
+			pickup()
+			return
+		end
+
+		local pickupSpeed = ix.config.Get("generatorPickupInterval")
+
+		client:SetAction("@pickingUpGenerator", pickupSpeed)
+		client:DoStaredAction(self, function()
+			pickup()
 		end, pickupSpeed, function()
 			if (IsValid(client)) then
 				client:SetAction()
