@@ -182,8 +182,14 @@ ITEM.functions.Attach = {
 		-- Check if the weapon item's slot is already taken
 		local attachments = weaponItem:GetData("attachments", {})
 
-		if (attachments[foundAttachmentSlot]) then
-			client:Notify("This weapon already has an attachment occupying this slot.")
+        if (attachments[foundAttachmentSlot]) then
+            local existingAttachment = TacRP.GetAttTable(attachments[foundAttachmentSlot].id)
+
+			if (existingAttachment) then
+				client:Notify("This weapon already has an attachment (" .. (TacRP:GetPhrase(existingAttachment.PrintName) or existingAttachment.PrintName) .. ") occupying the same slot.")
+			else
+				client:Notify("This weapon already has an attachment occupying the same slot.")
+			end
 
 			return false
 		end

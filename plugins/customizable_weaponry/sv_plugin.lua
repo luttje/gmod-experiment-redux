@@ -55,3 +55,45 @@ net.Receive("tacrp_receivepreset", function(len, ply)
 
 	-- We override this so players cant receive presets.
 end)
+
+function PLUGIN:PlayerHasFlashlight(client)
+    local weapon = client:GetActiveWeapon()
+
+    if (not IsValid(weapon) or not weapon.ArcticTacRP) then
+        return
+    end
+
+	for _, attachmentSlot in ipairs(weapon.Attachments) do
+        if (not attachmentSlot.Installed) then
+            continue
+        end
+
+        if (attachmentSlot.Installed == "tac_flashlight") then
+			client:AllowFlashlight(true)
+			return true
+		end
+	end
+end
+
+-- Removed because its ugly, let's draw the flashlight for others manually
+-- function PLUGIN:WeaponEquip(weapon, client)
+-- 	if (not weapon.ArcticTacRP) then
+-- 		return
+-- 	end
+
+--     -- Callback when the user toggles the tactical state
+-- 	weapon:NetworkVarNotify("NWTactical", function(weapon, name, oldValue, newValue)
+-- 		for _, attachmentSlot in pairs(weapon.Attachments) do
+-- 			if not attachmentSlot.Installed then
+-- 				continue
+-- 			end
+
+-- 			local attachment = TacRP.GetAttTable(attachmentSlot.Installed)
+
+-- 			-- Also toggle the real flashlight so other players see it
+-- 			if (attachment.Flashlight) then
+-- 				-- client:Flashlight(newValue)
+-- 			end
+-- 		end
+-- 	end)
+-- end

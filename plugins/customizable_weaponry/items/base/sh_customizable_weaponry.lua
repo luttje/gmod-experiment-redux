@@ -20,22 +20,13 @@ function ITEM:OnEquipWeapon(client, weapon)
     end
 
     for attachmentSlotId, attachmentData in pairs(attachments) do
-        weapon:Attach(attachmentSlotId, attachmentData.id, true, true)
+		local silent, suppress = true, true
+        weapon:Attach(attachmentSlotId, attachmentData.id, silent, suppress)
     end
 
     weapon:NetworkWeapon()
+    weapon:NetworkWeapon(client) -- Ensure the player always has the weapon networked even if they're not in the weapon's PVS :/
     TacRP:PlayerSendAttInv(client)
-
-    -- Sometimes networking may be too fast for TacRP to handle clientside (because the weapon wont exist yet),
-	-- so let's fire an update a few hundred ticks later to make doubly sure the client will render the attachments
-	local delayedTickID = SysTime()
-    weapon.expDelayedTickAt = delayedTickID
-
-	timer.Simple(0.1, function()
-		if (IsValid(weapon) and weapon.expDelayedTickAt == delayedTickID) then
-			weapon:NetworkWeapon()
-		end
-	end)
 end
 
 function ITEM:OnRestored()

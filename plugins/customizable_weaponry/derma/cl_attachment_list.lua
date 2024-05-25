@@ -56,7 +56,7 @@ function PANEL:Populate(attachmentId)
 
 	table.SortByMember(compatibleItems, "name", true)
 
-	self:SetTitle("Weapons compatible with the '" .. attachment.PrintName .. "'")
+	self:SetTitle("Weapons compatible with the '" .. (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName) .. "'")
 
 	for _, weaponItem in pairs(compatibleItems) do
 		self:AddCompatibleWeapon(weaponItem)

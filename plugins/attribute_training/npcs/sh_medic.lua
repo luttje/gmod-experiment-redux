@@ -156,8 +156,6 @@ local missionThreeInProgress = NPC:RegisterInteraction("missionThreeInProgress",
 		local medicMissionThree = character:GetData("medicMissionThree", nil)
         local charactersHealed = medicMissionThree.healed
 
-		PrintTable(medicMissionThree.healed)
-
 		return "You have healed " .. #charactersHealed .. " out of " .. NPC.missionThreeHealAmount .. " characters so far. Your help is greatly appreciated! Keep up the good work."
 	end,
 	responses = {
