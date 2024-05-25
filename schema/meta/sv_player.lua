@@ -356,3 +356,45 @@ function META:CreateServerRagdoll(bDontSetPlayer)
 
 	return entity
 end
+
+-- ! This overrides Helix's GetItemDropPos so it also ignores the player's active weapon
+--- Returns a good position in front of the player for an entity to be placed. This is usually used for item entities.
+-- @realm shared
+-- @entity entity Entity to get a position for
+-- @treturn vector Best guess for a good drop position in front of the player
+-- @usage local position = client:GetItemDropPos(entity)
+-- entity:SetPos(position)
+function META:GetItemDropPos(entity)
+	local data = {}
+	local trace
+
+	data.start = self:GetShootPos()
+	data.endpos = self:GetShootPos() + self:GetAimVector() * 86
+	data.filter = self
+
+	if (IsValid(entity)) then
+		-- use a hull trace if there's a valid entity to avoid collisions
+		local mins, maxs = entity:GetRotatedAABB(entity:OBBMins(), entity:OBBMaxs())
+
+		data.mins = mins
+		data.maxs = maxs
+		data.filter = function(ent)
+			if (ent == self or ent == entity or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then
+				return false
+			end
+
+			return true
+		end
+
+		trace = util.TraceHull(data)
+	else
+		-- trace along the normal for a few units so we can attempt to avoid a collision
+		trace = util.TraceLine(data)
+
+		data.start = trace.HitPos
+		data.endpos = data.start + trace.HitNormal * 48
+		trace = util.TraceLine(data)
+	end
+
+	return trace.HitPos
+end
