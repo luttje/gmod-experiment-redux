@@ -3,12 +3,17 @@ local ITEM = ITEM
 ITEM.name = "Flashlight"
 ITEM.price = 100
 ITEM.model = "models/maxofs2d/lamp_flashlight.mdl"
+ITEM.modelScale = 0.35
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Reusables"
 ITEM.class = "exp_flashlight"
 ITEM.weaponCategory = "utility"
 ITEM.description = "A flashlight to help you see in the dark."
+
+function ITEM:OnEntityCreated(entity)
+	entity:SetModelScale(self.modelScale)
+end
 
 ix.pac.RegisterPart("expFlashLightWorldModelPacData", {
 	[1] = {
@@ -46,7 +51,7 @@ ix.pac.RegisterPart("expFlashLightWorldModelPacData", {
 					["Brightness"] = 1,
 					["Hide"] = false,
 					["NoCulling"] = false,
-					["Scale"] = Vector(0.34999999403954, 0.34999999403954, 0.34999999403954),
+					["Scale"] = Vector(ITEM.modelScale, ITEM.modelScale, ITEM.modelScale),
 					["LegacyTransform"] = false,
 					["EditorExpand"] = false,
 					["Size"] = 1,
