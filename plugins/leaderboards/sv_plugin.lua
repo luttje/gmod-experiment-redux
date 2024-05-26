@@ -424,7 +424,15 @@ function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
 
     http.Post(endpoint, {
 		json = util.TableToJSON(data),
-	}, function(body, length, headers, code)
+    }, function(body, length, headers, code)
+		if (code ~= 200) then
+			if (onFailure) then
+				onFailure("HTTP code " .. code)
+			end
+
+			return
+		end
+
 		if (onSuccess) then
 			onSuccess({
 				body = body,
@@ -443,4 +451,83 @@ function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
         ["X-Api-Secret"] = API_KEY,
 		["Accept"] = "application/json",
 	})
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Wipe all character data, temporarily keeping a backup by renaming the tables."
+	COMMAND.superAdminOnly = true
+
+    function COMMAND:OnRun(client, pattern)
+        local timestamp = os.time()
+		local tablesToBackup = {
+			"ix_characters",
+            "ix_inventories",
+			"ix_items",
+            "ix_players",
+
+			"exp_alliances",
+			"exp_character_metrics",
+			"exp_metrics",
+        }
+        local tablesWiped = 0
+
+        -- Ensure all players are disconnected before wiping the tables.
+		for _, otherClient in ipairs(player.GetAll()) do
+			otherClient:Kick("Resetting data.")
+		end
+
+        -- Copy the tables to {timestamp}_backup_{table_name} and then truncate the original table.
+        for _, tableName in ipairs(tablesToBackup) do
+            local backupTableName = timestamp .. "_backup_" .. tableName
+
+            mysql:RawQuery(
+				"CREATE TABLE " .. backupTableName .. " AS SELECT * FROM " .. tableName .. ";",
+                function(data)
+                    ix.util.Notify("Backed up table " .. tableName .. " to " .. backupTableName, client)
+
+                    local query = mysql:Truncate(tableName)
+					query:Callback(function(data)
+						tablesWiped = tablesWiped + 1
+
+						if (tablesWiped == #tablesToBackup) then
+							ix.util.Notify("Wiped all tables.", client)
+						end
+                    end)
+					query:Execute()
+				end
+			)
+		end
+	end
+
+	ix.command.Add("LeaderboardWipeData", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Force the submission of metrics."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		if (PLUGIN.disabled) then
+			client:Notify("Leaderboards are disabled.")
+			return
+		end
+
+		if (not PLUGIN.hasDependantTables) then
+			client:Notify("Dependant tables are not created.")
+			return
+		end
+
+		if (self.isSubmittingMetrics) then
+			client:Notify("Already submitting metrics.")
+			return
+		end
+
+		PLUGIN:SubmitMetrics()
+	end
+
+	ix.command.Add("LeaderboardSubmitMetrics", COMMAND)
 end
