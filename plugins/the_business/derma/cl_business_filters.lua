@@ -12,14 +12,11 @@ function PANEL:Init()
 	bulkActions:SetTall(25)
 	bulkActions:DockMargin(0, 0, 0, 5)
 
-	local selectNoFilters = bulkActions:Add("DButton")
+	local selectNoFilters = bulkActions:Add("expButton")
 	selectNoFilters:Dock(LEFT)
 	selectNoFilters:DockMargin(0, 0, 5, 0)
+	selectNoFilters:SetScale(BUTTON_SCALE_SMALL)
 	selectNoFilters:SetText("Select None")
-	selectNoFilters:SetTextColor(color_white)
-	selectNoFilters:SetFont("ixSmallFont")
-	selectNoFilters:SetExpensiveShadow(1, Color(0, 0, 0, 150))
-	selectNoFilters:SizeToContents()
 	selectNoFilters.DoClick = function(button)
 		for _, filterInput in ipairs(self.filterInputs) do
 			if (filterInput.SetChecked) then
@@ -32,14 +29,11 @@ function PANEL:Init()
 		self:RefreshMatchedItems()
 	end
 
-	local selectFilters = bulkActions:Add("DButton")
+	local selectFilters = bulkActions:Add("expButton")
 	selectFilters:Dock(LEFT)
 	selectFilters:DockMargin(0, 0, 5, 0)
 	selectFilters:SetText("Select All")
-	selectFilters:SetTextColor(color_white)
-	selectFilters:SetFont("ixSmallFont")
-	selectFilters:SetExpensiveShadow(1, Color(0, 0, 0, 150))
-	selectFilters:SizeToContents()
+	selectFilters:SetScale(BUTTON_SCALE_SMALL)
 	selectFilters.DoClick = function(button)
 		for _, filterInput in ipairs(self.filterInputs) do
 			if (filterInput.SetChecked) then
@@ -213,4 +207,4 @@ function PANEL:CreateFilterInput(filter, filterItems, filterType)
 	return filterInput
 end
 
-vgui.Register("expBusinessFilters", PANEL, "DFrame")
+vgui.Register("expBusinessFilters", PANEL, "expFrame")

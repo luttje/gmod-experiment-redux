@@ -71,4 +71,4 @@ function PANEL:Think()
 	end
 end
 
-vgui.Register("expStructureAccessMenu", PANEL, "DFrame")
+vgui.Register("expStructureAccessMenu", PANEL, "expFrame")

@@ -15,14 +15,14 @@ function PANEL:Init()
     self.buttonContainer:DockMargin(0, 0, 0, 10)
     self.buttonContainer:DockPadding(0, 0, 0, 0)
 
-    self.nextButton = self.buttonContainer:Add("DButton")
+    self.nextButton = self.buttonContainer:Add("expButton")
     self.nextButton:Dock(FILL)
     self.nextButton:SetText("Next")
     self.nextButton.DoClick = function()
         self:ShowMessage()
     end
 
-    self.closeButton = self.buttonContainer:Add("DButton")
+    self.closeButton = self.buttonContainer:Add("expButton")
     self.closeButton:Dock(RIGHT)
     self.closeButton:SetText("Close")
     self.closeButton.DoClick = function()

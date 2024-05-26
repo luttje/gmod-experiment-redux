@@ -8,11 +8,9 @@ function PANEL:Init()
 
     self.itemIcon = self:Add("expBusinessItem")
 
-    self.purchaseButton = self:Add("DButton")
+    self.purchaseButton = self:Add("expButton")
     self.purchaseButton:SetText(L"completePurchase")
-    self.purchaseButton:SetFont("ixBigFont")
-	self.purchaseButton:SizeToContents()
-    self.purchaseButton:SetTall(128)
+    self.purchaseButton:SetScale(BUTTON_SCALE_BIG)
 	self.purchaseButton:Dock(BOTTOM)
 
     self.purchaseLabel = self:Add("DLabel")

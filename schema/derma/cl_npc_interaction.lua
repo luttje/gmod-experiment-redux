@@ -22,10 +22,9 @@ function PANEL:SetInteraction(interaction)
 	end
 
     for _, answer in ipairs(responses) do
-		local button = self:Add("DButton")
-		button:SetTall(32)
+		local button = self:Add("expButton")
 		button:Dock(TOP)
-		button:SetFont("ixSmallFont")
+		button:SetScale(BUTTON_SCALE_SMALL)
 		button:DockMargin(0, 0, 0, 8)
 		button:SetText(answer.text)
         button.DoClick = function()
@@ -39,7 +38,7 @@ function PANEL:SetInteraction(interaction)
 			end
 		end
 
-		height = height + button:GetTall()
+		height = height + button:GetTall() + 8
 	end
 
     self:SetTall(height)
@@ -211,4 +210,4 @@ function PANEL:OnRemove()
 	Schema.npc.panel = nil
 end
 
-vgui.Register("expNpcInteraction", PANEL, "DFrame")
+vgui.Register("expNpcInteraction", PANEL, "expFrame")

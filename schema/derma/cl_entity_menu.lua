@@ -17,9 +17,7 @@ function PANEL:Init()
     end
 
     -- Draw a button to close the menu.
-    self.closeButton = self:Add("DImageButton")
-    self.closeButton:SetSize(48, 48)
-	self.closeButton:SetIcon("experiment-redux/close.png")
+    self.closeButton = self:Add("expCloseButton")
 	self.closeButton:SetPos(ScrW() - self.closeButton:GetWide() - padding, padding)
 	self.closeButton.DoClick = function()
 		self:Remove()

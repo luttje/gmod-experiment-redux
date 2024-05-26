@@ -19,11 +19,9 @@ function PANEL:Init()
     self:SetDeleteOnClose(true)
     self:SetTitle(L("paper"))
 
-    self.close = self:Add("DButton")
+    self.close = self:Add("expButton")
     self.close:Dock(BOTTOM)
     self.close:DockMargin(0, 4, 0, 0)
-    self.close:SetTall(32)
-    self.close:SetFont("ixSmallFont")
     self.close:SetText(L("close"))
     self.close.DoClick = function()
         self:Close()
@@ -112,7 +110,7 @@ function PANEL:OnRemove()
     ix.gui.expReadableFrame = nil
 end
 
-vgui.Register("expReadableFrame", PANEL, "DFrame")
+vgui.Register("expReadableFrame", PANEL, "expFrame")
 
 hook.Add("ShouldDrawCrosshair", "expDontDrawCrosshair", function()
 	if (IsValid(ix.gui.expReadableFrame)) then

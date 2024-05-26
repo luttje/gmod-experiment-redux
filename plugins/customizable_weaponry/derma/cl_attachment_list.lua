@@ -63,4 +63,4 @@ function PANEL:Populate(attachmentId)
 	end
 end
 
-vgui.Register("expAttachmentList", PANEL, "DFrame")
+vgui.Register("expAttachmentList", PANEL, "expFrame")

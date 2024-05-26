@@ -29,7 +29,7 @@ function PANEL:Init()
     self.actions:Dock(RIGHT)
 end
 
-function PANEL:SetMessage(message, actions)
+function PANEL:SetMessage(message, actions, noticeKey)
 	self.message:SetText(message)
 	self.message:SizeToContents()
 
@@ -38,13 +38,12 @@ function PANEL:SetMessage(message, actions)
 
         for i = #actions, 1, -1 do
             local action = actions[i]
-            local button = self.actions:Add("DButton")
+            local button = self.actions:Add("expButton")
 
             button:Dock(RIGHT)
             button:DockMargin(0, 0, 4, 0)
-            button:SetFont(BUTTON_FONT_SMALL)
+            button:SetScale("small")
             button:SetText(action.text)
-            button:SizeToContents()
             button.DoClick = action.callback
 
 			actionsWidth = actionsWidth + 4 + button:GetWide()
@@ -59,6 +58,8 @@ function PANEL:SetMessage(message, actions)
         self.close:SetImage("icon16/cross.png")
         self.close.DoClick = function()
             self:Remove()
+            table.remove(Schema.alliance.notices, noticeKey)
+			self:GetParent():Update()
         end
         self.close:SetVisible(true)
     else
@@ -80,12 +81,12 @@ function PANEL:Init()
 	self.notices = {}
 end
 
-function PANEL:AddNotice(message, actions)
+function PANEL:AddNotice(message, actions, noticeKey)
 	actions = actions == nil and true or actions
 
 	local panel = self:Add("exp_AllianceNotice")
     panel:Dock(TOP)
-	panel:SetMessage(message, actions)
+	panel:SetMessage(message, actions, noticeKey)
 
 	return table.insert(self.notices, panel), panel
 end
@@ -105,8 +106,8 @@ function PANEL:Update()
 
 	local totalHeight = 0
 
-    for _, notice in ipairs(Schema.alliance.notices) do
-        local index, panel = self:AddNotice(notice.notice, notice.actions)
+    for noticeKey, notice in ipairs(Schema.alliance.notices) do
+        local index, panel = self:AddNotice(notice.notice, notice.actions, noticeKey)
 
 		totalHeight = totalHeight + 4 + panel:GetTall()
     end
@@ -125,12 +126,9 @@ function PANEL:Init()
 	self.inAlliance = self:Add("EditablePanel")
     self.inAlliance:Dock(FILL)
 
-    self.invite = self.inAlliance:Add("DButton")
-    self.invite:SetTall(BUTTON_HEIGHT)
+    self.invite = self.inAlliance:Add("expButton")
     self.invite:Dock(LEFT)
-    self.invite:SetFont(BUTTON_FONT)
     self.invite:SetText("Invite")
-    self.invite:SizeToContentsX(32)
     self.invite.DoClick = function()
         local menu = DermaMenu()
 
@@ -147,12 +145,9 @@ function PANEL:Init()
 		menu:Open()
 	end
 
-	self.leave = self.inAlliance:Add("DButton")
-	self.leave:SetTall(BUTTON_HEIGHT)
+	self.leave = self.inAlliance:Add("expButton")
 	self.leave:Dock(RIGHT)
-	self.leave:SetFont(BUTTON_FONT)
 	self.leave:SetText("Leave Alliance")
-	self.leave:SizeToContentsX(32)
     self.leave.DoClick = function()
         Derma_Query(
             "Are you sure that you want to leave the alliance?",
@@ -167,12 +162,9 @@ function PANEL:Init()
 	self.notInAlliance = self:Add("EditablePanel")
 	self.notInAlliance:Dock(FILL)
 
-	self.create = self.notInAlliance:Add("DButton")
-	self.create:SetTall(BUTTON_HEIGHT)
+	self.create = self.notInAlliance:Add("expButton")
 	self.create:Dock(RIGHT)
-	self.create:SetFont(BUTTON_FONT)
 	self.create:SetText("Create New Alliance (".. ix.currency.Get(ix.config.Get("allianceCost")) ..")")
-	self.create:SizeToContentsX(BUTTON_HEIGHT)
 	self.create.DoClick = function()
 		Derma_StringRequest(
 			"Create New Alliance (".. ix.currency.Get(ix.config.Get("allianceCost")) ..")",
@@ -307,8 +299,12 @@ function PANEL:SetMember(member)
 		end
 	end
 
-	if (IsValid(client)) then
-		self.client = client
+    if (IsValid(client)) then
+        self.client = client
+    end
+
+	if (client == LocalPlayer()) then
+		self.kickButton:SetVisible(false)
 	end
 
 	self:Update()
@@ -526,12 +522,4 @@ net.Receive("AllianceMemberLeft", function()
 	else
 		panel:Update()
 	end
-end)
-
-net.Receive("AllianceCreateNameInput", function()
-	Derma_StringRequest("Alliance", "What is the name of the alliance?", nil, function(text)
-		net.Start("AllyCreate")
-		net.WriteString(text)
-		net.SendToServer()
-	end)
 end)

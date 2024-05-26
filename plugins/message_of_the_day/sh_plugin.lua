@@ -195,7 +195,7 @@ function PLUGIN:InitPostEntity()
 end
 
 net.Receive("expTermsOfService", function()
-    local window = vgui.Create("DFrame")
+    local window = vgui.Create("expFrame")
     window:SetSize(ScrW() * 0.75, ScrH() * 0.8)
     window:Center()
     window:SetTitle("Terms of Service")

@@ -23,23 +23,6 @@ do
 end
 
 do
-	if (SERVER) then
-		util.AddNetworkString("AllianceCreateNameInput")
-	end
-
-	local COMMAND = {}
-
-	COMMAND.description = "Create a new alliance."
-
-	function COMMAND:OnRun(client)
-		net.Start("AllianceCreateNameInput")
-		net.Send(client)
-	end
-
-	ix.command.Add("AllyCreate", COMMAND)
-end
-
-do
 	local COMMAND = {}
 
 	COMMAND.description = "Invite the character you are looking at to your alliance."

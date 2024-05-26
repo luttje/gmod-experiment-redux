@@ -25,13 +25,13 @@ end
 
 -- Hack a context menu into the business panel for attachments to list compatible weapons before the player buys them
 function ITEM.PaintOver(icon, itemTable, w, h)
-	local parent = icon:GetParent()
+    local parent = icon:GetParent()
 
 	if (not parent) then
 		return
 	end
 
-	if (parent:GetName() ~= "ixBusinessItem") then
+	if (parent:GetName() ~= "ixBusinessItem" and parent:GetName() ~= "expBusinessItem") then
 		return
 	end
 
