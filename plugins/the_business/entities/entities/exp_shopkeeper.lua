@@ -21,7 +21,6 @@ if (SERVER) then
         self:SetModel("models/experiment-redux/shopkeeper.mdl")
 
         self:SetSolid(SOLID_VPHYSICS)
-        self:PhysicsInit(SOLID_VPHYSICS)
         self:SetMoveType(MOVETYPE_NONE)
 
 		-- self:SetUseType(SIMPLE_USE)
