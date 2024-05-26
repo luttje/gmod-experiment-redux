@@ -18,6 +18,15 @@ LANGUAGE = {
 	skills = "Attributes",
     chooseSkills = "Distribute your attribute points.",
 
+    categories = "Categories",
+    searchResults = "Search Results",
+    noSearchResults = "No search results found.",
+    searchClear = "Clear search",
+    filter = "Filter",
+    wallet = "Wallet",
+	confirmPurchase = "Do you want to purchase this item for %s?",
+	completePurchase = "Purchase",
+
     grenades = "Grenades",
     income = "Income",
     moderation = "Moderation",

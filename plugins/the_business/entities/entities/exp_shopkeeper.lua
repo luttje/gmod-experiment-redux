@@ -10,8 +10,9 @@ ENT.PrintName = "Shopkeeper"
 ENT.Author = "Experiment Redux"
 ENT.Category = "Experiment Redux"
 
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminOnly = true
+ENT.PhysgunDisabled = true
 
 ENT.AutomaticFrameAdvance = true
 
@@ -23,20 +24,9 @@ if (SERVER) then
         self:PhysicsInit(SOLID_VPHYSICS)
         self:SetMoveType(MOVETYPE_NONE)
 
-		self:SetUseType(SIMPLE_USE)
+		-- self:SetUseType(SIMPLE_USE)
 
 		self:ReturnToIdle()
-    end
-
-    function ENT:Use(activator)
-		local isNowOpen = not self:GetNWBool("open", false)
-        self:SetNWBool("open", isNowOpen)
-
-        if (isNowOpen) then
-            self:OneShotSequence("inspect", function()
-				self:SetNWBool("open", false)
-			end)
-        end
     end
 
     function ENT:ReturnToIdle()
@@ -70,7 +60,16 @@ if (SERVER) then
 end
 
 if (not CLIENT) then
-	return
+    return
+end
+
+function ENT:GetEntityMenu()
+	return function()
+        local businessPanel = vgui.Create("expBusiness")
+		local purchasePanel = vgui.Create("expBusinessPurchase")
+
+		return businessPanel, purchasePanel
+	end
 end
 
 local doorModel = Model("models/experiment-redux/shopkeeper_portal_door.mdl")
@@ -104,8 +103,26 @@ function ENT:Draw()
         end
     elseif (self.open) then
         self.open = false
+        PLUGIN.lastPurchase = nil
         door:SetSequence("close")
     end
+
+	if (DEBUGX) then
+		PLUGIN.lastPurchase = DEBUGX
+	end
+
+	if (PLUGIN.lastPurchase and PLUGIN.lastPurchase.entity == self) then
+        local itemTable = PLUGIN.lastPurchase.itemTable
+        local model = itemTable:GetModel()
+        local position = self:GetPos() + self:GetUp() * 55
+		local angle = self:GetAngles()
+
+		render.Model({
+			model = model,
+			pos = position + Vector(0, 0, -3.5),
+			angle = angle
+		})
+	end
 
 	door:FrameAdvance()
 	door:DrawModel()

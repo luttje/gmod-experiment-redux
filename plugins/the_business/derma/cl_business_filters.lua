@@ -1,131 +1,8 @@
 local PLUGIN = PLUGIN
 local PANEL = {}
 
-function PANEL:GetItemsForCategory(category)
-    local items = {}
-
-    for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
-        if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
-            continue
-        end
-
-        if (itemTable.category == category) then
-            items[#items + 1] = itemTable
-        end
-    end
-
-    return items
-end
-
-function PANEL:Init()
-	Schema.businessPanel = self
-
-	-- Create a panel to hold the search bar and category list
-	self.searchPanel = self:Add("EditablePanel")
-	self.searchPanel:Dock(TOP)
-	self.searchPanel:SetTall(36)
-	self.searchPanel:DockMargin(0, 0, 0, 5)
-
-	-- Reparent the search bar to the search panel
-	self.search:SetParent(self.searchPanel)
-	self.search:Dock(FILL)
-	self.search:DockMargin(5, 0, 5, 5)
-
-	-- A button to open the filter menu
-	self.filterButton = self.searchPanel:Add("DButton")
-	self.filterButton:Dock(LEFT)
-	self.filterButton:SetWide(100)
-	self.filterButton:SetText("Filter")
-	self.filterButton:SetTextColor(color_white)
-	self.filterButton:SetFont("ixMediumFont")
-	self.filterButton:SetExpensiveShadow(1, Color(0, 0, 0, 150))
-	self.filterButton:DockMargin(5, 0, 5, 5)
-	self.filterButton.DoClick = function(button)
-		local allItems = self:GetItemsForCategory(self.selected.category)
-		local filters = {}
-
-		for _, itemTable in ipairs(allItems) do
-			if (not itemTable.GetFilters) then
-				continue
-			end
-
-			for filter, filterType in pairs(itemTable:GetFilters()) do
-				filters[filter] = filters[filter] or {
-					type = filterType,
-					items = {},
-				}
-				filters[filter].items[#filters[filter].items + 1] = itemTable
-			end
-		end
-
-		if (IsValid(self.filterMenu)) then
-			self.filterMenu:SetVisible(true)
-			self.filterMenu:MakePopup()
-			self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
-			return
-		end
-
-		self.filterMenu = vgui.Create("expEnhancedBusinessFilters", self)
-		self.filterMenu:SetFilters(filters, allItems)
-		self.filterMenu:MakePopup()
-		self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
-	end
-end
-
-function PANEL:DisplayItems(items)
-	self.itemList:Clear()
-	self.itemList:InvalidateLayout(true)
-
-	table.SortByMember(items, "name", true)
-
-	for _, itemTable in ipairs(items) do
-		self.itemList:Add("ixBusinessItem"):SetItem(itemTable)
-	end
-end
-
-function PANEL:LoadItems(category, search)
-	category = category or "misc"
-
-	self.itemList:Clear()
-	self.itemList:InvalidateLayout(true)
-
-	if (IsValid(self.filterMenu)) then
-		self.filterMenu:Close()
-		self.filterMenu:Remove()
-	end
-
-	local items = self:GetItemsForCategory(category)
-	local matchedItems = {}
-
-	for _, itemTable in ipairs(items) do
-		local searchMismatch = search and search ~= "" and not L(itemTable.name):lower():find(search, 1, true)
-
-		if (searchMismatch and not itemTable.GetSearchMatches) then
-			continue
-		end
-
-		if (searchMismatch and itemTable.GetSearchMatches and not itemTable:GetSearchMatches(search)) then
-			continue
-		end
-
-		matchedItems[#matchedItems + 1] = itemTable
-	end
-
-	self:DisplayItems(matchedItems)
-end
-
-function PANEL:Refresh()
-	self:LoadItems(self.selected.category)
-end
-
-vgui.Register("expEnhancedBusiness", PANEL, "ixBusiness")
-
-PANEL = {}
-
 function PANEL:Init()
 	self:SetTitle("Filter")
-	self:SetSize(ScrW() * 0.25, ScrH() * 0.5)
-	self:Center()
 	self:MakePopup()
 	self:SetDeleteOnClose(false)
 
@@ -179,22 +56,6 @@ function PANEL:Init()
 	self.filters = {}
 end
 
-function PANEL:Think()
-	if (input.IsMouseDown(MOUSE_FIRST)) then
-		local mouseX = gui.MouseX()
-		local mouseY = gui.MouseY()
-
-		local x, y, w, h = self:GetBounds()
-
-		-- If the user clicks outside of the frame, close it
-		if (mouseX < x or mouseY < y or mouseX > x + w or mouseY > y + h) then
-			self:Close()
-		end
-	end
-
-	self:MoveToFront()
-end
-
 function PANEL:RefreshMatchedItems()
 	local matchedItems = {}
 
@@ -217,6 +78,8 @@ function PANEL:SetFilters(filters, allItems)
 	self.filterList:Clear()
 	self.filterInputs = {}
 
+	local height = 70
+
 	local filterableItems = {}
 
 	for filter, filterData in pairs(filters) do
@@ -226,6 +89,8 @@ function PANEL:SetFilters(filters, allItems)
 		for _, itemTable in ipairs(filterData.items) do
 			filterableItems[itemTable.uniqueID] = itemTable
 		end
+
+		height = height + filterInput:GetTall() + 10
 	end
 
 	-- Put any non-filterable items into their own filter
@@ -240,7 +105,11 @@ function PANEL:SetFilters(filters, allItems)
 	if (#otherItems > 0) then
 		local filterInput = self:CreateFilterInput("Uncategorized", otherItems, "checkbox")
 		self.filterInputs[#self.filterInputs + 1] = filterInput
+
+		height = height + filterInput:GetTall() + 10
 	end
+
+	self:SetSize(ScrW() * 0.25, math.min(height, ScrH() * 0.75))
 end
 
 function PANEL:CreateFilterInput(filter, filterItems, filterType)
@@ -344,4 +213,4 @@ function PANEL:CreateFilterInput(filter, filterItems, filterType)
 	return filterInput
 end
 
-vgui.Register("expEnhancedBusinessFilters", PANEL, "DFrame")
+vgui.Register("expBusinessFilters", PANEL, "DFrame")

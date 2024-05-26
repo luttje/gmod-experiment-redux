@@ -1,0 +1,331 @@
+local PLUGIN = PLUGIN
+local PANEL = {}
+
+local BUTTON_HEIGHT = 36
+
+--- Returns a list of items, optionally filtered by category and search query.
+function PANEL:GetItems(category, search)
+	category = category ~= "searchResults" and category or nil
+	search = search and search:lower() or nil
+
+    local items = {}
+
+    for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
+        if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
+            continue
+        end
+
+		local searchMismatch = search and search ~= "" and not L(itemTable.name):lower():find(search, 1, true)
+
+		if (searchMismatch and not itemTable.GetSearchMatches) then
+			continue
+		end
+
+		if (searchMismatch and itemTable.GetSearchMatches and not itemTable:GetSearchMatches(search)) then
+			continue
+		end
+
+        if (not category or itemTable.category == category) then
+            items[#items + 1] = itemTable
+        end
+    end
+
+    return items
+end
+
+function PANEL:Init()
+	ix.gui.business = self
+    Schema.businessPanel = self
+
+	self:DockPadding(16, 48, 16, 48)
+
+	self:SetupWalletInfo()
+
+	self.categories = self:Add("DIconLayout")
+	self.categories:SetSpaceY(5)
+	self.categories:SetSpaceX(5)
+	self.categories:SetBorder(5)
+	self.categories:DockPadding(0, 0, 0, 5)
+	self.categories:DockMargin(0, 0, 0, 16)
+	self.categories:Dock(TOP)
+	self.categories.Paint = function(this, w, h)
+		surface.SetDrawColor(0, 0, 0, 200)
+		surface.DrawRect(0, 0, w, h)
+	end
+	self.categoryPanels = {}
+
+	self.scroll = self:Add("DScrollPanel")
+    self.scroll:Dock(FILL)
+
+	self.itemList = self.scroll:Add("DIconLayout")
+	self.itemList:Dock(TOP)
+	self.itemList:SetSpaceX(10)
+	self.itemList:SetSpaceY(10)
+	self.itemList:SetMinimumSize(128, 400)
+
+	local dark = Color(0, 0, 0, 50)
+	local first = true
+
+	for k, v in pairs(ix.item.list) do
+		if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), k) == false) then
+			continue
+		end
+
+		if (!self.categoryPanels[L(v.category)]) then
+			self.categoryPanels[L(v.category)] = v.category
+		end
+	end
+
+	-- Add the category label first
+	local label = self.categories:Add("DLabel")
+	label:SetText(L"categories" .. ":")
+	label:SetFont("expSmallerFont")
+	label:DockMargin(5, 5, 5, 5)
+	label:SetTextColor(Color(255, 255, 255, 100))
+	label:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+	label:SizeToContents()
+	label:SetContentAlignment(5)
+	label:SetTall(BUTTON_HEIGHT)
+
+	local function addCategoryButton(category, realName)
+		local button = self.categories:Add("DButton")
+		button:SetText(category)
+		button:SetTextColor(color_white)
+		button:DockMargin(5, 5, 5, 5)
+		button:SetFont("ixMediumFont")
+		button:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+		button:SizeToContents()
+		button:SetTall(BUTTON_HEIGHT)
+		button.Paint = function(this, w, h)
+			surface.SetDrawColor(self.selected == this and ix.config.Get("color") or dark)
+			surface.DrawRect(0, 0, w, h)
+
+			surface.SetDrawColor(0, 0, 0, 50)
+			surface.DrawOutlinedRect(0, 0, w, h)
+		end
+		button.DoClick = function(this)
+			if (self.selected ~= this) then
+				self.selected = this
+
+				self:LoadItems(realName, self.search:GetText())
+				timer.Simple(0.01, function()
+					self.scroll:InvalidateLayout()
+				end)
+			end
+		end
+		button.category = realName
+
+		if (first) then
+			self.selected = button
+			first = false
+		end
+
+		self.categoryPanels[realName] = button
+
+		return button
+	end
+
+	for category, realName in SortedPairs(self.categoryPanels) do
+		addCategoryButton(category, realName)
+	end
+
+	local searchResultButton = addCategoryButton(L"searchResults", "searchResults")
+	searchResultButton:SetVisible(false)
+
+	self.categories:Layout()
+
+	self:SetupSearch()
+
+	if (self.selected) then
+		self:LoadItems(self.selected.category, self.search:GetText())
+	end
+end
+
+function PANEL:SetupWalletInfo()
+	local wallet = self:Add("DPanel")
+	wallet:SetTall(48)
+	wallet:DockMargin(0, 10, 0, 0)
+	wallet:Dock(BOTTOM)
+	wallet:SetPaintBackground(false)
+
+	local walletLabel = wallet:Add("DLabel")
+	walletLabel:SetText(L"wallet" .. ":")
+	walletLabel:SetFont("expSmallerFont")
+	walletLabel:DockMargin(5, 5, 5, 5)
+	walletLabel:SetTextColor(Color(255, 255, 255, 100))
+	walletLabel:SizeToContents()
+	walletLabel:Dock(LEFT)
+
+	local walletAmount = wallet:Add("DLabel")
+	walletAmount:SetFont("ixBigFont")
+	walletAmount:DockMargin(5, 5, 5, 5)
+	walletAmount:SetTextColor(ix.config.Get("color"))
+	walletAmount:Dock(FILL)
+
+	self.walletAmount = walletAmount
+
+	self:UpdateWallet()
+end
+
+function PANEL:UpdateWallet(money)
+	money = money or LocalPlayer():GetCharacter():GetMoney()
+
+	print(money)
+
+	self.walletAmount:SetText(ix.currency.Get(money))
+	self.walletAmount:SizeToContents()
+end
+
+function PANEL:SetupSearch()
+	-- Create a panel to hold the search bar and category list
+	self.searchPanel = self:Add("DPanel")
+	self.searchPanel:Dock(TOP)
+	self.searchPanel:SetTall(BUTTON_HEIGHT)
+	self.searchPanel:DockMargin(0, 0, 0, 10)
+	self.searchPanel:SetPaintBackground(false)
+
+	-- A button to open the filter menu
+	self.filterButton = self.searchPanel:Add("DButton")
+	self.filterButton:Dock(LEFT)
+	self.filterButton:SetText(L"filter")
+	self.filterButton:SetTextColor(color_white)
+	self.filterButton:SetFont("expSmallerFont")
+	self.filterButton:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+	self.filterButton:SizeToContentsX(32)
+    self.filterButton.DoClick = function(button)
+        local allItems = self:GetItems(self.selected.category, self.search:GetText())
+        local filters = {}
+
+        for _, itemTable in ipairs(allItems) do
+            if (not itemTable.GetFilters) then
+                continue
+            end
+
+            for filter, filterType in pairs(itemTable:GetFilters()) do
+                filters[filter] = filters[filter] or {
+                    type = filterType,
+                    items = {},
+                }
+                filters[filter].items[#filters[filter].items + 1] = itemTable
+            end
+        end
+
+        if (IsValid(self.filterMenu)) then
+            self.filterMenu:SetVisible(true)
+            self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
+			self.filterMenu:MakePopup()
+            return
+        end
+
+        self.filterMenu = vgui.Create("expBusinessFilters", self)
+        self.filterMenu:SetFilters(filters, allItems)
+        self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
+    end
+
+	-- Reparent the search bar to the search panel
+	self.search = self.searchPanel:Add("DTextEntry")
+	self.search:Dock(FILL)
+	self.search:DockMargin(5, 0, 0, 0)
+	self.search:SetFont("ixMediumFont")
+	self.search.OnTextChanged = function(this)
+		local text = self.search:GetText()
+
+		self.selected = self.categoryPanels["searchResults"]
+		self.selected:SetVisible(text ~= "")
+		self.categories:Layout()
+
+		if (text == "") then
+			self.selected = self.categories:GetChildren()[2] -- skip the label
+			timer.Simple(0.01, function()
+				self.scroll:InvalidateLayout()
+			end)
+		end
+
+		self:LoadItems(self.selected.category, text:find("%S") and text or nil)
+
+		self.scroll:InvalidateLayout()
+	end
+	self.search.PaintOver = function(this, cw, ch)
+		if (self.search:GetValue() == "" and !self.search:HasFocus()) then
+			ix.util.DrawText("V", 10, ch/2 - 1, color_black, 3, 1, "ixIconsSmall")
+		end
+	end
+end
+
+function PANEL:DisplayItems(items)
+	self.itemList:Clear()
+	self.itemList:InvalidateLayout(true)
+
+	table.SortByMember(items, "name", true)
+
+	for _, itemTable in ipairs(items) do
+		self.itemList:Add("expBusinessItem"):SetItem(itemTable)
+	end
+
+	if (#items > 0) then
+		return
+	end
+
+	local label = self.itemList:Add("DLabel")
+	label:Dock(TOP)
+	label:SetText(L("noSearchResults"))
+	label:SetFont("ixMediumFont")
+	label:SetTextColor(color_white)
+	label:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+	label:SizeToContents()
+	label:SetContentAlignment(5)
+	label:DockMargin(0, 0, 0, 16)
+
+	local clearButton = self.itemList:Add("DButton")
+	clearButton:Dock(TOP)
+	clearButton:SetText(L("searchClear"))
+	clearButton:SetTextColor(color_white)
+	clearButton:SetFont("ixMediumFont")
+	clearButton:SetTall(32)
+	clearButton.DoClick = function()
+		self.search:SetText("")
+		self.categoryPanels["searchResults"]:SetVisible(false)
+		self.categories:Layout()
+		self.selected = self.categories:GetChildren()[2] -- skip the label
+		self:LoadItems(self.selected.category)
+
+		timer.Simple(0.01, function()
+			self.scroll:InvalidateLayout()
+		end)
+	end
+end
+
+function PANEL:LoadItems(category, search)
+	self.itemList:Clear()
+	self.itemList:InvalidateLayout(true)
+
+	if (IsValid(self.filterMenu)) then
+		self.filterMenu:Close()
+		self.filterMenu:Remove()
+	end
+
+	local items = self:GetItems(category, search)
+
+	self:DisplayItems(items)
+end
+
+function PANEL:BuyItem(uniqueID)
+	Schema.businessPurchasePanel:BuyItem(uniqueID)
+
+	return true
+end
+
+function PANEL:Refresh()
+	self:LoadItems(self.selected.category, self.search:GetText():lower())
+end
+
+vgui.Register("expBusiness", PANEL, "EditablePanel")
+
+PANEL = {}
+
+function PANEL:Init()
+	local size = math.max(ScrW() * 0.1, 128)
+	self:SetSize(size, size * 1.4)
+end
+
+vgui.Register("expBusinessItem", PANEL, "ixBusinessItem")
