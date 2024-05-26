@@ -92,7 +92,8 @@ end
 
 function BUFF.hooks:PlayerWeaponChanged(client, weapon)
 	if (weapon:GetClass() == "ix_hands"
-			or weapon:GetClass() == "ix_keys"
+            or weapon:GetClass() == "ix_keys"
+            or weapon:GetClass() == "exp_keys"
 			or weapon:GetClass() == "gmod_tool"
 			or weapon:GetClass() == "weapon_physgun") then
 		return

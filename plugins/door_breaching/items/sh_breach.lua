@@ -21,7 +21,7 @@ ITEM.functions.Place = {
 
 		local entity = trace.Entity
 
-		if (not IsValid(entity)) then
+		if (not IsValid(entity) or not entity:IsDoor()) then
 			client:Notify("You are not looking at an entity that can be breached!")
 
 			return false

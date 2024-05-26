@@ -14,18 +14,6 @@ function PLUGIN:EntityBreached(entity, client, breach, noSound)
 	Schema.achievement.Progress("doorway_demolisher", client)
 end
 
-function PLUGIN:EntityIsDoor(entity)
-	if (entity:GetClass() == "exp_door_protector") then
-		return false
-	end
-end
-
-function PLUGIN:CanPlayerHoldObject(client, entity)
-	if (entity:GetClass() == "exp_door_protector") then
-		return true
-	end
-end
-
 function PLUGIN:EntityTakeDamage(entity, damageInfo)
 	if (not damageInfo:IsBulletDamage()) then
 		return
@@ -72,16 +60,9 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 	end
 
 	for _, entity in ipairs(ents.FindInSphere(entity:GetPos(), PLUGIN.doorProtectorRange)) do
-		if (entity:GetClass() ~= "exp_door_protector") then
-			continue
-		end
-
 		if (IsValid(entity.expClient) and Schema.perk.GetOwned("jinxed_door", entity.expClient)) then
 			attacker:TakeDamage(damageInfo:GetDamage(), entity, entity)
 		end
-
-		-- The door protector prevented the door from being shot open.
-		return
 	end
 
 	Schema.ImpactEffect(damagePosition, 8, false)

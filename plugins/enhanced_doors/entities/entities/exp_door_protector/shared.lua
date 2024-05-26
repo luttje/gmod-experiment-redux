@@ -6,5 +6,4 @@ ENT.Spawnable = false
 ENT.AdminOnly = true
 
 function ENT:SetupDataTables()
-	self:NetworkVar("Int", "ProtectedCount")
 end

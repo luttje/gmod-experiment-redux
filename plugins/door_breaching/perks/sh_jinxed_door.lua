@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 12,
 	size = 32,
 }
-PERK.description = "Your door protectors will damage characters that try to shoot your doors open."
+PERK.description = "Your doors will damage characters that try to shoot them open."
 

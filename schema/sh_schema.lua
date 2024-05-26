@@ -22,7 +22,10 @@ Schema.disabledPlugins = {
     "spawnsaver",
 
     -- We disable the default spawn point system, because we want players to select one from a list
-	"spawns",
+    "spawns",
+
+    -- We do doors differently with our own plugin.
+	"doors",
 }
 
 ix.util.Include("libs/thirdparty/sh_netstream2.lua")
