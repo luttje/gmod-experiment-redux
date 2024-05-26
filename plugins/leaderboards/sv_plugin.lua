@@ -485,14 +485,14 @@ do
             mysql:RawQuery(
 				"CREATE TABLE " .. backupTableName .. " AS SELECT * FROM " .. tableName .. ";",
                 function(data)
-                    ix.util.Notify("Backed up table " .. tableName .. " to " .. backupTableName, client)
+                    client:Notify("Backed up table " .. tableName .. " to " .. backupTableName)
 
                     local query = mysql:Truncate(tableName)
 					query:Callback(function(data)
 						tablesWiped = tablesWiped + 1
 
 						if (tablesWiped == #tablesToBackup) then
-							ix.util.Notify("Wiped all tables.", client)
+							client:Notify("Wiped all tables.")
 						end
                     end)
 					query:Execute()

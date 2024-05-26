@@ -251,15 +251,15 @@ function Schema.alliance.SetMemberRank(allianceId, memberId, memberRank, callbac
 end
 
 function Schema.alliance.RequestCreate(client, allianceName)
-	if (Schema.util.Throttle("RequestCreate", 15, client)) then
-		ix.util.Notify("Please wait before trying to create an alliance again.", client)
+	if (Schema.util.Throttle("RequestCreate", 10, client)) then
+		client:Notify("Please wait before trying to create an alliance again.")
 
 		return
 	end
 
 	local canRun = Schema.util.RunSingleWithinScope("RequestCreate", function(release)
 		if (type(allianceName) ~= "string" or allianceName:len() < 1) then
-			ix.util.Notify("You entered an invalid alliance name!", client)
+			client:Notify("You entered an invalid alliance name!")
 
 			release()
 			return
@@ -269,8 +269,8 @@ function Schema.alliance.RequestCreate(client, allianceName)
 		local character = client:GetCharacter()
 
 		if (not character:HasMoney(allianceCost)) then
-			ix.util.Notify("You need another " ..
-				ix.currency.Get(allianceCost - character:GetMoney(), nil, true) .. "!", client)
+			client:Notify("You need another " ..
+				ix.currency.Get(allianceCost - character:GetMoney(), nil, true) .. "!")
 
 			release()
 			return
@@ -288,13 +288,13 @@ function Schema.alliance.RequestCreate(client, allianceName)
 			end
 
 			if (client:GetCharacter() ~= character) then
-				ix.util.Notify("You switched characters before the alliance creation process could finish.", client)
+				client:Notify("You switched characters before the alliance creation process could finish.")
 				release()
 				return
 			end
 
 			if (result and #result > 0) then
-				ix.util.Notify("An alliance with the name '" .. allianceName .. "' already exists!", client)
+				client:Notify("An alliance with the name '" .. allianceName .. "' already exists!")
 				release()
 				return
 			end
@@ -306,7 +306,7 @@ function Schema.alliance.RequestCreate(client, allianceName)
 				end
 
 				if (client:GetCharacter() ~= character) then
-					ix.util.Notify("You switched characters before the alliance creation process could finish.", client)
+					client:Notify("You switched characters before the alliance creation process could finish.")
 					release()
 					return
 				end
@@ -317,7 +317,7 @@ function Schema.alliance.RequestCreate(client, allianceName)
 				})
 				character:TakeMoney(allianceCost, "creating an alliance")
 
-				ix.util.Notify("You have created the '" .. allianceName .. "' alliance.", client)
+				client:Notify("You have created the '" .. allianceName .. "' alliance.")
                 ix.log.Add(client, "allianceCreated", allianceName)
 
 				net.Start("AllianceForceUpdate")
@@ -330,7 +330,7 @@ function Schema.alliance.RequestCreate(client, allianceName)
 	end)
 
 	if (not canRun) then
-		ix.util.Notify("You are already creating an alliance!", client)
+		client:Notify("You are already creating an alliance!")
 
 		return
 	end
@@ -344,13 +344,13 @@ end)
 
 function Schema.alliance.RequestKick(client, member)
 	if (Schema.util.Throttle("RequestKick", 5, client)) then
-		ix.util.Notify("Please wait before trying to kick a member again.", client)
+		client:Notify("Please wait before trying to kick a member again.")
 
 		return
 	end
 
 	if (not client:GetAllianceCanManageRoster()) then
-		ix.util.Notify("You are not allowed to kick members from the alliance!", client)
+		client:Notify("You are not allowed to kick members from the alliance!")
 		return
 	end
 
@@ -368,14 +368,14 @@ function Schema.alliance.RequestKick(client, member)
 	local memberAlliance = member:GetAlliance()
 
 	if (not memberAlliance or memberAlliance.id ~= alliance.id) then
-		ix.util.Notify(member:Name() .. " is not in your alliance!", client)
+		client:Notify(member:Name() .. " is not in your alliance!")
 		return
 	end
 
 	local memberCharacter = member:GetCharacter()
 
 	if (not memberCharacter) then
-		ix.util.Notify("This player is not valid!", client)
+		client:Notify("This player is not valid!")
 		return
 	end
 
@@ -385,17 +385,17 @@ function Schema.alliance.RequestKick(client, member)
 		end
 
 		if (not success) then
-			ix.util.Notify("Failed to kick member: " .. reason, client)
+			client:Notify("Failed to kick member: " .. reason)
 			return
 		end
 
 		if (not IsValid(member)) then
-			ix.util.Notify("The member you tried to kick is no longer valid.", client)
+			client:Notify("The member you tried to kick is no longer valid.")
 			return
 		end
 
-		ix.util.Notify("You have kicked " .. member:Name() .. " from the '" .. alliance.name .. "' alliance.", client)
-		ix.util.Notify("You have been kicked from the '" .. alliance.name .. "' alliance.", member)
+		client:Notify("You have kicked " .. member:Name() .. " from the '" .. alliance.name .. "' alliance.")
+		member:Notify("You have been kicked from the '" .. alliance.name .. "' alliance.")
 		ix.log.Add(client, "allianceKicked", member, alliance.name)
 
 		member:SetAlliance(nil)
@@ -403,7 +403,7 @@ function Schema.alliance.RequestKick(client, member)
 	end)
 
 	if (not canRun) then
-		ix.util.Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.", client)
+		client:Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.")
 	end
 end
 
@@ -415,7 +415,7 @@ end)
 
 function Schema.alliance.RequestSetRank(client, member, rank)
 	if (Schema.util.Throttle("RequestSetRank", 5, client)) then
-		ix.util.Notify("Please wait before trying to change a member's rank.", client)
+		client:Notify("Please wait before trying to change a member's rank.")
 
 		return
 	end
@@ -424,12 +424,12 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 	local memberAlliance = member:GetAlliance()
 
 	if (not memberAlliance or memberAlliance.id ~= alliance.id) then
-		ix.util.Notify(member:Name() .. " is not in your alliance!", client)
+		client:Notify(member:Name() .. " is not in your alliance!")
 		return
 	end
 
     if (not rank or rank < RANK_RCT or rank > RANK_GEN) then
-        ix.util.Notify("You entered an invalid rank!", client)
+        client:Notify("You entered an invalid rank!")
         return
     end
 
@@ -438,13 +438,13 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 	local canSetRank = (clientRank >= RANK_LT and rankIsLower) or (clientRank == RANK_GEN)
 
     if (not canSetRank) then
-        ix.util.Notify("You cannot set this rank!", client)
+        client:Notify("You cannot set this rank!")
         return
     end
 
     -- If the leader tries to demote themselves, reject it
 	if (clientRank == RANK_GEN and member == client) then
-		ix.util.Notify("You cannot demote yourself!", client)
+		client:Notify("You cannot demote yourself!")
 		return
 	end
 
@@ -455,18 +455,17 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 			end
 
 			if (not success) then
-				ix.util.Notify("Failed to change member rank: " .. reason, client)
+				client:Notify("Failed to change member rank: " .. reason)
 				return
 			end
 
 			if (not IsValid(member)) then
-				ix.util.Notify("The member you tried to modify is no longer valid.", client)
+				client:Notify("The member you tried to modify is no longer valid.")
 				return
 			end
 
-			ix.util.Notify("You have set " .. member:Name() .. " to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.",
-				client)
-			ix.util.Notify("You have been set to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.", member)
+			client:Notify("You have set " .. member:Name() .. " to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.")
+			member:Notify("You have been set to the rank of " .. RANKS[rank] .. " in the '" .. alliance.name .. "' alliance.")
 			ix.log.Add(client, "allianceRankSet", member, RANKS[rank], alliance.name)
 
 			member:SetAllianceRank(rank)
@@ -474,7 +473,7 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 		end)
 
 	if (not canRun) then
-		ix.util.Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.", client)
+		client:Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.")
 	end
 end
 
@@ -524,7 +523,7 @@ function Schema.alliance.RequestSendMembers(client)
 		end
 
 		if (#members == 0) then
-			ix.util.Notify("Your alliance does not exist anymore!", client)
+			client:Notify("Your alliance does not exist anymore!")
 			return
 		end
 
@@ -555,7 +554,7 @@ end
 
 function Schema.alliance.RequestInviteMember(client, member)
 	if (Schema.util.Throttle("RequestInviteMember", 5, client)) then
-		ix.util.Notify("Please wait before trying to invite a member again.", client)
+		client:Notify("Please wait before trying to invite a member again.")
 
 		return
 	end
@@ -563,34 +562,34 @@ function Schema.alliance.RequestInviteMember(client, member)
 	local alliance = client:GetAlliance()
 
 	if (not alliance) then
-		ix.util.Notify("You are not in an alliance!", client)
+		client:Notify("You are not in an alliance!")
 		return
 	end
 
 	if (not client:GetAllianceCanManageRoster()) then
-		ix.util.Notify("You are not allowed to invite members to the alliance!", client)
+		client:Notify("You are not allowed to invite members to the alliance!")
 		return
 	end
 
 	local memberCharacter = member:GetCharacter()
 
 	if (not memberCharacter) then
-		ix.util.Notify("This player is not valid!", client)
+		client:Notify("This player is not valid!")
 		return
 	end
 
 	local memberAlliance = member:GetAlliance()
 
 	if (memberAlliance) then
-		ix.util.Notify(member:Name() .. " is already in an alliance!", client)
+		client:Notify(member:Name() .. " is already in an alliance!")
 		return
 	end
 
 	member.expAllianceInvites = member.expAllianceInvites or {}
 	member.expAllianceInvites[alliance.id] = client
 
-	ix.util.Notify("You have invited " .. member:Name() .. " to the '" .. alliance.name .. "' alliance.", client)
-	ix.util.Notify(client:Name() .. " has invited you to the '" .. alliance.name .. "' alliance. Go to the alliance panel to accept.", member)
+	client:Notify("You have invited " .. member:Name() .. " to the '" .. alliance.name .. "' alliance.")
+	member:Notify(client:Name() .. " has invited you to the '" .. alliance.name .. "' alliance. Go to the alliance panel to accept.")
 	ix.log.Add(client, "allianceInvited", member, alliance.name)
 
 	net.Start("AllianceMemberInvitation")
@@ -607,7 +606,7 @@ end)
 
 function Schema.alliance.RequestInviteAccept(client, allianceId)
 	if (Schema.util.Throttle("RequestInviteAccept", 5, client)) then
-		ix.util.Notify("Please wait before trying to accept an alliance invite again.", client)
+		client:Notify("Please wait before trying to accept an alliance invite again.")
 
 		return
 	end
@@ -615,14 +614,14 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 	client.expAllianceInvites = client.expAllianceInvites or {}
 
 	if (not client.expAllianceInvites[allianceId]) then
-		ix.util.Notify("You do not have an invite to this alliance!", client)
+		client:Notify("You do not have an invite to this alliance!")
 		return
 	end
 
 	local alliance = client:GetAlliance()
 
 	if (alliance) then
-		ix.util.Notify("You are already in an alliance!", client)
+		client:Notify("You are already in an alliance!")
 		return
 	end
 
@@ -633,7 +632,7 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 			end
 
 			if (not success) then
-				ix.util.Notify("Failed to join alliance: " .. reason, client)
+				client:Notify("Failed to join alliance: " .. reason)
 				return
 			end
 
@@ -642,7 +641,7 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 			if (IsValid(inviter)) then
 				Schema.achievement.Progress("the_don", inviter, client:SteamID64())
 				Schema.achievement.Progress("alliance_architect", inviter, client:SteamID64())
-				ix.util.Notify(client:Name() .. " has accepted your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.", inviter)
+				inviter:Notify(client:Name() .. " has accepted your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.")
 			end
 
 			client:SetAlliance({
@@ -651,13 +650,13 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 			})
 			client:SetAllianceRank(RANK_RCT)
 
-			ix.util.Notify("You have joined the '" .. allianceName .. "' alliance.", client)
+			client:Notify("You have joined the '" .. allianceName .. "' alliance.")
 			ix.log.Add(client, "allianceJoined", allianceName)
 			Schema.alliance.RequestSendMembersToAlliance(allianceId)
 		end)
 
 	if (not canRun) then
-		ix.util.Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.", client)
+		client:Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.")
 	end
 end
 
@@ -669,7 +668,7 @@ end)
 
 function Schema.alliance.RequestInviteDecline(client, allianceId)
 	if (Schema.util.Throttle("RequestInviteDecline", 5, client)) then
-		ix.util.Notify("Please wait before trying to decline an alliance invite again.", client)
+		client:Notify("Please wait before trying to decline an alliance invite again.")
 
 		return
 	end
@@ -677,19 +676,19 @@ function Schema.alliance.RequestInviteDecline(client, allianceId)
 	client.expAllianceInvites = client.expAllianceInvites or {}
 
 	if (not client.expAllianceInvites[allianceId]) then
-		ix.util.Notify("You do not have an invite to this alliance!", client)
+		client:Notify("You do not have an invite to this alliance!")
 		return
 	end
 
 	local inviter = client.expAllianceInvites[allianceId]
 
 	if (IsValid(inviter)) then
-		ix.util.Notify(client:Name() .. " has declined your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.", inviter)
+		inviter:Notify(client:Name() .. " has declined your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.")
 	end
 
 	client.expAllianceInvites[allianceId] = nil
 
-	ix.util.Notify("You have declined the invite to the alliance.", client)
+	client:Notify("You have declined the invite to the alliance.")
 	net.Start("AllianceInviteDeclined")
 	net.WriteUInt(allianceId, 32)
 	net.Send(client)
@@ -703,7 +702,7 @@ end)
 
 function Schema.alliance.RequestLeave(client)
 	if (Schema.util.Throttle("RequestLeave", 5, client)) then
-		ix.util.Notify("Please wait before trying to leave an alliance again.", client)
+		client:Notify("Please wait before trying to leave an alliance again.")
 
 		return
 	end
@@ -711,24 +710,24 @@ function Schema.alliance.RequestLeave(client)
 	local alliance = client:GetAlliance()
 
 	if (not alliance) then
-		ix.util.Notify("You are not in an alliance!", client)
+		client:Notify("You are not in an alliance!")
 		return
 	end
 
 	local canRun = Schema.alliance.RemoveMember(alliance.id, client:GetCharacter():GetID(), function(success, reason)
 		if (not success) then
-			ix.util.Notify("Failed to leave alliance: " .. reason, client)
+			client:Notify("Failed to leave alliance: " .. reason)
 			return
 		end
 
 		client:SetAlliance(nil)
 
-		ix.util.Notify("You have left the '" .. alliance.name .. "' alliance.", client)
+		client:Notify("You have left the '" .. alliance.name .. "' alliance.")
 		ix.log.Add(client, "allianceLeft", alliance.name)
 		Schema.alliance.RequestSendMembersToAlliance(alliance.id)
 	end)
 
 	if (not canRun) then
-		ix.util.Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.", client)
+		client:Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.")
 	end
 end

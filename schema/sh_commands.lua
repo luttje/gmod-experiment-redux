@@ -48,7 +48,7 @@ do
 		local target = Schema.GetPlayer(client:GetEyeTraceNoCursor().Entity)
 
 		if (not target) then
-			ix.util.Notify("You must look at a character!", client)
+			client:Notify("You must look at a character!")
 			return
 		end
 
@@ -106,7 +106,7 @@ do
 		amount = amount or 2
 
 		if (not target:Alive()) then
-			ix.util.Notify("This character is dead!", client)
+			client:Notify("This character is dead!")
 			return
 		end
 
@@ -130,7 +130,7 @@ do
 		elseif (bodyPart == "gear") then
 			hitGroup = HITGROUP_GEAR
 		else
-			ix.util.Notify("Invalid body part specified!", client)
+			client:Notify("Invalid body part specified!")
 			return
 		end
 
@@ -151,7 +151,7 @@ do
 
 		target:TakeDamageInfo(damageInfo)
 
-		ix.util.Notify("You have damaged " .. target:GetName() .. "'s " .. bodyPart .. " for " .. amount .. " damage.", client)
+		client:Notify("You have damaged " .. target:GetName() .. "'s " .. bodyPart .. " for " .. amount .. " damage.")
 	end
 
 	ix.command.Add("CharTakeDamage", COMMAND)
@@ -174,7 +174,7 @@ do
 		local target = util.TraceLine(data).Entity
 
 		if (not IsValid(target)) then
-			ix.util.Notify("You must look at a valid entity!", client)
+			client:Notify("You must look at a valid entity!")
 			return
 		end
 
@@ -203,7 +203,7 @@ do
 
 		if (IsValid(target)) then
 			if (target:IsPlayer()) then
-				ix.util.Notify("You must look at an entity, not a player!", client)
+				client:Notify("You must look at an entity, not a player!")
 				return
 			end
 
@@ -220,7 +220,7 @@ do
 			end
 		end
 
-		ix.util.Notify("Removed " .. count .. " entities of class '" .. class .. "'.", client)
+		client:Notify("Removed " .. count .. " entities of class '" .. class .. "'.")
 	end
 
 	ix.command.Add("EntityRemove", COMMAND)
@@ -239,7 +239,7 @@ do
 		local npc = Schema.npc.Get(npcID)
 
 		if (not npc) then
-			ix.util.Notify("Invalid NPC ID!", client)
+			client:Notify("Invalid NPC ID!")
 			return
 		end
 
@@ -255,7 +255,7 @@ do
 		-- Spawn slightly above the ground so legs don't glitch
 		Schema.npc.SpawnEntity(npc, trace.HitPos + trace.HitNormal * 4, angledTowardsPlayer)
 
-		ix.util.Notify("NPC spawned successfully.", client)
+		client:Notify("NPC spawned successfully.")
 	end
 
 	ix.command.Add("NpcSpawn", COMMAND)
@@ -276,9 +276,9 @@ do
 
 		if (IsValid(target) and target:GetClass() == "exp_npc") then
 			target:Remove()
-			ix.util.Notify("NPC removed successfully.", client)
+			client:Notify("NPC removed successfully.")
 		else
-			ix.util.Notify("You must look at an NPC!", client)
+			client:Notify("You must look at an NPC!")
 		end
 	end
 
@@ -296,7 +296,7 @@ do
 
 	function COMMAND:OnRun(client, buffUniqueID)
 		if (not Schema.buff.Exists(buffUniqueID)) then
-			ix.util.Notify("Invalid Buff Unique ID!", client)
+			client:Notify("Invalid Buff Unique ID!")
 			return
 		end
 
@@ -307,10 +307,10 @@ do
 		local target = util.TraceLine(data).Entity
 
 		if (IsValid(target) and target:IsPlayer()) then
-			ix.util.Notify("Buff applied to " .. target:GetName() .. ".", client)
+			client:Notify("Buff applied to " .. target:GetName() .. ".")
 		else
 			target = client
-			ix.util.Notify("Buff applied to yourself.", client)
+			client:Notify("Buff applied to yourself.")
 		end
 
 		Schema.buff.SetActive(target, buffUniqueID)
@@ -330,7 +330,7 @@ do
 
 	function COMMAND:OnRun(client, buffUniqueID)
 		if (not Schema.buff.Exists(buffUniqueID)) then
-			ix.util.Notify("Invalid Buff Unique ID!", client)
+			client:Notify("Invalid Buff Unique ID!")
 			return
 		end
 
@@ -348,7 +348,7 @@ do
 			return buffTable.uniqueID == buffUniqueID
 		end)
 
-		ix.util.Notify("Removed " .. expiredCount .. " buffs of type '" .. buffUniqueID .. "' from " .. target:GetName() .. ".", client)
+		client:Notify("Removed " .. expiredCount .. " buffs of type '" .. buffUniqueID .. "' from " .. target:GetName() .. ".")
 	end
 
 	ix.command.Add("CharBuffExpire", COMMAND)
@@ -389,7 +389,7 @@ do
         local perkTable = Schema.perk.Get(perkUniqueID)
 
 		if (not perkTable) then
-			ix.util.Notify("Invalid Perk Unique ID!", client)
+			client:Notify("Invalid Perk Unique ID!")
 			return
 		end
 
@@ -415,7 +415,7 @@ do
         local perkTable = Schema.perk.Get(perkUniqueID)
 
 		if (not perkTable) then
-			ix.util.Notify("Invalid Perk Unique ID!", client)
+			client:Notify("Invalid Perk Unique ID!")
 			return
 		end
 

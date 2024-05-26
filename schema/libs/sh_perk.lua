@@ -112,20 +112,24 @@ if (SERVER) then
 		end
 
 		if (not character:HasMoney(perkTable.price)) then
-			ix.util.Notify("You need another " ..
-				ix.currency.Get(perkTable.price - character:GetMoney(), nil, true) .. "!")
+			client:Notify(
+                "You need another "
+                .. ix.currency.Get(perkTable.price - character:GetMoney(), nil, true)
+                .. "!"
+            )
+
 			return
 		end
 
 		if (Schema.perk.GetOwned(perkTable.uniqueID, client)) then
-			ix.util.Notify("You already have the '" .. perkTable.name .. "' perk.", client)
+			client:Notify("You already have the '" .. perkTable.name .. "' perk.")
 			return
 		end
 
 		Schema.perk.Give(client, perkTable.uniqueID)
 
 		character:TakeMoney(perkTable.price, perkTable.name)
-		ix.util.Notify("You have gotten the '" .. perkTable.name .. "' perk.", client)
+		client:Notify("You have gotten the '" .. perkTable.name .. "' perk.")
 
 		hook.Run("PlayerPerkBought", client, perkTable)
 	end)
