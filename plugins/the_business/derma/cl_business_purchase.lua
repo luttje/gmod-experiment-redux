@@ -45,7 +45,8 @@ function PANEL:BuyItem(uniqueID)
 
         PLUGIN.lastPurchase = {
 			entity = entity,
-			itemTable = itemTable
+            itemTable = itemTable,
+			purchasedAt = CurTime()
 		}
 
         net.Start("expBusinessPurchase")

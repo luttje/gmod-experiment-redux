@@ -59,12 +59,11 @@ function PANEL:Init()
 
 	self.itemList = self.scroll:Add("DIconLayout")
 	self.itemList:Dock(TOP)
-	self.itemList:SetSpaceX(10)
-	self.itemList:SetSpaceY(10)
+	self.itemList:SetSpaceX(16)
+	self.itemList:SetSpaceY(16)
 	self.itemList:SetMinimumSize(128, 400)
 
 	local dark = Color(0, 0, 0, 50)
-	local first = true
 
 	for k, v in pairs(ix.item.list) do
 		if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), k) == false) then
@@ -76,7 +75,6 @@ function PANEL:Init()
 		end
 	end
 
-	-- Add the category label first
 	local label = self.categories:Add("DLabel")
 	label:SetText(L"categories" .. ":")
 	label:SetFont("expSmallerFont")
@@ -106,6 +104,7 @@ function PANEL:Init()
 		button.DoClick = function(this)
 			if (self.selected ~= this) then
 				self.selected = this
+				PLUGIN.lastBusinessCategory = realName
 
 				self:LoadItems(realName, self.search:GetText())
 				timer.Simple(0.01, function()
@@ -115,9 +114,9 @@ function PANEL:Init()
 		end
 		button.category = realName
 
-		if (first) then
+		if (not PLUGIN.lastBusinessCategory or PLUGIN.lastBusinessCategory == realName) then
 			self.selected = button
-			first = false
+			PLUGIN.lastBusinessCategory = realName
 		end
 
 		self.categoryPanels[realName] = button
@@ -130,7 +129,10 @@ function PANEL:Init()
 	end
 
 	local searchResultButton = addCategoryButton(L"searchResults", "searchResults")
-	searchResultButton:SetVisible(false)
+
+	if (not PLUGIN.lastBusinessSearch) then
+		searchResultButton:SetVisible(false)
+	end
 
 	self.categories:Layout()
 
@@ -144,7 +146,7 @@ end
 function PANEL:SetupWalletInfo()
 	local wallet = self:Add("DPanel")
 	wallet:SetTall(48)
-	wallet:DockMargin(0, 10, 0, 0)
+	wallet:DockMargin(0, 16, 0, 0)
 	wallet:Dock(BOTTOM)
 	wallet:SetPaintBackground(false)
 
@@ -170,8 +172,6 @@ end
 function PANEL:UpdateWallet(money)
 	money = money or LocalPlayer():GetCharacter():GetMoney()
 
-	print(money)
-
 	self.walletAmount:SetText(ix.currency.Get(money))
 	self.walletAmount:SizeToContents()
 end
@@ -181,7 +181,7 @@ function PANEL:SetupSearch()
 	self.searchPanel = self:Add("DPanel")
 	self.searchPanel:Dock(TOP)
 	self.searchPanel:SetTall(BUTTON_HEIGHT)
-	self.searchPanel:DockMargin(0, 0, 0, 10)
+	self.searchPanel:DockMargin(0, 0, 0, 16)
 	self.searchPanel:SetPaintBackground(false)
 
 	-- A button to open the filter menu
@@ -224,24 +224,27 @@ function PANEL:SetupSearch()
 
 	-- Reparent the search bar to the search panel
 	self.search = self.searchPanel:Add("DTextEntry")
+	self.search:SetText(PLUGIN.lastBusinessSearch or "")
 	self.search:Dock(FILL)
 	self.search:DockMargin(5, 0, 0, 0)
 	self.search:SetFont("ixMediumFont")
 	self.search.OnTextChanged = function(this)
-		local text = self.search:GetText()
+		local query = self.search:GetText()
 
 		self.selected = self.categoryPanels["searchResults"]
-		self.selected:SetVisible(text ~= "")
+		self.selected:SetVisible(query ~= "")
 		self.categories:Layout()
 
-		if (text == "") then
+		if (query == "") then
 			self.selected = self.categories:GetChildren()[2] -- skip the label
 			timer.Simple(0.01, function()
 				self.scroll:InvalidateLayout()
 			end)
 		end
 
-		self:LoadItems(self.selected.category, text:find("%S") and text or nil)
+		PLUGIN.lastBusinessCategory = self.selected.category
+		PLUGIN.lastBusinessSearch = query
+		self:LoadItems(self.selected.category, query:find("%S") and query or nil)
 
 		self.scroll:InvalidateLayout()
 	end
@@ -287,6 +290,7 @@ function PANEL:DisplayItems(items)
 		self.categoryPanels["searchResults"]:SetVisible(false)
 		self.categories:Layout()
 		self.selected = self.categories:GetChildren()[2] -- skip the label
+		PLUGIN.lastBusinessCategory = self.selected.category
 		self:LoadItems(self.selected.category)
 
 		timer.Simple(0.01, function()
@@ -318,6 +322,18 @@ end
 function PANEL:Refresh()
 	self:LoadItems(self.selected.category, self.search:GetText():lower())
 end
+
+hook.Add("VGUIMousePressed", "expCloseFiltersOnOutsideClick", function(panel, mouseCode)
+	if (not IsValid(ix.gui.business) or not IsValid(ix.gui.business.filterMenu) or mouseCode ~= MOUSE_LEFT) then
+		return
+	end
+
+	local isFilterMenuOrChild = panel:HasParent(ix.gui.business.filterMenu)
+
+	if (not isFilterMenuOrChild) then
+		ix.gui.business.filterMenu:Close()
+	end
+end)
 
 vgui.Register("expBusiness", PANEL, "EditablePanel")
 

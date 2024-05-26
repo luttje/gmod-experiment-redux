@@ -81,6 +81,15 @@ function PANEL:Think()
 	self.desiredHeight = ScrH()
 end
 
+function PANEL:OnKeyCodeReleased(key)
+	local scoreboardBinding = input.LookupBinding("showscores")
+	local scoreboardKey = scoreboardBinding and input.GetKeyCode(scoreboardBinding) or KEY_TAB
+
+	if (key == scoreboardKey) then
+		self:Remove()
+	end
+end
+
 function PANEL:Paint(width, height) -- luacheck: ignore 312
 	local selfHalf = self:GetTall() * 0.5
 	local entity = self.entity

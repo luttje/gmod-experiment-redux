@@ -104,6 +104,7 @@ function ENT:Draw()
     elseif (self.open) then
         self.open = false
         PLUGIN.lastPurchase = nil
+		SafeRemoveEntity(self.itemModel)
         door:SetSequence("close")
     end
 
@@ -114,14 +115,30 @@ function ENT:Draw()
 	if (PLUGIN.lastPurchase and PLUGIN.lastPurchase.entity == self) then
         local itemTable = PLUGIN.lastPurchase.itemTable
         local model = itemTable:GetModel()
-        local position = self:GetPos() + self:GetUp() * 55
-		local angle = self:GetAngles()
+        local fraction = math.max(0, math.TimeFraction(
+			PLUGIN.lastPurchase.purchasedAt + 4,
+			PLUGIN.lastPurchase.purchasedAt,
+			CurTime()
+		))
 
-		render.Model({
-			model = model,
-			pos = position + Vector(0, 0, -3.5),
-			angle = angle
-		})
+		if (fraction > 0) then
+			if (not IsValid(self.itemModel)) then
+				self.itemModel = ClientsideModel(model, RENDERGROUP_OTHER)
+				self.itemModel:SetModel(model)
+                self.itemModel:SetNoDraw(true)
+
+				if (itemTable.modelScale) then
+					self.itemModel:SetModelScale(itemTable.modelScale, 0)
+				end
+			end
+
+            self.itemModel:SetPos(self:GetPos() + self:GetUp() * (42 + math.sin(SysTime()) * 10))
+            self.itemModel:SetAngles(Angle(0, SysTime() * 100 % 360, 0))
+
+			render.SetBlend(fraction)
+            self.itemModel:DrawModel()
+			render.SetBlend(1)
+		end
 	end
 
 	door:FrameAdvance()
@@ -129,4 +146,9 @@ function ENT:Draw()
 	render.RenderFlashlights(function()
 		door:DrawModel()
 	end)
+end
+
+function ENT:OnRemove()
+    SafeRemoveEntity(self.door)
+	SafeRemoveEntity(self.itemModel)
 end
