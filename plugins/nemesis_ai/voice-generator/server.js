@@ -55,33 +55,6 @@ app.post('/generate-voice', (req, res) => {
     childProcess.stdin.end();
 });
 
-app.get('/stream-voice/:fileName', (req, res) => {
-    const fileName = req.params.fileName;
-    const filePath = `/root/.local/share/mycroft/mimic3/${fileName}`;
-    // TODO: Prevent path traversal attacks
-
-    // Stream it, so that it can be played in an <audio> tag
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
-
-    fileStream.on('error', (err) => {
-        console.error(`File Stream Error: ${err}`);
-        res.status(500).send('Error streaming the file');
-    });
-
-    fileStream.on('end', () => {
-        console.log('File Stream Ended');
-    });
-
-    res.on('finish', () => {
-        console.log('Response Finished');
-    });
-
-    res.on('close', () => {
-        console.log('Response Closed');
-    });
-});
-
 app.listen(port, () => {
     console.log(`Voice generator server listening at http://localhost:${port}`);
 });
