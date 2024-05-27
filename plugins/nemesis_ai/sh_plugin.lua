@@ -1,8 +1,8 @@
 local PLUGIN = PLUGIN
 
-PLUGIN.name = "Monitors"
+PLUGIN.name = "Nemesis AI"
 PLUGIN.author = "Experiment Redux"
-PLUGIN.description = "Display giant monitor screens in the city."
+PLUGIN.description = "An AI that communicates through giant screens in the city."
 
 ix.util.Include("sh_commands.lua")
 ix.util.Include("sv_plugin.lua")
