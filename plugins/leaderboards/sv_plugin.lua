@@ -505,6 +505,54 @@ do
 end
 
 do
+    local COMMAND = {}
+
+    COMMAND.description = "Remove all backup tables."
+    COMMAND.superAdminOnly = true
+
+    function COMMAND:OnRun(client)
+        local query
+
+		if (mysql.module == "mysqloo") then
+			query = [[
+				SELECT table_name AS name
+				FROM information_schema.tables
+				WHERE table_name LIKE '%_backup_%'
+				AND table_schema = ']] .. ix.db.config.database .. [[';
+			]]
+		elseif (mysql.module == "sqlite") then
+			query = [[
+				SELECT name
+				FROM sqlite_master
+				WHERE type='table' AND name LIKE '%_backup_%';
+			]]
+		else
+			ix.util.SchemaError("Unsupported module \"%s\"!\n", mysql.module)
+		end
+
+        mysql:RawQuery(
+            query,
+            function(data)
+                if (not data) then
+                    client:Notify("No backup tables found.")
+                    return
+                end
+
+                for _, row in ipairs(data) do
+                    local tableName = row.name
+
+                    mysql:RawQuery("DROP TABLE " .. tableName .. ";", function(_)
+                        client:Notify("Dropped table " .. tableName)
+                    end)
+                end
+            end
+        )
+    end
+
+	ix.command.Add("LeaderboardRemoveBackups", COMMAND)
+end
+
+do
 	local COMMAND = {}
 
 	COMMAND.description = "Force the submission of metrics."
