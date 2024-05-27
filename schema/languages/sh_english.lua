@@ -5,38 +5,41 @@ LANGUAGE = {
 	optdAccessibilityFont =
 	"Enables a more readable font for those who have trouble reading the default font.",
 	optAccessibilityFontScale = "Font scaling",
-    optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
+	optdAccessibilityFontScale = "Scales the font to be larger for those who think it's too big or small.",
 
 	random = "Random",
+	attribPointsDesc =
+	"These enhance your character's abilities. You get %d points to distribute now and can train to get more later.",
+	attribPointsHint = "Hover over an attribute to see what it affects.",
 
 	achievements = "Achievements",
-    alliance = "Alliance",
+	alliance = "Alliance",
 	alliances = "Alliances",
 	buffs = "Nano Buffs",
 	perks = "Perks",
 	scoreboard = "Player List",
 	skills = "Attributes",
-    chooseSkills = "Distribute your attribute points.",
+	chooseSkills = "Distribute your attribute points.",
 
-    categories = "Categories",
-    searchResults = "Search Results",
-    noSearchResults = "No search results found.",
-    searchClear = "Clear search",
-    filter = "Filter",
-    wallet = "Wallet",
+	categories = "Categories",
+	searchResults = "Search Results",
+	noSearchResults = "No search results found.",
+	searchClear = "Clear search",
+	filter = "Filter",
+	wallet = "Wallet",
 	confirmPurchase = "Do you want to purchase this item for %s?",
 	completePurchase = "Purchase",
 
-    grenades = "Grenades",
-    income = "Income",
-    moderation = "Moderation",
+	grenades = "Grenades",
+	income = "Income",
+	moderation = "Moderation",
 	scavenging = "Scavenging",
 
 	noBuffs = "No active nano buffs.",
 
 	upgrade = "Upgrade '%s' (-%s)",
 	withdraw = "Withdraw (+%s)",
-    generatorOwnerName = "%s's Generator",
+	generatorOwnerName = "%s's Generator",
 	generatorOwnerSelf = "Your Generator",
 
 	generator = "Generator",
@@ -47,8 +50,8 @@ LANGUAGE = {
 	generatorRecharge = "Recharge",
 	generatorRecharged = "You have successfully recharged the generator with %d scrap.",
 
-    pickup = "Pick Up",
-    pickingUpGenerator = "Picking up generator...",
+	pickup = "Pick Up",
+	pickingUpGenerator = "Picking up generator...",
 
 	turnOn = "Turn On",
 	turnOff = "Turn Off",
@@ -74,10 +77,10 @@ LANGUAGE = {
 	tiedUp = "They have been tied up.",
 	fUntied = "You have been untied.",
 	beingTied = "They are being tied up.",
-    beingUntied = "They are being untied.",
+	beingUntied = "They are being untied.",
 
-    tiedBreakFreeStart = "Press %s to attempt to break free.",
-    tiedBreakingFree = "Struggling to break free.",
+	tiedBreakFreeStart = "Press %s to attempt to break free.",
+	tiedBreakingFree = "Struggling to break free.",
 	tiedBreakingFreeMe = "starts struggling to break free from their restraints...",
 
 	chloroforming = "Chloroforming...",
@@ -88,9 +91,9 @@ LANGUAGE = {
 
 	searchCorpse = "Search corpse",
 	searchingCorpse = "Searching corpse...",
-    resurrectingCorpse = "Resurrecting corpse...",
-    corpseOwnerName = "Corpse of %s",
-    corpseOwnerSelf = "Your Corpse",
+	resurrectingCorpse = "Resurrecting corpse...",
+	corpseOwnerName = "Corpse of %s",
+	corpseOwnerSelf = "Your Corpse",
 	corpseDeceased = "Deceased",
 
 	mutilateCorpse = "Mutilate corpse",
@@ -112,16 +115,16 @@ LANGUAGE = {
 	rareItem = "Rare Item",
 
 	cashback = "Cashback",
-    cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
+	cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
 
-    bloodBondRequest = "Request Blood Bond",
-    bloodBondRequestSent = "You have sent a blood bond request to %s.",
+	bloodBondRequest = "Request Blood Bond",
+	bloodBondRequestSent = "You have sent a blood bond request to %s.",
 	bloodBondRequested = "%s has requested a blood bond with you.",
-    bloodBondAccept = "Accept Blood Bond",
-    bloodBondActivated =
-    "You have blood bonded with %s. You can't hurt each other. When you're near them your generators output 10%% more.",
-    bloodBondCannotTie = "You can't tie someone you're blood bonded with.",
-    bloodBondCannotChloroform = "You can't chloroform someone you're blood bonded with.",
+	bloodBondAccept = "Accept Blood Bond",
+	bloodBondActivated =
+	"You have blood bonded with %s. You can't hurt each other. When you're near them your generators output 10%% more.",
+	bloodBondCannotTie = "You can't tie someone you're blood bonded with.",
+	bloodBondCannotChloroform = "You can't chloroform someone you're blood bonded with.",
 	bloodBondCannotMutilate = "You can't mutilate someone you're blood bonded with.",
 
 	--[[

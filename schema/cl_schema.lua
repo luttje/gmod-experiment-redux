@@ -30,7 +30,7 @@ net.Receive("ixRecognizeMenu", function(length)
 end)
 
 -- ! Overrides the default name and description vars so they display a 'Random' button in the character creation menu.
-local characterVarOverrides = {
+local characterVarRandomOverrides = {
 	["name"] = {
 		randomizer = function ()
 			return Schema.GetRandomName()
@@ -43,7 +43,7 @@ local characterVarOverrides = {
 	},
 }
 
-for varName, characterVarOverride in pairs(characterVarOverrides) do
+for varName, characterVarOverride in pairs(characterVarRandomOverrides) do
     local var = ix.char.vars[varName]
 
     var.OnDisplay = function(self, container, payload)
@@ -70,6 +70,90 @@ for varName, characterVarOverride in pairs(characterVarOverrides) do
 
         return textEntry
     end
+end
+
+-- ! Overrides the attributes display so it displays more information about the attributes.
+ix.char.vars["attributes"].OnDisplay = function(self, container, payload)
+    local maximum = hook.Run("GetDefaultAttributePoints", LocalPlayer(), payload) or 10
+
+    if (maximum < 1) then
+        return
+    end
+
+	local attributes = container:Add("DPanel")
+	attributes:SetPaintBackground(false)
+    attributes:Dock(TOP)
+
+    local total = 0
+
+    payload.attributes = {}
+
+    local infoLabel = attributes:Add("DLabel")
+	infoLabel:Dock(TOP)
+	infoLabel:DockMargin(0, 0, 0, 16)
+    infoLabel:SetFont("expSmallerFont")
+    infoLabel:SetTextColor(color_white)
+    infoLabel:SetWrap(true)
+    infoLabel:SetAutoStretchVertical(true)
+    infoLabel:SetText(L("attribPointsDesc", maximum))
+
+    -- total spendable attribute points
+    local totalBar = attributes:Add("ixAttributeBar")
+    totalBar:SetMax(maximum)
+    totalBar:SetValue(maximum)
+    totalBar:Dock(TOP)
+    totalBar:DockMargin(2, 2, 2, 2)
+    totalBar:SetText(L("attribPointsLeft"))
+    totalBar:SetReadOnly(true)
+    totalBar:SetColor(Color(20, 120, 20, 255))
+
+    for attributeKey, attribute in SortedPairsByMemberValue(ix.attributes.list, "name") do
+        payload.attributes[attributeKey] = 0
+
+		local bar = attributes:Add("ixAttributeBar")
+		bar:SetPaintBackground(false)
+        bar:SetMax(maximum)
+        bar:Dock(TOP)
+        bar:DockMargin(2, 2, 2, 2)
+        bar:SetText(L(attribute.name))
+		bar.OnChanged = function(this, difference)
+			if ((total + difference) > maximum) then
+				return false
+			end
+
+			total = total + difference
+			payload.attributes[attributeKey] = payload.attributes[attributeKey] + difference
+
+			totalBar:SetValue(totalBar.value - difference)
+		end
+
+		bar.bar:SetHelixTooltip(function(tooltip)
+			local attributeDescription = tooltip:AddRow("description")
+			attributeDescription:SetText(attribute.description)
+			attributeDescription:SizeToContents()
+		end)
+
+        if (attribute.noStartBonus) then
+            bar:SetReadOnly()
+        end
+    end
+
+    local hintLabel = attributes:Add("DLabel")
+    hintLabel:Dock(TOP)
+	hintLabel:DockMargin(0, 16, 0, 0)
+    hintLabel:SetFont("expSmallerFont")
+    hintLabel:SetTextColor(ColorAlpha(color_white, 50))
+    hintLabel:SetContentAlignment(5)
+    hintLabel:SetText(L("attribPointsHint"))
+
+	attributes:InvalidateChildren(true)
+	attributes:InvalidateParent(true)
+	attributes:InvalidateLayout(true)
+	timer.Simple(0, function()
+		attributes:SizeToChildren(false, true)
+    end)
+
+    return attributes
 end
 
 -- ! Overrides ix.menu.Open in helix /libs/sh_menu.lua to ensure options are alphabetically sorted.`

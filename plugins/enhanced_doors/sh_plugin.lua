@@ -14,6 +14,11 @@ ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 ix.util.Include("sh_commands.lua")
 
+ix.config.Add("doorLockTime", 1, "How long it takes to (un)lock a door.", nil, {
+	data = {min = 0, max = 10.0, decimals = 1},
+	category = "dConfigName"
+})
+
 do
 	local entityMeta = FindMetaTable("Entity")
 
@@ -86,17 +91,3 @@ do
 		end
 	end
 end
-
--- Configurations for door prices.
-ix.config.Add("doorCost", 10, "The price to purchase a door.", nil, {
-	data = {min = 0, max = 500},
-	category = "dConfigName"
-})
-ix.config.Add("doorSellRatio", 0.5, "How much of the door price is returned when selling a door.", nil, {
-	data = {min = 0, max = 1.0, decimals = 1},
-	category = "dConfigName"
-})
-ix.config.Add("doorLockTime", 1, "How long it takes to (un)lock a door.", nil, {
-	data = {min = 0, max = 10.0, decimals = 1},
-	category = "dConfigName"
-})

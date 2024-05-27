@@ -155,50 +155,55 @@ function Schema:EntityKeyValue(entity, key, value)
 end
 
 function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter)
-	local mode = client:IsRunning() and "run" or "walk"
+    local mode = client:IsRunning() and "run" or "walk"
 
-	if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
-		return true
-	end
+    if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
+        return true
+    end
 
-	if (client:IsBot()) then
-		-- Bots wont have an inventory
-		return
-	end
+    if (client:IsBot()) then
+        -- Bots wont have an inventory
+        return
+    end
 
-	local armorItems = client:GetCharacterNetVar("armorItems", {})
-	local soundOverride
+    local armorItems = client:GetCharacterNetVar("armorItems", {})
+    local soundOverride
 
     for _, uniqueId in ipairs(armorItems) do
         local item = ix.item.list[uniqueId]
 
-		if (not item or not item.footstepSounds) then
-			continue
-		end
+        if (not item or not item.footstepSounds) then
+            continue
+        end
 
-		local footstepSounds = item.footstepSounds[mode]
+        local footstepSounds = item.footstepSounds[mode]
 
-		if (not footstepSounds) then
-			continue
-		end
+        if (not footstepSounds) then
+            continue
+        end
 
-		soundOverride = footstepSounds[math.random(#footstepSounds)]
-	end
+        soundOverride = footstepSounds[math.random(#footstepSounds)]
+    end
 
     if (soundOverride) then
         EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, 100, 0, filter)
         return true
     end
 
-	if (soundName:StartsWith("player/footsteps/wood")) then
-		local shouldPlaySqueekSound = math.Rand(0, 100) <= 0.5
+    if (soundName:StartsWith("player/footsteps/wood")) then
+        local shouldPlaySqueekSound = math.Rand(0, 100) <= 0.5
 
-		if (shouldPlaySqueekSound) then
-			soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or "ambient/materials/squeekyfloor2.wav"
+        if (shouldPlaySqueekSound) then
+            soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or
+            "ambient/materials/squeekyfloor2.wav"
 
-			EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, math.random(95, 105), 0, filter)
-		end
-	end
+            EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, math.random(95, 105), 0, filter)
+        end
+    end
+end
+
+function Schema:GetDefaultAttributePoints(client)
+	return 5
 end
 
 function Schema:AdjustMaterialSources(materialSources)
