@@ -45,7 +45,7 @@ end)
 local audioChannelReference
 
 net.Receive("expPlayNemesisAudio", function(length)
-	local audioUrl = net.ReadString()
+    local audioUrl = net.ReadString()
 
 	sound.PlayURL(audioUrl, "", function(channel)
         if (IsValid(channel)) then

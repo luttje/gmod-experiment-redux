@@ -39,7 +39,7 @@ function PLUGIN:GenerateSpeech(text, callback)
         return
     end
 
-    local endpoint = APP_URL .. "/generate-voice"
+    local endpoint = APP_URL .. "generate-voice"
 
     http.Post(
         endpoint,
@@ -60,6 +60,7 @@ function PLUGIN:GenerateSpeech(text, callback)
     )
 end
 
+-- lua_run ix.plugin.Get("nemesis_ai"):PlayNemesisAudio("Hello world!")
 function PLUGIN:PlayNemesisAudio(text, clients)
 	self:GenerateSpeech(text, function(body)
 		local audioUrl = AUDIO_URL .. body

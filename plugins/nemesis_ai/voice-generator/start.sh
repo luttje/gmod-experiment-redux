@@ -17,7 +17,7 @@ echo "Starting voice generator at $(date)" >> "$LOG_DIR/$(date +%Y-%m-%d).log"
 
 while [ $RESTART_COUNT -lt $MAX_RESTARTS ]; do
   LOG_FILE="$LOG_DIR/$(date +%Y-%m-%d).log"
-  docker run -p 3000:3000 --rm -v "/srv/experiment-redux/content/nemesis_ai:/root/.local/share/mycroft/mimic3" voice-generator >> "$LOG_FILE" 2>&1
+  docker run -p 3000:3000 --rm -v "/srv/experiment-redux/content/nemesis_ai:/root/.local/share/mycroft/mimic3" --env-file "$SCRIPT_DIR/.env" voice-generator >> "$LOG_FILE" 2>&1
   sleep 1
   ((RESTART_COUNT++))
 

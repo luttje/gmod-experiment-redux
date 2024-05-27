@@ -4,13 +4,13 @@ We build upon the [mimic-3 tts docker image](https://mycroft-ai.gitbook.io/docs/
 
 ## 🚀 Getting Started
 
-1. Ensure you have [Docker](https://www.docker.com/) installed.
+1. Ensure you have [Docker](https://www.docker.com/) installed and running.
 
 2. Clone (or download) this repository.
 
 3. Open a terminal (or command prompt) in this directory.
 
-4. Build the docker image in this directory.
+4. Build the docker image in this directory. This is a one-time operation, unless you make changes to the Dockerfile or node script.
 
     ```bash
     docker build -t voice-generator .
@@ -21,7 +21,7 @@ We build upon the [mimic-3 tts docker image](https://mycroft-ai.gitbook.io/docs/
 1. Start the docker container
 
     ```bash
-    MSYS_NO_PATHCONV=1 docker run -p 3000:3000 -i --rm -v "$(pwd)/volume:/root/.local/share/mycroft/mimic3" voice-generator
+    MSYS_NO_PATHCONV=1 docker run -p 3000:3000 -i --rm -v "$(pwd)/volume:/root/.local/share/mycroft/mimic3" --env-file "./.env" voice-generator
     ```
 
     The `MSYS_NO_PATHCONV=1` prefix is only required for Windows users using Git Bash.
