@@ -3,11 +3,77 @@ local PLUGIN = PLUGIN
 util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
 util.AddNetworkString("expSetMonitorVgui")
+util.AddNetworkString("expPlayNemesisAudio")
 
 resource.AddFile("materials/experiment-redux/arrow.png")
 resource.AddFile("materials/experiment-redux/arrow_forward.png")
 resource.AddFile("materials/experiment-redux/arrow_backward.png")
 resource.AddSingleFile("materials/experiment-redux/combinescanline.vmt")
+
+local API_KEY, APP_URL, AUDIO_URL
+
+-- On loading the plugin we will get the API_KEY that we can use to authenticate with the moderation API.
+function PLUGIN:OnLoaded()
+    local envFile = file.Read(PLUGIN.folder .. "/voice-generator/.env", "LUA")
+
+    if (not envFile) then
+		ix.util.SchemaErrorNoHalt("The .env file is missing from the web folder for Nemesis AI.")
+		self.disabled = true
+		return
+    end
+
+    local variables = Schema.util.EnvToTable(envFile)
+
+	-- An API key to authenticate with the voice generation API
+    API_KEY = variables.API_SECRET
+
+	-- The URL of the voice generation API
+    APP_URL = Schema.util.ForceEndPath(variables.APP_URL)
+
+	-- Where the audio files are stored. An idea is to reuse the FastDL server for this.
+    AUDIO_URL = Schema.util.ForceEndPath(variables.AUDIO_URL)
+end
+
+function PLUGIN:GenerateSpeech(text, callback)
+    if (self.disabled) then
+        return
+    end
+
+    local endpoint = APP_URL .. "/generate-voice"
+
+    http.Post(
+        endpoint,
+        {
+            text = text,
+            api_key = API_KEY
+        },
+        function(body, len, headers, code)
+            if (code == 200) then
+                callback(body)
+            else
+                ix.util.SchemaErrorNoHalt("Error fetching the .wav file:", code)
+            end
+        end,
+        function(error)
+            ix.util.SchemaErrorNoHalt("Error fetching the .wav file:", error)
+        end
+    )
+end
+
+function PLUGIN:PlayNemesisAudio(text, clients)
+	self:GenerateSpeech(text, function(body)
+		local audioUrl = AUDIO_URL .. body
+
+		net.Start("expPlayNemesisAudio")
+        net.WriteString(audioUrl)
+
+		if (istable(clients)) then
+			net.Send(clients)
+		else
+			net.Broadcast()
+		end
+	end)
+end
 
 function PLUGIN:SpawnMonitor(parent, monitor)
     local monitorEnt = ents.Create("exp_monitor")

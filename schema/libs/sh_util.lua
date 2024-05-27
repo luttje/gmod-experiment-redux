@@ -2,6 +2,14 @@ Schema.util = Schema.util or {}
 Schema.util.transactions = Schema.util.transactions or {}
 Schema.util.throttles = Schema.util.throttles or {}
 
+function Schema.util.ForceEndPath(path)
+	if (not path:EndsWith("/")) then
+		return path .. "/"
+	end
+
+	return path
+end
+
 --- Converts Source Engine units (1 unit = 1 inch) to centimeters (1 unit = 2.54 cm)
 --- @param unit any
 --- @return unknown

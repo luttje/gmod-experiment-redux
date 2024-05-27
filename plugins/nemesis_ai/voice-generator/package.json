@@ -1,0 +1,9 @@
+{
+  "description": "Voice generator for Experiment Redux Nemesis AI",
+  "private": true,
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

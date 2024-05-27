@@ -15,7 +15,7 @@ function PLUGIN:OnLoaded()
     local variables = Schema.util.EnvToTable(envFile)
 
     API_KEY = variables.API_SECRET
-    APP_URL = variables.APP_URL
+    APP_URL = Schema.util.ForceEndPath(variables.APP_URL)
 
 	-- gmsv_eightbit doesn't work in singleplayer or on listen servers, so we only load it on dedicated servers.
     if (eightbit or not game.IsDedicated()) then
@@ -100,7 +100,7 @@ function PLUGIN:player_connect(data)
 	self:PostJson("api/submit-player-info", data, function(response)
 		ix.util.SchemaPrint("Player info submitted successfully.")
 	end, function(message)
-		ix.util.SchemaErrorNoHaltWithStack("Failed to submit player info: " .. message)
+		ix.util.SchemaErrorNoHalt("Failed to submit player info: " .. message)
 	end)
 end
 
@@ -109,7 +109,7 @@ function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
 		return
 	end
 
-    endpoint = APP_URL .. "/" .. endpoint
+    endpoint = APP_URL .. endpoint
 
     http.Post(endpoint, {
 		json = util.TableToJSON(data),

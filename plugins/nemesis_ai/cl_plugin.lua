@@ -41,6 +41,21 @@ net.Receive("expMonitorsPrintPresets", function(length)
 	end
 end)
 
+-- Keeping a reference to the audio channel will prevent it from being garbage collected and stopping the audio
+local audioChannelReference
+
+net.Receive("expPlayNemesisAudio", function(length)
+	local audioUrl = net.ReadString()
+
+	sound.PlayURL(audioUrl, "", function(channel)
+        if (IsValid(channel)) then
+            audioChannelReference = channel
+
+			channel:Play()
+		end
+	end)
+end)
+
 -- When a monitor comes into PVS, set it up with the correct vgui
 function PLUGIN:NetworkEntityCreated(entity)
     if (entity:GetClass() ~= "exp_monitor" or not self.monitorVgui) then

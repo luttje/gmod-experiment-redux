@@ -27,7 +27,7 @@ function PLUGIN:OnLoaded()
     local variables = Schema.util.EnvToTable(envFile)
 
     API_KEY = variables.API_SECRET
-    APP_URL = variables.APP_URL
+    APP_URL = Schema.util.ForceEndPath(variables.APP_URL)
 end
 
 function PLUGIN:IncrementMetric(client, name, value)
@@ -413,14 +413,14 @@ function PLUGIN:Think()
 		self.lastSubmittedDay = forDay
 		self.isSubmittingMetrics = nil
 	end, function(message)
-		ix.util.SchemaErrorNoHaltWithStack("Failed to submit metrics." .. tostring(message))
+		ix.util.SchemaErrorNoHalt("Failed to submit metrics." .. tostring(message))
 		self.lastSubmittedDay = forDay -- So it doesnt keep retrying
 		self.isSubmittingMetrics = nil
 	end)
 end
 
 function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
-    endpoint = APP_URL .. "/" .. endpoint
+    endpoint = APP_URL .. endpoint
 
     http.Post(endpoint, {
 		json = util.TableToJSON(data),
