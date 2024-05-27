@@ -94,24 +94,5 @@ function ENT:Use(client)
 
 	local origin = client:GetShootPos()
 
-	local target = ents.Create("info_target")
-	target:SetName(tostring(target))
-	target:SetPos(origin)
-	target:Spawn()
-
-	if (self.expDoor:GetInternalVariable("m_bLocked")) then
-		self.expDoor:Fire("SetAnimation", "locked", 0)
-		self:EmitSound("doors/door_locked2.wav", 75, math.random(95, 105))
-	elseif (self.expDoor:GetInternalVariable("m_eDoorState") == 0) then
-		self.expDoor:Fire("SetAnimation", "open", 0)
-        self.expDoor:Fire("OpenAwayFrom", tostring(target))
-    else
-		self.expDoor:Fire("Close")
-	end
-
-	timer.Simple(1, function()
-		if ( IsValid(target) ) then
-			target:Remove()
-		end
-	end)
+	self.expDoor:OpenDoorAwayFrom(origin, true)
 end

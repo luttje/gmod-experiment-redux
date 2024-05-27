@@ -28,8 +28,8 @@ PLUGIN:RegisterSentence("nemesis_arena", {
 })
 
 PLUGIN:RegisterSentence("nemesis_downfall", {
-	{ 1.8, "I've orchestrated your downfall" },
-	{ 1.5, "%s!" },
+	{ 1.85, "I've orchestrated your downfall" },
+	{ 1.5, "%s" },
 	{ 3, "before you even knew it began." },
 })
 

@@ -23,6 +23,21 @@ net.Receive("expClearEntityInfoTooltip", function()
 	end
 
 	ix.gui.entityInfo:Remove()
+
+	local infoPanel = vgui.Create(ix.option.Get("minimalTooltips", false) and "ixTooltipMinimal" or "ixTooltip")
+    infoPanel:StopAnimations() -- Stop the expanding
+
+	local entityPlayer = targetEntity:GetNetVar("player")
+
+	if (entityPlayer) then
+		infoPanel:SetEntity(entityPlayer)
+		infoPanel.entity = targetEntity
+	else
+		infoPanel:SetEntity(targetEntity)
+	end
+
+	infoPanel:SetDrawArrow(true)
+	ix.gui.entityInfo = infoPanel
 end)
 
 function Schema:LoadFonts(headingFont, readableFont)
@@ -617,9 +632,9 @@ function Schema:NetworkEntityCreated(entity)
         return
     end
 
-    local monsterCorpse = entity:GetNetVar("monsterCorpse")
+    local monsterCorpseIndex = entity:GetNetVar("monsterCorpse")
 
-	if (monsterCorpse) then
+	if (monsterCorpseIndex) then
         entity.GetEntityMenu = function(entity)
             if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
                 return
@@ -634,24 +649,30 @@ function Schema:NetworkEntityCreated(entity)
 		return
 	end
 
-    local player = entity:GetNetVar("player", NULL)
+	local player = entity:GetNetVar("player", NULL)
 
-    if (not IsValid(player)) then
+	local function setupPlayerCorpse()
+		entity.GetEntityMenu = function(entity)
+			if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+				return
+			end
+
+			local target = entity:GetNetVar("player", NULL)
+			local options = {}
+
+			hook.Run("AdjustPlayerRagdollEntityMenu", options, target, entity)
+
+			return options
+		end
+	end
+
+	if (not IsValid(player)) then
+		-- try again in a moment, since the player netvar might not exist yet
+		timer.Simple(2, setupPlayerCorpse)
         return
     end
 
-    entity.GetEntityMenu = function(entity)
-		if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
-			return
-		end
-
-        local target = entity:GetNetVar("player", NULL)
-        local options = {}
-
-        hook.Run("AdjustPlayerRagdollEntityMenu", options, target, entity)
-
-        return options
-    end
+	setupPlayerCorpse()
 end
 
 function Schema:GetPlayerEntityMenu(target, options)
@@ -675,7 +696,7 @@ function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
 
     local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
-    if (not corpseOwnerID) then
+    if (not corpseOwnerID and target:IsPlayer()) then
         if (target:Alive() and target:IsRestricted()) then
             options[L("searchTied")] = true
             options[L("untie")] = true

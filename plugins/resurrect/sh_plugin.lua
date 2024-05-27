@@ -18,15 +18,11 @@ if (CLIENT) then
 	function PLUGIN:AdjustPlayerRagdollEntityMenu(options, target, corpse)
 		local client = LocalPlayer()
 
-		if (target:Alive()) then
-			return
-		end
-
 		if (not Schema.perk.GetOwned("phoenix_tamer")) then
 			return
 		end
 
-		if (not IsValid(target) or target:Alive()) then
+		if (not IsValid(target) or not target:IsPlayer() or target:Alive()) then
 			return
 		end
 

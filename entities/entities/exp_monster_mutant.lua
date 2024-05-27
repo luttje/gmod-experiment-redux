@@ -502,7 +502,8 @@ function ENT:Initialize()
     BaseClass.Initialize(self)
 
     self:SetModel("models/zombie/classic.mdl")
-    self:SetHealth(1500)
+    self:SetHealth(900)
+	self:SetMaxHealth(900)
 	self:Activate()
 end
 
@@ -541,6 +542,10 @@ function ENT:SetupVoiceSounds()
 
     self:SetTypedVoiceSet("AttackHit", {
         "Zombie.AttackHit"
+    })
+
+    self:SetTypedVoiceSet("AttackHitDoor", {
+        "NPC_BaseZombie.PoundDoor"
     })
 
     self:SetTypedVoiceSet("Victory", {

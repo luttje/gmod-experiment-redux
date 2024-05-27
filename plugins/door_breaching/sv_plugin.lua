@@ -13,19 +13,7 @@ function PLUGIN:OpenDoor(entity, client, noSound)
 	entity:Fire("Unlock")
 
 	if (origin and string.lower(entity:GetClass()) == "prop_door_rotating") then
-		local target = ents.Create("info_target")
-
-		target:SetName( tostring(target) )
-		target:SetPos(origin)
-		target:Spawn()
-
-		entity:Fire("OpenAwayFrom", tostring(target))
-
-		timer.Simple(1, function()
-			if ( IsValid(target) ) then
-				target:Remove()
-			end
-		end)
+		entity:OpenDoorAwayFrom(origin)
 	else
 		entity:Fire("Open")
 	end

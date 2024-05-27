@@ -132,6 +132,7 @@ function ENT:Initialize()
 
     self:SetModel("models/zombie/fast.mdl")
     self:SetHealth(500)
+	self:SetMaxHealth(500)
 	self:Activate()
 end
 
@@ -170,6 +171,10 @@ function ENT:SetupVoiceSounds()
 
     self:SetTypedVoiceSet("AttackHit", {
         "NPC_FastZombie.AttackHit"
+	})
+
+    self:SetTypedVoiceSet("AttackHitDoor", {
+        "NPC_BaseZombie.PoundDoor"
     })
 
     self:SetTypedVoiceSet("Victory", {

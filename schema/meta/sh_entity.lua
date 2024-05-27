@@ -119,7 +119,7 @@ if (SERVER) then
 		entity:SetPos(self:GetPos())
 		entity:SetAngles(self:EyeAngles())
 		entity:SetModel(self:GetModel())
-        entity:SetSkin(self:GetSkin())
+		entity:SetSkin(self:GetSkin())
 
 		for i = 0, (self:GetNumBodyGroups() - 1) do
 			entity:SetBodygroup(i, self:GetBodygroup(i))
@@ -131,7 +131,7 @@ if (SERVER) then
 		entity:Activate()
 
 		local modelScale = self:GetModelScale()
-        local modelScaleVector = Vector(modelScale, modelScale, modelScale)
+		local modelScaleVector = Vector(modelScale, modelScale, modelScale)
 
 		for i = 0, entity:GetBoneCount() do
 			entity:ManipulateBoneScale(i, modelScaleVector)
@@ -139,23 +139,50 @@ if (SERVER) then
 
 		local velocity = self:GetVelocity() * modelScale
 
-        for i = 0, entity:GetPhysicsObjectCount() - 1 do
-            local physObj = entity:GetPhysicsObjectNum(i)
+		for i = 0, entity:GetPhysicsObjectCount() - 1 do
+			local physObj = entity:GetPhysicsObjectNum(i)
 
-            if (IsValid(physObj)) then
-                physObj:SetVelocity(velocity)
+			if (IsValid(physObj)) then
+				physObj:SetVelocity(velocity)
 
-                local index = entity:TranslatePhysBoneToBone(i)
+				local index = entity:TranslatePhysBoneToBone(i)
 
-                if (index) then
-                    local position, angles = self:GetBonePosition(index)
+				if (index) then
+					local position, angles = self:GetBonePosition(index)
 
-                    physObj:SetPos(position)
-                    physObj:SetAngles(angles)
-                end
-            end
-        end
+					physObj:SetPos(position)
+					physObj:SetAngles(angles)
+				end
+			end
+		end
 
 		return entity
+	end
+
+	function META:OpenDoorAwayFrom(position, notSilent)
+		local target = ents.Create("info_target")
+		target:SetName(tostring(target))
+		target:SetPos(position)
+		target:Spawn()
+
+		if (self:GetInternalVariable("m_bLocked")) then
+			if (notSilent) then
+				self:Fire("SetAnimation", "locked", 0)
+				self:EmitSound("doors/door_locked2.wav", 75, math.random(95, 105))
+			end
+		elseif (self:GetInternalVariable("m_eDoorState") == 0) then
+			if (notSilent) then
+				self:Fire("SetAnimation", "open", 0)
+			end
+			self:Fire("OpenAwayFrom", tostring(target))
+		else
+			self:Fire("Close")
+		end
+
+		timer.Simple(1, function()
+			if (IsValid(target)) then
+				target:Remove()
+			end
+		end)
 	end
 end

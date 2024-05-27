@@ -174,7 +174,7 @@ function ix.menu.Open(options, entity)
     local listEndOptions = {}
 
     for text, callbackOrData in SortedPairs(options) do
-        local callback = isfunction(callbackOrData) and callbackOrData or callbackOrData.callback
+        local callback = istable(callbackOrData) and callbackOrData.callback or callbackOrData
 
         if (istable(callbackOrData) and callbackOrData.forceListEnd) then
             listEndOptions[text] = callback

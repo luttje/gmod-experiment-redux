@@ -29,9 +29,8 @@ function PANEL:Paint(w, h)
     elseif (powerFraction <= 0.5) then
         powerColor = derma.GetColor("Warning", self)
     end
-	powerColor.a = 50
 
-    surface.SetDrawColor(powerColor)
+    surface.SetDrawColor(ColorAlpha(powerColor, 50))
     surface.DrawRect(0, 0, w * powerFraction, h)
 
     if (powerFraction == 0) then
