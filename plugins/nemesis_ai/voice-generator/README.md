@@ -26,6 +26,16 @@ We build upon the [mimic-3 tts docker image](https://mycroft-ai.gitbook.io/docs/
 
     The `MSYS_NO_PATHCONV=1` prefix is only required for Windows users using Git Bash.
 
+2. Use [ngrok](https://ngrok.com/) to expose the local server to the internet (Garry's Mod won't POST to localhost without it)
+
+    ```bash
+    ngrok http 3000
+    ```
+
+    Copy the forwarding URL and specify it in the `.env` file.
+
+3. Serve the `./volume` directory using a static file server. Specify the URL in the `.env` file.
+
 ### Production
 
 1. Set this server up to run on startup using crontab, we've prepared a bash script that will keep it running in the background:

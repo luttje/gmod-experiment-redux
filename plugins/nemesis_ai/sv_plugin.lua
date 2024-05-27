@@ -4,11 +4,18 @@ util.AddNetworkString("expSetMonitorTarget")
 util.AddNetworkString("expMonitorsPrintPresets")
 util.AddNetworkString("expSetMonitorVgui")
 util.AddNetworkString("expPlayNemesisAudio")
+util.AddNetworkString("expPlayNemesisSentences")
 
 resource.AddFile("materials/experiment-redux/arrow.png")
 resource.AddFile("materials/experiment-redux/arrow_forward.png")
 resource.AddFile("materials/experiment-redux/arrow_backward.png")
 resource.AddSingleFile("materials/experiment-redux/combinescanline.vmt")
+
+function PLUGIN:RegisterSentence(uniqueID, parts)
+    self.registeredSentences[uniqueID] = parts
+end
+
+ix.util.Include("sv_nemesis.lua")
 
 local API_KEY, APP_URL, AUDIO_URL
 
@@ -74,6 +81,54 @@ function PLUGIN:PlayNemesisAudio(text, clients)
 			net.Broadcast()
 		end
 	end)
+end
+
+function PLUGIN:GenerateSentences(uniqueID, callback, ...)
+	local parts = self.registeredSentences[uniqueID]
+	local args = {...}
+
+    if (not parts) then
+        return
+    end
+
+    local audioWithPauses = {}
+
+    local function generatePart(index)
+        local part = parts[index]
+
+        if (not part) then
+            callback(audioWithPauses)
+			return
+		end
+
+		local duration = part[1]
+		local text = part[2]:format(unpack(args))
+
+		self:GenerateSpeech(text, function(body)
+			audioWithPauses[#audioWithPauses + 1] = {
+				duration,
+				AUDIO_URL .. body
+			}
+
+			generatePart(index + 1)
+		end)
+	end
+
+	generatePart(1)
+end
+
+-- lua_run ix.plugin.Get("nemesis_ai"):PlayNemesisSentences("nemesis_downfall", nil, "Jonathan")
+function PLUGIN:PlayNemesisSentences(uniqueID, clients, ...)
+    self:GenerateSentences(uniqueID, function(audioWithPauses)
+        net.Start("expPlayNemesisSentences")
+        net.WriteTable(audioWithPauses)
+
+        if (istable(clients)) then
+            net.Send(clients)
+        else
+            net.Broadcast()
+        end
+    end, ...)
 end
 
 function PLUGIN:SpawnMonitor(parent, monitor)

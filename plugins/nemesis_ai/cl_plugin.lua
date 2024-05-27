@@ -41,19 +41,57 @@ net.Receive("expMonitorsPrintPresets", function(length)
 	end
 end)
 
--- Keeping a reference to the audio channel will prevent it from being garbage collected and stopping the audio
-local audioChannelReference
+local audioChannelReferences = {}
+
+-- Keeps a reference of at most 5 audio channels, so they don't get garbage collected
+-- This allows the audio to reverb and echo properly
+function PLUGIN:AddReferenceToAudioChannel(channel)
+	table.insert(audioChannelReferences, channel)
+
+	if (#audioChannelReferences > 5) then
+		table.remove(audioChannelReferences, 1)
+	end
+end
 
 net.Receive("expPlayNemesisAudio", function(length)
     local audioUrl = net.ReadString()
 
 	sound.PlayURL(audioUrl, "", function(channel)
         if (IsValid(channel)) then
-            audioChannelReference = channel
+			PLUGIN:AddReferenceToAudioChannel(channel)
 
 			channel:Play()
 		end
 	end)
+end)
+
+net.Receive("expPlayNemesisSentences", function()
+    local audioWithPauses = net.ReadTable()
+
+	local function playPart(index)
+		local part = audioWithPauses[index]
+
+		if (not part) then
+			return
+		end
+
+		local duration = part[1]
+		local url = part[2]
+
+		sound.PlayURL(url, "", function(channel)
+			if (IsValid(channel)) then
+				PLUGIN:AddReferenceToAudioChannel(channel)
+
+				channel:Play()
+
+				timer.Simple(duration, function()
+					playPart(index + 1)
+				end)
+			end
+		end)
+	end
+
+	playPart(1)
 end)
 
 -- When a monitor comes into PVS, set it up with the correct vgui
