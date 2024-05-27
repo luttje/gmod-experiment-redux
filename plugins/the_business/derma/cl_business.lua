@@ -91,7 +91,7 @@ function PANEL:Init()
 		button:SetScale(BUTTON_SCALE_SMALL)
 		button:DockMargin(5, 5, 5, 5)
 		button.Paint = function(this, width, height)
-			if (not self.selected == this) then
+			if (self.selected ~= this) then
 				return
 			end
 
@@ -280,6 +280,7 @@ function PANEL:DisplayItems(items)
 		self.categories:Layout()
 		self.selected = self.categories:GetChildren()[2] -- skip the label
 		PLUGIN.lastBusinessCategory = self.selected.category
+		PLUGIN.lastBusinessSearch = nil
 		self:LoadItems(self.selected.category)
 
 		timer.Simple(0.01, function()
