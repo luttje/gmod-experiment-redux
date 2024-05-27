@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models/experiment-redux/characters/guardian_scientist_sheet_bloody1"
+	"$halflambert" 1
+}
