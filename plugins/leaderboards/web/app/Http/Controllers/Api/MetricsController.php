@@ -70,12 +70,12 @@ class MetricsController extends Controller
 
         $alliances = Alliance::pluck('id');
 
-        function metricValueOrNull($key)
-        {
-            return isset($metric[$key]) ? $metric[$key] : null;
-        }
-
         foreach ($metrics as &$metric) {
+            function metricValueOrNull($key)
+            {
+                return isset($metric[$key]) ? $metric[$key] : null;
+            }
+
             // Make sure every metric has the same columns
             $metric['character_id'] = metricValueOrNull('character_id');
 
