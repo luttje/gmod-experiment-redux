@@ -363,10 +363,8 @@ function PLUGIN:Think()
 	end
 
     local dataToQuery = self.isQueryingData.dataToQuery
-    local queriedData = self.isQueryingData.queriedData
-    local forDay = self.isQueryingData.forDay
 
-    if (#dataToQuery ~= #queriedData) then
+    if (#dataToQuery ~= #self.isQueryingData.queriedData) then
 		return
 	end
 
@@ -406,6 +404,8 @@ function PLUGIN:Think()
 	end
 
     self.isQueryingData = nil
+
+    local forDay = self.isQueryingData.forDay
 
     self:PostJson("api/submit-metrics", data, function(response)
         ix.util.SchemaPrint("Metrics submitted successfully for day " .. tostring(forDay))

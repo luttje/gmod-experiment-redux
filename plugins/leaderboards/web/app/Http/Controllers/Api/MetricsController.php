@@ -70,17 +70,26 @@ class MetricsController extends Controller
 
         $alliances = Alliance::pluck('id');
 
+        function metricValueOrNull($key)
+        {
+            return isset($metric[$key]) ? $metric[$key] : null;
+        }
+
         foreach ($metrics as &$metric) {
             // Make sure every metric has the same columns
-            $metric['character_id'] = $metric['character_id'] ?? null;
+            $metric['character_id'] = metricValueOrNull('character_id');
+
+            // A character may not have an alliance, in which case this wont be set
+            $metric['alliance_id'] = metricValueOrNull('alliance_id');
 
             // The alliance may not exist anymore if it was removed
-            // TODO: Leave the alliance? Remove the foreign keys on client? I dunno.
-            $metric['alliance_id'] = $alliances->contains($metric['alliance_id']) ? $metric['alliance_id'] : null;
-            $metric['alliance_id'] = $metric['alliance_id'] ?? null;
+            // TODO: Leave the alliance? Remove the foreign keys on client? I dunno yet.
+            if ($metric['alliance_id'] !== null) {
+                $metric['alliance_id'] = $alliances->contains($metric['alliance_id']) ? $metric['alliance_id'] : null;
+            }
 
-            $metric['metric_id'] = $metric['metric_id'] ?? null;
-            $metric['value'] = $metric['value'] ?? null;
+            $metric['metric_id'] = metricValueOrNull('metric_id');
+            $metric['value'] = metricValueOrNull('value');
 
             $metric['created_at'] = $currentTimestamp;
             $metric['updated_at'] = $currentTimestamp;
