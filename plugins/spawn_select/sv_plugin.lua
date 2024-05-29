@@ -213,12 +213,35 @@ function PLUGIN:DoAnimatedSpawn(client, spawnPosition, spawnAngles)
 			return
 		end
 
+		-- Move all players and NPC's that are in the way, out of the way. Knock out players.
+        local entitiesAtSpawn = ents.FindInBox(spawnPosition + Vector(-64, -64, 0), spawnPosition + Vector(64, 64, 90))
+		local awayFromSpawnAngles = (spawnAngles:Forward() * 1024) + (spawnAngles:Up() * 64)
+
+        for _, entity in ipairs(entitiesAtSpawn) do
+            if (entity == client) then
+                continue
+            end
+
+            if (not entity:IsPlayer() and not entity:IsNPC()) then
+				continue
+			end
+
+            entity:SetVelocity(awayFromSpawnAngles)
+
+			if (entity:IsPlayer()) then
+				entity:SetRagdolled(true, 5)
+			end
+		end
+
+		-- Let players move, setting their position and angles again, restoring their normal color.
 		client:Freeze(false)
 		client:SetMoveType(MOVETYPE_WALK)
 		client:SetEyeAngles(spawnAngles)
 		client:SetNetVar("expChoosingSpawn", false)
 		client:SetRenderMode(RENDERMODE_TRANSCOLOR)
-		client:SetColor(Color(255, 255, 255, 255))
+        client:SetColor(Color(255, 255, 255, 255))
+
+		-- Special sound and visual effects for other players to see.
 		client:EmitSound(
 			table.Random(teleportSounds),
 			75,
