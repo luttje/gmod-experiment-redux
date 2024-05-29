@@ -38,7 +38,7 @@
                     </h3>
 
                     @php
-                    $leadingCharacter = $metric->characters->first();
+                    $leadingCharacter = $metric->leader;
                     @endphp
 
                     @if ($leadingCharacter)
@@ -48,7 +48,7 @@
                             <span class="font-bold">{{ $leadingCharacter->name }}</span>
                             <span class="text-amber-600">({{ $leadingCharacter->player->steam_name }})</span>
                         </span>
-                        <span>{{ $leadingCharacter->pivot->value }}</span>
+                        <span>{{ $leadingCharacter->sum }}</span>
                     </p>
                     @endif
                 </a>

@@ -333,7 +333,7 @@ function Schema:PostEntityTakeDamage(entity, damageInfo, tookDamage)
 	local force = damageInfo:GetDamageForce()
 	local damage = damageInfo:GetDamage()
 
-	force.z = math.max(force.z, damage) * 0.5
+	force.z = math.max(force.z, damage) * 0.05
 	force.y = math.max(force.z, damage) * 0.5
 	force.x = math.max(force.z, damage) * 0.5
 
@@ -354,7 +354,8 @@ function Schema:PlayerShouldViewPunch(client, damageInfo)
 		local yaw = math.random(-2, 2)
 		local roll = math.random(-1, 1)
 
-		client:ViewPunch(Angle(pitch, yaw, roll))
+		-- SetViewPunchAngles will reset instead of adding to the current view punch, so we need to get the current view punch.
+		client:SetViewPunchAngles(Angle(pitch, yaw, roll))
 
 		return false
 	end
@@ -763,6 +764,10 @@ end
 
 --]]
 
+function Schema:OnAchievementAchieved(client, achievementTable)
+	ix.log.Add(client, "achievementAchieved", achievementTable.name, achievementTable.reward)
+end
+
 function Schema:PlayerUse(client, entity)
 
 end
@@ -864,36 +869,6 @@ end
 
 function Schema:PlayerPerkBought(client, perk)
 	Schema.achievement.Progress("perk_purveyor", client)
-end
-
-function Schema:CreateShipment(client, shipmentEntity)
-	local itemCount = 0
-	local itemSum = 0
-
-	for uniqueID, amount in pairs(shipmentEntity.items) do
-		local itemTable = ix.item.list[uniqueID]
-
-		itemCount = itemCount + math.max(amount, 0)
-		itemSum = itemSum + math.max(amount, 0) * (itemTable.price or 0)
-	end
-
-	local atLeast = Schema.achievement.GetProperty("master_trader", "atLeast")
-
-	if (itemCount >= atLeast) then
-		Schema.achievement.Progress("master_trader", client)
-	end
-
-	hook.Run("PlayerShipmentPurchased", client, itemSum, shipmentEntity)
-
-	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
-
-	if (hasMercantilePerk) then
-		local rebate = itemSum * mercantilePerkTable.sumRebate
-
-		if (rebate > 0) then
-			client:GetCharacter():GiveMoney(rebate)
-		end
-	end
 end
 
 function Schema:InventoryItemAdded(sourceInventory, targetInventory, item)

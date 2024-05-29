@@ -60,11 +60,11 @@ if (SERVER) then
 				client:GetCharacter():GiveMoney(achievementTable.reward)
 			end
 
-			if (achievementTable.OnAchieved) then
-				achievementTable:OnAchieved(client)
-			end
+            if (achievementTable.OnAchieved) then
+                achievementTable:OnAchieved(client)
+            end
 
-			ix.log.Add(client, "achievementAchieved", achievementTable.name, achievementTable.reward)
+			hook.Run("OnAchievementAchieved", client, achievementTable)
 		end
 
 		net.Start("exp_AchievementProgress")

@@ -1,9 +1,5 @@
 local PLUGIN = PLUGIN
 
--- TODO:
--- self:RegisterOrGetMetric("Successfully Defended", "The number of times a player has successfully defended themselves.")
--- self:RegisterOrGetMetric("Bolts Stolen", "The number of bolts stolen by a player.")
-
 function PLUGIN:PlayerHealed(client, target, item, healAmount)
 	self:IncrementMetric(client, "Healing Done", healAmount)
 	self:IncrementMetric(target, "Healing Received", healAmount)
@@ -13,8 +9,16 @@ function PLUGIN:PlayerGeneratorEarnedMoney(client, money, generator)
     self:IncrementMetric(client, "Bolts Generated", money)
 end
 
-function PLUGIN:PlayerShipmentPurchased(client, itemSum, shipmentEntity)
-    self:IncrementMetric(client, "Bolts Spent", itemSum)
+function PLUGIN:OnAchievementAchieved(client, achievementTable)
+	self:IncrementMetric(client, "Bolts Generated", achievementTable.reward)
+end
+
+function PLUGIN:OnBusinessItemPurchased(client, itemTable, price, entity)
+    self:IncrementMetric(client, "Bolts Spent", price)
+end
+
+function PLUGIN:PlayerPerkBought(client, perkTable)
+    self:IncrementMetric(client, "Bolts Spent", perkTable.price)
 end
 
 function PLUGIN:PlayerDeath(client, inflictor, attacker)
@@ -26,5 +30,18 @@ function PLUGIN:PlayerDeath(client, inflictor, attacker)
 		return
 	end
 
-	self:IncrementMetric(attacker, "Kills", 1)
+	-- TODO: Check if a bounty is on the client
+	-- self:IncrementMetric(attacker, "Bounty Kills", 1)
+end
+
+function PLUGIN:OnMonsterTakeDamage(monster, damage, attacker)
+	if (not IsValid(attacker) or not attacker:IsPlayer()) then
+		return
+	end
+
+	self:IncrementMetric(attacker, "Monster Damage", damage)
+end
+
+function PLUGIN:OnPlayerDefendedAttack(client)
+	self:IncrementMetric(client, "Successfully Defended", 1)
 end

@@ -16,11 +16,11 @@ abstract class Controller
             }
 
             $request->request->remove('json');
-        } else {
+        } elseif ($request->header('Content-Type') !== 'application/json') {
             $headers = collect($request->header())->transform(function ($item) {
                 return $item[0];
             });
-            die(json_encode($headers, JSON_PRETTY_PRINT) . '    /    ' . json_encode($request->all(), JSON_PRETTY_PRINT));
+            dd(json_encode($headers, JSON_PRETTY_PRINT) . '    /    ' . json_encode($request->all(), JSON_PRETTY_PRINT));
         }
     }
 }

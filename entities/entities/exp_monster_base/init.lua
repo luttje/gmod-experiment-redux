@@ -731,14 +731,16 @@ function ENT:OnTakeDamage(damageInfo)
 
 	Schema.BloodEffect(self, position, 0.6, force)
 
+    local attacker = damageInfo:GetAttacker()
+
+	hook.Run("OnMonsterTakeDamage", self, damage, attacker)
+
 	if (self:Health() <= 0) then
 		self:HandleDeath()
 		return damage
 	end
 
-	local attacker = damageInfo:GetAttacker()
-
-	if (attacker and attacker:IsValid()) then
+	if (IsValid(attacker)) then
 		-- We delay this a frame, so the health is updated before we clear the tooltip
 		timer.Simple(0, function()
 			if (not IsValid(attacker) or not IsValid(self)) then

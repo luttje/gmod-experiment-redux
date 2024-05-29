@@ -42,8 +42,6 @@ if (SERVER) then
         if (perkTable.OnGiven) then
             perkTable:OnGiven(client)
         end
-
-        ix.log.Add(client, "perkBought", perkTable.name)
     end
 
 	function Schema.perk.Take(client, perk)
@@ -132,6 +130,8 @@ if (SERVER) then
 		client:Notify("You have gotten the '" .. perkTable.name .. "' perk.")
 
 		hook.Run("PlayerPerkBought", client, perkTable)
+
+        ix.log.Add(client, "perkBought", perkTable.name)
 	end)
 else
 	Schema.perk.localOwned = Schema.perk.localOwned or {}

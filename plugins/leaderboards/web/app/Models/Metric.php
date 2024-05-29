@@ -57,7 +57,7 @@ class Metric extends Model
     /**
      * Gets the latest metric for each character
      */
-    public static function getLatest()
+    public static function withEagerRelations()
     {
         return Metric::with([
             'characters.player'

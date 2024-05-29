@@ -61,43 +61,47 @@ class MetricsController extends Controller
             ]);
         }
 
-        foreach ($data['metrics'] as $metric) {
-            $epoch->metrics()->firstOrCreate($metric);
+        foreach ($data['metrics'] as $characterMetric) {
+            $epoch->metrics()->firstOrCreate($characterMetric);
         }
 
+        // Remove any metrics that are no longer provided by the game server (could happen on game updates)
+        // TODO: How do we handle historical data? Do we keep it? Do we remove it?
+        Metric::whereNotIn('id', array_column($data['metrics'], 'id'))->delete();
+
         $currentTimestamp = now();
-        $metrics = $data['character_metrics'];
+        $characterMetrics = $data['character_metrics'];
 
         $alliances = Alliance::pluck('id');
 
-        function metricValueOrNull($metric, $key)
+        function metricValueOrNull($characterMetric, $key)
         {
-            return isset($metric[$key]) ? $metric[$key] : null;
+            return isset($characterMetric[$key]) ? $characterMetric[$key] : null;
         }
 
-        foreach ($metrics as &$metric) {
+        foreach ($characterMetrics as &$characterMetric) {
             // Make sure every metric has the same columns
-            $metric['character_id'] = metricValueOrNull($metric, 'character_id');
+            $characterMetric['character_id'] = metricValueOrNull($characterMetric, 'character_id');
 
             // A character may not have an alliance, in which case this wont be set
-            $metric['alliance_id'] = metricValueOrNull($metric, 'alliance_id');
+            $characterMetric['alliance_id'] = metricValueOrNull($characterMetric, 'alliance_id');
 
             // The alliance may not exist anymore if it was removed
             // TODO: Leave the alliance? Remove the foreign keys on client? I dunno yet.
-            if ($metric['alliance_id'] !== null) {
-                $metric['alliance_id'] = $alliances->contains($metric['alliance_id']) ? $metric['alliance_id'] : null;
+            if ($characterMetric['alliance_id'] !== null) {
+                $characterMetric['alliance_id'] = $alliances->contains($characterMetric['alliance_id']) ? $characterMetric['alliance_id'] : null;
             }
 
-            $metric['metric_id'] = metricValueOrNull($metric, 'metric_id');
-            $metric['value'] = metricValueOrNull($metric, 'value');
+            $characterMetric['metric_id'] = metricValueOrNull($characterMetric, 'metric_id');
+            $characterMetric['value'] = metricValueOrNull($characterMetric, 'value');
 
-            $metric['created_at'] = $currentTimestamp;
-            $metric['updated_at'] = $currentTimestamp;
+            $characterMetric['created_at'] = $currentTimestamp;
+            $characterMetric['updated_at'] = $currentTimestamp;
         }
 
         CharacterMetric::upsert(
-            $metrics,
-            uniqueBy: ['character_id', 'metric_id'],
+            $characterMetrics,
+            uniqueBy: ['id', 'character_id', 'metric_id'],
             update: ['value']
         );
 

@@ -134,7 +134,7 @@ ITEM.functions.Place = {
 
 		local physicsObject = entity:GetPhysicsObject()
 
-		if physicsObject and physicsObject:IsValid() then
+		if (IsValid(physicsObject)) then
 			physicsObject:EnableMotion(false)
 		end
 

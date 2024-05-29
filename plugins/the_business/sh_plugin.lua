@@ -49,6 +49,20 @@ if (SERVER) then
 
         character:TakeMoney(price)
 
+        Schema.achievement.Progress("master_trader", client)
+
+		hook.Run("OnBusinessItemPurchased", client, itemTable, price, entity)
+
+		local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
+
+		if (hasMercantilePerk) then
+			local rebate = price * mercantilePerkTable.priceRebate
+
+			if (rebate > 0) then
+				character:GiveMoney(rebate)
+			end
+		end
+
         net.Start("expBusinessPurchaseCompleted")
 		net.WriteUInt(character:GetMoney(), 32)
         net.Send(client)

@@ -8,5 +8,5 @@ PERK.foregroundImage = {
 	y = 2,
 	size = 32,
 }
-PERK.sumRebate = 0.1
+PERK.priceRebate = 0.1
 PERK.description = "Fancy yourself as a merchant? With this perk, you will receive ten percent off all business items."

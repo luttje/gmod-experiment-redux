@@ -9,7 +9,7 @@ class LeaderboardController extends Controller
 {
     public function index()
     {
-        $metrics = Metric::getLatest();
+        $metrics = Metric::withEagerRelations();
 
         if ($metrics->isEmpty()) {
             return view('leaderboards.no-data');
@@ -18,12 +18,24 @@ class LeaderboardController extends Controller
         // TODO: How many queries are being run here? Do we need to run all of them to get just the overall leader?
         $overallLeader = Metric::getOverallScores($metrics)->first();
 
+        $metrics = $metrics->each(function ($metric) {
+            $metric->leader = (object)$metric->characters->groupBy('id')->map(function ($characters) {
+                // Because we're grouped by character ID, we can just grab the first character to get the character name.
+                $character = $characters->first();
+                return [
+                    'name' => $character->name,
+                    'player' => $character->player,
+                    'sum' => $characters->sum('pivot.value'),
+                ];
+            })->sortByDesc('value')->first();
+        });
+
         return view('leaderboards.index', compact('metrics', 'overallLeader'));
     }
 
     public function overall()
     {
-        $metrics = Metric::getLatest();
+        $metrics = Metric::withEagerRelations();
 
         $overallLeaders = Metric::getOverallScores($metrics);
         $characterScores = $overallLeaders->map(function ($leader) {
@@ -43,13 +55,11 @@ class LeaderboardController extends Controller
         ]);
 
         $characterScores = $metric->characters->groupBy('id')->map(function ($characters) {
-            return $characters->sortByDesc('pivot.created_at')->first();
-        })->sortByDesc('pivot.value')->values()->map(function ($leader) {
             return [
-                'character' => $leader,
-                'value' => $leader->pivot->value,
+                'character' => $characters->first(),
+                'value' => $characters->sum('pivot.value'),
             ];
-        });
+        })->sortByDesc('value')->values();
 
         return view('leaderboards.show', compact('metric', 'characterScores'));
     }

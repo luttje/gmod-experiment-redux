@@ -24,23 +24,28 @@ class MetricsTest extends TestCase
                 ['steam_name' => 'Player 2', 'steam_id' => '90071996842377319'],
             ],
             'characters' => [
-                ['name' => 'Character 1', 'steam_id' => '90071996842377318'],
-                ['name' => 'Character 2', 'steam_id' => '90071996842377319'],
+                ['id' => 101, 'name' => 'Character 1', 'steam_id' => '90071996842377318'],
+                ['id' => 102, 'name' => 'Character 2', 'steam_id' => '90071996842377319'],
             ],
             'character_metrics' => [
-                ['character_id' => 1, 'metric_id' => 1, 'value' => 100],
-                ['character_id' => 1, 'metric_id' => 2, 'value' => 50],
-                ['character_id' => 2, 'metric_id' => 1, 'value' => 200],
-                ['character_id' => 2, 'metric_id' => 2, 'value' => 100],
+                ['id' => 1, 'character_id' => 101, 'metric_id' => 1, 'value' => 100],
+                ['id' => 2, 'character_id' => 101, 'metric_id' => 2, 'value' => 50],
+                ['id' => 3, 'character_id' => 102, 'metric_id' => 1, 'value' => 200],
+                ['id' => 4, 'character_id' => 102, 'metric_id' => 2, 'value' => 100],
+                ['id' => 5, 'character_id' => 101, 'metric_id' => 2, 'value' => 10],
+                ['id' => 6, 'character_id' => 102, 'metric_id' => 2, 'value' => 20],
             ],
             'alliances' => [
-                ['name' => 'Alliance 1'],
-                ['name' => 'Alliance 2'],
+                ['id' => 1001, 'name' => 'Alliance 1'],
+                ['id' => 1010, 'name' => 'Alliance 2'],
             ],
             'metrics' => [
-                ['name' => 'Metric 1', 'description' => 'Metric 1 description'],
-                ['name' => 'Metric 2', 'description' => 'Metric 2 description'],
+                ['id' => 1, 'name' => 'Metric 1', 'description' => 'Metric 1 description'],
+                ['id' => 2, 'name' => 'Metric 2', 'description' => 'Metric 2 description'],
             ],
+        ], [
+            'X-Api-Secret' => config('app.api_secret'),
+            'Content-Type' => 'application/json',
         ]);
 
         $response->assertStatus(200);
@@ -64,9 +69,10 @@ class MetricsTest extends TestCase
         $this->assertDatabaseHas('metrics', ['name' => 'Metric 2']);
 
         // assert that the character metrics were created
-        $this->assertDatabaseHas('character_metric', ['character_id' => 1, 'metric_id' => 1, 'value' => 100]);
-        $this->assertDatabaseHas('character_metric', ['character_id' => 1, 'metric_id' => 2, 'value' => 50]);
-        $this->assertDatabaseHas('character_metric', ['character_id' => 2, 'metric_id' => 1, 'value' => 200]);
-        $this->assertDatabaseHas('character_metric', ['character_id' => 2, 'metric_id' => 2, 'value' => 100]);
+        $this->assertDatabaseHas('character_metric', ['character_id' => 101, 'metric_id' => 1, 'value' => 100]);
+        $this->assertDatabaseHas('character_metric', ['character_id' => 101, 'metric_id' => 2, 'value' => 50]);
+        $this->assertDatabaseHas('character_metric', ['character_id' => 101, 'metric_id' => 2, 'value' => 10]);
+        $this->assertDatabaseHas('character_metric', ['character_id' => 102, 'metric_id' => 1, 'value' => 200]);
+        $this->assertDatabaseHas('character_metric', ['character_id' => 102, 'metric_id' => 2, 'value' => 100]);
     }
 }
