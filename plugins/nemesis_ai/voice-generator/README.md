@@ -6,6 +6,8 @@ We build upon the [mimic-3 tts docker image](https://mycroft-ai.gitbook.io/docs/
 
 1. Ensure you have [Docker](https://www.docker.com/) installed and running.
 
+    For Ubuntu [follow these instructions](https://docs.docker.com/engine/install/ubuntu/).
+
 2. Clone (or download) this repository.
 
 3. Open a terminal (or command prompt) in this directory.
@@ -38,20 +40,26 @@ We build upon the [mimic-3 tts docker image](https://mycroft-ai.gitbook.io/docs/
 
 ### Production
 
-1. Set this server up to run on startup using crontab, we've prepared a bash script that will keep it running in the background:
+1. Make the starting script executable:
 
     ```bash
-    crontab -e
+    chmod +x /srv/experiment-redux/plugins/nemesis_ai/voice-generator/start.sh
+    ```
+
+2. Set this server up to run on startup using crontab, we've prepared a bash script that will keep it running in the background:
+
+    ```bash
+    sudo -u www-data crontab -e
     ```
 
     Add the following line to the end of the file:
 
     ```bash
-    @reboot /srv/experiment-redux/plugins/nemesis_ai/voice-generator/start.sh
+    @reboot /srv/experiment-redux/plugins/nemesis_ai/voice-generator/start.sh > /srv/experiment-redux/plugins/nemesis_ai/voice-generator/logs/start.log 2>&1
     ```
 
     Save and exit the file.
 
-2. Ensure the Garry's Mod server is run with the `-allowlocalhttp` command line argument.
+3. Ensure the Garry's Mod server is run with the `-allowlocalhttp` command line argument.
 
-3. Restart the server.
+4. Restart the server.

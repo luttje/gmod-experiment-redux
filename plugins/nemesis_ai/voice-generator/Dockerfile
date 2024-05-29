@@ -35,6 +35,7 @@ RUN tar -xvf ffmpeg-git-amd64-static.tar.xz && \
 RUN rm -rf ffmpeg-git-amd64-static.tar.xz
 
 COPY ./init-voice-gen.sh /home/mimic3/app/init-voice-gen.sh
+RUN chmod +x /home/mimic3/app/init-voice-gen.sh
 
 EXPOSE 3000
 
