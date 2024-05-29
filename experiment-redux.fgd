@@ -34,7 +34,7 @@
 @PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_npc :
     "Entity that represents an NPC in the world"
 [
-    npcid(string) : "NPC UniqueID" : "" : "Unique ID of the NPC"
+    npcId(string) : "NPC UniqueID" : "" : "Unique ID of the NPC"
 ]
 
 @PointClass base(Angles) studio("models/experiment-redux/shopkeeper.mdl") = exp_shopkeeper :
@@ -42,10 +42,16 @@
 [
 ]
 
-//
-// Attribute Training plugin entities
-//
+@PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_monster_spawner :
+    "Marks a position where monsters can spawn"
+[
+    monsterClasses(string) : "Monster Class(es)" : "" : "Classes of the monster to spawn (separated by commas if multiple)"
+    monsterMax(integer) : "Monster Max" : 1 : "Number of monsters to spawn at most from this spawner"
+    monsterSpawnDelay(float) : "Monster Spawn Delay" : 10 : "Delay between monster spawns in seconds"
+    monsterSpawnRadius(float) : "Monster Spawn Radius" : 0 : "Radius around the spawner where monsters can spawn"
+]
 
+// Attribute Training plugin entity
 @PointClass base(Angles) studio("models/props_phx/construct/metal_plate_curve360.mdl") = exp_target_practice_spawn :
     "Entity that represents a spawn point for a target in the target practice attribute training"
 [

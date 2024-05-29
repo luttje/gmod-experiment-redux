@@ -195,6 +195,24 @@ function PLUGIN:LoadData()
 					end
 				end
 
+				-- When a map is recompiled the map creation ID can change, so we need to check for the closest entity
+                if (not IsValid(mapEntity)) then
+					local closestDistance = math.huge
+
+                    for _, entity in ipairs(nearbyEntities) do
+                        if (entity:GetClass() ~= "exp_scavenging_source") then
+                            continue
+                        end
+
+						local distance = entity:GetPos():DistToSqr(scavengingSourceData.position)
+
+						if (distance < closestDistance) then
+							closestDistance = distance
+							mapEntity = entity
+						end
+					end
+				end
+
 				if (not IsValid(mapEntity)) then
 					ix.util.SchemaErrorNoHalt(
 						"Attempt to restore a scavenging source with invalid map entity: "

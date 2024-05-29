@@ -15,3 +15,9 @@ ENT.AutomaticFrameAdvance = true
 function ENT:GetDisplayName()
 	return Format("monster")
 end
+
+hook.Add("ShouldCollide", "expDontCollideMonsters", function(entity, otherEntity)
+	if (entity:IsNPC() and otherEntity:IsNPC()) then
+		return false
+	end
+end)

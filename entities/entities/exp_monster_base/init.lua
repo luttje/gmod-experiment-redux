@@ -56,62 +56,94 @@ function ENT:Initialize()
 end
 
 function ENT:Boot()
-	self:SetHullType(HULL_HUMAN)
-	self:SetHullSizeNormal()
+    self:SetHullType(HULL_HUMAN)
+    self:SetHullSizeNormal()
+    self:SetCustomCollisionCheck(true)
 
-	self:SetSolid(SOLID_BBOX)
-	self:SetMoveType(MOVETYPE_STEP)
+    self:SetSolid(SOLID_BBOX)
+    self:SetMoveType(MOVETYPE_STEP)
 
-	self:CapabilitiesClear()
+    self:CapabilitiesClear()
 
-	self:CapabilitiesAdd(
-		bit.bor(
-			CAP_SKIP_NAV_GROUND_CHECK,
-			CAP_USE_SHOT_REGULATOR,
-			CAP_MOVE_GROUND,
-			CAP_ANIMATEDFACE,
-			CAP_TURN_HEAD,
-			CAP_INNATE_MELEE_ATTACK1
-		)
-	)
+    self:CapabilitiesAdd(
+        bit.bor(
+            CAP_SKIP_NAV_GROUND_CHECK,
+            CAP_USE_SHOT_REGULATOR,
+            CAP_MOVE_GROUND,
+            CAP_ANIMATEDFACE,
+            CAP_TURN_HEAD,
+            CAP_INNATE_MELEE_ATTACK1
+        )
+    )
 
-	self:SetNPCClass(CLASS_ZOMBIE)
-	-- self:SetSaveValue("m_flFieldOfView", 999)
-	-- Without a proper range, the monster will never find enemies, even if we SetEnemy them
-	self:SetMaxLookDistance(9000)
+    self:SetNPCClass(CLASS_ZOMBIE)
+    -- self:SetSaveValue("m_flFieldOfView", 999)
+    -- Without a proper range, the monster will never find enemies, even if we SetEnemy them
+    self:SetMaxLookDistance(9000)
 
-	self:SetMaxYawSpeed(256)
+    self:SetMaxYawSpeed(256)
 
-	if (self:GetAttackMeleeRange() == nil and self:GetAttackRange() == nil) then
-		-- Default to 64 units for melee range
-		self:SetAttackMeleeRange(64)
-	end
+    if (self:GetAttackMeleeRange() == nil and self:GetAttackRange() == nil) then
+        -- Default to 64 units for melee range
+        self:SetAttackMeleeRange(64)
+    end
 
-	if (self:GetSenseRange() == nil) then
-		self:SetSenseRange(512)
-	end
+    if (self:GetSenseRange() == nil) then
+        self:SetSenseRange(512)
+    end
 
-	if (self:GetVoicePitch() == nil) then
-		self:SetVoicePitch(100)
-	end
+    if (self:GetVoicePitch() == nil) then
+        self:SetVoicePitch(100)
+    end
 
-	self.expVoiceSounds = {}
-	self.expVoiceSoundThrottle = {}
-	self:SetupVoiceSounds()
+    self.expVoiceSounds = {}
+    self.expVoiceSoundThrottle = {}
+    self:SetupVoiceSounds()
 
-	self.expSchedules = {}
-	self.expSchedules.Attacks = {}
-	self:SetupSchedules()
+    self.expSchedules = {}
+    self.expSchedules.Attacks = {}
+    self:SetupSchedules()
 
-	-- Note on setting up node graphs:
-	-- You might want to use https:--steamcommunity.com/sharedfiles/filedetails/?id=2004023752 to setup node graphs for better pathfinding
-	-- To do that I suggest:
-	-- 1. Install the addon
-	-- 2. Start a new game on the map you want to setup the node graph for
-	-- 3. Open the console and type "nav_edit 1" (this builds a navmesh)
-	-- 4. Wait until the navmesh is built (you'll see the map being restarted)
-	-- 5. Use the installed addon to generate the node graph from the navmesh
+    self.enemiesOfNoInterest = {}
+
+    -- Note on setting up node graphs:
+    -- You might want to use https:--steamcommunity.com/sharedfiles/filedetails/?id=2004023752 to setup node graphs for better pathfinding
+    -- To do that I suggest:
+    -- 1. Install the addon
+    -- 2. Start a new game on the map you want to setup the node graph for
+    -- 3. Open the console and type "nav_edit 1" (this builds a navmesh)
+    -- 4. Wait until the navmesh is built (you'll see the map being restarted)
+    -- 5. Use the installed addon to generate the node graph from the navmesh
 end
+
+-- Monsters might get stuck opening doors, if there's an object behind it blocking the door from opening
+-- Using this function we can make monsters ignore enemies that have just been attempted to open
+function ENT:AddEnemyOfNoInterest(enemy, duration)
+    duration = duration or 20
+    self.enemiesOfNoInterest[enemy] = CurTime() + duration
+end
+
+hook.Add(
+	"AcceptInput",
+	"expDontAllowDoorsToCloseWhenOpenedByMonsters",
+    function(entity, inputName, activator, caller, value)
+        if (not entity:IsDoor()) then
+            return
+        end
+
+        local closing = inputName == "Close" or inputName == "Use"
+
+        if (closing and entity.expIsOpeningFromAttackUntil) then
+            if (entity.expIsOpeningFromAttackUntil < CurTime()) then
+                entity.expIsOpeningFromAttackUntil = nil
+                entity.expDoorHealth = nil
+                return
+            end
+
+			return true
+		end
+    end
+)
 
 function ENT:DebugCapabilities()
 	print("============================================")
@@ -384,6 +416,7 @@ function ENT:StartAttackSchedule(enemy)
     end
 
     self.expAttackSchedule = attackSchedule
+	self.expDesiredAttackEnemy = enemy
     self:UpdateEnemyMemory(enemy, enemy:GetPos())
     self:StartSchedule(attackSchedule)
 end
@@ -432,12 +465,7 @@ end
 function ENT:HandleAttackTaskComplete()
     -- Trace the range of the attack to see if we hit anything
     local attackData = self.expAttackSchedule.expAttackData
-    local enemy = self:GetEnemy()
-
-    if (not IsValid(enemy)) then
-        return
-    end
-
+    local enemy = self.expDesiredAttackEnemy
     local directionToEnemy = (enemy:EyePos() - self:EyePos()):GetNormalized()
 
     -- If the direction is behind us, don't bother attacking
@@ -446,50 +474,55 @@ function ENT:HandleAttackTaskComplete()
         return
     end
 
-    local traceData = {}
-    traceData.start = self:EyePos()
-    traceData.endpos = self:EyePos() + (directionToEnemy * attackData.range * self:GetModelScale())
-    traceData.filter = function(entity) return self:IsEnemyEntity(entity) or entity:IsDoor() end
+	if (not self:IsTargetInMeleeRange(enemy)) then
+		local traceData = {}
+		traceData.start = self:EyePos()
+		traceData.endpos = self:EyePos() + (directionToEnemy * attackData.range * self:GetModelScale())
+		traceData.filter = function(entity) return self:IsEnemyEntity(entity) end
 
-	local trace = util.TraceLine(traceData)
+		local trace = util.TraceLine(traceData)
 
-	if (not IsValid(trace.Entity)) then
+		enemy = trace.Entity
+	end
+
+	if (not IsValid(enemy)) then
         self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
 		return
 	end
 
-    if (trace.Entity == enemy) then
-        self:SpeakFromTypedVoiceSet("AttackHit", nil, true)
-        enemy:TakeDamage(attackData.damage, self, self)
-	elseif (trace.Entity:IsDoor()) then
+    if (enemy:IsDoor()) then
 		self:SpeakFromTypedVoiceSet("AttackHitDoor", nil, true)
 
-		if (trace.Entity.expIsOpeningFromAttack) then
-			return
+        if (enemy.expIsOpeningFromAttackUntil) then
+			if (enemy.expIsOpeningFromAttackUntil > CurTime()) then
+				self:AddEnemyOfNoInterest(enemy)
+				return
+			else
+                enemy.expIsOpeningFromAttackUntil = nil
+				enemy.expDoorHealth = nil
+			end
 		end
 
-		if (trace.Entity:GetInternalVariable("m_bLocked")) then
-			trace.Entity.expDoorHealth = trace.Entity.expDoorHealth or 3
-			trace.Entity.expDoorHealth = trace.Entity.expDoorHealth - 1
+		if (enemy:GetInternalVariable("m_bLocked")) then
+			enemy.expDoorHealth = enemy.expDoorHealth or 3
+			enemy.expDoorHealth = enemy.expDoorHealth - 1
 
-			if (trace.Entity.expDoorHealth > 0) then
+			if (enemy.expDoorHealth > 0) then
 				return
 			end
 
-			trace.Entity:Fire("Unlock")
+			enemy:Fire("Unlock")
 		end
 
-		trace.Entity.expIsOpeningFromAttack = true
-		trace.Entity:OpenDoorAwayFrom(self:EyePos())
+        if (enemy:GetInternalVariable("m_eDoorState") == 0) then
+            enemy:OpenDoorAwayFrom(self:EyePos())
+            enemy.expIsOpeningFromAttackUntil = CurTime() + 2
+        end
 
-		timer.Simple(2, function()
-			if (IsValid(trace.Entity)) then
-				trace.Entity.expIsOpeningFromAttack = false
-				trace.Entity.expDoorHealth = nil
-			end
-		end)
+		self:AddEnemyOfNoInterest(enemy)
 	else
-        self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
+        self:SpeakFromTypedVoiceSet("AttackHit", nil, true)
+        enemy:TakeDamage(attackData.damage, self, self)
     end
 end
 
@@ -502,12 +535,29 @@ function ENT:IsEnemyEntity(entity)
         return false
     end
 
-    if (not entity:IsPlayer() or not entity:Alive()) then
+    if (entity:IsPlayer()) then
+		if (not entity:Alive()) then
+			return false
+		end
+	else
+        local isClosedDoor = entity:IsDoor() and entity:GetInternalVariable("m_eDoorState") == 0
+
+        if (not isClosedDoor) then
+            return false
+        end
+    end
+
+    if (entity:GetMoveType() == MOVETYPE_NOCLIP) then
         return false
     end
 
-	if (entity:GetMoveType() == MOVETYPE_NOCLIP) then
-		return false
+    -- Check if this enemy is in the list of enemies we're not interested in, or clear it if it's expired
+	if (self.enemiesOfNoInterest[entity]) then
+		if (self.enemiesOfNoInterest[entity] < CurTime()) then
+			self.enemiesOfNoInterest[entity] = nil
+		else
+			return false
+		end
 	end
 
     return true
@@ -516,7 +566,6 @@ end
 function ENT:TargetNewEnemy(enemy)
 	self:SetEnemy(enemy, true)
     self:UpdateEnemyMemory(enemy, enemy:GetPos())
-    self:SpeakFromTypedVoiceSet("Alert")
 end
 
 function ENT:FindEnemyInView()
@@ -536,6 +585,10 @@ function ENT:FindEnemyInView()
 			continue
 		end
 
+		if (entity:IsPlayer()) then
+			self:SpeakFromTypedVoiceSet("Alert")
+		end
+
 		self:TargetNewEnemy(entity)
 		self:StartSchedule(self.expSchedules.Chase)
 
@@ -549,7 +602,7 @@ end
 function ENT:HandleEnemy()
     local enemy = self:GetEnemy()
 
-	if (not IsValid(enemy) or not enemy:Alive()) then
+	if (not self:IsEnemyEntity(enemy)) then
         self:SetEnemy(nil, false)
         self:SpeakFromTypedVoiceSet("Lost", 5)
         return false
@@ -603,20 +656,21 @@ function ENT:Think()
 
 	local trace = util.TraceLine(traceData)
 
-	if (not IsValid(trace.Entity)) then
+    if (not IsValid(trace.Entity)) then
+        return
+    end
+
+	if (trace.Entity ~= enemy) then
 		return
 	end
 
-	if (trace.Entity == enemy) then
-		self:SpeakFromTypedVoiceSet("Chase", 2)
-		self:UpdateEnemyMemory(enemy, enemy:GetPos())
+    self:UpdateEnemyMemory(enemy, enemy:GetPos())
 
-		-- If they're in melee range, attack immediately if they run by us.
-		if (self:IsTargetInMeleeRange(enemy)) then
-			self:StartAttackSchedule(enemy)
-		end
-	elseif (trace.Entity:IsDoor() and self:IsTargetInMeleeRange(trace.Entity)) then
-		self:StartAttackSchedule(trace.Entity)
+	-- If they're in melee range, attack immediately if they run by us.
+	if (self:IsTargetInMeleeRange(enemy)) then
+        self:StartAttackSchedule(enemy)
+	else
+		self:SpeakFromTypedVoiceSet("Chase", 2)
 	end
 end
 
