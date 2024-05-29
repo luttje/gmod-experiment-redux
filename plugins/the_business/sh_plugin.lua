@@ -83,7 +83,9 @@ function PLUGIN:ShowEntityMenu(entity)
 		return
 	end
 
-	local panel = vgui.Create("expEntityMenu")
+    local panel = vgui.Create("expEntityMenu")
+    panel:InitDoubleList()
+	panel:SetShowCloseButton(true)
     panel:SetEntity(entity)
 
     local mainPanel, entityPanel = builderOrOptions()

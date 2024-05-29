@@ -168,7 +168,7 @@ function ix.menu.Open(options, entity)
         return false
     end
 
-    local panel = vgui.Create("ixEntityMenu")
+    local panel = vgui.Create("expEntityMenu")
     panel:SetEntity(entity)
 
     local listEndOptions = {}
