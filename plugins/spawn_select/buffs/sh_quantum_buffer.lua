@@ -8,7 +8,7 @@ BUFF.foregroundImage = {
 	size = 32,
 }
 BUFF.durationInSeconds = 15 * 60
-BUFF.description = "You are invulnerable for a short duration, unless you attack, speak or get hurt by a monster."
+BUFF.description = "You are invulnerable to damage from other players for a short duration, unless you attack, speak or take other damage."
 
 if (not SERVER) then
 	return
@@ -58,9 +58,10 @@ function BUFF:OnShouldExpire(client, buff)
 end
 
 function BUFF.hooks:PostPlayerLoadout(client)
-	if (Schema.buff.GetActive(client, self.index)) then
-		return
-	end
+    if (Schema.buff.GetActive(client, self.index)) then
+        return
+    end
+
 	Schema.buff.SetActive(client, self.index)
 end
 
@@ -72,7 +73,7 @@ function BUFF.hooks:EntityTakeDamage(entity, damageInfo)
 	if (Schema.buff.GetActive(entity, self.index)) then
 		local attacker = damageInfo:GetAttacker()
 
-		if (attacker:IsNPC()) then
+		if ((IsValid(attacker) and not attacker:IsPlayer()) or damageInfo:IsFallDamage()) then
 			entity.expQuantumBufferShouldExpire = true
 			return
 		end

@@ -118,11 +118,11 @@ function PLUGIN:GetAvailableSpawns(client)
 	local spawns = {}
 
 	for k, spawn in ipairs(self.spawns) do
-		local status = self.spawnStatus.SAFE
+		local status = spawn.status or self.spawnStatus.SAFE
 		local unsafeUntil
 
 		-- Filter out spawns where the player recently died.
-		if (not canSpawnNearDeath and lastDeathPosition) then
+		if (status == self.spawnStatus.SAFE and (not canSpawnNearDeath and lastDeathPosition)) then
 			local distance = spawn.position:DistToSqr(lastDeathPosition)
 
 			if (distance < spawnNearDeathRange) then

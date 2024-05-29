@@ -29,6 +29,7 @@
 	"This entity indicates the position and facing direction at which the player can choose to spawn."
 [
     name(string) : "Name" : "" : "Name of the spawn point"
+    status(integer) : "Override Status" : -1 : "Override the status of the spawn point (-1 = don't override, 0 = safe, 1 = danger, 2 = locked, 3 = chaos)"
 ]
 
 @PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_npc :

@@ -33,7 +33,11 @@ function BUFF:OnExpire(client, buff)
 	end
 end
 
-function BUFF.hooks:EntityTakeDamage(victim, damageInfo)
+function BUFF.hooks:PostEntityTakeDamage(victim, damageInfo, tookDamage)
+    if (not tookDamage) then
+        return
+    end
+
 	if (victim:IsPlayer()) then
 		Schema.buff.SetActive(victim, self.index)
 	end
