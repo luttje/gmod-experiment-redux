@@ -1,7 +1,6 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const { createHash } = require('crypto');
-// const cors = require('cors');
 const fs = require('fs');
 
 const apiKey = process.env.API_SECRET
@@ -17,9 +16,9 @@ if (process.env.APP_URL) {
     }
 }
 
-// app.use(cors())
 app.use(express.urlencoded({ extended: true }));
 
+// curl -X POST -d "text=Hello%20world%21%0A&api_key=secret" http://localhost:3000/generate-voice
 app.post('/generate-voice', (req, res) => {
     const scriptPath = './init-voice-gen.sh';
     const body = req.body.text
