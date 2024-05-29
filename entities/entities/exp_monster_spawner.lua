@@ -1,3 +1,7 @@
+if (SERVER) then
+	AddCSLuaFile()
+end
+
 ENT.Type = "anim"
 ENT.Base = "base_gmodentity"
 ENT.Author = "Experiment Redux"
