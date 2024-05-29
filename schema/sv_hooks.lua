@@ -683,7 +683,7 @@ function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 			if (item:GetData("equip")) then
 				if (item.isWeapon and not dropEquippedWeapons) then
 					continue
-				elseif (item:IsBasedOn("outfit") and not dropEquippedArmor) then
+				elseif (item:IsBasedOn("base_outfit") and not dropEquippedArmor) then
 					continue
 				end
 			end
