@@ -17,7 +17,7 @@ function ENT:GetDisplayName()
 end
 
 hook.Add("ShouldCollide", "expDontCollideMonsters", function(entity, otherEntity)
-	if (entity:IsNPC() and otherEntity:IsNPC()) then
+    if (entity:IsNPC() and otherEntity:IsNPC()) then
 		return false
 	end
 end)

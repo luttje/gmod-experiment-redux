@@ -454,7 +454,7 @@ end
 function ENT:OnTaskFailed(failCode, failReason)
 	local enemy = self:GetEnemy()
 
-	if (enemy and self:IsUnreachable(enemy)) then
+    if (enemy and self:IsUnreachable(enemy)) then
 		self:SpeakFromTypedVoiceSet("Lost", 5)
 		self:SetEnemy(nil, false)
 		self:StartSchedule(self.expSchedules.Patrol)
@@ -570,9 +570,9 @@ end
 
 function ENT:FindEnemyInView()
 	-- This is an expensive operation, so we throttle it
-	if (Schema.util.Throttle("FindEnemyInView", 1, self)) then
-		return false
-	end
+    if (Schema.util.Throttle("FindEnemyInView", 1, self)) then
+        return false
+    end
 
 	local viewDistance = self:GetSenseRange()
 	local viewAngle = self:EyeAngles()
@@ -586,7 +586,7 @@ function ENT:FindEnemyInView()
 		end
 
 		if (entity:IsPlayer()) then
-			self:SpeakFromTypedVoiceSet("Alert")
+			self:SpeakFromTypedVoiceSet("Alert", 5)
 		end
 
 		self:TargetNewEnemy(entity)
@@ -602,9 +602,12 @@ end
 function ENT:HandleEnemy()
     local enemy = self:GetEnemy()
 
-	if (not self:IsEnemyEntity(enemy)) then
-        self:SetEnemy(nil, false)
-        self:SpeakFromTypedVoiceSet("Lost", 5)
+    if (not self:IsEnemyEntity(enemy)) then
+        if (enemy) then
+            self:SetEnemy(nil, false)
+            self:SpeakFromTypedVoiceSet("Lost", 5)
+        end
+
         return false
     end
 
@@ -618,11 +621,11 @@ function ENT:HandleEnemy()
     end
 
     if (distance < self:GetRangeSquared(self:GetSenseRange())) then
-		self:UpdateEnemyMemory(enemy, enemyPosition)
+        self:UpdateEnemyMemory(enemy, enemyPosition)
 
-		if (self.CurrentSchedule ~= self.expSchedules.Chase) then
-        	self:StartSchedule(self.expSchedules.Chase)
-		end
+        if (self.CurrentSchedule ~= self.expSchedules.Chase) then
+            self:StartSchedule(self.expSchedules.Chase)
+        end
 
         return true
     end
@@ -633,9 +636,39 @@ function ENT:HandleEnemy()
     return false
 end
 
+-- To save on performance, we let the monster not think if there's no players in the area
+function ENT:ShouldHibernate()
+    if (self:GetEnemy()) then
+        return false
+    end
+
+	local hibernationRange = self:GetRangeSquared(1500)
+
+    for _, entity in ipairs(player.GetAll()) do
+        if (entity:GetMoveType() == MOVETYPE_NOCLIP) then
+            continue
+        end
+
+		if (self:GetPos():DistToSqr(entity:GetPos()) < hibernationRange) then
+			return false
+		end
+	end
+
+	return true
+end
+
 function ENT:Think()
-	if (self:GetEnemy() == nil) then
-		if (not self:FindEnemyInView()) then
+	local shouldHibernate = self:ShouldHibernate()
+
+	if (shouldHibernate) then
+        self:StopMoving()
+		self:ClearSchedule()
+        self:NextThink(CurTime() + 5)
+		return true
+	end
+
+    if (self:GetEnemy() == nil) then
+        if (not self:FindEnemyInView()) then
 			self:SpeakFromTypedVoiceSet("Idle", 5)
 		end
 
@@ -643,7 +676,11 @@ function ENT:Think()
 	end
 
 	-- CurrentSchedule is defined in base/entities/entities/base_ai/schedules.lua and contains the current lua defined schedule table
-	if (self.CurrentSchedule ~= self.expSchedules.Chase) then
+    if (self.CurrentSchedule ~= self.expSchedules.Chase) then
+        return
+    end
+
+	if (Schema.util.Throttle("UpdateEnemyMemory", 1, self)) then
 		return
 	end
 
@@ -723,7 +760,7 @@ function ENT:OnTakeDamage(damageInfo)
 end
 
 function ENT:HandleDeath()
-	self:SpeakFromTypedVoiceSet("Die")
+	self:SpeakFromTypedVoiceSet("Die", 5)
 
     local corpse = self:CreateServerRagdoll()
 	corpse:SetNetVar("monsterCorpse", self:EntIndex())
