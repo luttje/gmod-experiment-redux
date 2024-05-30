@@ -4,42 +4,47 @@ DEFINE_BASECLASS("base_ai")
 
 ENT.PopulateEntityInfo = true
 
-ENT.BubblePosForward = 2
-ENT.BubblePosZ = 76
-
-function ENT:CreateBubble()
-	self.bubble = ClientsideModel("models/extras/info_speech.mdl", RENDERGROUP_OPAQUE)
-	local forward = self:GetForward() * self.BubblePosForward
-	self.bubble:SetPos(self:GetPos() + forward + Vector(0, 0, self.BubblePosZ))
-	self.bubble:SetModelScale(0.2, 0)
-	self.bubble:SetColor(Color(255, 255, 255, 150))
-	self.bubble:SetRenderMode(RENDERMODE_TRANSALPHA)
-end
+ENT.MarkerPosZ = 78
 
 function ENT:Draw()
-	local bubble = self.bubble
+    self:DrawModel()
 
-	if (IsValid(bubble)) then
-		local realTime = RealTime()
-
-		local forward = self:GetForward() * self.BubblePosForward
-
-		bubble:SetRenderOrigin(self:GetPos() + forward + Vector(0, 0, self.BubblePosZ + math.sin(realTime * 3) * 0.5))
-		bubble:SetRenderAngles(Angle(0, realTime * 100, 0))
+	if (not self:GetNpcId()) then
+		return
 	end
 
-	self:DrawModel()
+    local icon = ix.util.GetMaterial("experiment-redux/mission_available.png")
+	local alphaRange, alphaBase = 100, 55
+
+    self.cachedNpcData = self.cachedNpcData or Schema.npc.Get(self:GetNpcId())
+
+	if (not self.cachedNpcData or (self.cachedNpcData.GetAvailable and not self.cachedNpcData:GetAvailable(self))) then
+        icon = ix.util.GetMaterial("experiment-redux/mission_unavailable.png")
+		alphaRange, alphaBase = 55, 5
+	end
+
+    local positionOverNpc = self:GetPos()
+        + (self:GetUp() * self.MarkerPosZ)
+		+ (self:GetForward() * 2)
+	positionOverNpc = positionOverNpc + Vector(0, 0, math.cos(CurTime() * .5))
+
+	local angleFacingPlayer = (positionOverNpc - EyePos()):GetNormalized():Angle()
+
+	angleFacingPlayer = Angle(0, angleFacingPlayer.y, 0)
+	angleFacingPlayer.y = angleFacingPlayer.y + math.sin(CurTime()) * 10
+
+	-- Correct the angle so it points at the camera
+	angleFacingPlayer:RotateAroundAxis(angleFacingPlayer:Up(), -90)
+	angleFacingPlayer:RotateAroundAxis(angleFacingPlayer:Forward(), 90)
+
+	cam.Start3D2D(positionOverNpc, angleFacingPlayer, .4)
+	surface.SetMaterial(icon)
+	surface.SetDrawColor(255, 255, 255, math.abs(math.sin(CurTime() * 2) * alphaRange) + alphaBase)
+    surface.DrawTexturedRect(-16, -16, 32, 32)
+	cam.End3D2D()
 end
 
 function ENT:Think()
-	local noBubble = self:GetNoBubble()
-
-	if (IsValid(self.bubble) and noBubble) then
-		self.bubble:Remove()
-	elseif (not IsValid(self.bubble) and not noBubble) then
-		self:CreateBubble()
-	end
-
 	if ((self.nextAnimCheck or 0) < CurTime()) then
 		self:SetAnim()
 		self.nextAnimCheck = CurTime() + 60
@@ -48,12 +53,6 @@ function ENT:Think()
 	self:SetNextClientThink(CurTime() + 0.25)
 
 	return true
-end
-
-function ENT:OnRemove()
-	if (IsValid(self.bubble)) then
-		self.bubble:Remove()
-	end
 end
 
 function ENT:OnPopulateEntityInfo(container)

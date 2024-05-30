@@ -109,7 +109,7 @@ end
 
 function ENT:SetupNPC(npc)
 	self.expNpcData = npc
-	self:SetNpcId(npc.uniqueID)
+    self:SetNpcId(npc.uniqueID)
 
 	if (npc.name) then
 		self:SetDisplayName(npc.name)

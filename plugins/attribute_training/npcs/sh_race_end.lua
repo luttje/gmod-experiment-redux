@@ -153,3 +153,12 @@ local goodbyes = {
 function NPC:OnEnd(client, npcEntity)
 	npcEntity:PrintChat(goodbyes[math.random(#goodbyes)])
 end
+
+if (CLIENT) then
+	function NPC:GetAvailable(npcEntity)
+        local client = LocalPlayer()
+        local raceStartedAt = client:GetCharacterNetVar("expRaceStartedAt")
+
+		return raceStartedAt ~= nil
+	end
+end

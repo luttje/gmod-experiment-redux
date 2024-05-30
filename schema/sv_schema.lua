@@ -8,6 +8,9 @@ resource.AddFile("materials/experiment-redux/arrow-down.png")
 resource.AddFile("materials/experiment-redux/check.png")
 resource.AddFile("materials/experiment-redux/close.png")
 
+resource.AddFile("materials/experiment-redux/mission_available.png")
+resource.AddFile("materials/experiment-redux/mission_unavailable.png")
+
 -- JersonGaming's Model/Real RNG Ammo Boxes (https://steamcommunity.com/sharedfiles/filedetails/?id=1741790902)
 -- Higher quality ammo boxes, they replace the default ones.
 resource.AddWorkshop("1741790902")

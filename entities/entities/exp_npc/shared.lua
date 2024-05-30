@@ -11,7 +11,6 @@ ENT.Spawnable = false
 ENT.AdminOnly = true
 
 function ENT:SetupDataTables()
-	self:NetworkVar("Bool", "NoBubble")
 	self:NetworkVar("String", "DisplayName")
 	self:NetworkVar("String", "Description")
 	self:NetworkVar("String", "NpcId")
