@@ -740,15 +740,17 @@ function ENT:OnTakeDamage(damageInfo)
 		return damage
 	end
 
-	if (IsValid(attacker)) then
-		-- We delay this a frame, so the health is updated before we clear the tooltip
-		timer.Simple(0, function()
-			if (not IsValid(attacker) or not IsValid(self)) then
-				return
-			end
+    if (IsValid(attacker)) then
+		if (attacker:IsPlayer()) then
+			-- We delay this a frame, so the health is updated before we clear the tooltip
+			timer.Simple(0, function()
+				if (not IsValid(attacker) or not IsValid(self)) then
+					return
+				end
 
-			Schema.PlayerClearEntityInfoTooltip(attacker, self)
-		end)
+				Schema.PlayerClearEntityInfoTooltip(attacker, self)
+			end)
+		end
 
 		if (self:GetEnemy() == nil) then
 			self:SpeakFromTypedVoiceSet("Pain", 2)
