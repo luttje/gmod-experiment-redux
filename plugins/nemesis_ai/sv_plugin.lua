@@ -11,8 +11,11 @@ resource.AddFile("materials/experiment-redux/arrow_forward.png")
 resource.AddFile("materials/experiment-redux/arrow_backward.png")
 resource.AddSingleFile("materials/experiment-redux/combinescanline.vmt")
 
-function PLUGIN:RegisterSentence(uniqueID, parts)
-    self.registeredSentences[uniqueID] = parts
+function PLUGIN:RegisterSentence(uniqueID, sentence, parts)
+    self.registeredSentences[uniqueID] = {
+        sentence = sentence,
+		parts = parts,
+	}
 end
 
 ix.util.Include("sv_nemesis.lua")
@@ -83,14 +86,8 @@ function PLUGIN:PlayNemesisAudio(text, clients)
 	end)
 end
 
-function PLUGIN:GenerateSentences(uniqueID, callback, ...)
-	local parts = self.registeredSentences[uniqueID]
+function PLUGIN:GenerateSentences(parts, callback, ...)
 	local args = {...}
-
-    if (not parts) then
-        return
-    end
-
     local audioWithPauses = {}
 
     local function generatePart(index)
@@ -119,8 +116,18 @@ end
 
 -- lua_run ix.plugin.Get("nemesis_ai"):PlayNemesisSentences("nemesis_downfall", nil, "Jonathan")
 function PLUGIN:PlayNemesisSentences(uniqueID, clients, ...)
-    self:GenerateSentences(uniqueID, function(audioWithPauses)
+    local data = self.registeredSentences[uniqueID]
+
+    if (not data) then
+		ix.util.SchemaErrorNoHalt("The sentence with the unique ID '" .. tostring(uniqueID) .. "' does not exist.")
+        return
+    end
+
+	local sentence = data.sentence
+
+    self:GenerateSentences(data.parts, function(audioWithPauses)
         net.Start("expPlayNemesisSentences")
+		net.WriteString(sentence)
         net.WriteTable(audioWithPauses)
 
         if (istable(clients)) then

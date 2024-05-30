@@ -8,6 +8,18 @@ ix.util.Include("sh_commands.lua")
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 
+ix.chat.Register("nemesis_ai", {
+	CanSay = function(self, speaker, text)
+		return not IsValid(speaker)
+	end,
+    OnChatAdd = function(self, speaker, text)
+        local icon = ix.util.GetMaterial("icon16/bullet_blue.png")
+
+		chat.AddText(icon, Color(126, 199, 248), "An artificial voice says \"" .. tostring(text) .. "\"")
+	end,
+	noSpaceAfter = true
+})
+
 PLUGIN.presets = {
 	combine_big = {
         description = "Big wall mounted combine monitor",
