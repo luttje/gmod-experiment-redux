@@ -1,6 +1,6 @@
 ITEM.name = "Glock 17"
 ITEM.description = "Polymer pistol with larger-than-standard capacity and a fast fire rate."
-ITEM.price = 1500
+ITEM.price = 750
 ITEM.class = "tacrp_ex_glock"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint_extras/w_glock_new.mdl"

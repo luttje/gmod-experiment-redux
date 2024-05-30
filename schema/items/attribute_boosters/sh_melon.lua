@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Melon"
-ITEM.price = 30
+ITEM.price = 15
 ITEM.model = "models/props_junk/watermelon01.mdl"
 ITEM.width = 1
 ITEM.height = 1

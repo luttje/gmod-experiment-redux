@@ -2,7 +2,7 @@ local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.name = "Handheld Radio"
-ITEM.price = 100
+ITEM.price = 75
 ITEM.model = "models/deadbodies/dead_male_civilian_radio.mdl"
 ITEM.width = 1
 ITEM.height = 1

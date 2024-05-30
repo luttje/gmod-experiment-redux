@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Tear Gas Grenade"
-ITEM.price = 150
+ITEM.price = 165
 ITEM.model = "models/items/grenadeammo.mdl"
 ITEM.width = 1
 ITEM.height = 1

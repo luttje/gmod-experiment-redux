@@ -9,7 +9,7 @@ end
 local ITEM = ITEM
 
 ITEM.name = "Kevlar Vest"
-ITEM.price = 300
+ITEM.price = 150
 ITEM.model = "models/weapons/w_suitcase_passenger.mdl"
 ITEM.width = 2
 ITEM.height = 1

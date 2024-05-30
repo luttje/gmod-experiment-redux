@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Health Vial"
-ITEM.price = 40
+ITEM.price = 25
 ITEM.model = "models/healthvial.mdl"
 ITEM.width = 1
 ITEM.height = 1

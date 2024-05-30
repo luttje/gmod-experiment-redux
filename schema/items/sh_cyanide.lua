@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Cyanide"
-ITEM.price = 100
+ITEM.price = 55
 ITEM.model = "models/props_junk/garbage_plasticbottle002a.mdl"
 ITEM.width = 1
 ITEM.height = 1

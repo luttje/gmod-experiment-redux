@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Door Protector"
-ITEM.price = 100
+ITEM.price = 50
 ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1

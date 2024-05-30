@@ -1,6 +1,6 @@
 ITEM.name = "HK USP"
 ITEM.description = "Tactical pistol with good damage and range for its capacity."
-ITEM.price = 2900
+ITEM.price = 1450
 ITEM.class = "tacrp_ex_usp"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint_extras/w_usp.mdl"

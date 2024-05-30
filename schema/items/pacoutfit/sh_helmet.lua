@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Helmet"
-ITEM.price = 180
+ITEM.price = 95
 ITEM.model = "models/props_junk/metalbucket01a.mdl"
 ITEM.width = 1
 ITEM.height = 1

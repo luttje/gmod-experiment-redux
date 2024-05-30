@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Skull Mask"
-ITEM.price = 300
+ITEM.price = 150
 ITEM.model = "models/gibs/hgibs.mdl"
 ITEM.width = 1
 ITEM.height = 1

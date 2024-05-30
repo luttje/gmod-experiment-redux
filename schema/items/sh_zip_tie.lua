@@ -1,11 +1,11 @@
 local ITEM = ITEM
 
 ITEM.name = "Zip Tie"
-ITEM.price = 150
+ITEM.price = 165
 ITEM.model = "models/items/crossbowrounds.mdl"
 ITEM.width = 1
 ITEM.height = 1
-ITEM.description = "An orange zip tie with Thomas and Betts printed on the side."
+ITEM.description = "Can be used to tie up a character."
 
 ITEM.functions.Tie = {
 	-- Note that we always return false, because we manually remove the zip tie when not cancelling the action.

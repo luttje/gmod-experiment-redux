@@ -2,7 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Small Jacket"
 ITEM.model = "models/props_junk/garbage_bag001a.mdl"
-ITEM.price = 6000
+ITEM.price = 3000
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Storage"

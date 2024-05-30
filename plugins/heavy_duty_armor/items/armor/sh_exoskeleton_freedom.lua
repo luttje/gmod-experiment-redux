@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.base = "base_armor_exoskeleton"
-ITEM.price = 14000
+ITEM.price = 1400
 ITEM.name = "Freedom Exoskeleton"
 ITEM.description =
 	"A Freedom™ branded exoskeleton. Provides you with great bullet resistance."

@@ -1,9 +1,8 @@
 local ITEM = ITEM
 
 ITEM.name = "Breach"
-ITEM.price = 150
+ITEM.price = 295
 ITEM.model = "models/props_wasteland/prison_padlock001a.mdl"
-ITEM.plural = "Breaches"
 ITEM.width = 1
 ITEM.height = 2
 ITEM.description = "A device that will breach a door when placed on it and shot."

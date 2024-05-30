@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Flashlight"
-ITEM.price = 100
+ITEM.price = 55
 ITEM.model = "models/maxofs2d/lamp_flashlight.mdl"
 ITEM.modelScale = 0.35
 ITEM.width = 1

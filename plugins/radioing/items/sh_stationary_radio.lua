@@ -1,10 +1,10 @@
 local ITEM = ITEM
 
 ITEM.name = "Stationary Radio"
-ITEM.price = 200
+ITEM.price = 95
 ITEM.model = "models/props_lab/citizenradio.mdl"
 ITEM.width = 2
-ITEM.height = 3
+ITEM.height = 2
 ITEM.category = "Perpetuities"
 ITEM.description = "An antique radio for putting on a table, do you think this'll still work?"
 ITEM.maximum = 5

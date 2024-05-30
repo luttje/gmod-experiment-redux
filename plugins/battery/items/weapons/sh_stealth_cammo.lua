@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Stealth Cammo"
-ITEM.price = 7700
+ITEM.price = 5500
 ITEM.model = "models/weapons/w_c4_planted.mdl"
 ITEM.width = 1
 ITEM.height = 1

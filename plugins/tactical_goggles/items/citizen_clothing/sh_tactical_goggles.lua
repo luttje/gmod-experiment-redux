@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Tactical Goggles"
-ITEM.price = 2500
+ITEM.price = 1250
 ITEM.model = "models/gibs/shield_scanner_gib1.mdl"
 ITEM.width = 1
 ITEM.height = 1

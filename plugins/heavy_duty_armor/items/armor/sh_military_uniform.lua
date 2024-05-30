@@ -1,6 +1,6 @@
 local ITEM = ITEM
 
-ITEM.price = 8500
+ITEM.price = 950
 ITEM.name = "Military Uniform"
 ITEM.description =
 	"A Military Uniform. Provides you with some bullet resistance."

@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Broadcaster"
-ITEM.price = 10000
+ITEM.price = 2500
 ITEM.model = "models/props_lab/citizenradio.mdl"
 ITEM.width = 1
 ITEM.height = 1

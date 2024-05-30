@@ -107,7 +107,7 @@
   {"name": "Straight", "price": 740, "category": "weapon_attachments"},
   {"name": "Wide", "price": 750, "category": "weapon_attachments"},
   {"name": "Breach", "price": 150, "category": "items"},
-  {"name": "Door Protector", "price": 300, "category": "Protection"},
+  {"name": "Door Protector", "price": 100, "category": "Protection"},
   {"name": "Flashlight", "price": 100, "category": "Reusables"},
   {"name": "Flare Grenade", "price": 110, "category": "grenades"},
   {"name": "Flash Grenade", "price": 125, "category": "grenades"},

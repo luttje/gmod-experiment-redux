@@ -1,12 +1,12 @@
 local ITEM = ITEM
 
 ITEM.name = "Milk Carton"
-ITEM.price = 20
+ITEM.price = 15
 ITEM.model = "models/props_junk/garbage_milkcarton002a.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
-ITEM.description = "A carton filled with delicious milk."
+ITEM.description = "A carton filled with delicious milk. Drinking this will temporarily enhance your endurance and strength."
 ITEM.attributeBoosts = {
 	["endurance"] = {
 		amount = 1,

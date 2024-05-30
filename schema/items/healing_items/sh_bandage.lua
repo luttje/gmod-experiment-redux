@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Bandage"
-ITEM.price = 25
+ITEM.price = 15
 ITEM.model = "models/props_wasteland/prison_toiletchunk01f.mdl"
 ITEM.width = 1
 ITEM.height = 1

@@ -1,7 +1,7 @@
 local ITEM = ITEM
 
 ITEM.name = "Chloroform"
-ITEM.price = 800
+ITEM.price = 450
 ITEM.model = "models/props_junk/garbage_newspaper001a.mdl"
 ITEM.width = 1
 ITEM.height = 1

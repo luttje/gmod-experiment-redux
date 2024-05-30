@@ -1,12 +1,12 @@
 local ITEM = ITEM
 
 ITEM.name = "Beer"
-ITEM.price = 25
+ITEM.price = 15
 ITEM.model = "models/props_junk/garbage_glassbottle003a.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Consumables"
-ITEM.description = "A glass bottle filled with liquid, it has a funny smell."
+ITEM.description = "A glass bottle filled with liquid, it has a funny smell. It might make you feel stronger."
 ITEM.attributeBoosts = {
 	["strength"] = {
 		amount = 2,
