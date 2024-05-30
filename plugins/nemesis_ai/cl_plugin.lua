@@ -54,8 +54,10 @@ function PLUGIN:AddReferenceToAudioChannel(channel)
 end
 
 net.Receive("expPlayNemesisAudio", function(length)
+	local sentence = net.ReadString()
     local audioUrl = net.ReadString()
 
+	ix.chat.Send(nil, "nemesis_ai", sentence)
 	sound.PlayURL(audioUrl, "", function(channel)
         if (IsValid(channel)) then
 			PLUGIN:AddReferenceToAudioChannel(channel)
@@ -81,10 +83,6 @@ net.Receive("expPlayNemesisSentences", function()
 
 		sound.PlayURL(url, "", function(channel)
             if (IsValid(channel)) then
-				if (index == 1) then
-					ix.chat.Send(nil, "nemesis_ai", sentence)
-				end
-
 				PLUGIN:AddReferenceToAudioChannel(channel)
 
 				channel:Play()
@@ -96,6 +94,7 @@ net.Receive("expPlayNemesisSentences", function()
 		end)
 	end
 
+	ix.chat.Send(nil, "nemesis_ai", sentence)
 	playPart(1)
 end)
 

@@ -5,6 +5,7 @@ local MYSQL_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 local LAST_SUBMITTED_DATE_FILE = "leaderboards_last_submitted_day.txt"
 
 PLUGIN.metrics = PLUGIN.metrics or {}
+PLUGIN.metricsLookup = PLUGIN.metricsLookup or {}
 PLUGIN.dependantTables = {
 	"ix_characters",
 	"ix_players",
@@ -141,15 +142,18 @@ function PLUGIN:RegisterOrGetMetric(name, description)
     query:Select("description")
     query:Where("name", name)
 	query:Callback(function(result)
-		if (#result > 0) then
-            self.metrics[name] = createMetricHandler(result[1].metric_id, result[1].name, result[1].description)
+        if (#result > 0) then
+			local metric = result[1]
+            self.metrics[name] = createMetricHandler(metric.metric_id, metric.name, metric.description)
+			self.metricsLookup[metric.metric_id] = self.metrics[name]
 		else
 			query = mysql:Insert("exp_metrics")
 			query:Insert("name", name)
             query:Insert("description", description)
 			query:Insert("created_at", os.time())
             query:Callback(function(data, status, lastID)
-				self.metrics[name] = createMetricHandler(lastID, name, description)
+                self.metrics[name] = createMetricHandler(lastID, name, description)
+				self.metricsLookup[lastID] = self.metrics[name]
             end)
 			query:Execute()
 		end
@@ -327,20 +331,20 @@ function PLUGIN:CheckHasDependantTables()
 end
 
 function PLUGIN:Think()
-	if (self.disabled) then
-		return
-	end
+    if (self.disabled) then
+        return
+    end
 
-	if (not self.hasDependantTables) then
-		self:CheckHasDependantTables()
-		return
-	end
+    if (not self.hasDependantTables) then
+        self:CheckHasDependantTables()
+        return
+    end
 
-	if (not self.hasRegisteredMetrics) then
-		self.hasRegisteredMetrics = true
+    if (not self.hasRegisteredMetrics) then
+        self.hasRegisteredMetrics = true
 
-		self:RegisterMetrics()
-	end
+        self:RegisterMetrics()
+    end
 
     if (self:ShouldSubmitMetrics()) then
         self:SubmitMetrics()
@@ -350,85 +354,123 @@ function PLUGIN:Think()
         return
     end
 
-	if (CurTime() > self.isQueryingData.timeoutAt) then
-		ix.util.SchemaErrorNoHaltWithStack("Failed to query data for metrics. Timeout reached.")
-		self.isQueryingData = nil
-		self.isSubmittingMetrics = nil -- TODO: Do not endlessly retry
-		return
-	end
+    if (CurTime() > self.isQueryingData.timeoutAt) then
+        ix.util.SchemaErrorNoHaltWithStack("Failed to query data for metrics. Timeout reached.")
+        self.isQueryingData = nil
+        self.isSubmittingMetrics = nil -- TODO: Do not endlessly retry
+        return
+    end
 
     local dataToQuery = self.isQueryingData.dataToQuery
-	local currentQueriedData = self.isQueryingData.queriedData
+    local currentQueriedData = self.isQueryingData.queriedData
 
     if (#dataToQuery ~= #currentQueriedData) then
-		return
-	end
+        return
+    end
 
-	local data = {}
+    local data = {}
 
-	for i = 1, #dataToQuery do
-		local queryData = dataToQuery[i]
-		local queriedData = currentQueriedData[i]
+    for i = 1, #dataToQuery do
+        local queryData = dataToQuery[i]
+        local queriedData = currentQueriedData[i]
 
-		if (queryData.value) then
-			data[queryData.name] = queryData.value
-		end
+        if (queryData.value) then
+            data[queryData.name] = queryData.value
+        end
 
-		if (not queryData.table) then
-			continue
-		end
+        if (not queryData.table) then
+            continue
+        end
 
-		data[queryData.name] = {}
+        data[queryData.name] = {}
 
-		for _, row in ipairs(queriedData) do
-			local rowData = {}
+        for _, row in ipairs(queriedData) do
+            local rowData = {}
 
-			for column, key in pairs(queryData.columns) do
-				if (type(column) == "number") then
-					column = key
-				end
+            for column, key in pairs(queryData.columns) do
+                if (type(column) == "number") then
+                    column = key
+                end
 
-				rowData[key] = row[column]
-			end
+                rowData[key] = row[column]
+            end
 
-			for key, valueGetter in pairs(queryData.values or {}) do
-				rowData[key] = valueGetter(rowData)
-			end
+            for key, valueGetter in pairs(queryData.values or {}) do
+                rowData[key] = valueGetter(rowData)
+            end
 
-			data[queryData.name][#data[queryData.name] + 1] = rowData
-		end
-	end
+            data[queryData.name][#data[queryData.name] + 1] = rowData
+        end
+    end
 
-	-- Append all metrics to the data, clearing the keys and Log function
-	data.metrics = {}
+    -- Append all metrics to the data, clearing the keys and Log function
+    data.metrics = {}
 
-	for name, metric in pairs(self.metrics) do
-		data.metrics[#data.metrics + 1] = {
-			id = metric.id,
-			name = metric.name,
-			description = metric.description,
-		}
-	end
+    for name, metric in pairs(self.metrics) do
+        data.metrics[#data.metrics + 1] = {
+            id = metric.id,
+            name = metric.name,
+            description = metric.description,
+        }
+    end
 
-	local forDay = self.isQueryingData.forDay
-	local isDryRun = self.isQueryingData.isDryRun
-	self.isQueryingData = nil
+    local forDay = self.isQueryingData.forDay
+    local isDryRun = self.isQueryingData.isDryRun
+    self.isQueryingData = nil
 
-	if (isDryRun) then
-		ix.util.SchemaPrint("(Dry Run) Metrics for day " .. tostring(forDay) .. ":")
-		PrintTable(data)
-		return
-	end
+    if (isDryRun) then
+        ix.util.SchemaPrint("(Dry Run) Metrics for day " .. tostring(forDay) .. ":")
+        PrintTable(data)
+        return
+    end
 
     self:PostJson("api/submit-metrics", data, function(response)
         ix.util.SchemaPrint("Metrics submitted successfully for day " .. tostring(forDay))
         file.Write(LAST_SUBMITTED_DATE_FILE, tostring(forDay))
-		self.lastSubmittedDay = forDay
-		self.isSubmittingMetrics = nil
-	end, function(message, body)
-		ix.util.SchemaErrorNoHalt("Failed to submit metrics. " .. tostring(message) .. "\n" .. tostring(body) .. "\n")
-		self.lastSubmittedDay = forDay -- So it doesnt keep retrying
-		self.isSubmittingMetrics = nil
+        self.lastSubmittedDay = forDay
+        self.isSubmittingMetrics = nil
+    end, function(message, body)
+        ix.util.SchemaErrorNoHalt("Failed to submit metrics. " .. tostring(message) .. "\n" .. tostring(body) .. "\n")
+        self.lastSubmittedDay = forDay -- So it doesnt keep retrying
+        self.isSubmittingMetrics = nil
+    end)
+end
+
+-- Query the metrics so it can be used to figure out who's leading in what.
+function PLUGIN:GetTopCharacters(callback)
+	local query = [[
+		SELECT character_id, metric_id, SUM(value) AS total_value
+		FROM exp_character_metrics
+		GROUP BY character_id, metric_id
+		ORDER BY metric_id, total_value DESC
+		LIMIT 10;
+	]]
+
+	mysql:RawQuery(query, function(result)
+		if (not result) then
+			ix.util.SchemaErrorNoHaltWithStack("Failed to get top characters.")
+			return
+		end
+
+		local metricInfo = {}
+
+		-- Sum up the metrics for each character, keeping track of the top 10 for each metric.
+		for _, row in ipairs(result) do
+			local characterID = row.character_id
+			local metricID = row.metric_id
+			local totalValue = row.total_value
+
+			if (not metricInfo[metricID]) then
+                metricInfo[metricID] = {
+                    name = self.metricsLookup[metricID].name,
+					topCharacters = {},
+				}
+			end
+
+			table.insert(metricInfo[metricID].topCharacters, { character_id = characterID, value = totalValue })
+		end
+
+		callback(metricInfo)
 	end)
 end
 

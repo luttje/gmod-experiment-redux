@@ -20,6 +20,58 @@ ix.chat.Register("nemesis_ai", {
 	noSpaceAfter = true
 })
 
+ix.chat.Register("nemesis_ai_bounty", {
+	CanSay = function(self, speaker, text)
+		return not IsValid(speaker)
+	end,
+    OnChatAdd = function(self, speaker, text, anonymous, data)
+        local textColor = Color(84, 106, 118) -- alternative: Color(98, 168, 124)
+        local highlightColor = Color(126, 224, 129)
+
+		chat.AddText(
+			highlightColor,
+			"'" .. text .. "'",
+			textColor,
+            " has a score of ",
+            highlightColor,
+            data.score,
+            textColor,
+            " for '",
+            highlightColor,
+            data.metric,
+            textColor,
+            "'.\nA bounty has been set on them for ",
+            highlightColor,
+            data.reward,
+            textColor,
+            ". Kill them within ",
+            highlightColor,
+            data.time,
+            textColor,
+			" to claim the reward."
+		)
+	end,
+	noSpaceAfter = true
+})
+
+ix.config.Add("nemesisAiEnabled", true, "Whether or not the Nemesis AI is enabled.", nil, {
+	category = "nemesis_ai"
+})
+
+ix.config.Add("nemesisAiBountyIntervalSeconds", 60 * 60, "The interval in seconds that the Nemesis AI will check for bounties.", nil, {
+	data = {min = 1, max = 86400},
+	category = "nemesis_ai"
+})
+
+ix.config.Add("nemesisAiBountyDurationSeconds", 60 * 30, "How long a bounty lasts in seconds.", nil, {
+	data = {min = 1, max = 86400},
+	category = "nemesis_ai"
+})
+
+ix.lang.AddTable("english", {
+    nemesis_ai = "Nemesis AI",
+})
+
 PLUGIN.presets = {
 	combine_big = {
         description = "Big wall mounted combine monitor",

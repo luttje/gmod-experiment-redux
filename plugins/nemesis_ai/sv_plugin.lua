@@ -15,7 +15,9 @@ function PLUGIN:RegisterSentence(uniqueID, sentence, parts)
     self.registeredSentences[uniqueID] = {
         sentence = sentence,
 		parts = parts,
-	}
+    }
+
+	return uniqueID
 end
 
 ix.util.Include("sv_nemesis.lua")
@@ -44,10 +46,20 @@ function PLUGIN:OnLoaded()
     AUDIO_URL = Schema.util.ForceEndPath(variables.AUDIO_URL)
 end
 
+function PLUGIN:Think()
+	self:OnNemesisThink()
+end
+
 function PLUGIN:GenerateSpeech(text, callback)
     if (self.disabled) then
         return
     end
+
+	-- lua_run DEBUG_DONT_GENERATE_SPEECH = true
+    if (DEBUG_DONT_GENERATE_SPEECH) then
+		callback("skipping_generating_speech_for_easy_testing.wav")
+		return
+	end
 
     local endpoint = APP_URL .. "generate-voice"
 
@@ -76,6 +88,7 @@ function PLUGIN:PlayNemesisAudio(text, clients)
 		local audioUrl = AUDIO_URL .. body
 
 		net.Start("expPlayNemesisAudio")
+		net.WriteString(text)
         net.WriteString(audioUrl)
 
 		if (istable(clients)) then
@@ -114,7 +127,7 @@ function PLUGIN:GenerateSentences(parts, callback, ...)
 	generatePart(1)
 end
 
--- lua_run ix.plugin.Get("nemesis_ai"):PlayNemesisSentences("nemesis_downfall", nil, "Jonathan")
+-- lua_run ix.plugin.Get("nemesis_ai"):PlayNemesisSentences("downfall", nil, "Jonathan")
 function PLUGIN:PlayNemesisSentences(uniqueID, clients, ...)
     local data = self.registeredSentences[uniqueID]
 
@@ -123,7 +136,9 @@ function PLUGIN:PlayNemesisSentences(uniqueID, clients, ...)
         return
     end
 
-	local sentence = data.sentence
+    local sentence = data.sentence:format(...)
+
+	ix.util.SchemaPrint("Nemsis AI: " .. tostring(sentence))
 
     self:GenerateSentences(data.parts, function(audioWithPauses)
         net.Start("expPlayNemesisSentences")
@@ -170,6 +185,8 @@ function PLUGIN:DramaticDelayEachMonitor(callback)
 end
 
 function PLUGIN:SetTarget(entity)
+    self.currentTarget = entity
+
 	net.Start("expSetMonitorTarget")
 	net.WriteEntity(entity)
 	net.Broadcast()
@@ -178,6 +195,116 @@ function PLUGIN:SetTarget(entity)
 	self:DramaticDelayEachMonitor(function(monitor)
 		monitor:SetPoweredOn(true)
 	end)
+end
+
+function PLUGIN:SetBounty(client, metricScore, metricName)
+    local reward = math.Clamp(math.Round(metricScore * .5), 10, 2000)
+    local duration = ix.config.Get("nemesisAiBountyDurationSeconds")
+
+    client:GetCharacter():SetData("nemesisBounty", {
+        reward = reward,
+        metricScore = metricScore,
+		metricName = metricName,
+        endsAt = os.time() + duration,
+    })
+
+    self:SetTarget(client)
+
+    self:SendBountyMessage(client, reward, metricName, metricScore, duration)
+end
+
+function PLUGIN:SendBountyMessage(client, reward, metricName, metricScore, duration)
+	ix.chat.Send(nil, "nemesis_ai_bounty", client:GetCharacter():GetName(), false, nil, {
+		score = metricScore,
+		metric = metricName,
+		reward = ix.currency.Get(reward),
+		time = string.NiceTime(duration),
+	})
+end
+
+-- If they disconnect, store the bounty so they can't just reconnect to avoid it. (subtract the time)
+function PLUGIN:OnCharacterDisconnect(client, character)
+	local bounty = character:GetData("nemesisBounty")
+
+    if (not bounty) then
+        return
+    end
+
+	local timeLeft = bounty.endsAt - os.time()
+
+	if (timeLeft > 0) then
+		character:SetData("nemesisBounty", {
+            reward = bounty.reward,
+            metricScore = bounty.metricScore,
+			metricName = bounty.metricName,
+			timeLeft = timeLeft,
+		})
+	else
+		character:SetData("nemesisBounty", nil)
+	end
+end
+
+-- If they reconnect, check if they have a bounty and if so, setup the time it ends.
+function PLUGIN:PlayerLoadedCharacter(client, character)
+    local bounty = character:GetData("nemesisBounty")
+
+    if (not bounty) then
+        return
+    end
+
+    -- We fall back to the half the default bounty duration, since this may happen if the server crashed without saving the time left.
+    local timeLeft = bounty.timeLeft or (ix.config.Get("nemesisAiBountyDurationSeconds") * .5)
+
+    character:SetData("nemesisBounty", {
+        reward = bounty.reward,
+        metricScore = bounty.metricScore,
+        metricName = bounty.metricName,
+        endsAt = os.time() + timeLeft,
+    })
+
+    if (not IsValid(self.currentTarget)) then
+        self:SetTarget(client)
+    end
+
+    self:SendBountyMessage(client, bounty.reward, bounty.metricName, bounty.metricScore, timeLeft)
+end
+
+-- If someone kills the target, reward them and remove the bounty.
+function PLUGIN:PlayerDeath(client, inflictor, attacker)
+	local character = client:GetCharacter()
+	local bounty = character and character:GetData("nemesisBounty") or nil
+
+    if (not bounty) then
+        return
+    end
+
+	if (not IsValid(attacker) or not attacker:IsPlayer()) then
+		return
+	end
+
+	if (attacker == client) then
+		return
+	end
+
+	local attackerCharacter = attacker:GetCharacter()
+
+    if (not attackerCharacter) then
+        return
+    end
+
+	-- TODO: Prevent companions from killing the target and claiming the reward. Or discourage it somehow.
+
+	character:SetData("nemesisBounty", nil)
+
+	attackerCharacter:GiveMoney(bounty.reward)
+
+    local bountySentenceUniqueID = PLUGIN.bountySentences[math.random(#PLUGIN.bountySentences)]
+
+	self:PlayNemesisSentences(bountySentenceUniqueID, nil, attackerCharacter:GetName())
+
+	if (IsValid(self.currentTarget) and self.currentTarget == attacker) then
+		self:SetTarget(nil)
+	end
 end
 
 function PLUGIN:RelateMonitorToParent(monitor, parent)

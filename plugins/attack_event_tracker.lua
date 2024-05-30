@@ -15,7 +15,7 @@ if (not SERVER) then
 end
 
 -- Set this to true to test the attack event tracker with NPCs (useful for testing)
-local DEBUG_FAKE_NPC_AS_PLAYERS = false
+-- local DEBUG_FAKE_NPC_AS_PLAYERS = false
 
 function PLUGIN:HasPlayerAttacked(client, victim)
 	local curTime = CurTime()
