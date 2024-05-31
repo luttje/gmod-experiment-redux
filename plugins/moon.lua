@@ -63,9 +63,14 @@ function PLUGIN:PostDrawOpaqueRenderables(isDrawingDepth, isDrawingSkybox, isDra
 	moonDirection.x = -moonDirection.x
 
 	local moonPos = client:GetPos() + moonDirection * moonDistance
+	local moonAngle = (moonPos - client:GetPos()):Angle()
 
-	cam.Start3D()
-	render.SetMaterial(moonMaterial)
-	render.DrawSprite(moonPos, moonSize, moonSize, Color(255, 255, 255))
-	cam.End3D()
+	moonAngle:RotateAroundAxis(moonAngle:Right(), 90)
+	moonAngle:RotateAroundAxis(moonAngle:Up(), 90)
+
+	cam.Start3D2D(moonPos, moonAngle, 1)
+	surface.SetMaterial(moonMaterial)
+	surface.SetDrawColor(255, 255, 255)
+	surface.DrawTexturedRect(-moonSize / 2, -moonSize / 2, moonSize, moonSize)
+	cam.End3D2D()
 end
