@@ -38,7 +38,6 @@ end
 
 function ENT:GetInventory()
 	local character = self:GetCharacter()
-	local lockerInventoryID = character:GetData("lockerID")
 
-	return ix.item.inventories[lockerInventoryID]
+	return character:GetLockerInventory()
 end

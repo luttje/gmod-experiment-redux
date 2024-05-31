@@ -8,6 +8,15 @@ ix.util.Include("sh_commands.lua")
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 
+if (SERVER) then
+    resource.AddFile("materials/experiment-redux/locker_rot.png")
+    resource.AddFile("materials/experiment-redux/locker_rot_icon.png")
+    resource.AddFile("materials/experiment-redux/locker_rot_anti_virus.png")
+else
+	PLUGIN.lockerRotIcon = ix.util.GetMaterial("experiment-redux/locker_rot_icon.png")
+	PLUGIN.lockerRotAntiVirusSymbol = ix.util.GetMaterial("experiment-redux/locker_rot_anti_virus.png")
+end
+
 ix.chat.Register("nemesis_ai", {
 	CanSay = function(self, speaker, text)
 		return not IsValid(speaker)
@@ -20,7 +29,7 @@ ix.chat.Register("nemesis_ai", {
 	noSpaceAfter = true
 })
 
-ix.chat.Register("nemesis_ai_bounty", {
+ix.chat.Register("nemesis_ai_locker_rot", {
 	CanSay = function(self, speaker, text)
 		return not IsValid(speaker)
 	end,
@@ -28,7 +37,8 @@ ix.chat.Register("nemesis_ai_bounty", {
         local textColor = Color(84, 106, 118) -- alternative: Color(98, 168, 124)
         local highlightColor = Color(126, 224, 129)
 
-		chat.AddText(
+        chat.AddText(
+			PLUGIN.lockerRotIcon,
 			highlightColor,
 			"'" .. text .. "'",
 			textColor,
@@ -40,15 +50,55 @@ ix.chat.Register("nemesis_ai_bounty", {
             highlightColor,
             data.metric,
             textColor,
-            "'.\nA bounty has been set on them for ",
+            "'.\nDue to the ",
             highlightColor,
-            data.reward,
+            "Locker Rot Virus",
             textColor,
-            ". Kill them within ",
+            " they are holding their most ",
             highlightColor,
-            data.time,
+            "valuable items",
             textColor,
-			" to claim the reward."
+            ". They will be running to find the anti-virus, so be on the lookout to ",
+            highlightColor,
+			"slay them and claim their items for yourself!"
+		)
+	end,
+	noSpaceAfter = true
+})
+
+ix.chat.Register("nemesis_ai_locker_rot_hint", {
+	CanSay = function(self, speaker, text)
+		return not IsValid(speaker)
+	end,
+    OnChatAdd = function(self, speaker, text, anonymous, data)
+        local textColor = Color(84, 106, 118)
+        local highlightColor = Color(126, 224, 129)
+
+        chat.AddText(
+			PLUGIN.lockerRotIcon,
+            highlightColor,
+			"Hint: ",
+            textColor,
+            text
+		)
+	end,
+	noSpaceAfter = true
+})
+
+ix.chat.Register("nemesis_ai_locker_rot_warning", {
+	CanSay = function(self, speaker, text)
+		return not IsValid(speaker)
+	end,
+	OnChatAdd = function(self, speaker, text, anonymous, data)
+		local textColor = Color(162, 62, 72)
+		local highlightColor = Color(255, 60, 56)
+
+        chat.AddText(
+			PLUGIN.lockerRotIcon,
+			highlightColor,
+			"Warning: ",
+			textColor,
+            text
 		)
 	end,
 	noSpaceAfter = true
@@ -58,12 +108,12 @@ ix.config.Add("nemesisAiEnabled", true, "Whether or not the Nemesis AI is enable
 	category = "nemesis_ai"
 })
 
-ix.config.Add("nemesisAiBountyIntervalSeconds", 60 * 60, "The interval in seconds that the Nemesis AI will check for bounties.", nil, {
+ix.config.Add("nemesisAiLockerRotIntervalSeconds", 60 * 60, "The interval in seconds that the Nemesis AI will check for bounties.", nil, {
 	data = {min = 1, max = 86400},
 	category = "nemesis_ai"
 })
 
-ix.config.Add("nemesisAiBountyDurationSeconds", 60 * 30, "How long a bounty lasts in seconds.", nil, {
+ix.config.Add("nemesisAiLockerRotTaskSeconds", 60 * 10, "How long a player has to complete the Locker Rot task.", nil, {
 	data = {min = 1, max = 86400},
 	category = "nemesis_ai"
 })

@@ -102,15 +102,16 @@ function ENT:Use(client)
 			ix.storage.Open(client, inventory, {
 				name = L("lockers", client),
 				entity = session,
-				bMultipleUsers = true,
+                bMultipleUsers = true,
+				isLockersInventory = true,
 				data = {
 					money = character:GetData("lockersMoney", 0)
 				},
 				OnPlayerOpen = function()
-					ix.log.Add(client, "openLockers")
+					hook.Run("OnPlayerLockerOpened", client, self)
 				end,
 				OnPlayerClose = function()
-					ix.log.Add(client, "closeLockers")
+                    hook.Run("OnPlayerLockerClosed", client, self)
 
                     if (IsValid(session)) then
                         session:Remove()
@@ -136,18 +137,11 @@ end
 --- @param callback fun(table) # The function to call when the locker inventory is ready.
 function ENT:GetOrCreateLockerInventory(client, callback)
 	local character = client:GetCharacter()
-	local lockerInventoryID = character:GetData("lockerID")
+	local lockerInventory = character:GetLockerInventory()
 	local inventoryType, inventoryTypeID = PLUGIN:GetLockerInventoryType()
 
-	if (lockerInventoryID) then
-		if (ix.item.inventories[lockerInventoryID]) then
-			callback(ix.item.inventories[lockerInventoryID])
-			return
-		end
-
-		error("Locker inventory ID exists, but the inventory does not. I'm convinced this shouldn't happen.")
-		-- Shouldn't be necessary, because ix.char.Restore will restore all inventories belonging to the character.
-		ix.inventory.Restore(invID, inventoryType.w, inventoryType.h, callback)
+	if (lockerInventory) then
+		callback(lockerInventory)
 		return
 	end
 

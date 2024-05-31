@@ -37,6 +37,18 @@ ix.log.AddType("closeLockers", function(client, ...)
 	return string.format("%s closed their lockers.", client:Name())
 end, FLAG_NORMAL)
 
+local characterMeta = ix.meta.character
+
+function characterMeta:GetLockerInventory()
+	local lockerInventoryID = self:GetData("lockerID")
+
+    if (not lockerInventoryID) then
+        return
+    end
+
+	return ix.item.inventories[lockerInventoryID]
+end
+
 function PLUGIN:LoadData()
 	local lockers = self:GetData()
 

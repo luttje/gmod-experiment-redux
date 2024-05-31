@@ -299,18 +299,20 @@ function Schema.SetupStoragePanel(panel, storageInventoryPanel, localInventoryPa
 		panel.expCloseShortcutOnKeyCodeReleased
 		or panel.OnKeyCodeReleased
 
-	function panel:OnKeyCodeReleased(key)
-		local scoreboardBinding = input.LookupBinding("showscores")
-		local scoreboardKey = scoreboardBinding and input.GetKeyCode(scoreboardBinding) or KEY_TAB
+    function panel:OnKeyCodeReleased(key)
+        local scoreboardBinding = input.LookupBinding("showscores")
+        local scoreboardKey = scoreboardBinding and input.GetKeyCode(scoreboardBinding) or KEY_TAB
 
-		if (key == scoreboardKey) then
-			self.storageInventory:Close()
-		end
+        if (key == scoreboardKey) then
+            self.storageInventory:Close()
+        end
 
-		if (self.expCloseShortcutOnKeyCodeReleased) then
-			self:expCloseShortcutOnKeyCodeReleased(key)
-		end
-	end
+        if (self.expCloseShortcutOnKeyCodeReleased) then
+            self:expCloseShortcutOnKeyCodeReleased(key)
+        end
+    end
+
+	Schema.SetupInventorySlots(storageInventoryPanel)
 
 	if (not ix.option.Get("openBags", true)) then
 		return
@@ -354,68 +356,114 @@ function Schema.SetupStoragePanel(panel, storageInventoryPanel, localInventoryPa
 end
 
 function Schema.SetupStoragePanelBags(inventoryPanel, inventory, isStoragePanelBags)
-	local bagPanelsToPosition = {}
-	local totalBagPanelHeight = 0
+    local bagPanelsToPosition = {}
+    local totalBagPanelHeight = 0
 
-	for _, item in pairs(inventory:GetItems()) do
-		if (not item.isBag) then
-			continue
+    for _, item in pairs(inventory:GetItems()) do
+        if (not item.isBag) then
+            continue
+        end
+
+        item.functions.View.OnClick(item)
+
+        local index = item:GetData("id", "")
+        local bagPanel = ix.gui["inv" .. index]
+
+        if (not IsValid(bagPanel)) then
+            continue
+        end
+
+        bagPanelsToPosition[#bagPanelsToPosition + 1] = bagPanel
+        totalBagPanelHeight = totalBagPanelHeight + bagPanel:GetTall()
+    end
+
+    if (#bagPanelsToPosition == 0) then
+        return
+    end
+
+    local screenH = ScrH()
+    local parentX, parentY, parentW, parentH = inventoryPanel:GetBounds()
+    local padding = 4
+
+    if (totalBagPanelHeight > screenH) then
+        local bagHeight = math.floor((screenH - padding * 2) / #bagPanelsToPosition) - 2
+
+        for b, panel in ipairs(bagPanelsToPosition) do
+            local bagWidth = panel:GetWide()
+            local bagY = padding + (bagHeight + 2) * (b - 1)
+            local bagX
+
+            if (isStoragePanelBags) then
+                bagX = parentX - bagWidth - padding
+            else
+                bagX = parentX + parentW + padding
+            end
+
+            panel:SetPos(bagX, bagY)
+        end
+    else
+        local bagY = padding + (screenH - totalBagPanelHeight) * .5
+
+        for _, panel in ipairs(bagPanelsToPosition) do
+            local bagWidth = panel:GetWide()
+            local bagX
+
+            if (isStoragePanelBags) then
+                bagX = parentX - bagWidth - padding
+            else
+                bagX = parentX + parentW + padding
+            end
+
+            panel:SetPos(bagX, bagY)
+
+            bagY = bagY + panel:GetTall() + 2
+        end
+    end
+end
+
+-- Sets up inventory slots to allow custom PaintOver from plugins
+function Schema.SetupInventorySlots(inventoryPanel)
+    inventoryPanel.expOriginalAddIcon = inventoryPanel.expOriginalAddIcon or inventoryPanel.AddIcon
+
+	local function PaintOverOverride(self, width, height)
+		local itemTable = self.itemTable
+
+		if (not itemTable) then
+			return
 		end
 
-		item.functions.View.OnClick(item)
-
-		local index = item:GetData("id", "")
-		local bagPanel = ix.gui["inv" .. index]
-
-		if (not IsValid(bagPanel)) then
-			continue
+		if (hook.Run("PaintOverItemIcon", self, itemTable, width, height)) then
+			return
 		end
 
-		bagPanelsToPosition[#bagPanelsToPosition + 1] = bagPanel
-		totalBagPanelHeight = totalBagPanelHeight + bagPanel:GetTall()
+		if (itemTable.PaintOver) then
+			itemTable.PaintOver(self, itemTable, width, height)
+		end
 	end
 
-	if (#bagPanelsToPosition == 0) then
-		return
-	end
+	-- Setup existing items
+	for x, rows in pairs(inventoryPanel.slots) do
+        for y, data in pairs(rows) do
+            local itemIcon = data.item
 
-	local screenH = ScrH()
-	local parentX, parentY, parentW, parentH = inventoryPanel:GetBounds()
-	local padding = 4
-
-	if (totalBagPanelHeight > screenH) then
-		local bagHeight = math.floor((screenH - padding * 2) / #bagPanelsToPosition) - 2
-
-		for b, panel in ipairs(bagPanelsToPosition) do
-			local bagWidth = panel:GetWide()
-			local bagY = padding + (bagHeight + 2) * (b - 1)
-			local bagX
-
-			if (isStoragePanelBags) then
-				bagX = parentX - bagWidth - padding
-			else
-				bagX = parentX + parentW + padding
+			if (not itemIcon) then
+				continue
 			end
 
-			panel:SetPos(bagX, bagY)
+			itemIcon.PaintOver = PaintOverOverride
 		end
-	else
-		local bagY = padding + (screenH - totalBagPanelHeight) * .5
+    end
 
-		for _, panel in ipairs(bagPanelsToPosition) do
-			local bagWidth = panel:GetWide()
-			local bagX
+	function inventoryPanel:AddIcon(model, x, y, w, h, skin)
+		local panel = self:expOriginalAddIcon(model, x, y, w, h, skin)
 
-			if (isStoragePanelBags) then
-				bagX = parentX - bagWidth - padding
-			else
-				bagX = parentX + parentW + padding
-			end
-
-			panel:SetPos(bagX, bagY)
-
-			bagY = bagY + panel:GetTall() + 2
+		if (not panel) then
+			return
 		end
+
+        panel.PaintOver = PaintOverOverride
+
+		return panel
 	end
 end
 

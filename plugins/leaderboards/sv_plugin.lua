@@ -53,8 +53,8 @@ function PLUGIN:RegisterMetrics()
 		"The number of bolts spent by a player."
 	)
 	self:RegisterOrGetMetric(
-		"Bounty Kills",
-		"The number of other bounties claimed by a player."
+		"Locker Rot Kills",
+		"The number of players killed that were infected by Locker Rot."
 	)
 	self:RegisterOrGetMetric(
 		"Monster Damage",

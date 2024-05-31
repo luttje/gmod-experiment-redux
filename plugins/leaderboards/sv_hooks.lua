@@ -26,12 +26,22 @@ function PLUGIN:PlayerDeath(client, inflictor, attacker)
         return
     end
 
-	if (client == attacker) then
+    if (client == attacker) then
+        return
+    end
+
+    local nemesisAiPlugin = ix.plugin.Get("nemesis_ai")
+    local lockerRotEvent = nemesisAiPlugin:GetLockerRotEvent()
+
+    if (not lockerRotEvent) then
+        return
+    end
+
+	if (lockerRotEvent.targetCharacter ~= client:GetCharacter()) then
 		return
 	end
 
-	-- TODO: Check if a bounty is on the client
-	-- self:IncrementMetric(attacker, "Bounty Kills", 1)
+	self:IncrementMetric(attacker, "Locker Rot Kills", 1)
 end
 
 function PLUGIN:OnMonsterTakeDamage(monster, damage, attacker)

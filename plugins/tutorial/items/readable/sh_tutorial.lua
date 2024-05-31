@@ -34,7 +34,7 @@ ITEM.functions.destroy = {
 		local timeStamp = math.floor(os.time())
 
 		-- Ensure their character has been created for at least 5 minutes.
-		if (character:GetCreateTime() + 300 > timeStamp) then
+		if (character:GetCreateTime() + (60 * 5) > timeStamp) then
 			item.player:Notify("You should read this, it's important. You can destroy it in a few minutes.")
 			return false
 		end

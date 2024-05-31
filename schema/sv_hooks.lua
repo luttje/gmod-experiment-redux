@@ -9,6 +9,8 @@ function Schema:GetGameDescription()
 end
 
 function Schema:PrePlayerLoadedCharacter(client, curChar, prevChar)
+	client.expLastCharacterLoadedAt = CurTime()
+
 	if (prevChar) then
 		local informers = prevChar:GetVar("boltInformers") or {}
 		local inventory = prevChar:GetInventory()
@@ -690,8 +692,11 @@ function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)
 			end
 
 			local shouldDropItem = false
+			local shouldOverrideDropItem = hook.Run("ShouldPlayerDeathDropItem", client, item, dropModeIsRandom)
 
-			if (dropModeIsRandom) then
+			if (shouldOverrideDropItem ~= nil) then
+				shouldDropItem = shouldOverrideDropItem
+			elseif (dropModeIsRandom) then
 				local loseItemChance = 0.75
 
 				if (hasConfusingPockets) then
@@ -1022,4 +1027,12 @@ function Schema:PlayerButtonDown(client, button)
 	if (client:GetNetVar("tied")) then
 		Schema.TiedPlayerPressedBreakFree(client, button)
 	end
+end
+
+function Schema:OnPlayerLockerOpened(client, lockers)
+	ix.log.Add(client, "openLockers")
+end
+
+function Schema:OnPlayerLockerClosed(client, lockers)
+	ix.log.Add(client, "closeLockers")
 end

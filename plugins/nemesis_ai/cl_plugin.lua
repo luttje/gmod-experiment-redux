@@ -358,3 +358,46 @@ function PLUGIN:RenderMonitorToPlayerView(monitor, renderTargetMaterial, renderT
 		)
 	end
 end
+
+-- Draw location to locker with anti-virus (if this player has a locker rot event)
+function PLUGIN:HUDPaint()
+    local client = LocalPlayer()
+
+	if (not IsValid(client)) then
+		return
+	end
+
+    local lockerRotAntiVirusPosition = client:GetCharacterNetVar("lockerRotAntiVirusPosition")
+	local lockerRotAntiVirusTime = client:GetCharacterNetVar("lockerRotAntiVirusTime")
+
+    if (not lockerRotAntiVirusPosition or not lockerRotAntiVirusTime) then
+        return
+    end
+
+	-- Draw the symbol to the position of the locker
+    local position = lockerRotAntiVirusPosition:ToScreen()
+
+	if (position.visible) then
+		local size = 32
+		local x, y = position.x - size * 0.5, position.y - size * 0.5
+
+		surface.SetDrawColor(ColorAlpha(color_white, 255 * math.abs(math.sin(CurTime()))))
+		surface.SetMaterial(self.lockerRotAntiVirusSymbol)
+		surface.DrawTexturedRect(x, y, size, size)
+	end
+
+	-- Draw the time remaining to reach the locker
+	local timeRemaining = lockerRotAntiVirusTime - CurTime()
+    Schema.draw.DrawLabeledValue("Time to reach locker with anti-virus:", math.max(1, math.ceil(timeRemaining)))
+end
+
+function PLUGIN:PaintOverItemIcon(itemIcon, itemTable, width, height)
+	if (not itemTable:GetData("lockerRot")) then
+		return
+	end
+
+	local margin = 8
+	surface.SetDrawColor(255, 255, 255, 255)
+	surface.SetMaterial(self.lockerRotIcon)
+	surface.DrawTexturedRect(margin, margin, width - (margin * 2), height - (margin * 2))
+end

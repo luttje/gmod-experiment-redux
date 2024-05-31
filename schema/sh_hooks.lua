@@ -37,13 +37,20 @@ end
 
 function Schema:Tick()
 	if (CLIENT) then
-		if (IsValid(ix.gui.openedStorage)
-			and ix.gui.openedStorage.storageInventory.invID
-			and ix.gui.inv1.invID
-			and not ix.gui.openedStorage.hasSchemaSetup) then
-			ix.gui.openedStorage.hasSchemaSetup = true
+        if (IsValid(ix.gui.openedStorage)
+                and ix.gui.openedStorage.storageInventory.invID
+                and ix.gui.inv1.invID
+                and not ix.gui.openedStorage.hasSchemaSetup) then
+            ix.gui.openedStorage.hasSchemaSetup = true
 
-			Schema.SetupStoragePanel(ix.gui.openedStorage, ix.gui.openedStorage.storageInventory, ix.gui.inv1)
+            Schema.SetupStoragePanel(ix.gui.openedStorage, ix.gui.openedStorage.storageInventory, ix.gui.inv1)
+        end
+
+		if (IsValid(ix.gui.inv1)
+				and not ix.gui.inv1.hasSchemaSetup) then
+			ix.gui.inv1.hasSchemaSetup = true
+
+			Schema.SetupInventorySlots(ix.gui.inv1)
 		end
 	end
 

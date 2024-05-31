@@ -85,7 +85,7 @@ PLUGIN:RegisterSentence(
     "escape",
 	"You can't escape the game. Play, or die.",
 	{
-		{ 2, "You can't escape the game." },
+		{ 2, "You can't escape the gayme." },
 		{ 1, "Play, or die." },
 	}
 )
@@ -99,10 +99,50 @@ PLUGIN:RegisterSentence(
 	}
 )
 
--- Some sentences about completing bounties, with a placeholder for the player's name. The tone should still be dominating (e.g: my little puppet).
-PLUGIN.bountySentences = {
+-- Sentences about locker rot having been released into a single player's locker.
+PLUGIN.lockerRotStartTaunts = {
 	PLUGIN:RegisterSentence(
-		"bounty:completed:1",
+		"locker_rot:1",
+		"Let's play a game. I've released the Locker Rot Virus into a test subject's locker. Find out if it's yours, and complete the task to save your items.",
+		{
+			{ 2, "Let's play a gayme." },
+			{ .8, "I've released" },
+			{ .8, "the Locker" },
+			{ .5, "Rot" },
+			{ 1, "Virus" },
+			{ 3, "into a test subject's locker." },
+			{ 4, "Go to your locker to find out if it's yours." },
+		}
+    ),
+	PLUGIN:RegisterSentence(
+		"locker_rot:2",
+		"My Locker Rot Virus has been released into a locker. Better check if it's your locker that's infected.",
+		{
+			{ .8, "My Locker" },
+			{ .5, "Rot" },
+			{ .8, "Virus" },
+			{ 3, "has been released into a locker." },
+			{ 4, "Better check if it's your locker that's infected." },
+		}
+    ),
+	PLUGIN:RegisterSentence(
+		"locker_rot:3",
+		"The Locker Rot Virus I've released will destroy items in a locker. You had better check if it's your locker that's infected.",
+		{
+			{ .8, "The Locker" },
+			{ .5, "Rot" },
+			{ .8, "Virus" },
+			{ 1.5, "I've released" },
+			{ 3, "will destroy items in a locker." },
+			{ 4, "You had better check if it's your locker that's infected." },
+		}
+	),
+}
+
+-- Some sentences about completing bounties, %s will be the attacker's name.
+PLUGIN.lockerRotCompleteTaunts = {
+	PLUGIN:RegisterSentence(
+		"locker_rot:completed:1",
 		"Ah, %s, you've done well. You're my little puppet now.",
 		{
 			{ 2, "Ah, %s," },
@@ -111,7 +151,7 @@ PLUGIN.bountySentences = {
 		}
 	),
 	PLUGIN:RegisterSentence(
-		"bounty:completed:2",
+		"locker_rot:completed:2",
 		"Congratulations, %s. You've proven your worth. For now.",
 		{
 			{ 2, "Congratulations, %s." },
@@ -120,7 +160,7 @@ PLUGIN.bountySentences = {
 		}
 	),
 	PLUGIN:RegisterSentence(
-		"bounty:completed:3",
+		"locker_rot:completed:3",
 		"Your success is noted, %s. You're still just a pawn.",
 		{
 			{ 2, "Your success is noted, %s." },
@@ -128,11 +168,57 @@ PLUGIN.bountySentences = {
 		}
 	),
 	PLUGIN:RegisterSentence(
-		"bounty:completed:4",
+		"locker_rot:completed:4",
 		"Your victory is temporary, %s. I'll be watching.",
 		{
 			{ 2, "Your victory is temporary, %s." },
 			{ 2, "I'll be watching." },
+		}
+	),
+}
+
+-- In case the player dies, but no attacker is found, we taunt them with the victim's name.
+PLUGIN.lockerRotCompleteNoAttackerTaunts = {
+	PLUGIN:RegisterSentence(
+		"locker_rot:completed:anonymous:1",
+		"The death of %s is noted. Their items now lay with their corpse. They were weak.",
+		{
+			{ 2, "The death of %s is noted." },
+			{ 3, "Their items now lay with their corpse." },
+			{ 2, "They were weak." },
+		}
+	),
+	PLUGIN:RegisterSentence(
+		"locker_rot:completed:anonymous:2",
+		"%s has fallen. The rats will feast on their corpse. Who will rush to claim their items?",
+		{
+			{ 2, "%s has fallen." },
+			{ 3, "The rats will feast on their corpse." },
+			{ 2, "Who will rush to claim their items?" },
+		}
+	),
+}
+
+-- In case the target fails to complete the task in time, but nobody killed them either.
+PLUGIN.lockerRotFailedTaunts = {
+	PLUGIN:RegisterSentence(
+		"locker_rot:failed:1",
+		"Pathetic. %s failed to complete the task in time and nobody claimed their items. They're all weak!",
+		{
+			{ 2, "Pathetic." },
+			{ 2, "%s failed to complete the task in time" },
+			{ 2, "and nobody claimed their items." },
+			{ 2, "They're all weak!" },
+		}
+	),
+	PLUGIN:RegisterSentence(
+		"locker_rot:failed:2",
+		"Disappointing. %s couldn't complete the task in time and nobody claimed their items. They're all weak!",
+		{
+			{ 2, "Disappointing." },
+			{ 2, "%s couldn't complete the task in time" },
+			{ 2, "and nobody claimed their items." },
+			{ 2, "They're all weak!" },
 		}
 	),
 }
@@ -157,7 +243,7 @@ addMetricTaunt(
 		"taunt:Bolts Generated:1",
 		"%s, your bolts are a testament to your greed. I'll make sure you pay for it.",
 		{
-			{ 2, "Your bolts are a testament to your greed." },
+			{ 2, "%s, your bolts are a testament to your greed." },
 			{ 2, "I'll make sure you pay for it." },
 		}
     )
@@ -169,7 +255,7 @@ addMetricTaunt(
 		"taunt:Bolts Generated:2",
 		"%s, your bolts reveal your greed. Prepare to pay for it.",
 		{
-			{ 2, "Your bolts reveal your greed." },
+			{ 2, "%s, your bolts reveal your greed." },
 			{ 2, "Prepare to pay for it." },
 		}
 	)
@@ -181,7 +267,7 @@ addMetricTaunt(
 		"taunt:Successfully Defended:1",
 		"%s, your defenses are a sign of your weakness. They won't save you from my wrath.",
 		{
-			{ 2, "Your defenses are a sign of your weakness." },
+			{ 2, "%s, your defenses are a sign of your weakness." },
 			{ 2, "They won't save you from my wrath." },
 		}
 	)
@@ -193,7 +279,7 @@ addMetricTaunt(
 		"taunt:Successfully Defended:2",
 		"%s, you think your defenses will save you? Watch me unleash the dogs of war.",
 		{
-			{ 2, "You think your defenses will save you?" },
+			{ 2, "%s, you think your defenses will save you?" },
 			{ 2, "Watch me unleash the dogs of war." },
 		}
 	)
@@ -272,9 +358,9 @@ addMetricTaunt(
 )
 
 addMetricTaunt(
-	"Bounty Kills",
+	"Locker Rot Kills",
 	PLUGIN:RegisterSentence(
-		"taunt:Bounty Kills:1",
+		"taunt:Locker Rot Kills:1",
 		"%s, irony is a cruel mistress. Let's see how you like being hunted.",
 		{
 			{ 2, "Irony is a cruel mistress." },
@@ -295,25 +381,74 @@ addMetricTaunt(
 	)
 )
 
--- Check if any of the top characters are online. If so, taunt them and set a bounty.
+-- Check if any of the top characters are online. If so, taunt them and set a bounty in the form of the 'Locker Rot Virus'
 function PLUGIN:OnNemesisThink()
-    local interval = ix.config.Get("nemesisAiBountyIntervalSeconds")
+    local isEnabled = ix.config.Get("nemesisAiEnabled")
 
-    if (Schema.util.Throttle("NemesisMetricBounties", interval)) then
+	if (not isEnabled) then
+		return
+	end
+
+    local interval = ix.config.Get("nemesisAiLockerRotIntervalSeconds")
+
+    if (Schema.util.Throttle("NemesisMetricLockerRotGrace", interval)) then
         return
     end
+
+	-- Don't overwhelm the server with multiple locker rot events.
+    local activeLockerRotEvent = self:GetLockerRotEvent()
+
+	if (activeLockerRotEvent) then
+		return
+	end
 
     local leaderboardsPlugin = ix.plugin.Get("leaderboards")
     local onlineCharactersByID = {}
 
+	-- Collect online characters that qualify to become locker rot victims.
     for _, client in ipairs(player.GetAll()) do
-        if (client:GetCharacter()) then
-            onlineCharactersByID[client:GetCharacter():GetID()] = client
+        local character = client:GetCharacter()
+
+        if (not character) then
+            continue
         end
+
+        -- Make sure all players have played for at least a couple hours on their characters
+        if (character:GetCreateTime() + (60 * 2) > os.time()) then
+            print("Skipping locker rot for " ..
+            	character:GetName() .. " because they haven't played for at least 2 hours.")
+            continue
+        end
+
+        -- Make sure they've played for at least 5 minutes (so they have a chance to load into the server)
+		if (client.expLastCharacterLoadedAt + (60 * 5) > CurTime()) then
+			-- continue -- TODO: Uncomment this (it's commented out for testing purposes)
+		end
+
+        -- Check if the character has a locker rot cooldown, so we don't spam them with challenges.
+        local lockerRotGraceEndsAt = character:GetData("nemesisLockerRotGraceEndsAt")
+
+        if (lockerRotGraceEndsAt and lockerRotGraceEndsAt <= os.time()) then
+            lockerRotGraceEndsAt = nil
+            character:SetData("nemesisLockerRotGraceEndsAt", lockerRotGraceEndsAt)
+        end
+
+        if (lockerRotGraceEndsAt) then
+            continue
+        end
+
+        if (not character:GetLockerInventory()) then
+            -- This character has never visited their locker, so they can't have any items to infect.
+            continue
+        end
+
+        onlineCharactersByID[character:GetID()] = client
     end
 
+	-- We try to find the player that has the highest rank of all the metrics, and infect their locker.
     leaderboardsPlugin:GetTopCharacters(function(metricInfo)
-        local availableBounties = {}
+		local highestRankingTargets = {}
+		local highestRank = -1
 
         for metricID, info in pairs(metricInfo) do
             local metricName = tostring(info.name)
@@ -326,7 +461,7 @@ function PLUGIN:OnNemesisThink()
 
             local topCharacters = info.topCharacters
 
-            for _, data in ipairs(topCharacters) do
+            for rank, data in ipairs(topCharacters) do
                 local characterID = data.character_id
                 local client = onlineCharactersByID[characterID]
 
@@ -334,30 +469,31 @@ function PLUGIN:OnNemesisThink()
                     continue
                 end
 
-                local existingBounty = client:GetCharacter():GetData("nemesisBounty")
-
-				if (existingBounty and existingBounty.endsAt > os.time()) then
-					continue
-				end
-
-				availableBounties[#availableBounties + 1] = {
-					client = client,
+				local lockerRotEvent = {
+					targetCharacter = client:GetCharacter(),
 					value = data.value,
 					metricName = metricName,
-					taunts = taunts,
+                    taunts = taunts,
+                    rank = rank,
 				}
-            end
-        end
 
-        -- Pick a random bounty and taunt them.
-        if (#availableBounties == 0) then
+				if (rank > highestRank) then
+                    highestRank = rank
+                    highestRankingTargets = { lockerRotEvent }
+                elseif (rank == highestRank) then
+					highestRankingTargets[#highestRankingTargets + 1] = lockerRotEvent
+				end
+			end
+		end
+
+        if (highestRank == -1) then
+            -- None of the metrics have any top characters online.
             return
         end
 
-        local bounty = availableBounties[math.random(#availableBounties)]
-        local tauntUniqueID = bounty.taunts[math.random(#bounty.taunts)]
+		-- If there are multiple characters with the same highest rank, we pick one at random.
+        local lockerRotEvent = highestRankingTargets[math.random(#highestRankingTargets)]
 
-        self:PlayNemesisSentences(tauntUniqueID, nil, bounty.client:GetCharacter():GetName())
-        self:SetBounty(bounty.client, bounty.value, bounty.metricName)
+		self:StartLockerRotEvent(lockerRotEvent.targetCharacter, lockerRotEvent)
     end)
 end
