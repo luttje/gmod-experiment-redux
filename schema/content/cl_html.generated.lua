@@ -206,9 +206,9 @@ return {
               </ul>
           </div>
           <div class="wrapper my">
-              <h2>CLOSED ALPHA TEST</h2>
+              <h2>BETA TESTING</h2>
               <p>
-                  Our server is currently in a closed alpha test. This means:
+                  Our server is currently in a beta testing. This means:
               </p>
               <ul>
                   <li>

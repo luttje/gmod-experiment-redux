@@ -97,7 +97,7 @@ Additionally you should consider this for a production server:
     3. Open `path/to/gmod/garrysmod/cfg/server.cfg` and add the following lines:
 
         ```cfg
-        hostname "Experiment (Redux) | Closed Alpha Test"
+        hostname "Experiment (Redux) | Testing"
         sv_location eu
         sv_allowupload "0"
         sv_allowdownload "0"

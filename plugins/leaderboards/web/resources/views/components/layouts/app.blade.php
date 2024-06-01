@@ -46,7 +46,7 @@
             </p>
             <p class="italic">
                 Experiment Redux is open-source software released under the MIT license.
-                Found a bug? <x-link href="https://github.com/luttje/gmod-experiment-redux/issues" target="_blank">Thanks for reporting it!</x-link>
+                Found a bug? <x-link href="https://experiment.games/issues" target="_blank">Thanks for reporting it!</x-link>
             </p>
         </div>
     </footer>

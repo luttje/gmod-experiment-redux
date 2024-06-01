@@ -5,9 +5,17 @@ PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds various tools for debugging."
 PLUGIN.alphaTestMessageInterval = 60 * 15
 
-ix.config.Add("alphaTestMessage", "Welcome to Experiment Redux! You are part of the Closed Alpha Test. Please report bugs @ https://github.com/luttje/gmod-experiment-redux/issues. Thanks for your help and patience.", "Message to display at an interval to signal that the server is in alpha testing.", nil, {
-	category = "Server"
-})
+ix.config.Add(
+	"alphaTestMessage",
+	"Welcome to Experiment Redux! You are part of the Beta Test. "
+	.. "Please report bugs @ https://experiment.games/issues "
+	.. "\nThanks for your help and patience.",
+    "Message to display at an interval to signal that the server is being tested.",
+    nil,
+	{
+		category = "Server"
+    }
+)
 
 if (SERVER) then
 	function PLUGIN:PlayerSpawn(client)

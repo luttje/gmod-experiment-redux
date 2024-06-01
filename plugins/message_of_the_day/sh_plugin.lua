@@ -9,7 +9,7 @@ PLUGIN.termsOfServiceVersion = "2024-05-04"
 ix.config.Add("privacyEmail", "privacy@experiment.games", "The email address for privacy concerns.", nil, {
 	category = "Message of the Day"
 })
-ix.config.Add("githubUrl", "https://github.com/luttje/gmod-experiment-redux/issues", "The URL to the GitHub issues page.", nil, {
+ix.config.Add("githubUrl", "https://experiment.games/issues", "The URL to the GitHub issues page.", nil, {
 	category = "Message of the Day"
 })
 
