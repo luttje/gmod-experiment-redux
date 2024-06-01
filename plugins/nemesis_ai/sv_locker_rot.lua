@@ -563,12 +563,12 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageinfo)
 
 	for _, item in pairs(inventory:GetItems()) do
 		if (item:GetData("lockerRot")) then
-			table.insert(candidateItems, item)
+			candidateItems[#candidateItems + 1] = item
 		end
 	end
 
-	local itemCountToDrop = math.Round(#candidateItems * self.rankToPercentItemsDropped)
-	local itemCountToRemove = #candidateItems - itemCountToDrop
+	local itemCountToDrop = math.ceil(#candidateItems * self.rankToPercentItemsDropped)
+	local itemCountToRemove = math.max(0, #candidateItems - itemCountToDrop)
 
 	-- Lose these items forever (the rest will drop into the corpse)
 	for i = 1, itemCountToRemove do
@@ -591,10 +591,6 @@ end
 
 -- Always drop the remaining items that are infected with the locker rot on death (the rest will already have been removed)
 function PLUGIN:ShouldPlayerDeathDropItem(client, item, dropModeIsRandom)
-	if (not self.lockerRotEvent) then
-		return
-	end
-
     if (not item:GetData("lockerRot")) then
         return
     end
