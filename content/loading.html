@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Experiment Redux - Loading Screen</title>
+
+    <style>
+        @font-face {
+            font-family: "LightsOut";
+            src: url(./resource/fonts/lightout.woff);
+        }
+
+        @font-face {
+            font-family: "RomanAntique";
+            src: url(./resource/fonts/RomanAntique.woff);
+        }
+
+        @font-face {
+            font-family: "RomanAntique";
+            src: url(./resource/fonts/RomanAntique-Italic.woff);
+            font-style: italic;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: black;
+            color: white;
+            font-size: 16px;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+            background-image: url('materials/experiment-redux/illustrations/death.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .overlay {
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 1em;
+        }
+
+        .stylized-font {
+            font-family: "RomanAntique", 'Times New Roman', Times, serif;
+            font-size: 1.4em;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            color: #A33426;
+            font-family: "LightsOut";
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            font-weight: 900;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wrapper {
+            max-width: 512px;
+            margin: 0 auto;
+        }
+
+        .with-aside {
+            display: flex;
+            gap: 1em;
+        }
+
+        .with-aside aside {
+            flex: 1;
+        }
+
+        .with-aside main {
+            flex: 3;
+        }
+
+        .logo {
+            max-width: 512px;
+        }
+
+        img {
+            position: relative;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        img.max-content {
+            max-width: max-content;
+        }
+
+        p {
+            line-height: 1.5em;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0.25em 0 0 0;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        ul li::before {
+            content: "•";
+            color: #A33426;
+            display: inline-block;
+            margin: 0.5em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .my {
+            margin-top: 1.5em;
+            margin-bottom: 1.5em;
+        }
+        .mt-s {
+            margin-top: 1em;
+        }
+
+        a, .highlight {
+            color: #A33426;
+        }
+
+        button {
+            background: #A33426;
+            color: white;
+            border: none;
+            font-size: 1em;
+            padding: .5em 1em;
+            margin: 0.5em 0;
+            cursor: pointer;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            width: 100%;
+        }
+
+        button.huge {
+            font-size: 2em;
+            padding: .8em 1em;
+        }
+
+        button.gray {
+            background: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: .5em;
+            margin: 0.5em 0;
+            font-size: 1em;
+        }
+
+        .range {
+            display: flex;
+            gap: 1em;
+            align-items: center;
+            flex: 1;
+        }
+
+        .range input[type="range"] {
+            width: 100%;
+        }
+
+        .range input[type="number"] {
+            width: 60px;
+        }
+
+        .bg-gray {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .p {
+            padding: 0.5em 1em;
+        }
+
+        .parameter {
+            display: flex;
+            gap: 1em;
+            font-size: 0.8em;
+            align-items: center;
+        }
+
+        .parameter label {
+            width: 100px;
+        }
+
+        .parameter input:disabled {
+            color: black;
+            font-weight: bold;
+        }
+
+        .flex {
+            display: flex;
+            gap: 1em;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .flex-2 {
+            flex: 2;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .w-fit {
+            width: fit-content;
+        }
+
+        .discord {
+            height: 0.9em;
+            width: auto;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1em;
+        }
+
+        .grid.tight {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+        .h-300 {
+            max-height: 300px;
+            overflow: auto;
+        }
+
+        .duration {
+            display: flex;
+            flex-direction: column;
+            padding: 1em;
+        }
+
+        .duration span {
+            font-size: 1.5em;
+            flex-grow: 1;
+        }
+
+        .duration span:last-of-type {
+            font-size: 1em;
+            color: rgba(255, 255, 255, 0.3);
+            flex: 0;
+        }
+    </style>
+</head>
+
+<body class="stylized-font">
+    <div class="overlay">
+        <div class="wrapper logo">
+            <img src="materials/experiment-redux/logo.png">
+        </div>
+        <div class="wrapper my">
+            <p>
+                <strong>Experiment Redux</strong> is an <a href="#"
+                   target="_blank">open-source</a> FPS RPG gamemode for Garry's Mod.
+            </p>
+        </div>
+        <div class="wrapper my">
+            <h2>CURRENTLY BETA TESTING</h2>
+            <p>
+                We are hard at work on the gamemode, making sure it's fun, polished and competitive for everyone.
+            </p>
+            <p>
+                We appreciate your patience and support.
+            </p>
+            <p>
+                Join our Discord to stay up to date with the latest news and updates.
+            </p>
+        </div>
+        <div class="wrapper my">
+            <h2>FIND OUT MORE</h2>
+            <p>
+                <strong>Find out more through <a href="#">experiment.games</a></strong>
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>
