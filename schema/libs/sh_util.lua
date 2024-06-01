@@ -186,6 +186,12 @@ function Schema.util.AllPlayersExcept(excludedClients)
 	return players
 end
 
+function Schema.util.ReloadMap()
+	local currentLevel = game.GetMap()
+
+	RunConsoleCommand("changelevel", currentLevel)
+end
+
 function Schema.util.ForceConVars(conVarsToSet)
 	for conVarName, value in pairs(conVarsToSet) do
 		if (value.isServer and not SERVER) then

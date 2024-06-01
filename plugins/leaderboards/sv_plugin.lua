@@ -534,9 +534,11 @@ do
         local tablesWiped = 0
 
         -- Ensure all players are disconnected before wiping the tables.
-		for _, otherClient in ipairs(player.GetAll()) do
-			otherClient:Kick("Resetting data.")
-		end
+        for _, otherClient in ipairs(player.GetAll()) do
+            otherClient:Kick("Resetting data.")
+        end
+
+		RunConsoleCommand("sv_password", math.random(0, math.huge))
 
         -- Copy the tables to {timestamp}_backup_{table_name} and then truncate the original table.
         for _, tableName in ipairs(tablesToBackup) do
@@ -552,7 +554,13 @@ do
 						tablesWiped = tablesWiped + 1
 
 						if (tablesWiped == #tablesToBackup) then
-							client:Notify("Wiped all tables.")
+                            client:Notify("Wiped all tables.")
+
+                            -- Wipe the cache and loaded characters
+                            ix.char.cache = {}
+                            ix.char.loaded = {}
+
+							Schema.util.ReloadMap()
 						end
                     end)
 					query:Execute()
