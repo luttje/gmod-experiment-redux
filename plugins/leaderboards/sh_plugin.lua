@@ -5,9 +5,9 @@ PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds tracking metrics and leaderboards to track player progress."
 
 PLUGIN.currentEpoch = {
-    name = "Early Test Epoch",
-    started_at = "2024-04-28",
-	ends_at = "2024-05-28",
+    name = "Beta Test Epoch",
+    started_at = "2024-06-01",
+	ends_at = "2024-06-23",
 }
 
 ix.util.Include("sv_plugin.lua")
