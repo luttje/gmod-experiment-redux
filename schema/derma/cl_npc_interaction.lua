@@ -8,28 +8,27 @@ function PANEL:SetInteraction(interaction)
 	self:Clear()
 
 	if (interaction.responses == nil) then
-		self:ShowLoading("Goodbye...")
+		self:ShowChosenAnswer("Goodbye...")
 		self:Close()
 
 		return
 	end
 
 	local responses = interaction.responses
-    local height = 0
+	local height = 0
 
 	if (isfunction(responses)) then
 		responses = responses(LocalPlayer(), self.npcEntity, self)
 	end
 
-    for _, answer in ipairs(responses) do
+	for _, answer in ipairs(responses) do
 		local button = self:Add("expButton")
 		button:Dock(TOP)
-		button:SetScale(BUTTON_SCALE_SMALL)
 		button:DockMargin(0, 0, 0, 8)
 		button:SetText(answer.text)
-        button.DoClick = function()
-            self:OnAnswer(answer)
-        end
+		button.DoClick = function()
+			self:OnAnswer(answer)
+		end
 
 		if (answer.color) then
 			function button:Paint(width, height)
@@ -41,7 +40,7 @@ function PANEL:SetInteraction(interaction)
 		height = height + button:GetTall() + 8
 	end
 
-    self:SetTall(height)
+	self:SetTall(height)
 end
 
 function PANEL:Close()
@@ -60,7 +59,7 @@ function PANEL:Close()
 end
 
 function PANEL:OnAnswer(answer)
-	self:ShowLoading(answer.text)
+	self:ShowChosenAnswer(answer.text)
 
 	if (answer.next == nil) then
 		self:Close()
@@ -77,26 +76,10 @@ function PANEL:OnAnswer(answer)
 	end)
 end
 
-function PANEL:ShowLoading(text)
+function PANEL:ShowChosenAnswer(text)
 	self:Clear()
 
-	local panel = self:Add("EditablePanel")
-	panel:SetContentAlignment(5)
-	panel:Dock(FILL)
-
-	local label = panel:Add("DLabel")
-	label:SetText("Answering:")
-	label:SetFont("expSmallerFont")
-	label:SetTextColor(Color(255, 255, 255, 40))
-	label:SetContentAlignment(5)
-	label:Dock(TOP)
-
-	local textLabel = panel:Add("DLabel")
-	textLabel:SetText(text)
-	textLabel:SetFont("expSmallItalicFont")
-	textLabel:SetTextColor(Color(255, 255, 255, 40))
-	textLabel:SetContentAlignment(5)
-    textLabel:Dock(TOP)
+	self:GetParent():ShowChosenAnswer(text)
 
 	self:SetTall(64)
 end
@@ -106,38 +89,18 @@ vgui.Register("expNpcAnswers", PANEL, "EditablePanel")
 PANEL = {}
 
 function PANEL:Init()
-    if (IsValid(Schema.npc.panel)) then
-        Schema.npc.panel:Remove()
-    end
+	if (IsValid(Schema.npc.panel)) then
+		Schema.npc.panel:Remove()
+	end
 
-    self:SetBackgroundBlur(false)
-    self:SetDeleteOnClose(true)
-    self:SetTitle(L("interaction"))
+	self.html = self:Add("DHTML")
+	self.html:Dock(FILL)
 
-    self.html = self:Add("DHTML")
-    self.html:Dock(FILL)
-    self.html:AddFunction("interop", "onKnownTextHeight", function(height)
-		self:RecalculateDimensions(height + 16) -- Add some padding to prevent sudden scrollbars
-	end)
+	self.answers = self:Add("expNpcAnswers")
+	self.answers:Dock(BOTTOM)
+	self.answers:DockMargin(8, 8, 8, 8)
 
-    self.answers = self:Add("expNpcAnswers")
-    self.answers:Dock(BOTTOM)
-    self.answers:DockMargin(8, 8, 8, 8)
-
-    self:RecalculateDimensions()
-    self:MakePopup()
-
-    Schema.npc.panel = self
-end
-
-function PANEL:RecalculateDimensions(htmlHeight)
-	local titleBarHeight = 24
-    htmlHeight = htmlHeight or 200
-
-	local height = htmlHeight + titleBarHeight + self.answers:GetTall() + 32
-
-    self:SetSize(math.min(ScrW(), 512), math.min(height, ScrH()))
-    self:SetPos(ScrW() * 0.5 - self:GetWide() * 0.5, ScrH() - self:GetTall() - 32)
+	Schema.npc.panel = self
 end
 
 function PANEL:ReplaceNewLines(text)
@@ -145,18 +108,39 @@ function PANEL:ReplaceNewLines(text)
 end
 
 function PANEL:SetText(text)
-    text = self:ReplaceNewLines(text)
+	text = self:ReplaceNewLines(text)
 
 	self.html:SetHTML([[
 		<html>
 			<head>
 				<style>
+					@font-face {
+						font-family: "LightsOut";
+						src: url(http://fastdl.experiment.games/resource/fonts/lightout.woff)
+					}
+
+					@font-face {
+						font-family: "RomanAntique";
+						src: url(http://fastdl.experiment.games/resource/fonts/RomanAntique.woff);
+					}
+
 					body {
-						font-family: Arial, sans-serif;
-						font-size: 14px;
-						color: #FFF;
+						color: white;
+						padding: 1em;
+						font-size: 24px;
+						font-family: "RomanAntique";
 						margin: 0;
-						padding: 8px;
+					}
+
+					h1,
+					h2,
+					h3,
+					h4,
+					h5,
+					h6 {
+						color: #A33426;
+						font-family: "LightsOut";
+						margin: 0;
 					}
 
 					.censored {
@@ -170,44 +154,68 @@ function PANEL:SetText(text)
 				</style>
 			</head>
 			<body>
+				<h1>]] .. (self.npc.name or "???") .. [[</h1>
 				<div id="text">]] .. text .. [[</div>
-
-				<script>
-					var text = document.getElementById("text");
-					var height = text.clientHeight + 16; // Add the body padding
-
-					document.addEventListener("DOMContentLoaded", function() {
-						window.interop.onKnownTextHeight(height);
-					});
-				</script>
 			</body>
 		</html>
 	]])
 end
 
 function PANEL:SetInteraction(interaction, npc, npcEntity)
-    local text = interaction.text
+	local text = interaction.text
 
 	self.npcEntity = npcEntity
+	self.npc = npc
 
-    self:SetTitle(npc.name or L("conversation"))
-
-    if (istable(text)) then
-        text = text[math.random(#text)]
-    end
+	if (istable(text)) then
+		text = text[math.random(#text)]
+	end
 
 	if (isfunction(text)) then
 		text = text(LocalPlayer(), self.npcEntity, self)
 	end
 
 	self:SetText(text)
-    self.answers:SetInteraction(interaction)
+	self.answers:SetInteraction(interaction)
+end
 
-	self.html:RunJavascript("window.interop.onKnownTextHeight(height);")
+function PANEL:ShowChosenAnswer(text)
+	local gracePeriod = ix.config.Get("npcAnswerGracePeriod")
+	self.chosenAnswer = text
+	self.chosenAnswerTime = CurTime() + gracePeriod
+end
+
+function PANEL:PaintOver(width, height)
+	if (not self.chosenAnswerTime or CurTime() > self.chosenAnswerTime) then
+		return
+	end
+
+	local gracePeriod = ix.config.Get("npcAnswerGracePeriod")
+	local fraction = 1 - ((self.chosenAnswerTime - CurTime()) / gracePeriod)
+	local maxAlpha = 150
+
+	surface.SetDrawColor(0, 0, 0, maxAlpha * fraction)
+	surface.DrawRect(0, 0, width, height)
+
+	local text = self.chosenAnswer
+	local font = "ixMenuButtonFont"
+
+	surface.SetFont(font)
+	local textWidth, textHeight = surface.GetTextSize(text)
+
+	local x = width * 0.5
+	local targetY = height * 0.5 - textHeight * 0.5
+	local y = Lerp(fraction, self.answers.y, targetY)
+
+	draw.SimpleText(text, font, x, y, Color(255, 255, 255, 255 - (255 * fraction)), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 end
 
 function PANEL:OnRemove()
 	Schema.npc.panel = nil
+
+	if (IsValid(ix.menu.panel)) then
+		ix.menu.panel:Remove()
+	end
 end
 
-vgui.Register("expNpcInteraction", PANEL, "expFrame")
+vgui.Register("expNpcInteraction", PANEL, "EditablePanel")

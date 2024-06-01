@@ -151,7 +151,7 @@ ix.config.Add("maxInteractionDistance", 192, "How far away from the player an it
 	data = { min = 128, max = math.huge, decimals = 0 },
 })
 
-ix.config.Add("npcAnswerGracePeriod", 1.5, "How many seconds between answering an NPC and getting the next question.", nil, {
+ix.config.Add("npcAnswerGracePeriod", 2, "How many seconds between answering an NPC and getting the next question.", nil, {
 	data = { min = 0, max = 5, decimals = 0 },
 })
 

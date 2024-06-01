@@ -9,7 +9,11 @@ ENT.MarkerPosZ = 78
 function ENT:Draw()
     self:DrawModel()
 
-	if (not self:GetNpcId()) then
+    if (not self:GetNpcId()) then
+        return
+    end
+
+	if (IsValid(ix.menu.panel)) then
 		return
 	end
 
