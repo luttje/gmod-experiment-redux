@@ -437,7 +437,12 @@ function PLUGIN:Think()
 end
 
 -- Query the metrics so it can be used to figure out who's leading in what.
+-- Can fail if the server hasn't loaded fully yet.
 function PLUGIN:GetTopCharacters(callback)
+	if (self.disabled or not self.hasDependantTables) then
+        return
+    end
+
 	local query = [[
 		SELECT character_id, metric_id, SUM(value) AS total_value
 		FROM exp_character_metrics
