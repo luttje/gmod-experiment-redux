@@ -45,7 +45,13 @@ ITEM.functions.Place = {
 	end,
 
 	OnCanRun = function(item)
-		local client = item.player
+        local client = item.player
+
+        -- Ensure it's in the player's inventory
+        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+            return false
+        end
+
 		local success, message, trace = client:TryTraceInteractAtDistance(true)
 
 		if (not success) then
