@@ -245,7 +245,7 @@ function PLUGIN:StartLockerRotEvent(targetCharacter, lockerRotEvent)
 		)
 
 		-- Force the event to start if the target doesn't close their locker before the time is up
-		timer.Simple(10, function()
+		timer.Simple(25, function()
 			local client = targetCharacter and targetCharacter:GetPlayer() or nil
 
 			if (not self.lockerRotEvent or not IsValid(client)) then

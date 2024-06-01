@@ -130,7 +130,7 @@ PLUGIN.lockerRotStartTaunts = {
 		"locker_rot:2",
 		"My Locker Rot Virus has been released into a locker. Better check if it's your locker that's infected.",
 		{
-			{ .8, "My Locker" },
+			{ .6, "My Locker" },
 			{ .5, "Rot" },
 			{ .8, "Virus" },
 			{ 3, "has been released into a locker." },
@@ -141,7 +141,7 @@ PLUGIN.lockerRotStartTaunts = {
 		"locker_rot:3",
 		"The Locker Rot Virus I've released will destroy items in a locker. You had better check if it's your locker that's infected.",
 		{
-			{ .8, "The Locker" },
+			{ .6, "The Locker" },
 			{ .5, "Rot" },
 			{ .8, "Virus" },
 			{ 1.5, "I've released" },
