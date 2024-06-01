@@ -529,6 +529,13 @@ function PLUGIN:OnPlayerLockerOpened(client, lockers)
             .. "You have successfully saved the rest.",
             false,
 			{ client }
+        )
+    else
+		ix.chat.Send(nil,
+			"nemesis_ai_locker_rot_hint",
+			"You have successfully saved all your items from the 'Locker Rot Virus'.",
+			false,
+			{ client }
 		)
 	end
 
