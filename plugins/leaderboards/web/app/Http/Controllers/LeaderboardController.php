@@ -19,15 +19,20 @@ class LeaderboardController extends Controller
         $overallLeader = Metric::getOverallScores($metrics)->first();
 
         $metrics = $metrics->each(function ($metric) {
-            $metric->leader = (object)$metric->characters->groupBy('id')->map(function ($characters) {
+            $leader = $metric->characters->groupBy('id')->map(function ($characters) {
                 // Because we're grouped by character ID, we can just grab the first character to get the character name.
                 $character = $characters->first();
+
                 return [
                     'name' => $character->name,
                     'player' => $character->player,
                     'sum' => $characters->sum('pivot.value'),
                 ];
             })->sortByDesc('value')->first();
+
+            if (isset($leader['name'])) {
+                $metric->leader = (object) $leader;
+            }
         });
 
         return view('leaderboards.index', compact('metrics', 'overallLeader'));
