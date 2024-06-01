@@ -23,6 +23,13 @@ net.Receive("expNpcInteractShow", function(length)
 		return
 	end
 
-	local panel = vgui.Create("expNpcInteraction")
-	panel:SetInteraction(interaction, npc, npcEntity)
+    local panel = vgui.Create("expEntityMenu")
+    panel:InitDoubleList()
+	panel:SetShowCloseButton(true)
+    panel:SetEntity(npcEntity)
+
+	local interactionPanel = vgui.Create("expNpcInteraction")
+	interactionPanel:SetInteraction(interaction, npc, npcEntity)
+
+    panel:SetMainPanel(interactionPanel)
 end)
