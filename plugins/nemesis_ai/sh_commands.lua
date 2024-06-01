@@ -123,3 +123,21 @@ do
 
 	ix.command.Add("MonitorSetVgui", COMMAND)
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description =
+		"For the Nemesis AI to play the specified text"
+	COMMAND.arguments = {
+		ix.type.text,
+	}
+
+	COMMAND.superAdminOnly = true
+
+    function COMMAND:OnRun(client, text)
+		PLUGIN:PlayNemesisAudio(text)
+	end
+
+	ix.command.Add("NemesisPlayAudio", COMMAND)
+end

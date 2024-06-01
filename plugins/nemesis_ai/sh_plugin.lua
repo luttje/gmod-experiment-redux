@@ -2,11 +2,19 @@ local PLUGIN = PLUGIN
 
 PLUGIN.name = "Nemesis AI"
 PLUGIN.author = "Experiment Redux"
-PLUGIN.description = "An AI that communicates through giant screens in the city."
+PLUGIN.description = "An AI that communicates through giant screens in the city. Implements the 'Locker Rot Virus' bounty system."
 
 ix.util.Include("sh_commands.lua")
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
+
+ix.util.Include("cl_monitors.lua")
+ix.util.Include("sv_monitors.lua")
+
+ix.util.Include("cl_sentences.lua")
+ix.util.Include("sv_sentences.lua")
+
+ix.util.Include("sv_locker_rot.lua")
 
 if (SERVER) then
     resource.AddFile("materials/experiment-redux/locker_rot.png")

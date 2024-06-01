@@ -205,12 +205,14 @@ function PLUGIN:OnPlayerLockerClosed(client, lockers)
 	self.timeBeforeAntivirusRevealLowerRanks
 
 	ix.chat.Send(
-		client,
+		nil,
 		"nemesis_ai_locker_rot_hint",
 		"Your locker has been infected by the 'Locker Rot Virus'. "
 		.. "You must bring your items to the locker with the anti-virus. "
 		.. "The locker location will be revealed in "
-		.. string.NiceTime(revealDelay)
+        .. string.NiceTime(revealDelay),
+        false,
+		{ client }
 	)
 
 	local function getCharacterIfLockerRotStillActive()
@@ -265,13 +267,15 @@ function PLUGIN:OnPlayerLockerClosed(client, lockers)
 		client:SetLocalVar("lockerRotAntiVirusTime", CurTime() + secondsToComplete)
 
 		ix.chat.Send(
-			client,
+			nil,
 			"nemesis_ai_locker_rot_hint",
 			"The locker with the anti-virus is revealed. You can see a marker pointing to it. "
 			.. "Bring your items to this locker to save them from being lost forever. "
 			.. "If killed by another player, they can claim some items, the rest will be lost. You have "
 			.. string.NiceTime(secondsToComplete)
-			.. " to do this."
+            .. " to do this.",
+            false,
+			{ client }
 		)
 
 		-- After the time expires and the target hasn't reached the safe locker, they lose their items

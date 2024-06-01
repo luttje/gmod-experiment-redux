@@ -1,6 +1,18 @@
 local PLUGIN = PLUGIN
 
+util.AddNetworkString("expPlayNemesisAudio")
+util.AddNetworkString("expPlayNemesisSentences")
+
 PLUGIN.registeredSentences = {}
+
+function PLUGIN:RegisterSentence(uniqueID, sentence, parts)
+    self.registeredSentences[uniqueID] = {
+        sentence = sentence,
+		parts = parts,
+    }
+
+	return uniqueID
+end
 
 PLUGIN:RegisterSentence(
     "intro",
@@ -227,14 +239,14 @@ PLUGIN.lockerRotFailedTaunts = {
 -- The Nemesis AI will taunt those leading in the metrics, setting bounties on them. The taunts are generated based on the metrics.
 --
 
-local metricTaunts = {}
+PLUGIN.metricTaunts = {}
 
 local function addMetricTaunt(metric, uniqueID)
-    if (not metricTaunts[metric]) then
-        metricTaunts[metric] = {}
+    if (not PLUGIN.metricTaunts[metric]) then
+        PLUGIN.metricTaunts[metric] = {}
     end
 
-    metricTaunts[metric][#metricTaunts + 1] = uniqueID
+    PLUGIN.metricTaunts[metric][#PLUGIN.metricTaunts + 1] = uniqueID
 end
 
 addMetricTaunt(
@@ -291,7 +303,7 @@ addMetricTaunt(
 		"taunt:Healing Done:1",
 		"%s, your healing is a sign of weakness. You can't heal your way out of this.",
 		{
-			{ 2, "Your healing is a sign of weakness." },
+			{ 2, "%s, your healing is a sign of weakness." },
 			{ 2, "You can't heal your way out of this." },
 		}
 	)
@@ -303,7 +315,7 @@ addMetricTaunt(
 		"taunt:Healing Done:2",
 		"%s, your abundant healing is in vain. You'll pay with your life.",
 		{
-			{ 2, "Your healing is in vain." },
+			{ 2, "%s, your healing is in vain." },
 			{ 2, "You'll pay with your life." },
 		}
 	)
@@ -315,7 +327,7 @@ addMetricTaunt(
 		"taunt:Healing Received:1",
 		"%s, your reliance on others to heal you is a weakness. I'll exploit it.",
 		{
-			{ 2, "Your reliance on others to heal you is a weakness." },
+			{ 2, "%s, your reliance on others to heal you is a weakness." },
 			{ 2, "I'll exploit it." },
 		}
 	)
@@ -327,7 +339,7 @@ addMetricTaunt(
 		"taunt:Healing Received:2",
 		"%s, you sure do rely on others to heal you. They won't be able to heal your corpse.",
 		{
-			{ 2, "You sure do rely on others to heal you." },
+			{ 2, "%s, you sure do rely on others to heal you." },
 			{ 2, "They won't be able to heal your corpse." },
 		}
 	)
@@ -339,7 +351,7 @@ addMetricTaunt(
 		"taunt:Bolts Spent:1",
 		"%s, your spending habits are a sign of your greed. I'll make sure you pay for it.",
 		{
-			{ 2, "Your spending habits are a sign of your greed." },
+			{ 2, "%s, your spending habits are a sign of your greed." },
 			{ 2, "I'll make sure you pay for it." },
 		}
 	)
@@ -351,7 +363,7 @@ addMetricTaunt(
 		"taunt:Bolts Spent:2",
 		"%s, you spend your bolts like they're nothing. I'll make sure you pay for it.",
 		{
-			{ 2, "You spend your bolts like they're nothing." },
+			{ 2, "%s, you spend your bolts like they're nothing." },
 			{ 2, "I'll make sure you pay for it." },
 		}
 	)
@@ -363,7 +375,7 @@ addMetricTaunt(
 		"taunt:Locker Rot Kills:1",
 		"%s, irony is a cruel mistress. Let's see how you like being hunted.",
 		{
-			{ 2, "Irony is a cruel mistress." },
+			{ 2, "%s, irony is a cruel mistress." },
 			{ 2, "Let's see how you like being hunted." },
 		}
 	)
@@ -375,125 +387,8 @@ addMetricTaunt(
 		"taunt:Monster Damage:1",
 		"%s, your attacks against my failed experiments won't save you from my wrath.",
 		{
-			{ 2, "Your attacks against my failed experiments" },
+			{ 2, "%s, your attacks against my failed experiments" },
 			{ 2, "won't save you from my wrath." },
 		}
 	)
 )
-
--- Check if any of the top characters are online. If so, taunt them and set a bounty in the form of the 'Locker Rot Virus'
-function PLUGIN:OnNemesisThink()
-    local isEnabled = ix.config.Get("nemesisAiEnabled")
-
-	if (not isEnabled) then
-		return
-	end
-
-    local interval = ix.config.Get("nemesisAiLockerRotIntervalSeconds")
-
-    if (Schema.util.Throttle("NemesisMetricLockerRotGrace", interval)) then
-        return
-    end
-
-	-- Don't overwhelm the server with multiple locker rot events.
-    local activeLockerRotEvent = self:GetLockerRotEvent()
-
-	if (activeLockerRotEvent) then
-		return
-	end
-
-    local leaderboardsPlugin = ix.plugin.Get("leaderboards")
-    local onlineCharactersByID = {}
-
-	-- Collect online characters that qualify to become locker rot victims.
-    for _, client in ipairs(player.GetAll()) do
-        local character = client:GetCharacter()
-
-        if (not character) then
-            continue
-        end
-
-        -- Make sure all players have played for at least a couple hours on their characters
-        if (character:GetCreateTime() + (60 * 2) > os.time()) then
-            print("Skipping locker rot for " ..
-            	character:GetName() .. " because they haven't played for at least 2 hours.")
-            continue
-        end
-
-        -- Make sure they've played for at least 5 minutes (so they have a chance to load into the server)
-		if (client.expLastCharacterLoadedAt + (60 * 5) > CurTime()) then
-			-- continue -- TODO: Uncomment this (it's commented out for testing purposes)
-		end
-
-        -- Check if the character has a locker rot cooldown, so we don't spam them with challenges.
-        local lockerRotGraceEndsAt = character:GetData("nemesisLockerRotGraceEndsAt")
-
-        if (lockerRotGraceEndsAt and lockerRotGraceEndsAt <= os.time()) then
-            lockerRotGraceEndsAt = nil
-            character:SetData("nemesisLockerRotGraceEndsAt", lockerRotGraceEndsAt)
-        end
-
-        if (lockerRotGraceEndsAt) then
-            continue
-        end
-
-        if (not character:GetLockerInventory()) then
-            -- This character has never visited their locker, so they can't have any items to infect.
-            continue
-        end
-
-        onlineCharactersByID[character:GetID()] = client
-    end
-
-	-- We try to find the player that has the highest rank of all the metrics, and infect their locker.
-    leaderboardsPlugin:GetTopCharacters(function(metricInfo)
-		local highestRankingTargets = {}
-		local highestRank = -1
-
-        for metricID, info in pairs(metricInfo) do
-            local metricName = tostring(info.name)
-            local taunts = metricTaunts[metricName]
-
-            if (not taunts) then
-                ix.util.SchemaErrorNoHalt("No taunt sentence registered for metric '" .. metricName .. "'.")
-                continue
-            end
-
-            local topCharacters = info.topCharacters
-
-            for rank, data in ipairs(topCharacters) do
-                local characterID = data.character_id
-                local client = onlineCharactersByID[characterID]
-
-                if (not IsValid(client)) then
-                    continue
-                end
-
-				local lockerRotEvent = {
-					targetCharacter = client:GetCharacter(),
-					value = data.value,
-					metricName = metricName,
-                    taunts = taunts,
-                    rank = rank,
-				}
-
-				if (rank > highestRank) then
-                    highestRank = rank
-                    highestRankingTargets = { lockerRotEvent }
-                elseif (rank == highestRank) then
-					highestRankingTargets[#highestRankingTargets + 1] = lockerRotEvent
-				end
-			end
-		end
-
-        if (highestRank == -1) then
-            -- None of the metrics have any top characters online.
-            return
-        end
-
-		-- If there are multiple characters with the same highest rank, we pick one at random.
-        local lockerRotEvent = highestRankingTargets[math.random(#highestRankingTargets)]
-
-		self:StartLockerRotEvent(lockerRotEvent.targetCharacter, lockerRotEvent)
-    end)
-end
