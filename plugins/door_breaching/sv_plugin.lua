@@ -5,15 +5,11 @@ function PLUGIN:OpenDoor(entity, client, noSound)
 		return
 	end
 
-	-- local breachPosition = breach:GetPos()
-	-- local velocityAwayFromBreach = entity:GetPos() - breachPosition
-	-- entity:BlastDoor(velocityAwayFromBreach)
-
-	local origin = client:GetShootPos()
-	entity:Fire("Unlock")
+	local origin = client:GetShootPos() - (client:GetAimVector() * 5)
+    entity:Fire("Unlock")
 
 	if (origin and string.lower(entity:GetClass()) == "prop_door_rotating") then
-		entity:OpenDoorAwayFrom(origin)
+		entity:OpenDoorAwayFrom(origin, nil, true)
 	else
 		entity:Fire("Open")
 	end

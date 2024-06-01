@@ -5,12 +5,12 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 
 function ENT:Initialize()
-	self:SetModel("models/props_combine/breenlight.mdl")
+	self:SetModel("models/experiment-redux/door_protector_basic.mdl")
 	self:SetMoveType(MOVETYPE_NONE)
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
-	self:SetHealth(25)
-	self:SetMaxHealth(25)
+	self:SetHealth(1000)
+	self:SetMaxHealth(1000)
 end
 
 function ENT:SetupDoorProtector(client, door)
@@ -18,27 +18,33 @@ function ENT:SetupDoorProtector(client, door)
     self.expDoor = door
     door.expProtector = self
 
-	door = IsValid(door.ixParent) and door.ixParent or door
+    door = IsValid(door.ixParent) and door.ixParent or door
 
-	-- Set the door to be owned by this player.
-	door:SetDTEntity(0, client)
-	door.ixAccess = {
-		[client] = DOOR_OWNER
-	}
+    -- Set the door to be owned by this player.
+    door:SetDTEntity(0, client)
+    door.ixAccess = {
+        [client] = DOOR_OWNER
+    }
 
-	PLUGIN:CallOnDoorChildren(door, function(child)
-		child:SetDTEntity(0, client)
-	end)
+    PLUGIN:CallOnDoorChildren(door, function(child)
+        child:SetDTEntity(0, client)
+    end)
 
-	local character = client:GetCharacter()
-	local doors = character:GetVar("doors") or {}
-	doors[#doors + 1] = door
-	character:SetVar("doors", doors, true)
+    local character = client:GetCharacter()
+    local doors = character:GetVar("doors") or {}
+    doors[#doors + 1] = door
+    character:SetVar("doors", doors, true)
 
-	ix.log.Add(client, "buydoor")
+    ix.log.Add(client, "buydoor")
 
-	self:SetPos(door:GetPos() + Vector(-1.0313, 41.8047, -8.1611))
+    local min, max = door:GetCollisionBounds()
+    self:SetPos(door:GetPos() + (door:GetRight() * (max.y + min.y) * -0.5))
+    self:SetAngles(door:GetAngles() + Angle(0, 0, math.Rand(55, 65)))
+
     self:SetParent(door)
+end
+
+function ENT:Think()
 end
 
 function ENT:OnTakeDamage(damageInfo)
@@ -77,9 +83,9 @@ function ENT:OnRemove()
 		end
 	end
 
-	character:SetVar("doors", doors, true)
+    character:SetVar("doors", doors, true)
 
-	ix.log.Add(self.expClient, "selldoor")
+	ix.log.Add(self.expClient, "lostdoor")
 end
 
 -- Forwards use commands to the door so the protector doesn't get in the way
@@ -92,7 +98,7 @@ function ENT:Use(client)
 		return
 	end
 
-	local origin = client:GetShootPos()
+	local origin = client:GetShootPos() - (client:GetAimVector() * 5)
 
 	self.expDoor:OpenDoorAwayFrom(origin, true)
 end

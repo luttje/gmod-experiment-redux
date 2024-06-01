@@ -82,11 +82,19 @@ do
 			end
 
 			door.ixAccess = {}
-			door:SetDTEntity(0, nil)
+            door:SetDTEntity(0, nil)
+
+			if (IsValid(door.expProtector)) then
+				door.expProtector:RemoveWithEffect()
+			end
 
 			-- Remove door information on child doors
 			PLUGIN:CallOnDoorChildren(door, function(child)
-				child:SetDTEntity(0, nil)
+                child:SetDTEntity(0, nil)
+
+				if (IsValid(child.expProtector)) then
+					child.expProtector:RemoveWithEffect()
+				end
 			end)
 		end
 	end

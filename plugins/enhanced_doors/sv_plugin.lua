@@ -1,6 +1,14 @@
 util.AddNetworkString("expDoorMenu")
 util.AddNetworkString("expDoorPermission")
 
+resource.AddFile("models/experiment-redux/door_protector_basic.mdl")
+resource.AddFile("materials/models/experiment-redux/door-protectors/door_protector_basic.vmt")
+resource.AddFile("materials/experiment-redux/electricity.png")
+
+ix.log.AddType("lostdoor", function(client, ...)
+	return Format("%s has lost a door.", client:Name())
+end, FLAG_WARNING)
+
 -- Variables for door data.
 local variables = {
 	-- Whether or not the door will be disabled.
@@ -25,7 +33,19 @@ function PLUGIN:OnCharacterCreated(client, character)
 end
 
 function PLUGIN:EntityIsDoor(entity)
-	if (entity:GetClass() == "exp_door_protector") then
+    if (entity:GetClass() == "exp_door_protector") then
+        return false
+    end
+end
+
+function PLUGIN:PlayerCanBreachEntity(client, entity)
+    if (entity:GetClass() == "exp_door_protector") then
+        return true
+    end
+end
+
+function PLUGIN:CanPlayerShootOpen(client, entity)
+	if (IsValid(entity.expProtector)) then
 		return false
 	end
 end
@@ -244,9 +264,9 @@ function PLUGIN:PlayerLoadedCharacter(client, curChar, prevChar)
 	if (prevChar) then
 		local doors = prevChar:GetVar("doors") or {}
 
-		for _, v in ipairs(doors) do
-			if (IsValid(v) and v:IsDoor() and v:GetDTEntity(0) == client) then
-				v:RemoveDoorAccessData()
+		for _, door in ipairs(doors) do
+			if (IsValid(door) and door:IsDoor() and door:GetDTEntity(0) == client) then
+                door:RemoveDoorAccessData()
 			end
 		end
 
@@ -260,9 +280,9 @@ function PLUGIN:PlayerDisconnected(client)
 	if (character) then
 		local doors = character:GetVar("doors") or {}
 
-		for _, v in ipairs(doors) do
-			if (IsValid(v) and v:IsDoor() and v:GetDTEntity(0) == client) then
-				v:RemoveDoorAccessData()
+		for _, door in ipairs(doors) do
+			if (IsValid(door) and door:IsDoor() and door:GetDTEntity(0) == client) then
+                door:RemoveDoorAccessData()
 			end
 		end
 

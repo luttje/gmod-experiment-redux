@@ -2,11 +2,11 @@ local ITEM = ITEM
 
 ITEM.name = "Door Protector"
 ITEM.price = 50
-ITEM.model = "models/props_combine/breenlight.mdl"
+ITEM.model = "models/experiment-redux/door_protector_basic.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Protection"
-ITEM.description = "Using this you can take ownership of powered doors (they have a key symbol on them)."
+ITEM.description = "Using this you can take ownership of doors with access to electricity (lightning bolt icon)."
 
 ITEM.functions.Place = {
 	OnRun = function(item)

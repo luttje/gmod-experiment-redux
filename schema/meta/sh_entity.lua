@@ -159,13 +159,13 @@ if (SERVER) then
 		return entity
 	end
 
-	function META:OpenDoorAwayFrom(position, notSilent)
+	function META:OpenDoorAwayFrom(position, notSilent, noLockCheck)
 		local target = ents.Create("info_target")
 		target:SetName(tostring(target))
 		target:SetPos(position)
 		target:Spawn()
 
-		if (self:GetInternalVariable("m_bLocked")) then
+		if (not noLockCheck and self:GetInternalVariable("m_bLocked")) then
 			if (notSilent) then
 				self:Fire("SetAnimation", "locked", 0)
 				self:EmitSound("doors/door_locked2.wav", 75, math.random(95, 105))

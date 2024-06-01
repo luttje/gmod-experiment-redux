@@ -1,7 +1,11 @@
 local PLUGIN = PLUGIN
 
 function PLUGIN:EntityBreached(entity, client, breach, noSound)
-	self:OpenDoor(entity, client, noSound)
+    if (IsValid(entity.expProtector)) then
+        entity.expProtector:RemoveWithEffect()
+    end
+
+    self:OpenDoor(entity, client, noSound)
 
 	if (not IsValid(client)) then
 		return
@@ -53,16 +57,18 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 		return
 	end
 
-	local attacker = damageInfo:GetAttacker()
+    if (not IsValid(attacker) or not attacker:IsPlayer()) then
+        return
+    end
 
-	if (not IsValid(attacker) or not attacker:IsPlayer()) then
+    local canBreach = hook.Run("CanPlayerShootOpen", attacker, entity)
+
+	if (canBreach == false) then
 		return
 	end
 
-	for _, entity in ipairs(ents.FindInSphere(entity:GetPos(), PLUGIN.doorProtectorRange)) do
-		if (IsValid(entity.expClient) and Schema.perk.GetOwned("jinxed_door", entity.expClient)) then
-			attacker:TakeDamage(damageInfo:GetDamage(), entity, entity)
-		end
+	if (IsValid(entity.expClient) and Schema.perk.GetOwned("jinxed_door", entity.expClient)) then
+		attacker:TakeDamage(damageInfo:GetDamage(), entity, entity)
 	end
 
 	Schema.ImpactEffect(damagePosition, 8, false)

@@ -5,7 +5,7 @@ ITEM.price = 295
 ITEM.model = "models/props_wasteland/prison_padlock001a.mdl"
 ITEM.width = 1
 ITEM.height = 2
-ITEM.description = "A device that will breach a door when placed on it and shot."
+ITEM.description = "A device that will breach a door protected by a door protector. Place on the door and shoot it to breach."
 
 ITEM.functions.Place = {
 	OnRun = function(item)
@@ -19,15 +19,10 @@ ITEM.functions.Place = {
 		end
 
 		local entity = trace.Entity
+		local canBreach = hook.Run("PlayerCanBreachEntity", client, entity)
 
-		if (not IsValid(entity) or not entity:IsDoor()) then
+		if (not canBreach and (not IsValid(entity) or not entity:IsDoor())) then
 			client:Notify("You are not looking at an entity that can be breached!")
-
-			return false
-		end
-
-		if (not hook.Run("PlayerCanBreachEntity", client, entity)) then
-			client:Notify("This entity cannot be breached!")
 
 			return false
 		end

@@ -69,11 +69,13 @@ function PLUGIN:DrawDoorInfo(door, width, position, angles, scale, clientPositio
 		return
 	end
 
-	-- Draw a little electricity symbol for doors that can be owned.
-
     local color = ColorAlpha(ix.config.Get("color"), alpha)
+	local icon = ix.util.GetMaterial("experiment-redux/electricity.png")
+	local iconSize = 128 * scale
 
-    draw.SimpleText("'", "ixIconsBig", 0, 0, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+	surface.SetDrawColor(color)
+	surface.SetMaterial(icon)
+	surface.DrawTexturedRect(-iconSize * .5, -iconSize * .5, iconSize, iconSize)
 end
 
 function PLUGIN:PostDrawTranslucentRenderables(bDepth, bSkybox)
@@ -134,12 +136,12 @@ function PLUGIN:PostDrawTranslucentRenderables(bDepth, bSkybox)
 		if (trace.HitNormal:Dot((clientPosition - position):GetNormalized()) < 0) then
 			-- draw front
 			cam.Start3D2D(positionFront, angles, 0.1)
-				self:DrawDoorInfo(nearbyEntity, width * 8, positionFront, angles, 0.1, clientPosition)
+				self:DrawDoorInfo(nearbyEntity, width * 8, positionFront, angles, 1, clientPosition)
 			cam.End3D2D()
 		else
 			-- draw back
 			cam.Start3D2D(positionOpposite, anglesOpposite, 0.1)
-				self:DrawDoorInfo(nearbyEntity, width * 8, positionOpposite, anglesOpposite, 0.1, clientPosition)
+				self:DrawDoorInfo(nearbyEntity, width * 8, positionOpposite, anglesOpposite, 1, clientPosition)
 			cam.End3D2D()
 		end
 	end

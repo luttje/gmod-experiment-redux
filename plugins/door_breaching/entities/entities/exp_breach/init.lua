@@ -38,17 +38,23 @@ function ENT:CreateDummyBreach()
 end
 
 function ENT:SetBreachEntity(entity, trace)
-	local position = trace.HitPos
-	local angles = trace.HitNormal:Angle()
+	local position = trace.HitPos + trace.HitNormal
+    local angles = trace.HitNormal:Angle()
 
-	self.entity = entity
+    local door = entity
+
+	if (door.expDoor) then
+		door = door.expDoor
+	end
+
+	self.entity = door
 	self.entity:DeleteOnRemove(self)
 
 	self:SetPos(position)
 	self:SetAngles(angles)
-	self:SetParent(entity)
+	self:SetParent(door)
 
-	entity.breach = self
+	door.breach = self
 	self:SetHealth(5)
 end
 

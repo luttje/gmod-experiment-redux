@@ -515,7 +515,7 @@ function ENT:HandleAttackTaskComplete()
 		end
 
         if (enemy:GetInternalVariable("m_eDoorState") == 0) then
-            enemy:OpenDoorAwayFrom(self:EyePos())
+            enemy:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
             enemy.expIsOpeningFromAttackUntil = CurTime() + 2
         end
 

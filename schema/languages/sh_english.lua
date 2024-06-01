@@ -10,7 +10,8 @@ LANGUAGE = {
 	random = "Random",
 	attribPointsDesc =
 	"These enhance your character's abilities. You get %d points to distribute now and can train to get more later.",
-	attribPointsHint = "Hover over an attribute to see what it affects.",
+    attribPointsHint = "Hover over an attribute to see what it affects.",
+	dTitleOwned = "Owned Door",
 
 	achievements = "Achievements",
 	alliance = "Alliance",
