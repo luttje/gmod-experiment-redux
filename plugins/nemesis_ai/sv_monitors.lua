@@ -47,9 +47,13 @@ function PLUGIN:SetTarget(entity)
 	net.WriteEntity(entity)
 	net.Broadcast()
 
-	-- Dramatically turn on all monitors with delay
-	self:DramaticDelayEachMonitor(function(monitor)
-		monitor:SetPoweredOn(true)
+	-- Dramatically turn on/off all monitors with delay
+    self:DramaticDelayEachMonitor(function(monitor)
+        if (IsValid(entity)) then
+			monitor:SetPoweredOn(true)
+        else
+			monitor:SetPoweredOn(false)
+		end
 	end)
 end
 
@@ -71,6 +75,11 @@ function PLUGIN:SaveMonitorData()
 	local parentEntities = {}
 
 	for _, monitor in ipairs(ents.FindByClass("exp_monitor")) do
+        if (monitor:MapCreationID() > -1) then
+            -- Do not save entities that are part of the map.
+            continue
+        end
+
 		if (not IsValid(monitor) or not monitor._parentUniqueName) then
 			continue
 		end

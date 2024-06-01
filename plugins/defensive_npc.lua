@@ -57,6 +57,11 @@ function PLUGIN:SaveData()
     local npcs = {}
 
     for _, entity in ipairs(ents.GetAll()) do
+        if (entity:MapCreationID() > -1) then
+            -- Do not save entities that are part of the map.
+            continue
+        end
+
         if (not self.turretTypes[entity:GetClass()]) then
             continue
         end

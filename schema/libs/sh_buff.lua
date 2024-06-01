@@ -348,7 +348,7 @@ if (SERVER) then
 			local buffTable = Schema.buff.Get(buff.index)
 
 			if (buffTable.OnShouldExpire) then
-				local shouldExpire = buffTable:OnShouldExpire(client, buff)
+				local shouldExpire = buffTable:OnShouldExpire(client, buff) or hook.Run("PlayerBuffShouldExpire", client, buffTable, buff)
 
 				if (shouldExpire == true) then
 					buff.activeUntil = CurTime() - 1

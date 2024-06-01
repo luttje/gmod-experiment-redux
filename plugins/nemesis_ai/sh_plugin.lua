@@ -22,6 +22,7 @@ if (SERVER) then
     resource.AddFile("materials/experiment-redux/locker_rot_anti_virus.png")
 else
 	PLUGIN.lockerRotIcon = ix.util.GetMaterial("experiment-redux/locker_rot_icon.png")
+	PLUGIN.lockerRotSymbol = ix.util.GetMaterial("experiment-redux/locker_rot.png")
 	PLUGIN.lockerRotAntiVirusSymbol = ix.util.GetMaterial("experiment-redux/locker_rot_anti_virus.png")
 end
 
@@ -122,6 +123,11 @@ ix.config.Add("nemesisAiLockerRotIntervalSeconds", 60 * 60, "The interval in sec
 })
 
 ix.config.Add("nemesisAiLockerRotTaskSeconds", 60 * 10, "How long a player has to complete the Locker Rot task.", nil, {
+	data = {min = 1, max = 86400},
+	category = "nemesis_ai"
+})
+
+ix.config.Add("nemesisAiLockerRotGraceSeconds", 60 * 60 * 24, "How many hours before a player can be targeted again.", nil, {
 	data = {min = 1, max = 86400},
 	category = "nemesis_ai"
 })

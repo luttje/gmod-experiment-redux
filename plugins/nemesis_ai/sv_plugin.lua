@@ -40,113 +40,7 @@ function PLUGIN:Think()
 		return
 	end
 
-	local interval = ix.config.Get("nemesisAiLockerRotIntervalSeconds")
-
-	if (Schema.util.Throttle("NemesisMetricLockerRotGrace", interval)) then
-		return
-	end
-
-	-- Don't overwhelm the server with multiple locker rot events.
-	local activeLockerRotEvent = self:GetLockerRotEvent()
-
-	if (activeLockerRotEvent) then
-		return
-	end
-
-	local leaderboardsPlugin = ix.plugin.Get("leaderboards")
-	local onlineCharactersByID = {}
-
-	-- Collect online characters that qualify to become locker rot victims.
-	for _, client in ipairs(player.GetAll()) do
-		local character = client:GetCharacter()
-
-		if (not character) then
-			continue
-		end
-
-		-- Make sure all players have played for at least a couple hours on their characters
-		if (character:GetCreateTime() + (60 * 2) > os.time()) then
-			print("Skipping locker rot for " ..
-				character:GetName() .. " because they haven't played for at least 2 hours.")
-			continue
-		end
-
-		-- Make sure they've played for at least 5 minutes (so they have a chance to load into the server)
-		if (client.expLastCharacterLoadedAt + (60 * 5) > CurTime()) then
-			-- continue -- TODO: Uncomment this (it's commented out for testing purposes)
-		end
-
-		-- Check if the character has a locker rot cooldown, so we don't spam them with challenges.
-		local lockerRotGraceEndsAt = character:GetData("nemesisLockerRotGraceEndsAt")
-
-		if (lockerRotGraceEndsAt and lockerRotGraceEndsAt <= os.time()) then
-			lockerRotGraceEndsAt = nil
-			character:SetData("nemesisLockerRotGraceEndsAt", lockerRotGraceEndsAt)
-		end
-
-		if (lockerRotGraceEndsAt) then
-			continue
-		end
-
-		if (not character:GetLockerInventory()) then
-			-- This character has never visited their locker, so they can't have any items to infect.
-			continue
-		end
-
-		onlineCharactersByID[character:GetID()] = client
-	end
-
-	-- We try to find the player that has the highest rank of all the metrics, and infect their locker.
-	leaderboardsPlugin:GetTopCharacters(function(metricInfo)
-		local highestRankingTargets = {}
-		local highestRank = -1
-
-		for metricID, info in pairs(metricInfo) do
-			local metricName = tostring(info.name)
-			local taunts = self.metricTaunts[metricName]
-
-			if (not taunts) then
-				ix.util.SchemaErrorNoHalt("No taunt sentence registered for metric '" .. metricName .. "'.")
-				continue
-			end
-
-			local topCharacters = info.topCharacters
-
-			for rank, data in ipairs(topCharacters) do
-				local characterID = data.character_id
-				local client = onlineCharactersByID[characterID]
-
-				if (not IsValid(client)) then
-					continue
-				end
-
-				local lockerRotEvent = {
-					targetCharacter = client:GetCharacter(),
-					value = data.value,
-					metricName = metricName,
-					taunts = taunts,
-					rank = rank,
-				}
-
-				if (rank > highestRank) then
-					highestRank = rank
-					highestRankingTargets = { lockerRotEvent }
-				elseif (rank == highestRank) then
-					highestRankingTargets[#highestRankingTargets + 1] = lockerRotEvent
-				end
-			end
-		end
-
-		if (highestRank == -1) then
-			-- None of the metrics have any top characters online.
-			return
-		end
-
-		-- If there are multiple characters with the same highest rank, we pick one at random.
-		local lockerRotEvent = highestRankingTargets[math.random(#highestRankingTargets)]
-
-		self:StartLockerRotEvent(lockerRotEvent.targetCharacter, lockerRotEvent)
-	end)
+	self:LockerRotThink()
 end
 
 function PLUGIN:GenerateSpeech(text, callback)
@@ -254,4 +148,19 @@ function PLUGIN:PlayNemesisSentences(uniqueID, clients, character, callback)
 			callback()
 		end
     end, character)
+end
+
+-- Ensure that everyone gets the target added to PVS when the target is set.
+function PLUGIN:SetupPlayerVisibility(client)
+    if (not IsValid(self.currentTarget)) then
+        return
+	end
+
+	local targetPosition = self.currentTarget:GetPos()
+
+    -- "If we don't test if the PVS is already loaded, it could crash the server."
+	-- According to: https://wiki.facepunch.com/gmod/Global.AddOriginToPVS
+	if (not client:TestPVS(targetPosition)) then
+		AddOriginToPVS(targetPosition)
+	end
 end

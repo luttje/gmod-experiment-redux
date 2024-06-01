@@ -172,6 +172,20 @@ function Schema.util.GetPlayerAddress(clientOrAddress)
     }
 end
 
+function Schema.util.AllPlayersExcept(excludedClients)
+	excludedClients = istable(excludedClients) and excludedClients or {excludedClients}
+
+	local players = {}
+
+	for _, client in ipairs(player.GetAll()) do
+		if (not table.HasValue(excludedClients, client)) then
+			table.insert(players, client)
+		end
+	end
+
+	return players
+end
+
 function Schema.util.ForceConVars(conVarsToSet)
 	for conVarName, value in pairs(conVarsToSet) do
 		if (value.isServer and not SERVER) then

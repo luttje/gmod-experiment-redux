@@ -155,9 +155,9 @@ PLUGIN.lockerRotStartTaunts = {
 PLUGIN.lockerRotCompleteTaunts = {
 	PLUGIN:RegisterSentence(
 		"locker_rot:completed:1",
-		"Ah, %s, you've done well. You're my little puppet now.",
+		"%s, you've done well. You're my little puppet now.",
 		{
-			{ 2, "Ah, %s," },
+			{ 2, "%s" },
 			{ 2, "you've done well." },
 			{ 2, "You're my little puppet now." },
 		}
@@ -218,7 +218,7 @@ PLUGIN.lockerRotFailedTaunts = {
 		"Pathetic. %s failed to complete the task in time and nobody claimed their items. They're all weak!",
 		{
 			{ 2, "Pathetic." },
-			{ 2, "%s failed to complete the task in time" },
+			{ 3, "%s failed to complete the task in time" },
 			{ 2, "and nobody claimed their items." },
 			{ 2, "They're all weak!" },
 		}
@@ -231,6 +231,28 @@ PLUGIN.lockerRotFailedTaunts = {
 			{ 2, "%s couldn't complete the task in time" },
 			{ 2, "and nobody claimed their items." },
 			{ 2, "They're all weak!" },
+		}
+	),
+}
+
+-- In case the target completes the task, but any attackers fail to claim the items.
+PLUGIN.lockerRotCompleteAntiVirusTaunt = {
+	PLUGIN:RegisterSentence(
+		"locker_rot:completed:anti_virus",
+		"The anti-virus has been found. %s's items are safe... for now.",
+		{
+			{ 3, "The anti-virus has been found." },
+			{ 2, "%s's items are safe..." },
+			{ 2, "for now." },
+		}
+	),
+	PLUGIN:RegisterSentence(
+		"locker_rot:completed:anti_virus:2",
+		"%s has found the anti-virus. Their items are safe... for now.",
+		{
+			{ 3, "%s has found the anti-virus." },
+			{ 2, "Their items are safe..." },
+			{ 2, "for now." },
 		}
 	),
 }
@@ -255,7 +277,7 @@ addMetricTaunt(
 		"taunt:Bolts Generated:1",
 		"%s, your bolts are a testament to your greed. I'll make sure you pay for it.",
 		{
-			{ 2, "%s, your bolts are a testament to your greed." },
+			{ 3, "%s, your bolts are a testament to your greed." },
 			{ 2, "I'll make sure you pay for it." },
 		}
     )
@@ -267,7 +289,7 @@ addMetricTaunt(
 		"taunt:Bolts Generated:2",
 		"%s, your bolts reveal your greed. Prepare to pay for it.",
 		{
-			{ 2, "%s, your bolts reveal your greed." },
+			{ 3, "%s, your bolts reveal your greed." },
 			{ 2, "Prepare to pay for it." },
 		}
 	)
@@ -279,7 +301,7 @@ addMetricTaunt(
 		"taunt:Successfully Defended:1",
 		"%s, your defenses are a sign of your weakness. They won't save you from my wrath.",
 		{
-			{ 2, "%s, your defenses are a sign of your weakness." },
+			{ 3, "%s, your defenses are a sign of your weakness." },
 			{ 2, "They won't save you from my wrath." },
 		}
 	)
@@ -291,7 +313,7 @@ addMetricTaunt(
 		"taunt:Successfully Defended:2",
 		"%s, you think your defenses will save you? Watch me unleash the dogs of war.",
 		{
-			{ 2, "%s, you think your defenses will save you?" },
+			{ 4, "%s, you think your defenses will save you?" },
 			{ 2, "Watch me unleash the dogs of war." },
 		}
 	)
@@ -303,7 +325,7 @@ addMetricTaunt(
 		"taunt:Healing Done:1",
 		"%s, your healing is a sign of weakness. You can't heal your way out of this.",
 		{
-			{ 2, "%s, your healing is a sign of weakness." },
+			{ 3, "%s, your healing is a sign of weakness." },
 			{ 2, "You can't heal your way out of this." },
 		}
 	)
@@ -327,7 +349,7 @@ addMetricTaunt(
 		"taunt:Healing Received:1",
 		"%s, your reliance on others to heal you is a weakness. I'll exploit it.",
 		{
-			{ 2, "%s, your reliance on others to heal you is a weakness." },
+			{ 4, "%s, your reliance on others to heal you is a weakness." },
 			{ 2, "I'll exploit it." },
 		}
 	)
@@ -339,7 +361,7 @@ addMetricTaunt(
 		"taunt:Healing Received:2",
 		"%s, you sure do rely on others to heal you. They won't be able to heal your corpse.",
 		{
-			{ 2, "%s, you sure do rely on others to heal you." },
+			{ 4, "%s, you sure do rely on others to heal you." },
 			{ 2, "They won't be able to heal your corpse." },
 		}
 	)
@@ -351,7 +373,7 @@ addMetricTaunt(
 		"taunt:Bolts Spent:1",
 		"%s, your spending habits are a sign of your greed. I'll make sure you pay for it.",
 		{
-			{ 2, "%s, your spending habits are a sign of your greed." },
+			{ 4, "%s, your spending habits are a sign of your greed." },
 			{ 2, "I'll make sure you pay for it." },
 		}
 	)
@@ -363,7 +385,7 @@ addMetricTaunt(
 		"taunt:Bolts Spent:2",
 		"%s, you spend your bolts like they're nothing. I'll make sure you pay for it.",
 		{
-			{ 2, "%s, you spend your bolts like they're nothing." },
+			{ 3, "%s, you spend your bolts like they're nothing." },
 			{ 2, "I'll make sure you pay for it." },
 		}
 	)
@@ -376,7 +398,7 @@ addMetricTaunt(
 		"%s, irony is a cruel mistress. Let's see how you like being hunted.",
 		{
 			{ 2, "%s, irony is a cruel mistress." },
-			{ 2, "Let's see how you like being hunted." },
+			{ 3, "Let's see how you like being hunted." },
 		}
 	)
 )
@@ -387,7 +409,7 @@ addMetricTaunt(
 		"taunt:Monster Damage:1",
 		"%s, your attacks against my failed experiments won't save you from my wrath.",
 		{
-			{ 2, "%s, your attacks against my failed experiments" },
+			{ 3, "%s, your attacks against my failed experiments" },
 			{ 2, "won't save you from my wrath." },
 		}
 	)

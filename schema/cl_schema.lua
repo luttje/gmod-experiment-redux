@@ -324,35 +324,37 @@ function Schema.SetupStoragePanel(panel, storageInventoryPanel, localInventoryPa
 		localInventoryPanel,
 	}
 
-	for i, inventoryPanel in ipairs(inventoryPanels) do
-		local inventory = ix.item.inventories[inventoryPanel.invID]
+    for i, inventoryPanel in ipairs(inventoryPanels) do
+        local inventory = ix.item.inventories[inventoryPanel.invID]
 
-		local function checkAllBagsSynced()
-			for _, item in pairs(inventory:GetItems()) do
-				if (not item.isBag) then
-					continue
-				end
+        local function checkAllBagsSynced()
+            for _, item in pairs(inventory:GetItems()) do
+                if (not item.isBag) then
+                    continue
+                end
 
-				local index = item:GetData("id", "")
-				local bagInventory = ix.item.inventories[index]
+                local index = item:GetData("id", "")
+                local bagInventory = ix.item.inventories[index]
 
-				if (not bagInventory or not bagInventory.slots) then
-					return false
-				end
-			end
+                if (not bagInventory or not bagInventory.slots) then
+                    return false
+                end
+            end
 
-			return true
-		end
+            return true
+        end
 
-		-- Wait a couple of frames for the inventory to be arrive on the client, trying a couple times.
-		local retryTimerName = "ixStoragePanelBagsRetry" .. inventoryPanel.invID
-		timer.Create(retryTimerName, 0.1, 10, function()
-			if (checkAllBagsSynced()) then
-				Schema.SetupStoragePanelBags(inventoryPanel, inventory, i == 1)
-				timer.Remove(retryTimerName)
-			end
-		end)
-	end
+        -- Wait a couple of frames for the inventory to be arrive on the client, trying a couple times.
+        local retryTimerName = "ixStoragePanelBagsRetry" .. inventoryPanel.invID
+        timer.Create(retryTimerName, 0.1, 10, function()
+            if (checkAllBagsSynced()) then
+                Schema.SetupStoragePanelBags(inventoryPanel, inventory, i == 1)
+                timer.Remove(retryTimerName)
+            end
+        end)
+    end
+
+	hook.Run("OnStoragePanelSetup", panel, storageInventoryPanel, localInventoryPanel)
 end
 
 function Schema.SetupStoragePanelBags(inventoryPanel, inventory, isStoragePanelBags)

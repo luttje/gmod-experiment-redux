@@ -12,57 +12,84 @@ function PLUGIN:AddReferenceToAudioChannel(channel)
 	end
 end
 
-net.Receive("expPlayNemesisAudio", function(length)
-	local sentence = net.ReadString()
-    local audioUrl = net.ReadString()
+-- The commented code above is problematic, because sometimes the audio is still playing when we receive a new audio to play
+-- A queue system to play the audio in sequence where we unqueue the next audio to play when the current audio finishes playing
+PLUGIN.audioQueue = PLUGIN.audioQueue or {}
 
-	ix.chat.Send(nil, "nemesis_ai", sentence)
+function PLUGIN:AddToAudioQueue(sentence, audioUrl, duration)
+    table.insert(PLUGIN.audioQueue, {
+		duration = duration,
+		sentence = sentence,
+		audioUrl = audioUrl
+	})
+
+	if (#PLUGIN.audioQueue == 1) then
+		PLUGIN:PlayNextInAudioQueue()
+	end
+end
+
+function PLUGIN:PlayNextInAudioQueue()
+	local audioData = PLUGIN.audioQueue[1]
+
+	if (not audioData) then
+		return
+	end
+
+    local audioUrl = audioData.audioUrl
+    local duration = audioData.duration
+
 	sound.PlayURL(audioUrl, "", function(channel)
-        if (IsValid(channel)) then
-			PLUGIN:AddReferenceToAudioChannel(channel)
+		if (IsValid(channel)) then
+            PLUGIN:AddReferenceToAudioChannel(channel)
+
+			duration = duration or channel:GetLength()
 
 			channel:Play()
+
+			timer.Simple(duration, function()
+				table.remove(PLUGIN.audioQueue, 1)
+				PLUGIN:PlayNextInAudioQueue()
+			end)
 		end
 	end)
+end
+
+net.Receive("expPlayNemesisAudio", function(length)
+	local sentence = net.ReadString()
+	local audioUrl = net.ReadString()
+
+    ix.chat.Send(nil, "nemesis_ai", sentence)
+	PLUGIN:AddToAudioQueue(sentence, audioUrl)
 end)
 
 net.Receive("expPlayNemesisSentences", function()
 	local sentence = net.ReadString()
     local audioWithPauses = net.ReadTable()
 
-	local function playPart(index)
-		local part = audioWithPauses[index]
+    for _, part in ipairs(audioWithPauses) do
+        local duration = part[1]
+        local url = part[2]
 
-		if (not part) then
-			return
-		end
+        PLUGIN:AddToAudioQueue(sentence, url, duration)
+    end
 
-		local duration = part[1]
-		local url = part[2]
-
-		sound.PlayURL(url, "", function(channel)
-            if (IsValid(channel)) then
-				PLUGIN:AddReferenceToAudioChannel(channel)
-
-				channel:Play()
-
-				timer.Simple(duration, function()
-					playPart(index + 1)
-				end)
-			end
-		end)
-	end
-
-	ix.chat.Send(nil, "nemesis_ai", sentence)
-	playPart(1)
+    ix.chat.Send(nil, "nemesis_ai", sentence)
 end)
 
 -- Draw location to locker with anti-virus (if this player has a locker rot event)
 function PLUGIN:DrawLockerRotAntiVirusIfNeeded()
     local client = LocalPlayer()
 
-	if (not IsValid(client)) then
-		return
+    if (not IsValid(client)) then
+        return
+    end
+
+    local lockerRotAntiVirusRevealTime = client:GetCharacterNetVar("lockerRotAntiVirusRevealTime")
+
+	if (lockerRotAntiVirusRevealTime and lockerRotAntiVirusRevealTime > CurTime()) then
+		local timeRemaining = lockerRotAntiVirusRevealTime - CurTime()
+
+		Schema.draw.DrawLabeledValue("Time until locker with anti-virus is revealed to you:", string.NiceTime(math.max(1, math.ceil(timeRemaining))))
 	end
 
     local lockerRotAntiVirusPosition = client:GetCharacterNetVar("lockerRotAntiVirusPosition")
@@ -86,7 +113,7 @@ function PLUGIN:DrawLockerRotAntiVirusIfNeeded()
 
 	-- Draw the time remaining to reach the locker
 	local timeRemaining = lockerRotAntiVirusTime - CurTime()
-    Schema.draw.DrawLabeledValue("Time to reach locker with anti-virus:", math.max(1, math.ceil(timeRemaining)))
+    Schema.draw.DrawLabeledValue("Time to reach locker with anti-virus:", string.NiceTime(math.max(1, math.ceil(timeRemaining))))
 end
 
 function PLUGIN:PaintLockerRotOverItemIcon(itemIcon, itemTable, width, height)
