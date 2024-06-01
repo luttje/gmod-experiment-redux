@@ -57,14 +57,12 @@ function PLUGIN:LockerRotThink()
 
         -- Make sure all players have played for at least a couple hours on their characters
         if (character:GetCreateTime() + (60 * 2) > os.time()) then
-            print("Skipping locker rot for " ..
-                character:GetName() .. " because they haven't played for at least 2 hours.")
             continue
         end
 
         -- Make sure they've played for at least 5 minutes (so they have a chance to load into the server)
         if (client.expLastCharacterLoadedAt + (60 * 5) > CurTime()) then
-            -- continue -- TODO: Uncomment this (it's commented out for testing purposes)
+            continue
         end
 
         -- Check if the character has a locker rot cooldown, so we don't spam them with challenges.
