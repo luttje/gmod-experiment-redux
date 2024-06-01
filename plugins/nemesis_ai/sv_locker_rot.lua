@@ -55,6 +55,11 @@ function PLUGIN:LockerRotThink()
             continue
         end
 
+		-- Developers are excluded from locker rot events
+		if (client:IsSuperAdmin()) then
+			continue
+		end
+
         -- Make sure all players have played for at least a couple hours on their characters
         if (character:GetCreateTime() + (60 * 2) > os.time()) then
             continue
