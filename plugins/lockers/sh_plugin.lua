@@ -64,6 +64,11 @@ function PLUGIN:SaveData()
 	local lockers = {}
 
 	for _, entity in ipairs(ents.FindByClass("exp_lockers")) do
+        if (entity:MapCreationID() > -1) then
+			-- Do not save lockers that are part of the map.
+            continue
+        end
+
 		table.insert(lockers, {
 			pos = entity:GetPos(),
 			ang = entity:GetAngles()
