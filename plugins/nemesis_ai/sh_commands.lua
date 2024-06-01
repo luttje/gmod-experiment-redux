@@ -128,7 +128,7 @@ do
 	local COMMAND = {}
 
 	COMMAND.description =
-		"For the Nemesis AI to play the specified text"
+		"Force the Nemesis AI to play the specified text"
 	COMMAND.arguments = {
 		ix.type.text,
 	}
@@ -140,4 +140,38 @@ do
 	end
 
 	ix.command.Add("NemesisPlayAudio", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description =
+		"Force the locker rot event to start for the specified character."
+	COMMAND.arguments = {
+        ix.type.character,
+		ix.type.string,
+	}
+
+	COMMAND.superAdminOnly = true
+
+    function COMMAND:OnRun(client, character, metricName)
+        local taunts = PLUGIN.metricTaunts[metricName]
+
+		if (not taunts) then
+			client:Notify("Invalid metric name specified!")
+			return
+		end
+
+		local lockerRotEvent = {
+			targetCharacter = character,
+			value = 1337,
+			metricName = metricName,
+			taunts = taunts,
+			rank = 1,
+        }
+
+		PLUGIN:StartLockerRotEvent(character, lockerRotEvent)
+	end
+
+	ix.command.Add("ForceLockerRotEvent", COMMAND)
 end
