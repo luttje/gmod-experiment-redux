@@ -12,6 +12,13 @@ if (SERVER) then
     util.AddNetworkString("expBusinessPurchase")
     util.AddNetworkString("expBusinessPurchaseCompleted")
 
+    resource.AddFile("models/experiment-redux/shopkeeper.mdl")
+    resource.AddFile("models/experiment-redux/shopkeeper_portal_door.mdl")
+	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_eye.vmt")
+	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_paint.vmt")
+	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_shipment_portal.vmt")
+	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_steel.vmt")
+
 	net.Receive("expBusinessPurchase", function(length, client)
 		local entity = net.ReadEntity()
 		local uniqueID = net.ReadString()
