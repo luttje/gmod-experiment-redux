@@ -637,10 +637,6 @@ end
 
 -- To save on performance, we let the monster not think if there's no players in the area
 function ENT:ShouldHibernate()
-    if (self:GetEnemy()) then
-        return false
-    end
-
 	local hibernationRange = self:GetRangeSquared(1500)
 
     for _, entity in ipairs(player.GetAll()) do
@@ -657,7 +653,7 @@ function ENT:ShouldHibernate()
 end
 
 function ENT:Think()
-	local shouldHibernate = self:ShouldHibernate()
+    local shouldHibernate = self:ShouldHibernate()
 
 	if (shouldHibernate) then
         self:StopMoving()

@@ -21,9 +21,25 @@ function ENT:Initialize()
 	end
 end
 
--- Transmit information only when this entity is in the player's PVS.
-function ENT:UpdateTransmitState()
-	return TRANSMIT_PVS
+function ENT:Think()
+	local curTime = CurTime()
+
+	if (not self.nextCleanup) then
+		self.nextCleanup = curTime + ix.config.Get("belongingsCleanupSeconds")
+	end
+
+	if (self.nextCleanup < curTime) then
+		local inventory = self:GetInventory()
+
+		if (inventory) then
+			Schema.CloseInventory(inventory)
+		end
+
+		self:RemoveWithEffect()
+	end
+
+	self:NextThink(curTime + 1)
+	return true
 end
 
 function ENT:OnTakeDamage(damageInfo)
