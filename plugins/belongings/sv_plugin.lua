@@ -62,8 +62,14 @@ function PLUGIN:SaveBelongings()
 			moveable = physicsObject:IsMoveable()
 		end
 
-		if (not inventory.GetSize) then
-			ix.util.SchemaErrorNoHaltWithStack("TODO: Im doing something wrong, find out why inventories are not complete\n")
+        if (not inventory.GetSize) then
+            ix.util.SchemaErrorNoHaltWithStack(
+            "TODO: Im doing something wrong, find out why inventories are not complete\n")
+            continue
+        end
+
+        -- Do not store monster inventories (for sake of code simplicity)
+		if (entity:GetOwnerID() == 0) then
 			continue
 		end
 
@@ -140,4 +146,43 @@ function PLUGIN:CreateBelongings(client, storageEntity)
 	entity:SetOwnerID(character:GetID())
 	entity:SetPos((storageEntity and storageEntity:GetPos() or client:GetPos()) + Vector(0, 0, 48))
 	entity:Spawn()
+end
+
+function PLUGIN:CreateBelongingsForMonster(corpse)
+	local inventory = corpse and corpse.ixInventory or nil
+	local belongings = ents.Create("exp_belongings")
+
+	if (not inventory) then
+		ix.util.SchemaErrorNoHaltWithStack(
+			"Attempted to create belongings for monster without existing corpse inventory\n")
+	elseif (corpse) then
+		belongings:SetMoney(corpse:GetMoney())
+	end
+
+	belongings.ixInventory = inventory
+	inventory.vars.belongingsEntity = belongings
+
+	belongings:SetInventory(inventory)
+	belongings:SetAngles(corpse:GetAngles())
+	belongings:SetOwnerID(0)
+	belongings:SetPos(corpse:GetPos() + Vector(0, 0, 48))
+	belongings:Spawn()
+end
+
+function PLUGIN:HandleCorpseEmpty(corpse)
+	if (corpse:GetMoney() == 0 and table.Count(corpse.ixInventory:GetItems()) == 0) then
+		local index = corpse.ixInventory:GetID()
+
+		local query = mysql:Delete("ix_items")
+		query:Where("inventory_id", index)
+		query:Execute()
+
+		query = mysql:Delete("ix_inventories")
+		query:Where("inventory_id", index)
+		query:Execute()
+
+		return true
+	end
+
+	return false
 end

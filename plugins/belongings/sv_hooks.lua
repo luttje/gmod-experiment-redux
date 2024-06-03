@@ -23,27 +23,31 @@ function PLUGIN:OnPlayerCorpseNotCreated(client)
 end
 
 function PLUGIN:OnPlayerCorpseRemoved(client, corpse)
+    if (not corpse.ixInventory) then
+        return
+    end
+
+    Schema.CloseInventory(corpse.ixInventory)
+
+    if (self:HandleCorpseEmpty(corpse)) then
+		return
+	end
+
+    self:CreateBelongings(client, corpse)
+end
+
+function PLUGIN:OnMonsterCorpseRemoved(corpse)
 	if (not corpse.ixInventory) then
 		return
 	end
 
-	if (corpse:GetMoney() == 0 and table.Count(corpse.ixInventory:GetItems()) == 0) then
-		Schema.CloseInventory(corpse.ixInventory)
+    Schema.CloseInventory(corpse.ixInventory)
 
-		local index = corpse.ixInventory:GetID()
-
-		local query = mysql:Delete("ix_items")
-		query:Where("inventory_id", index)
-		query:Execute()
-
-		query = mysql:Delete("ix_inventories")
-		query:Where("inventory_id", index)
-		query:Execute()
-
+    if (self:HandleCorpseEmpty(corpse)) then
 		return
 	end
 
-	self:CreateBelongings(client, corpse)
+	self:CreateBelongingsForMonster(corpse)
 end
 
 function PLUGIN:OnPlayerCorpseCreated(client, corpse)

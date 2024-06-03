@@ -16,8 +16,14 @@ function ENT:GetInventory()
 end
 
 function ENT:GetOwnerName(client)
-	local ownerName = CLIENT and L"someone" or L("someone", client)
-    local character = ix.char.loaded[self:GetOwnerID()]
+    local ownerName = CLIENT and L "someone" or L("someone", client)
+    local ownerID = self:GetOwnerID()
+
+	if (ownerID == 0) then
+		return ownerName, false
+	end
+
+    local character = ix.char.loaded[ownerID]
 	local isOwner = false
 
 	if (not client and CLIENT) then

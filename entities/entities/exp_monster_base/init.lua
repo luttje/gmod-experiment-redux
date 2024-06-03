@@ -84,8 +84,7 @@ function ENT:Boot()
     self:SetMaxYawSpeed(256)
 
     if (self:GetAttackMeleeRange() == nil and self:GetAttackRange() == nil) then
-        -- Default to 64 units for melee range
-        self:SetAttackMeleeRange(64)
+        self:SetAttackMeleeRange(60) -- Right up against the target
     end
 
     if (self:GetSenseRange() == nil) then
@@ -769,16 +768,13 @@ function ENT:HandleDeath()
     local corpse = self:CreateServerRagdoll()
 	corpse:SetNetVar("monsterCorpse", self:EntIndex())
 	local decayTime = ix.config.Get("corpseDecayTime", 60)
-	local uniqueID = "ixMonsterCorpseDecay" .. corpse:EntIndex()
 
     if (decayTime > 0) then
-        local visualDecayTime = math.max(decayTime * .1, math.min(10, decayTime))
+        local visualDecayTime = math.min(decayTime * .1, 10)
 
-        timer.Create(uniqueID, decayTime - visualDecayTime, 1, function()
+        timer.Simple(decayTime - visualDecayTime, function()
             if (IsValid(corpse)) then
                 Schema.DecayEntity(corpse, visualDecayTime)
-            else
-                timer.Remove(uniqueID)
             end
         end)
     end
@@ -810,8 +806,12 @@ function ENT:HandleDeath()
 		})
 	end
 
-	corpse.GetInventory = function(corpse)
-		return corpse.ixInventory
+    corpse.GetInventory = function(corpse)
+        return corpse.ixInventory
+    end
+
+	corpse.GetOwnerID = function(corpse)
+		return 0
 	end
 
 	corpse.SetMoney = function(corpse, amount)
@@ -824,18 +824,22 @@ function ENT:HandleDeath()
     end
 
     -- TODO: Add loot based on subclass settings
-	corpse:SetMoney(math.random(10, 50))
+	corpse:SetMoney(math.random(300, 600))
 
-	corpse.OnOptionSelected = function(entity, client, option, data)
-		if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
-			return
-		end
+    corpse.OnOptionSelected = function(entity, client, option, data)
+        if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+            return
+        end
 
-		if (option == L("searchCorpse", client) and corpse.StartSearchCorpse) then
-			corpse:StartSearchCorpse(client)
-			return
-		end
-	end
+        if (option == L("searchCorpse", client) and corpse.StartSearchCorpse) then
+            corpse:StartSearchCorpse(client)
+            return
+        end
+    end
+
+	corpse:CallOnRemove("expPersistentCorpse", function(ragdoll)
+		hook.Run("OnMonsterCorpseRemoved", ragdoll)
+	end)
 
     self:Remove()
 end
