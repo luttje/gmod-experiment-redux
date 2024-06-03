@@ -59,17 +59,22 @@ if (CLIENT) then
 	net.Receive("expDamageNumbers", function()
 		local entity = net.ReadEntity()
 		local damage = net.ReadUInt(32)
+		local client = LocalPlayer()
+
+		if (not IsValid(entity) or not IsValid(client)) then
+			return
+		end
 
 		local color = Color(83, 167, 125)
-		local pos = LocalPlayer():GetShootPos()
+		local pos = client:GetShootPos()
 
-		if (entity == LocalPlayer()) then
+		if (entity == client) then
 			color = Color(255, 0, 0)
 
-			pos = pos + LocalPlayer():GetAimVector() * 10
+			pos = pos + client:GetAimVector() * 10
 			pos = pos + VectorRand()
 		else
-			pos = pos + LocalPlayer():GetAimVector() * pos:Distance(entity:GetPos())
+			pos = pos + client:GetAimVector() * pos:Distance(entity:GetPos())
 			pos = pos + VectorRand(-5, 5)
 		end
 
