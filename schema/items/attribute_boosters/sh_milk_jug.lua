@@ -28,5 +28,5 @@ end
 
 function ITEM:OnBoosted()
 	local client = self.player
-	client:SetHealth(math.Clamp(client:Health() + 10, 0, client:GetMaxHealth()))
+	client:SetHealth(math.Clamp(client:Health() + 1, 0, client:GetMaxHealth()))
 end
