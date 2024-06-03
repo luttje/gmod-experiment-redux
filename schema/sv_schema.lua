@@ -500,7 +500,7 @@ function Schema.BustDownDoor(client, door, force)
 	door:DrawShadow(false)
 	door:SetNoDraw(true)
 	door:EmitSound("physics/wood/wood_box_impact_hard3.wav")
-	door:Fire("Unlock", "", 0)
+	door:Fire("Unlock")
 
 	local detachedDoor = ents.Create("prop_physics")
 

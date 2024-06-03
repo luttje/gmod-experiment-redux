@@ -326,6 +326,8 @@ function ENT:Think()
 end
 
 function ENT:AcceptInput(inputName, activator, caller, data)
+    inputName = inputName:lower()
+
     if (inputName == "lock") then
         self:SetIsLocked(true)
         self:MakeUnpassable()

@@ -132,10 +132,10 @@ function SWEP:ToggleLock(door, state)
 			hook.Run("PlayerLockedDoor", self.Owner, door, partner)
 		else
 			if (IsValid(partner)) then
-				partner:Fire("unlock")
+				partner:Fire("Unlock")
 			end
 
-			door:Fire("unlock")
+			door:Fire("Unlock")
 			self.Owner:EmitSound("doors/door_latch1.wav")
 
 			hook.Run("PlayerUnlockedDoor", self.Owner, door, partner)
@@ -151,7 +151,7 @@ function SWEP:ToggleLock(door, state)
 			self.Owner:EmitSound("doors/door_latch3.wav")
 			hook.Run("PlayerLockedVehicle", self.Owner, door)
 		else
-			door:Fire("unlock")
+			door:Fire("Unlock")
 
 			if (door.IsSimfphyscar) then
 				door.IsLocked = nil

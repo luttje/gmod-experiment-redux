@@ -61,9 +61,10 @@ end
 function ENT:OnRemove()
     if (IsValid(self.expDoor)) then
         self.expDoor.expProtector = nil
-    end
+        self.expDoor:RemoveDoorAccessData()
 
-    self.expDoor:RemoveDoorAccessData()
+		self.expDoor:Fire("Unlock")
+    end
 
 	if (not IsValid(self.expClient)) then
 		return
