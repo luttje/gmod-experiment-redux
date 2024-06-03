@@ -10,6 +10,10 @@ function Schema.util.ForceEndPath(path)
 	return path
 end
 
+function Schema.util.GetUniqueID()
+	return tostring({})
+end
+
 --- Converts Source Engine units (1 unit = 1 inch) to centimeters (1 unit = 2.54 cm)
 --- @param unit any
 --- @return unknown

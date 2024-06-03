@@ -18,10 +18,6 @@ function PLUGIN:OnItemTransferred(item, sourceInventory, targetInventory)
 	self:RemoveIfEmpty(sourceInventory)
 end
 
-function PLUGIN:OnPlayerCorpseNotCreated(client)
-	self:CreateBelongings(client)
-end
-
 function PLUGIN:OnPlayerCorpseRemoved(client, corpse)
     if (not corpse.ixInventory) then
         return
@@ -33,7 +29,9 @@ function PLUGIN:OnPlayerCorpseRemoved(client, corpse)
 		return
 	end
 
-    self:CreateBelongings(client, corpse)
+    local belongings = self:CreateBelongings(corpse)
+	local character = client.expCorpseCharacter or client:GetCharacter()
+	belongings:SetOwnerID(character:GetID())
 end
 
 function PLUGIN:OnMonsterCorpseRemoved(corpse)
@@ -47,7 +45,8 @@ function PLUGIN:OnMonsterCorpseRemoved(corpse)
 		return
 	end
 
-	self:CreateBelongingsForMonster(corpse)
+    local belongings = self:CreateBelongings(corpse)
+	belongings:SetOwnerID(0)
 end
 
 function PLUGIN:OnPlayerCorpseCreated(client, corpse)

@@ -776,65 +776,79 @@ function ENT:HandleDeath()
     end
 
 	local ownerName = self:GetDisplayName()
-	local width, height = 4, 1 -- Make customizable from subclass
-	local inventory = ix.inventory.Create(width, height, os.time())
-	inventory.vars.isMonsterCorpse = true
-	corpse.ixInventory = inventory
 
-	corpse.StartSearchCorpse = function(corpse, client)
-		if (not IsValid(client)) then
+    -- TODO: Make customizable from subclass:
+	local width, height = 4, 1
+    local corpseInventoryType = "monster:corpse:" .. width .. "x" .. height
+	ix.inventory.Register(corpseInventoryType, width, height)
+
+	ix.inventory.New(0, corpseInventoryType, function(inventory)
+        inventory.vars.isMonsterCorpse = true
+
+        if (not IsValid(corpse)) then
+			local query = mysql:Delete("ix_inventories")
+				query:Where("inventory_id", inventory:GetID())
+			query:Execute()
 			return
 		end
 
-        if (not corpse.ixInventory or ix.storage.InUse(corpse.ixInventory)) then
-            return
-        end
+		corpse.ixInventory = inventory
 
-		local name = L("corpseOwnerName", client, ownerName)
-		local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
-		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+		corpse.StartSearchCorpse = function(corpse, client)
+			if (not IsValid(client)) then
+				return
+			end
 
-		ix.storage.Open(client, corpse.ixInventory, {
-			entity = corpse,
-			name = name,
-			searchText = "@searchingCorpse",
-			searchTime = searchTime
-		})
-	end
+			if (not corpse.ixInventory or ix.storage.InUse(corpse.ixInventory)) then
+				return
+			end
 
-    corpse.GetInventory = function(corpse)
-        return corpse.ixInventory
-    end
+			local name = L("corpseOwnerName", client, ownerName)
+			local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
+			local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
 
-	corpse.GetOwnerID = function(corpse)
-		return 0
-	end
+			ix.storage.Open(client, corpse.ixInventory, {
+				entity = corpse,
+				name = name,
+				searchText = "@searchingCorpse",
+				searchTime = searchTime
+			})
+		end
 
-	corpse.SetMoney = function(corpse, amount)
-		hook.Run("OnMonsterCorpseMoneyChanged", corpse, amount, corpse.ixMoney)
-		corpse.ixMoney = amount
-	end
+		corpse.GetInventory = function(corpse)
+			return corpse.ixInventory
+		end
 
-    corpse.GetMoney = function(corpse)
-        return corpse.ixMoney or 0
-    end
+		corpse.GetOwnerID = function(corpse)
+			return 0
+		end
 
-    -- TODO: Add loot based on subclass settings
-	corpse:SetMoney(math.random(300, 600))
+		corpse.SetMoney = function(corpse, amount)
+			hook.Run("OnMonsterCorpseMoneyChanged", corpse, amount, corpse.ixMoney)
+			corpse.ixMoney = amount
+		end
 
-    corpse.OnOptionSelected = function(entity, client, option, data)
-        if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
-            return
-        end
+		corpse.GetMoney = function(corpse)
+			return corpse.ixMoney or 0
+		end
 
-        if (option == L("searchCorpse", client) and corpse.StartSearchCorpse) then
-            corpse:StartSearchCorpse(client)
-            return
-        end
-    end
+		-- TODO: Add loot based on subclass settings
+		corpse:SetMoney(math.random(300, 600))
 
-	corpse:CallOnRemove("expPersistentCorpse", function(ragdoll)
-		hook.Run("OnMonsterCorpseRemoved", ragdoll)
+		corpse.OnOptionSelected = function(entity, client, option, data)
+			if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+				return
+			end
+
+			if (option == L("searchCorpse", client) and corpse.StartSearchCorpse) then
+				corpse:StartSearchCorpse(client)
+				return
+			end
+		end
+
+		corpse:CallOnRemove("expPersistentCorpse", function(ragdoll)
+			hook.Run("OnMonsterCorpseRemoved", ragdoll)
+		end)
 	end)
 
     self:Remove()

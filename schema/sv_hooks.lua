@@ -596,9 +596,6 @@ function Schema:ShouldRemoveRagdollOnDeath(client)
 	return false
 end
 
-function Schema:OnPlayerCorpseNotCreated(client)
-end
-
 function Schema:OnPlayerCorpseCreated(client, entity)
 	if (not ix.config.Get("dropItemsOnDeath", false) or not client:GetCharacter()) then
 		return
@@ -608,60 +605,72 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 	local characterInventory = character:GetInventory()
 	local width, height = characterInventory:GetSize()
 
-	local inventory = ix.inventory.Create(width, height, os.time())
-	inventory.vars.isCorpse = true
-	entity.ixInventory = inventory
+    local corpseInventoryType = "player:corpse:" .. width .. "x" .. height
+	ix.inventory.Register(corpseInventoryType, width, height)
 
-	entity.StartSearchCorpse = function(corpse, client)
-		if (not IsValid(client)) then
+	ix.inventory.New(0, corpseInventoryType, function(inventory)
+		inventory.vars.isCorpse = true
+
+        if (not IsValid(entity)) then
+			local query = mysql:Delete("ix_inventories")
+				query:Where("inventory_id", inventory:GetID())
+			query:Execute()
 			return
 		end
 
-		if (not corpse.ixInventory or ix.storage.InUse(corpse.ixInventory)) then
-			return
-		end
+		entity.ixInventory = inventory
 
-		local ownerName = CLIENT and L"someone" or L("someone", client)
-
-		if (character) then
-			local ourCharacter = client:GetCharacter()
-
-			if (ourCharacter and character and ourCharacter:DoesRecognize(character)) then
-				ownerName = character:GetName()
+		entity.StartSearchCorpse = function(corpse, client)
+			if (not IsValid(client)) then
+				return
 			end
+
+			if (not corpse.ixInventory or ix.storage.InUse(corpse.ixInventory)) then
+				return
+			end
+
+			local ownerName = CLIENT and L"someone" or L("someone", client)
+
+			if (character) then
+				local ourCharacter = client:GetCharacter()
+
+				if (ourCharacter and character and ourCharacter:DoesRecognize(character)) then
+					ownerName = character:GetName()
+				end
+			end
+
+			local name = L("corpseOwnerName", client, ownerName)
+			local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
+			local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+
+			ix.storage.Open(client, entity.ixInventory, {
+				entity = entity,
+				name = name,
+				searchText = "@searchingCorpse",
+				searchTime = searchTime
+			})
 		end
 
-		local name = L("corpseOwnerName", client, ownerName)
-		local baseTaskTime = ix.config.Get("corpseSearchTime", 1)
-		local searchTime = Schema.GetDexterityTime(client, baseTaskTime)
+		-- Used to satisfy the saving for belongings
+		entity.GetOwnerID = function(corpse)
+			return character:GetID()
+		end
 
-		ix.storage.Open(client, entity.ixInventory, {
-			entity = entity,
-			name = name,
-			searchText = "@searchingCorpse",
-			searchTime = searchTime
-		})
-	end
+		entity.GetInventory = function(corpse)
+			return corpse.ixInventory
+		end
 
-	-- Used to satisfy the saving for belongings
-	entity.GetOwnerID = function(corpse)
-		return character:GetID()
-	end
+		entity.SetMoney = function(corpse, amount)
+			hook.Run("OnCorpseMoneyChanged", corpse, amount, corpse.ixMoney)
+			corpse.ixMoney = amount
+		end
 
-	entity.GetInventory = function(corpse)
-		return corpse.ixInventory
-	end
+		entity.GetMoney = function(corpse)
+			return corpse.ixMoney or 0
+		end
 
-	entity.SetMoney = function(corpse, amount)
-		hook.Run("OnCorpseMoneyChanged", corpse, amount, corpse.ixMoney)
-		corpse.ixMoney = amount
-	end
-
-	entity.GetMoney = function(corpse)
-		return corpse.ixMoney or 0
-	end
-
-	hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
+		hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
+	end)
 end
 
 function Schema:OnPlayerCorpseFillInventory(client, corpseInventory, entity)

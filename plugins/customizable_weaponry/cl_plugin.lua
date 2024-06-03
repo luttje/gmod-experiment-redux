@@ -110,7 +110,7 @@ net.Receive("tacrp_networkweapon", function(len)
     -- the client entity may not be valid or correct instantly.
     -- (in SP, the entity will appear valid but the functions/variables will all be nil.)
     if (!IsValid(weapon) or not weapon.ArcticTacRP) then
-        local retryTimerName = "tacrpWeaponsWait" .. engine.TickCount() .. tostring({})
+        local retryTimerName = "tacrpWeaponsWait" .. engine.TickCount() .. Schema.util.GetUniqueID()
 
         local ids = {}
         for i = 1, (len - MAX_EDICT_BITS) / TacRP.Attachments_Bits do

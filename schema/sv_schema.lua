@@ -563,7 +563,7 @@ function Schema.HandlePlayerDeathCorpse(client)
 	local maxCorpses = ix.config.Get("corpseMax", 8)
 
 	if (maxCorpses == 0) then
-		hook.Run("OnPlayerCorpseNotCreated", client)
+		-- ix.util.SchemaErrorNoHalt("Not implemented! corpseMax is set to 0, no corpses will be created.")
 		return
 	end
 
@@ -690,7 +690,7 @@ function Schema.DecayEntity(entity, seconds, callback)
 	if (entity.decaying) then
 		index = entity.decaying
 	else
-		index = tostring({}) -- will be unique
+		index = Schema.util.GetUniqueID() -- will be unique
 		entity.decaying = index
 	end
 

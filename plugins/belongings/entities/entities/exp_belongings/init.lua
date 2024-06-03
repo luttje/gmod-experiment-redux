@@ -121,13 +121,20 @@ end
 function ENT:Use(activator)
 	local inventory = self:GetInventory()
 
-	if (inventory and (activator.expNextOpen or 0) < CurTime()) then
-		local character = activator:GetCharacter()
-
-		if (character) then
-			self:OpenInventory(activator)
-		end
-
-		activator.expNextOpen = CurTime() + 1
+	if (not inventory) then
+		self:RemoveWithEffect()
+		return
 	end
+
+	if ((activator.expNextOpen or 0) > CurTime()) then
+		return
+	end
+
+	local character = activator:GetCharacter()
+
+	if (character) then
+		self:OpenInventory(activator)
+	end
+
+	activator.expNextOpen = CurTime() + 1
 end

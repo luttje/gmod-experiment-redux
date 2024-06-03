@@ -126,51 +126,28 @@ function PLUGIN:RemoveIfEmpty(inventory)
 	return true
 end
 
-function PLUGIN:CreateBelongings(client, storageEntity)
-	local character = client.expCorpseCharacter or client:GetCharacter()
-	local inventory = storageEntity and storageEntity.ixInventory or nil
-	local entity = ents.Create("exp_belongings")
+function PLUGIN:CreateBelongings(corpse)
+    local inventory = corpse.ixInventory
 
-	if (not inventory) then
-		local characterInventory = character:GetInventory()
-		local width, height = characterInventory:GetSize()
+    if (not inventory) then
+        ix.util.SchemaErrorNoHaltWithStack(
+            "Attempted to create belongings for monster without existing corpse inventory\n")
+        return -- This shouldn't happen, but lets log it just in case
+    end
 
-		inventory = ix.inventory.Create(width, height, os.time())
-
-		hook.Run("OnPlayerCorpseFillInventory", client, inventory, entity)
-	elseif (storageEntity) then
-		entity:SetMoney(storageEntity:GetMoney())
-	end
-
-	entity.ixInventory = inventory
-	inventory.vars.belongingsEntity = entity
-
-	entity:SetInventory(inventory)
-	entity:SetAngles(storageEntity and storageEntity:GetAngles() or Angle(0, 0, -90))
-	entity:SetOwnerID(character:GetID())
-	entity:SetPos((storageEntity and storageEntity:GetPos() or client:GetPos()) + Vector(0, 0, 48))
-	entity:Spawn()
-end
-
-function PLUGIN:CreateBelongingsForMonster(corpse)
-	local inventory = corpse and corpse.ixInventory or nil
 	local belongings = ents.Create("exp_belongings")
 
-	if (not inventory) then
-		ix.util.SchemaErrorNoHaltWithStack(
-			"Attempted to create belongings for monster without existing corpse inventory\n")
-	elseif (corpse) then
-		belongings:SetMoney(corpse:GetMoney())
-	end
+	belongings:SetMoney(corpse:GetMoney())
 
 	belongings.ixInventory = inventory
 	inventory.vars.belongingsEntity = belongings
 
 	belongings:SetInventory(inventory)
 	belongings:SetAngles(corpse:GetAngles())
-	belongings:SetOwnerID(0)
 	belongings:SetPos(corpse:GetPos() + Vector(0, 0, 48))
-	belongings:Spawn()
+    belongings:Spawn()
+
+	return belongings
 end
 
 function PLUGIN:HandleCorpseEmpty(corpse)
