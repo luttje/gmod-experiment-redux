@@ -62,3 +62,9 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 		end
 	end
 end
+
+function PLUGIN:CanPlayerHoldObject(client, entity)
+	if (entity:GetClass() == "exp_belongings") then
+		return true
+	end
+end
