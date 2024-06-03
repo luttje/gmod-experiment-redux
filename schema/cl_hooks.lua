@@ -557,19 +557,64 @@ function Schema:HUDPaintBackground()
 end
 
 function Schema:PostDrawHUD()
-	local curTime = CurTime()
+    local curTime = CurTime()
 
-	if (self.stunEffects) then
-		for k, stunEffect in pairs(self.stunEffects) do
-			local alpha = math.Clamp((255 / stunEffect.duration) * (stunEffect.endAt - curTime), 0, 255)
+    if (self.stunEffects) then
+        for k, stunEffect in pairs(self.stunEffects) do
+            local alpha = math.Clamp((255 / stunEffect.duration) * (stunEffect.endAt - curTime), 0, 255)
 
-			if (alpha ~= 0) then
-				draw.RoundedBox(0, 0, 0, ScrW(), ScrH(), Color(255, 255, 255, alpha))
-			else
-				table.remove(self.stunEffects, k)
-			end
-		end
+            if (alpha ~= 0) then
+                draw.RoundedBox(0, 0, 0, ScrW(), ScrH(), Color(255, 255, 255, alpha))
+            else
+                table.remove(self.stunEffects, k)
+            end
+        end
+    end
+end
+
+function Schema:PostDrawInventory(inventory)
+    if (not IsValid(inventory)) then
+        return
+    end
+
+	local client = LocalPlayer()
+    local character = IsValid(client) and client:GetCharacter() or nil
+
+	if (not character) then
+		return
 	end
+
+	local menuPanel = ix.gui.menu
+
+    if (not IsValid(menuPanel) or menuPanel.bIsClosing) then
+        return
+    end
+
+	if (menuPanel:GetActiveTab() ~= "inv") then
+		return
+	end
+
+    local money = character:GetMoney()
+	local font = "ixBigFont"
+	local moneyText = ix.currency.Get(money)
+    local moneyX, moneyY = ScrW() - 64, ScrH() - 64
+
+    local moneyWidth, moneyHeight = draw.SimpleText(
+        moneyText,
+        font,
+        moneyX, moneyY,
+		ColorAlpha(ix.config.Get("color"), menuPanel.currentAlpha),
+        TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM
+	)
+
+    draw.SimpleText(
+		L"wallet" .. ":",
+        "expSmallerFont",
+        moneyX - moneyWidth - 8,
+        moneyY - (moneyHeight * .5),
+		Color(255, 255, 255, menuPanel.currentAlpha * .5),
+        TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER
+	)
 end
 
 function Schema:PopulateCharacterInfo(client, character, tooltip)
