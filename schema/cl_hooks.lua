@@ -592,30 +592,36 @@ function Schema:PopulateCharacterInfo(client, character, tooltip)
 end
 
 function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
-	local hasCashbackPerk, cashbackPerkTable = Schema.perk.GetOwned("cashback")
+    local hasCashbackPerk, cashbackPerkTable = Schema.perk.GetOwned("cashback")
 
-	if (not hasCashbackPerk) then
-		return
-	end
+    if (not hasCashbackPerk) then
+        return
+    end
 
-	if (not itemTable.price or itemTable.noBusiness) then
-		return
-	end
+    if (not itemTable.price or itemTable.noBusiness) then
+        return
+    end
 
-	-- TODO: This is a hacky way to get cashback to appear at the end of the menu, if Helix provides a way to do this, we should use it
-	local oldMenuOpen = menu.Open
+    -- TODO: This is a hacky way to get cashback to appear at the end of the menu, if Helix provides a way to do this, we should use it
+    local oldMenuOpen = menu.Open
 
-	function menu:Open(...)
-		menu:AddOption(L("cashback"), function()
-			Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
-				function()
-					net.Start("expCashbackRequest")
-					net.WriteUInt(itemTable:GetID(), 32)
-					net.SendToServer()
-				end, L("no"))
-		end):SetImage("icon16/money_delete.png")
+    function menu:Open(...)
+        menu:AddOption(L("cashback"), function()
+            Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
+                function()
+                    net.Start("expCashbackRequest")
+                    net.WriteUInt(itemTable:GetID(), 32)
+                    net.SendToServer()
+                end, L("no"))
+        end):SetImage("icon16/money_delete.png")
 
-		oldMenuOpen(self, ...)
+        oldMenuOpen(self, ...)
+    end
+end
+
+function Schema:ShouldBarDraw(info)
+	if (info.identifier == "health" and info:GetValue() < 1) then
+		return true
 	end
 end
 
