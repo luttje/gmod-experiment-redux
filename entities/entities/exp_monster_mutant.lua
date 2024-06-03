@@ -56,7 +56,7 @@ if (not SERVER) then
 				["Size"] = 1,
 				["PositionOffset"] = Vector(0, 0, 0),
 				["IsDisturbing"] = false,
-				["AngleOffset"] = Angle(math.Rand(-86.5, 86.5), math.Rand(-16, 16), math.Rand(-16, 16)),
+				["AngleOffset"] = Angle(math.Rand(-64, 64), math.Rand(-8, 8), math.Rand(-8, 8)),
 				["EyeAngles"] = false,
 				["HideMesh"] = false,
 			}
