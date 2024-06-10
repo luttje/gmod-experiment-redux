@@ -56,6 +56,10 @@ function PLUGIN:PostPlayerSay(client, chatType, message, anonymous)
     }
 
     self:PostJson("api/submit-chat-log", data, function(response)
+        if (not DEBUG_MODERATION) then
+            return
+        end
+
         ix.util.SchemaPrint("Chatlog submitted successfully.")
     end, function(message)
         ix.util.SchemaErrorNoHaltWithStack("Failed to submit chatlog: " .. message)
@@ -76,6 +80,10 @@ function PLUGIN:PlayerLoadedCharacter(client, character)
     }
 
     self:PostJson("api/submit-player-info", data, function(response)
+        if (not DEBUG_MODERATION) then
+            return
+        end
+
         ix.util.SchemaPrint("Character info submitted successfully.")
     end, function(message)
         ix.util.SchemaErrorNoHaltWithStack("Failed to submit character info: " .. message)
@@ -98,6 +106,10 @@ function PLUGIN:player_connect(data)
 	}
 
 	self:PostJson("api/submit-player-info", data, function(response)
+        if (not DEBUG_MODERATION) then
+            return
+        end
+
 		ix.util.SchemaPrint("Player info submitted successfully.")
 	end, function(message)
 		ix.util.SchemaErrorNoHalt("Failed to submit player info: " .. message)
