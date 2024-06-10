@@ -163,21 +163,21 @@ function PLUGIN:GetInfectableItems(inventory)
 end
 
 -- Remove the rotting items from their inventory and lockers
-function PLUGIN:RemoveAllInfectedItems(character, noReplication)
+function PLUGIN:RemoveAllInfectedItems(character)
 	local lockerInventory = character:GetLockerInventory()
     local inventory = character:GetInventory()
 	local removed = 0
 
 	for _, item in pairs(lockerInventory:GetItems()) do
 		if (item:GetData("lockerRot")) then
-            item:Remove(noReplication)
+            item:Remove()
 			removed = removed + 1
 		end
 	end
 
     for _, item in pairs(inventory:GetItems()) do
         if (item:GetData("lockerRot")) then
-            item:Remove(noReplication)
+            item:Remove()
             removed = removed + 1
         end
     end
@@ -271,9 +271,7 @@ function PLUGIN:OnCharacterDisconnect(client, character)
 		return
 	end
 
-	-- Remove without replication, since the player disconnected anyway and wont be in their locker inventory
-	local noReplication = true
-	self:RemoveAllInfectedItems(character, noReplication)
+	self:RemoveAllInfectedItems(character)
 
 	ix.chat.Send(nil,
 		"nemesis_ai_locker_rot_hint",

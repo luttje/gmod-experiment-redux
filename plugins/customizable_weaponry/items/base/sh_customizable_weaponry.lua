@@ -43,34 +43,7 @@ function ITEM:OnRestored()
         return
     end
 
-	local query = mysql:Select("ix_items")
-	query:Select("item_id")
-	query:Select("unique_id")
-	query:Select("data")
-	query:WhereIn("item_id", itemIds)
-	query:Callback(function(result)
-		if (not istable(result)) then
-			return
-		end
-
-		for _, storedItem in ipairs(result) do
-			local itemID = tonumber(storedItem.item_id)
-			local data = util.JSONToTable(storedItem.data or "[]")
-			local uniqueID = storedItem.unique_id
-			local itemTable = ix.item.list[uniqueID]
-
-            if (not itemTable or not itemID) then
-                ix.util.SchemaErrorNoHalt("Attached item with ID " .. itemID .. " has no item table. Unique ID: " .. uniqueID .. "\n")
-				return
-			end
-
-			local item = ix.item.New(uniqueID, itemID)
-			item.data = data or {}
-			item.invID = 0
-			ix.item.instances[itemID] = item
-		end
-	end)
-	query:Execute()
+	ix.item.LoadItemByID(itemIds)
 end
 
 ITEM.functions.DetachAttachment = {

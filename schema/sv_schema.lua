@@ -51,6 +51,11 @@ ix.log.AddType("perkTaken", function(client, ...)
 	return Format("%s lost the perk '%s'", client:Name(), arg[1])
 end, FLAG_WARNING)
 
+ix.log.AddType("playerCashbackPerk", function(client, ...)
+	local arg = { ... }
+	return Format("%s cashed in an item for %s", client:Name(), ix.currency.Get(arg[1]))
+end, FLAG_WARNING)
+
 ix.log.AddType("generatorEarn", function(client, ...)
 	local arg = { ... }
 	return Format("%s earned %s from their generator", client:Name(), ix.currency.Get(arg[1]))
