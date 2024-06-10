@@ -72,7 +72,6 @@ function ENT:Use(client)
 		end
 
 		local character = client:GetCharacter()
-		character:SetData("lockerID", inventory:GetID())
 
 		if (IsValid(client.expLockersSession)) then
 			client.expLockersSession:Remove()
@@ -136,14 +135,26 @@ end
 --- @param client Player
 --- @param callback fun(table) # The function to call when the locker inventory is ready.
 function ENT:GetOrCreateLockerInventory(client, callback)
+    if (client.expIsCreatingLockerInventory) then
+        return
+    end
+
 	local character = client:GetCharacter()
 	local lockerInventory = character:GetLockerInventory()
 	local inventoryType, inventoryTypeID = PLUGIN:GetLockerInventoryType()
 
-	if (lockerInventory) then
-		callback(lockerInventory)
-		return
-	end
+    if (lockerInventory) then
+        callback(lockerInventory)
+        return
+    end
 
-	ix.inventory.New(character:GetID(), inventoryTypeID, callback)
+	client.expIsCreatingLockerInventory = true
+
+	ix.inventory.New(character:GetID(), inventoryTypeID, function(inventory)
+		if (IsValid(client)) then
+			client.expIsCreatingLockerInventory = false
+			character:SetData("lockerID", inventory:GetID())
+			callback(inventory)
+		end
+	end)
 end
