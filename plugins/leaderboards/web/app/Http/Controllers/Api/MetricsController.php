@@ -99,11 +99,17 @@ class MetricsController extends Controller
             $characterMetric['updated_at'] = $currentTimestamp;
         }
 
-        CharacterMetric::upsert(
-            $characterMetrics,
-            uniqueBy: ['id', 'character_id', 'metric_id'],
-            update: ['value']
-        );
+        // Chunk upserting to avoid getting "Prepared statement contains too many placeholders" error
+        // TODO: Stop sending everything to fix this correctly, instead only send new metrics
+        $characterMetricChunks = array_chunk($characterMetrics, 5000);
+
+        foreach ($characterMetricChunks as $chunk) {
+            CharacterMetric::upsert(
+                $chunk,
+                uniqueBy: ['id', 'character_id', 'metric_id'],
+                update: ['value']
+            );
+        }
 
         return [
             'message' => 'Metrics submitted successfully',
