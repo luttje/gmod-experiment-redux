@@ -570,7 +570,7 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageinfo)
 		end
 	end
 
-	local itemCountToDrop = math.ceil(#candidateItems * self.rankToPercentItemsDropped)
+	local itemCountToDrop = math.floor(#candidateItems * self.rankToPercentItemsDropped)
 	local itemCountToRemove = math.max(0, #candidateItems - itemCountToDrop)
 
 	-- Lose these items forever (the rest will drop into the corpse)
@@ -581,13 +581,15 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageinfo)
 	self:ClearLockerRotNetVar(client)
 	self:SetTarget(nil)
 
-    if (IsValid(attacker) and attacker:IsPlayer()) then
+    if (IsValid(attacker) and attacker:IsPlayer() and attacker ~= client) then
         local randomTaunt = self.lockerRotCompleteTaunts[math.random(#self.lockerRotCompleteTaunts)]
         self:PlayNemesisSentences(randomTaunt, nil, attacker:GetName())
-    else
+	else
         local randomTaunt = self.lockerRotCompleteNoAttackerTaunts[math.random(#self.lockerRotCompleteNoAttackerTaunts)]
         self:PlayNemesisSentences(randomTaunt, nil, character:GetName())
     end
+
+	hook.Run("PlayerLockerRotKilled", client, attacker)
 
 	self.lockerRotEvent = nil
 end

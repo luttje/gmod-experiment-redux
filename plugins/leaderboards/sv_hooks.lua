@@ -21,7 +21,7 @@ function PLUGIN:PlayerPerkBought(client, perkTable)
     self:IncrementMetric(client, "Bolts Spent", perkTable.price)
 end
 
-function PLUGIN:PlayerDeath(client, inflictor, attacker)
+function PLUGIN:PlayerLockerRotKilled(client, attacker)
     if (not IsValid(attacker) or not attacker:IsPlayer()) then
         return
     end
@@ -29,17 +29,6 @@ function PLUGIN:PlayerDeath(client, inflictor, attacker)
     if (client == attacker) then
         return
     end
-
-    local nemesisAiPlugin = ix.plugin.Get("nemesis_ai")
-    local lockerRotEvent = nemesisAiPlugin:GetLockerRotEvent()
-
-    if (not lockerRotEvent) then
-        return
-    end
-
-	if (lockerRotEvent.targetCharacter ~= client:GetCharacter()) then
-		return
-	end
 
 	self:IncrementMetric(attacker, "Locker Rot Kills", 1)
 end

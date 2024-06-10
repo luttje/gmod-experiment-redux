@@ -104,11 +104,53 @@ function PLUGIN:OnStoragePanelSetup(panel, storageInventoryPanel, localInventory
 	lockerRotInfo:SizeToChildren(false, true)
     lockerRotInfo:SetX(storageInventoryPanel:GetX())
 	lockerRotInfo:SetY(storageInventoryPanel:GetY() - lockerRotInfo:GetTall() - 16)
+end
 
-    -- lockerRotInfo.Paint = function(this, w, h)
-    --     surface.SetDrawColor(255, 0, 0, 200)
-    --     surface.DrawRect(0, 0, w, h)
+-- Draw location to locker with anti-virus (if this player has a locker rot event)
+function PLUGIN:DrawLockerRotAntiVirusIfNeeded()
+    local client = LocalPlayer()
 
-	-- 	draw.SimpleText("Some items in this locker are rotting!", "ixSmallTitleFont", w * 0.5, h * 0.5, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-	-- end
+    if (not IsValid(client)) then
+        return
+    end
+
+    local lockerRotAntiVirusRevealTime = client:GetCharacterNetVar("lockerRotAntiVirusRevealTime")
+
+	if (lockerRotAntiVirusRevealTime and lockerRotAntiVirusRevealTime > CurTime()) then
+		local timeRemaining = lockerRotAntiVirusRevealTime - CurTime()
+
+		Schema.draw.DrawLabeledValue("Time until locker with anti-virus is revealed to you:", string.NiceTime(math.max(1, math.ceil(timeRemaining))))
+	end
+
+    local lockerRotAntiVirusPosition = client:GetCharacterNetVar("lockerRotAntiVirusPosition")
+    local lockerRotAntiVirusTime = client:GetCharacterNetVar("lockerRotAntiVirusTime")
+
+    if (not lockerRotAntiVirusPosition or not lockerRotAntiVirusTime) then
+        return
+    end
+
+	-- Draw the symbol to the position of the locker
+    local position = lockerRotAntiVirusPosition:ToScreen()
+
+	if (position.visible) then
+		local size = 32
+		local x, y = position.x - size * 0.5, position.y - size * 0.5
+
+		surface.SetDrawColor(ColorAlpha(color_white, 255 * math.abs(math.sin(CurTime()))))
+		surface.SetMaterial(self.lockerRotAntiVirusSymbol)
+		surface.DrawTexturedRect(x, y, size, size)
+	end
+
+	-- Draw the time remaining to reach the locker
+	local timeRemaining = lockerRotAntiVirusTime - CurTime()
+    Schema.draw.DrawLabeledValue("Time to reach locker with anti-virus:", string.NiceTime(math.max(1, math.ceil(timeRemaining))))
+end
+
+function PLUGIN:PaintLockerRotOverItemIcon(itemIcon, itemTable, width, height)
+	local margin = 16
+    local size = math.min(width, height, 64) - margin
+
+	surface.SetDrawColor(255, 255, 255, 255)
+	surface.SetMaterial(self.lockerRotIcon)
+	surface.DrawTexturedRect((width * .5) - (size * .5), (height * .5) - (size * .5), size, size)
 end
