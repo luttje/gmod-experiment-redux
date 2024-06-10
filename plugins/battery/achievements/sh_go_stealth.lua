@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ACHIEVEMENT = ACHIEVEMENT
 
 ACHIEVEMENT.name = "Go Stealth"

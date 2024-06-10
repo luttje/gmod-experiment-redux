@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.name = "Stealth Cammo"
