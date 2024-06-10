@@ -20,14 +20,10 @@ function ENT:Upgrade(client, nextUpgrade)
         error("Generator is missing upgrades table!")
     end
 
+	local character = client:GetCharacter()
     local price = nextUpgrade.price
-	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
 
-	if (hasMercantilePerk) then
-		price = price * mercantilePerkTable.priceModifier
-	end
-
-	if (not client:GetCharacter():HasMoney(price)) then
+	if (not character:HasMoney(price)) then
 		client:Notify("You can not afford this upgrade!")
 		return
 	end
@@ -45,8 +41,7 @@ function ENT:Upgrade(client, nextUpgrade)
 		return
 	end
 
-	client:GetCharacter():TakeMoney(price)
-
+	character:TakeMoney(price)
 	self:SetUpgrades(self:GetUpgrades() + 1)
 
 	local itemID = self.expItemID
@@ -59,6 +54,16 @@ function ENT:Upgrade(client, nextUpgrade)
 	self:EmitSound("items/suitchargeok1.wav", 75)
 
 	client:Notify("You have successfully upgraded the generator.")
+
+	local hasMercantilePerk, mercantilePerkTable = Schema.perk.GetOwned("mercantile", client)
+
+	if (hasMercantilePerk) then
+		local rebate = price * mercantilePerkTable.priceRebate
+
+		if (rebate > 0) then
+			character:GiveMoney(rebate)
+		end
+	end
 end
 
 function ENT:SetupGenerator(client, item)
