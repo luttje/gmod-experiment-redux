@@ -120,9 +120,25 @@ ITEM.functions.split = {
                     ix.item.Spawn(itemUniqueID, client, nil, angle_zero, stackData)
                 end
 
-				local inventory = ix.inventory.Get(item.invID)
+                local inventory = ix.inventory.Get(item.invID)
+                local receivers = nil
 
-				item:SetData("stacks", stackedCount, inventory and ix.inventory.Get(item.invID):GetReceivers() or nil)
+				-- World inventories don't have receivers (they don't even have the GetReceivers method)
+                if (inventory and inventory:GetID() > 0) then
+					if (inventory.GetReceivers) then
+						receivers = inventory:GetReceivers()
+                    else
+                        -- https://github.com/luttje/gmod-experiment-redux/issues/114
+                        -- Shouldn't happen anymore, but leaving it here for a while just in case.
+						-- TODO: Remove after 10-7-2024
+                        ix.util.SchemaError(
+                            "(Debugging) Inventory doesn't have a GetReceivers method, id of inventory: "
+                            .. tostring(item.invID)
+						)
+					end
+				end
+
+				item:SetData("stacks", stackedCount, receivers)
 			end,
             "1"
 		)
