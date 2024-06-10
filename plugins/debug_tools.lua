@@ -10,11 +10,11 @@ ix.config.Add(
 	"Welcome to Experiment Redux! You are part of the Beta Test. "
 	.. "Please report bugs @ https://experiment.games/issues "
 	.. "\nThanks for your help and patience.",
-    "Message to display at an interval to signal that the server is being tested.",
-    nil,
+	"Message to display at an interval to signal that the server is being tested.",
+	nil,
 	{
 		category = "Server"
-    }
+	}
 )
 
 if (SERVER) then
@@ -70,19 +70,71 @@ do
 
 	COMMAND.superAdminOnly = true
 
-    function COMMAND:OnRun(client, pattern)
-        local items = ix.item.list
+	function COMMAND:OnRun(client, pattern)
+		local items = ix.item.list
 		local count = 0
 
-        for _, item in pairs(items) do
-            if (item.uniqueID:match(pattern)) then
-                client:GetCharacter():GetInventory():Add(item.uniqueID)
+		for _, item in pairs(items) do
+			if (item.uniqueID:match(pattern)) then
+				client:GetCharacter():GetInventory():Add(item.uniqueID)
 				count = count + 1
-            end
-        end
+			end
+		end
 
 		client:Notify("You have been given " .. count .. " items that match the pattern '" .. pattern .. "'.")
 	end
 
 	ix.command.Add("CharGiveAllItems", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Query the database for the item with the specified ID."
+	COMMAND.arguments = {
+		ix.type.number,
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, itemID)
+		-- Display the item as it exists in ix.item.instances,
+		-- Also query the database to show what item information exists on it
+		-- Also list the inventories it is a part of.
+		-- Take into account that any can be nil (this is for debugging)
+		local item = ix.item.instances[itemID]
+
+		if (item) then
+			client:Notify("ix.item.instances found!")
+			PrintTable(item)
+		end
+
+		local query = mysql:Select("ix_items")
+		query:Select("item_id")
+		query:Select("unique_id")
+		query:Select("data")
+		query:Select("inventory_id")
+		query:Select("character_id")
+		query:Select("player_id")
+		query:Select("x")
+		query:Select("y")
+		query:Select("data")
+		query:Where("item_id", itemID)
+		query:Callback(function(result, status)
+			if (istable(result)) then
+				if (#result > 0) then
+					client:Notify("Query result:")
+					PrintTable(result)
+				else
+					client:Notify("No results found.")
+				end
+			else
+				client:Notify("Query failed.")
+			end
+		end)
+
+		query:Execute()
+	end
+
+	ix.command.Add("DebugItemInfo", COMMAND)
 end
