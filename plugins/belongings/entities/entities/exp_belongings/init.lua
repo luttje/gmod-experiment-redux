@@ -104,11 +104,11 @@ function ENT:OpenInventory(activator)
 		entity = self,
 		searchTime = searchTime,
 		data = { money = self:GetMoney() },
-		OnPlayerOpen = function()
+		OnPlayerOpen = function(activator)
 			hook.Run("PlayerOpenedBelongings", activator, self, inventory)
 			PLUGIN:RemoveIfEmpty(inventory)
 		end,
-		OnPlayerClose = function()
+		OnPlayerClose = function(activator)
 			hook.Run("PlayerClosedBelongings", activator, self, inventory)
 			PLUGIN:RemoveIfEmpty(inventory)
 			ix.log.Add(activator, "closeContainer", name, inventory:GetID())

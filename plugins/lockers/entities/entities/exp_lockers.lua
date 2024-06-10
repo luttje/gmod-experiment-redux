@@ -107,10 +107,10 @@ function ENT:Use(client)
 				data = {
 					money = character:GetData("lockersMoney", 0)
 				},
-				OnPlayerOpen = function()
+				OnPlayerOpen = function(client)
 					hook.Run("OnPlayerLockerOpened", client, self)
 				end,
-				OnPlayerClose = function()
+				OnPlayerClose = function(client)
                     hook.Run("OnPlayerLockerClosed", client, self)
 
                     if (IsValid(session)) then

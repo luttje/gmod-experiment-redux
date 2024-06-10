@@ -123,7 +123,7 @@ function Schema:PlayerDisconnected(client)
 			jitVersionNum = jit.version_num,
 			steamID = tostring(client:SteamID()),
 			steamID64 = tostring(client:SteamID64()),
-			steamName = tostring(client:SteamName()),
+			Name = tostring(client:Name()),
 		}
 		ix.util.SchemaErrorNoHaltWithStack(
 			"Player disconnected (wiki bug/issue validation): "

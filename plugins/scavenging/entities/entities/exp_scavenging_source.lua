@@ -125,14 +125,71 @@ if (SERVER) then
 			searchTime = searchTime,
 			searchText = "Scavenging...",
 			bMultipleUsers = true,
-			OnPlayerOpen = function()
+			OnPlayerOpen = function(client)
+				if (not IsValid(activator) or not IsValid(client) or not inventory or not inventory.GetID) then
+					-- See comment below
+					return
+				end
+
+				ix.log.Add(client, "openContainer", name, inventory:GetID())
 			end,
-			OnPlayerClose = function()
-				ix.log.Add(activator, "closeContainer", name, inventory:GetID())
+			OnPlayerClose = function(client)
+				if (not IsValid(activator) or not IsValid(client) or not inventory or not inventory.GetID) then
+					--[[
+					Issue: https://github.com/luttje/gmod-experiment-redux/issues/115
+					This seems to happen when not staring at the scavenging source for long enough (1) AND when closing it normally (2):
+
+					1.
+						[LOG] Dmitri Nicholov opened the 'A bunch of junk' #19 container.
+
+						[ERROR] gamemodes/helix/gamemode/core/libs/sh_character.lua:1227: Tried to use a NULL entity!
+						1. SteamName - [C]:-1
+						2. Name - gamemodes/helix/gamemode/core/libs/sh_character.lua:1227
+							3. text - gamemodes/helix/plugins/containers/sh_plugin.lua:218
+							4. Parse - gamemodes/helix/gamemode/core/libs/sh_log.lua:74
+							5. Add - gamemodes/helix/gamemode/core/libs/sh_log.lua:101
+							6. OnPlayerClose - gamemodes/experiment-redux/plugins/scavenging/entities/entities/exp_scavenging_source.lua:131
+								7. RemoveReceiver - gamemodes/helix/gamemode/core/libs/sh_storage.lua:202
+								8. onCancel - gamemodes/helix/gamemode/core/libs/sh_storage.lua:251
+								9. unknown - gamemodes/helix/gamemode/core/meta/sh_player.lua:146
+
+						Timer Failed! [ixStare562264568][@gamemodes/helix/gamemode/core/meta/sh_player.lua (line 137)]
+
+					2.
+						[LOG] Boris Petrov opened the 'A bunch of junk' #25 container.
+						[LOG] Boris Petrov ran 'Scrap' on item 'Metal Can' (#2480)
+						[LOG] Boris Petrov has gained a 'Scrap' #2901.
+						[LOG] Boris Petrov ran 'Scrap' on item 'Metal Can' (#2512)
+						[LOG] Boris Petrov has gained a 'Scrap' #2902.
+
+						[ERROR] gamemodes/helix/gamemode/core/libs/sh_character.lua:1227: Tried to use a NULL entity!
+						1. SteamName - [C]:-1
+						2. Name - gamemodes/helix/gamemode/core/libs/sh_character.lua:1227
+							3. text - gamemodes/helix/plugins/containers/sh_plugin.lua:218
+							4. Parse - gamemodes/helix/gamemode/core/libs/sh_log.lua:74
+							5. Add - gamemodes/helix/gamemode/core/libs/sh_log.lua:101
+							6. OnPlayerClose - gamemodes/experiment-redux/plugins/scavenging/entities/entities/exp_scavenging_source.lua:131
+								7. RemoveReceiver - gamemodes/helix/gamemode/core/libs/sh_storage.lua:202
+								8. func - gamemodes/helix/gamemode/core/libs/sh_storage.lua:279
+								9. unknown - lua/includes/extensions/net.lua:38
+
+					I see no reason why it should happen, except that perhaps somehow Lua doesn't keep a reference to the 'activator' from
+					the ENT:Use function. This debugging code should help me figure out what's going on.
+					--]]
+					ix.util.SchemaError(
+						"(Debugging) Clogsin scavenging point that has no activator, inventory or inventory.GetID.\n"
+						.. "Activator: " .. tostring(activator) .. "\n"
+						.. "Client: " .. tostring(client) .. "\n"
+						.. "Inventory: " .. tostring(inventory) .. "\n"
+						.. "Inventory.GetID: " .. tostring(inventory and inventory.GetID or nil) .. "\n"
+					)
+
+					return
+				end
+
+				ix.log.Add(client, "closeContainer", name, inventory:GetID())
 			end
 		})
-
-		ix.log.Add(activator, "openContainer", name, inventory:GetID())
 	end
 
 	function ENT:Use(activator)
