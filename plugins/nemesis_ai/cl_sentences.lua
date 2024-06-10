@@ -117,8 +117,10 @@ function PLUGIN:DrawLockerRotAntiVirusIfNeeded()
 end
 
 function PLUGIN:PaintLockerRotOverItemIcon(itemIcon, itemTable, width, height)
-	local margin = 8
+	local margin = 16
+    local size = math.min(width, height) - margin
+
 	surface.SetDrawColor(255, 255, 255, 255)
 	surface.SetMaterial(self.lockerRotIcon)
-	surface.DrawTexturedRect(margin, margin, width - (margin * 2), height - (margin * 2))
+	surface.DrawTexturedRect((width * .5) - (size * .5), (height * .5) - (size * .5), size, size)
 end
