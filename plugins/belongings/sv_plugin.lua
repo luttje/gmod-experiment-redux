@@ -111,7 +111,26 @@ function PLUGIN:RemoveIfEmpty(inventory)
 
 	entity:RemoveWithEffect()
 
-	ix.storage.Close(inventory)
+    if (inventory.storageInfo) then
+		--[[
+			TODO: Figure out why this happens. For now it'll just prevent this error:
+
+			[ERROR] gamemodes/helix/gamemode/core/libs/sh_storage.lua:268: attempt to index field 'storageInfo' (a nil value)
+			Close - gamemodes/helix/gamemode/core/libs/sh_storage.lua:268
+			RemoveIfEmpty - gamemodes/experiment-redux/plugins/belongings/sv_plugin.lua:114
+			SaveBelongings - gamemodes/experiment-redux/plugins/belongings/sv_plugin.lua:54
+			v - gamemodes/experiment-redux/plugins/belongings/sv_hooks.lua:4
+			Run - gamemodes/helix/gamemode/core/libs/sh_plugin.lua:347
+			unknown - gamemodes/helix/gamemode/core/sh_data.lua:116
+
+			[ERROR] Warning! A net message (ixStorageExpired) is already started! Discarding in favor of the new message! (ixNetVarDelete)
+			ClearNetVars - gamemodes/helix/gamemode/core/libs/sv_networking.lua:191
+			unknown - gamemodes/helix/gamemode/core/hooks/sh_hooks.lua:232
+
+			On SERVERSIDE, spotted at 2024-06-10 14:40
+		--]]
+		ix.storage.Close(inventory)
+	end
 
 	local index = inventory:GetID()
 
