@@ -115,6 +115,7 @@ class MetricsController extends Controller
                 // Fail by ignoring and just error logging
                 Log::error('Failed to upsert character metrics', [
                     'error' => $e->getMessage(),
+                    'chunk' => $chunk,
                 ]);
             }
         }
