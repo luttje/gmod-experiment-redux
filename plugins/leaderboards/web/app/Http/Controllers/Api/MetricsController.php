@@ -85,7 +85,10 @@ class MetricsController extends Controller
             $characterMetric['character_id'] = metricValueOrNull($characterMetric, 'character_id');
 
             // If the character was removed by the player, we should not store the metric
-            if ($characterMetric['character_id'] === null) {
+            if ($characterMetric['character_id'] === null || !$epoch->characters->contains($characterMetric['character_id'])) {
+                Log::error('Character metric without character_id', [
+                    'character_metric' => $characterMetric,
+                ]);
                 unset($characterMetrics[$key]);
                 continue;
             }
