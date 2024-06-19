@@ -10,6 +10,7 @@ use App\Models\Epoch;
 use App\Models\Metric;
 use App\Models\Player;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class MetricsController extends Controller
 {
@@ -104,11 +105,18 @@ class MetricsController extends Controller
         $characterMetricChunks = array_chunk($characterMetrics, 5000);
 
         foreach ($characterMetricChunks as $chunk) {
-            CharacterMetric::upsert(
-                $chunk,
-                uniqueBy: ['id', 'character_id', 'metric_id'],
-                update: ['value']
-            );
+            try {
+                CharacterMetric::upsert(
+                    $chunk,
+                    uniqueBy: ['id', 'character_id', 'metric_id'],
+                    update: ['value']
+                );
+            } catch (\Exception $e) {
+                // Fail by ignoring and just error logging
+                Log::error('Failed to upsert character metrics', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         Metric::precacheLeaderboards();
