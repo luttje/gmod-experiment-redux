@@ -18,7 +18,8 @@
         <li>
             @php
             $character = $characterScore['character'];
-            $score = $characterScore['value'];
+            $player = $character['player'];
+            $score = $characterScore['sum'];
             $rowColorClasses = 'bg-slate-800 p-4 hover:bg-slate-900 text-slate-400';
 
             if ($loop->iteration === 1) {
@@ -34,10 +35,10 @@
                     {{ $loop->iteration }}
                 </span>
                 <span class="text-xl">
-                    {{ $character->name }}
+                    {{ $character['name'] }}
                 </span>
                 <span class="text-xl flex-1 text-slate-600 group-hover:text-slate-400">
-                    {{ $character->player->name }}
+                    {{ $player['steam_name'] }}
                 </span>
                 <span class="text-xl">
                     {{ $score }}

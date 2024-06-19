@@ -37,6 +37,15 @@
 
     <main class="container mx-auto p-6 px-8 flex-1">
         {{ $slot }}
+
+        @isset($lastUpdatedAt)
+        <div class="text-center italic">
+            <div class="container mx-auto p-4 px-8 text-xs flex flex-col gap-1">
+                <p>These leaderboards were last updated <strong>{{ $lastUpdatedAt->diffForHumans() }}</strong>.</p>
+                <p>They are updated every night at midnight UTC.</p>
+            </div>
+        </div>
+        @endisset
     </main>
 
     <footer class="bg-slate-900 text-center">

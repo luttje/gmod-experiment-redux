@@ -35,32 +35,111 @@ class Metric extends Model
      */
 
     /**
-     * Sums the latest metrics for each character to get the overall leader
+     * Will pre-calculate the leaderboards for each metric the current epoch. Easily accessible will be:
+     * - The leader for each metric
+     * - The order of all characters for each metric
+     * - The leader for the overall leaderboard
+     * - The order of all characters for the overall leaderboard
+     *
+     * This will be done by calculating the sum of all metrics for each player, character and alliance.
+     * The leaderboards will be stored in cache and will be used to display the leaderboards on the website.
      */
-    public static function getOverallScores(Collection $metrics)
+    public static function precacheLeaderboards()
     {
-        $overallLeaders = $metrics->flatMap
-            ->characters
-            ->groupBy('id')
-            ->map(function ($characters) {
-                return [
-                    'character' => $characters->first(),
-                    'value' => $characters->sum('pivot.value'),
+        $characterMetrics = CharacterMetric::all();
+
+        $overallScores = [];
+        $metricScores = [];
+
+        // Get the sum of all metrics for each character
+        foreach ($characterMetrics as $characterMetric) {
+            $characterId = $characterMetric->character_id;
+            $metricId = $characterMetric->metric_id;
+            $value = $characterMetric->value;
+
+            // Add the value to the overall leaderboard
+            if (!isset($overallScores[$characterId])) {
+                $overallScores[$characterId] = 0;
+            }
+
+            $weight = 1; // TODO: Weigh the metrics based on what we find important
+            $overallScores[$characterId] += $value * $weight;
+
+            // Add the value to the metric leaderboard
+            if (!isset($metricScores[$metricId])) {
+                $metricScores[$metricId] = [];
+            }
+
+            if (!isset($metricScores[$metricId][$characterId])) {
+                $metricScores[$metricId][$characterId] = 0;
+            }
+
+            $metricScores[$metricId][$characterId] += $value;
+        }
+
+        $now = now();
+
+        // Sort the scores for the overall and metric leaderboards, mapping
+        // character and player data for easy access
+        arsort($overallScores);
+
+        foreach ($metricScores as $metricId => $scores) {
+            arsort($scores);
+
+            $characterScores = collect($scores);
+            $leaderScore = $characterScores->first();
+            $leaderId = $characterScores->keys()->first();
+
+            if ($leaderScore) {
+                $character = Character::with('player')->find($leaderId);
+                $leader = [
+                    'character' => $character->toArray(),
+                    'player' => $character->player->toArray(),
+                    'sum' => $leaderScore,
                 ];
-            })
-            ->sortByDesc('value')
-            ->values();
+            }
 
-        return $overallLeaders;
-    }
+            $metricScores[$metricId] = [
+                'id' => $metricId,
+                'name' => Metric::find($metricId)->name,
+                'updatedAt' => $now,
+                'scores' => $characterScores->mapWithKeys(function ($value, $key) {
+                    $character = Character::with('player')->find($key);
+                    return [
+                        $key => [
+                            'character' => $character->toArray(),
+                            'player' => $character->player->toArray(),
+                            'sum' => $value,
+                        ],
+                    ];
+                })->toArray(),
+                'leader' => $leader,
+            ];
+        }
 
-    /**
-     * Gets the latest metric for each character
-     */
-    public static function withEagerRelations()
-    {
-        return Metric::with([
-            'characters.player'
-        ])->get();
+        $overallLeaderId = $overallScores ? key($overallScores) : null;
+        $overallLeader = $overallLeaderId ? [
+            'character' => Character::find($overallLeaderId)->toArray(),
+            'player' => Character::find($overallLeaderId)->player->toArray(),
+            'value' => $overallScores[$overallLeaderId],
+        ] : null;
+
+        $overallScores = collect($overallScores)->mapWithKeys(function ($value, $key) {
+            $character = Character::with('player')->find($key);
+            return [
+                $key => [
+                    'character' => $character->toArray(),
+                    'player' => $character->player->toArray(),
+                    'sum' => $value,
+                ],
+            ];
+        })->toArray();
+
+        // Store for quick access
+        $overallScores['updatedAt'] = $now;
+        $metricScores['updatedAt'] = $now;
+        cache()->forever('overallScores', $overallScores);
+        cache()->forever('metricScores', $metricScores);
+        cache()->forever('overallLeader', $overallLeader);
     }
 }

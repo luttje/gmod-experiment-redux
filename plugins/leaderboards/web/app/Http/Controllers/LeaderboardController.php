@@ -4,67 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Models\Metric;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 
 class LeaderboardController extends Controller
 {
     public function index()
     {
-        $metrics = Metric::withEagerRelations();
+        $metrics = cache('metricScores');
 
-        if ($metrics->isEmpty()) {
+        if (empty($metrics)) {
             return view('leaderboards.no-data');
         }
 
-        // TODO: How many queries are being run here? Do we need to run all of them to get just the overall leader?
-        $overallLeader = Metric::getOverallScores($metrics)->first();
+        $overallLeader = cache('overallLeader');
 
-        $metrics = $metrics->each(function ($metric) {
-            $leader = $metric->characters->groupBy('id')->map(function ($characters) {
-                // Because we're grouped by character ID, we can just grab the first character to get the character name.
-                $character = $characters->first();
-
-                return [
-                    'name' => $character->name,
-                    'player' => $character->player,
-                    'sum' => $characters->sum('pivot.value'),
-                ];
-            })->sortByDesc('value')->first();
-
-            if (isset($leader['name'])) {
-                $metric->leader = (object) $leader;
-            }
-        });
+        View::share('lastUpdatedAt', $metrics['updatedAt']);
+        unset($metrics['updatedAt']);
 
         return view('leaderboards.index', compact('metrics', 'overallLeader'));
     }
 
     public function overall()
     {
-        $metrics = Metric::withEagerRelations();
+        $characterScores = cache('overallScores');
 
-        $overallLeaders = Metric::getOverallScores($metrics);
-        $characterScores = $overallLeaders->map(function ($leader) {
-            return [
-                'character' => $leader['character'],
-                'value' => $leader['value'],
-            ];
-        });
+        View::share('lastUpdatedAt', $characterScores['updatedAt']);
+        unset($characterScores['updatedAt']);
 
         return view('leaderboards.overall', compact('characterScores'));
     }
 
     public function show(Metric $metric)
     {
-        $metric->load([
-            'characters.player',
-        ]);
+        $metrics = cache('metricScores');
+        $characterScores = $metrics[$metric->id];
 
-        $characterScores = $metric->characters->groupBy('id')->map(function ($characters) {
-            return [
-                'character' => $characters->first(),
-                'value' => $characters->sum('pivot.value'),
-            ];
-        })->sortByDesc('value')->values();
+        if (empty($characterScores)) {
+            return view('leaderboards.no-data');
+        }
+
+        $characterScores = $characterScores['scores'];
+        View::share('lastUpdatedAt', $metrics['updatedAt']);
 
         return view('leaderboards.show', compact('metric', 'characterScores'));
     }

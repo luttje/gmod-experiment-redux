@@ -21,8 +21,8 @@
                 <p class="flex flex-row gap-4 p-4 bg-amber-400 flex-1 text-black group-hover:bg-amber-200 transition duration-200">
                     <span class="font-normal">Leader:</span>
                     <span class="flex-1 text-center">
-                        <span class="font-bold">{{ $leadingCharacter['character']->name }}</span>
-                        <span class="text-amber-600">({{ $leadingCharacter['character']->player->steam_name }})</span>
+                        <span class="font-bold">{{ $leadingCharacter['character']['name'] }}</span>
+                        <span class="text-amber-600">({{ $leadingCharacter['player']['steam_name'] }})</span>
                     </span>
                     <span>{{ $leadingCharacter['value'] }}</span>
                 </p>
@@ -32,23 +32,23 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach ($metrics as $metric)
-                <a href="{{ route('leaderboards.show', $metric) }}" class="group flex flex-col overflow-clip rounded bg-slate-800 hover:bg-slate-900 transition duration-200">
+                <a href="{{ route('leaderboards.show', $metric['id']) }}" class="group flex flex-col overflow-clip rounded bg-slate-800 hover:bg-slate-900 transition duration-200">
                     <h3 class="text-xl text-center font-bold p-4">
-                        {{ $metric->name }}
+                        {{ $metric['name'] }}
                     </h3>
 
                     @php
-                    $leadingCharacter = $metric->leader;
+                    $leadingCharacter = $metric['leader'];
                     @endphp
 
                     @if ($leadingCharacter)
                     <p class="flex flex-row gap-4 p-4 bg-amber-400 flex-1 text-black group-hover:bg-amber-200 transition duration-200">
                         <span class="font-normal">Leader:</span>
                         <span class="flex-1 text-center">
-                            <span class="font-bold">{{ $leadingCharacter->name }}</span>
-                            <span class="text-amber-600">({{ $leadingCharacter->player->steam_name }})</span>
+                            <span class="font-bold">{{ $leadingCharacter['character']['name'] }}</span>
+                            <span class="text-amber-600">({{ $leadingCharacter['player']['steam_name'] }})</span>
                         </span>
-                        <span>{{ $leadingCharacter->sum }}</span>
+                        <span>{{ $leadingCharacter['sum'] }}</span>
                     </p>
                     @endif
                 </a>

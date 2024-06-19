@@ -111,6 +111,8 @@ class MetricsController extends Controller
             );
         }
 
+        Metric::precacheLeaderboards();
+
         return [
             'message' => 'Metrics submitted successfully',
         ];
