@@ -80,9 +80,15 @@ class MetricsController extends Controller
             return isset($characterMetric[$key]) ? $characterMetric[$key] : null;
         }
 
-        foreach ($characterMetrics as &$characterMetric) {
+        foreach ($characterMetrics as $key => &$characterMetric) {
             // Make sure every metric has the same columns
             $characterMetric['character_id'] = metricValueOrNull($characterMetric, 'character_id');
+
+            // If the character was removed by the player, we should not store the metric
+            if ($characterMetric['character_id'] === null) {
+                unset($characterMetrics[$key]);
+                continue;
+            }
 
             // A character may not have an alliance, in which case this wont be set
             $characterMetric['alliance_id'] = metricValueOrNull($characterMetric, 'alliance_id');
