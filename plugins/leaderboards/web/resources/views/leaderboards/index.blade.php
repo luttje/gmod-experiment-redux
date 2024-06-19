@@ -50,6 +50,10 @@
                         </span>
                         <span>{{ $leadingCharacter['sum'] }}</span>
                     </p>
+                    @else
+                    <p class="flex flex-row gap-4 p-4 bg-slate-800 flex-1 text-slate-400 font-normal text-xs justify-center items-center">
+                        No characters have scored in this leaderboard yet.
+                    </p>
                     @endif
                 </a>
             @endforeach

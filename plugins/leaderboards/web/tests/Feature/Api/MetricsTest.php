@@ -42,6 +42,7 @@ class MetricsTest extends TestCase
             'metrics' => [
                 ['id' => 1, 'name' => 'Metric 1', 'description' => 'Metric 1 description'],
                 ['id' => 2, 'name' => 'Metric 2', 'description' => 'Metric 2 description'],
+                ['id' => 3, 'name' => 'Metric Empty', 'description' => 'Metric without any scores'],
             ],
         ], [
             'X-Api-Secret' => config('app.api_secret'),

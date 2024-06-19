@@ -14,7 +14,7 @@
         </span>
     </div>
     <ol class="flex flex-col gap-2">
-        @foreach ($characterScores as $characterScore)
+        @forelse ($characterScores as $characterScore)
         <li>
             @php
             $character = $characterScore['character'];
@@ -45,6 +45,20 @@
                 </span>
             </div>
         </li>
-        @endforeach
+        @empty
+        <li>
+            <div class="flex flex-row gap-4 items-center rounded bg-slate-800 p-4 text-slate-400">
+                <span class="flex w-10 shrink-0 text-xl">
+                </span>
+                <span class="text-xl">
+                    No characters have scored in this leaderboard yet.
+                </span>
+                <span class="text-xl flex-1 text-slate-600">
+                </span>
+                <span class="text-xl">
+                </span>
+            </div>
+        </li>
+        @endforelse
     </ol>
 </section>

@@ -46,7 +46,11 @@ class Metric extends Model
      */
     public static function precacheLeaderboards()
     {
-        $characterMetrics = CharacterMetric::all();
+        $characterMetrics = CharacterMetric::with([
+            'character',
+            'character.player',
+            'metric',
+        ])->get();
 
         $overallScores = [];
         $metricScores = [];
@@ -77,6 +81,17 @@ class Metric extends Model
             $metricScores[$metricId][$characterId] += $value;
         }
 
+        // Add any empty metrics to the metric leaderboard
+        $metrics = Metric::all();
+
+        foreach ($metrics as $metric) {
+            $metricId = $metric->id;
+
+            if (!isset($metricScores[$metricId])) {
+                $metricScores[$metricId] = [];
+            }
+        }
+
         $now = now();
 
         // Sort the scores for the overall and metric leaderboards, mapping
@@ -97,6 +112,8 @@ class Metric extends Model
                     'player' => $character->player->toArray(),
                     'sum' => $leaderScore,
                 ];
+            } else {
+                $leader = null;
             }
 
             $metricScores[$metricId] = [
