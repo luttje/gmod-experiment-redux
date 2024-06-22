@@ -1,4 +1,4 @@
-@include('leaderboards.partials.epochs')
+@include('components.epochs')
 
 <section class="rounded bg-slate-700 p-4 mb-4 flex flex-col gap-2 font-bold">
     <div class="flex flex-row gap-4 items-center rounded bg-slate-900 p-4 text-slate-400">

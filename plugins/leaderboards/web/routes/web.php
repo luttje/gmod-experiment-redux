@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\LeaderboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,5 +13,16 @@ Route::get('/leaderboards/historic/{metric}/{epoch?}', [LeaderboardController::c
 Route::resource('/leaderboards', LeaderboardController::class)
     ->except(['index'])
     ->parameter('leaderboards', 'metric');
+
+Route::get('/characters/{character}/claim-rewards', [CharacterController::class, 'claimRewards'])->name('characters.claim-rewards');
+Route::post('/characters/{character}/claim-rewards', [CharacterController::class, 'confirmClaimRewards'])->name('characters.claim-rewards');
+
+Route::resource('/characters', CharacterController::class)
+    ->only(['index'])
+    ->middleware('auth');
+
+Route::get('/login', function () {
+    return redirect()->route('leaderboards.index');
+})->name('login');
 
 require __DIR__.'/auth.php';

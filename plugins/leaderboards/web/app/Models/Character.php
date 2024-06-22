@@ -15,6 +15,12 @@ class Character extends Model
      * Relationships
      */
 
+    public function characterRewards()
+    {
+        return $this->hasMany(CharacterReward::class)
+            ->with('character');
+    }
+
     public function player()
     {
         return $this->belongsTo(Player::class, 'steam_id', 'steam_id');

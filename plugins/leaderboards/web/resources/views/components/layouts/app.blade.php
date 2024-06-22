@@ -49,6 +49,8 @@
         @endisset
     </main>
 
+    @include('sweetalert::alert')
+
     <footer class="bg-slate-900 text-center">
         <div class="container mx-auto p-6 px-8 text-xs flex flex-col gap-1">
             <p>

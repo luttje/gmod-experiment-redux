@@ -10,36 +10,43 @@
                 By connecting your Discord and Steam accounts, you can claim your characters and rewards.
             </span>
         </div>
-        <div class="flex flex-row justify-between items-center gap-4">
-            @if (user() && user()->discord_id)
-                <div class="flex flex-row items-center gap-2 font-bold">
-                    <x-bi-discord class="w-4 h-4" />
-                    {{ user()->discord_name }}
-                </div>
-            @else
-                <a href="{{ route('auth.discord') }}" class="flex flex-col items-center gap-2 whitespace-nowrap rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white">
-                    <span class="text-xs">Sign in through / Connect</span>
-                    <span class="flex flex-row items-center gap-2">
+        <div class="flex flex-col gap-2">
+            <div class="flex flex-row justify-between items-center gap-4">
+                @if (user() && user()->discord_id)
+                    <div class="flex flex-row items-center gap-2 font-bold">
                         <x-bi-discord class="w-4 h-4" />
-                        Discord
-                    </span>
-                </a>
-            @endif
+                        {{ user()->discord_name }}
+                    </div>
+                @else
+                    <a href="{{ route('auth.discord') }}" class="flex flex-col items-center gap-2 whitespace-nowrap rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white">
+                        <span class="text-xs">Sign in through / Connect</span>
+                        <span class="flex flex-row items-center gap-2">
+                            <x-bi-discord class="w-4 h-4" />
+                            Discord
+                        </span>
+                    </a>
+                @endif
 
-            @if (user() && user()->steam_id)
-                <div class="flex flex-row items-center gap-2 font-bold">
-                    <x-bi-steam class="w-4 h-4" />
-                    {{ user()->steam_nickname }}
-                </div>
-            @else
-                <a href="{{ route('auth.steam') }}" class="flex flex-col items-center gap-2 whitespace-nowrap rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white">
-                    <span class="text-xs">Sign in through / Connect</span>
-                    <span class="flex flex-row items-center gap-2">
+                @if (user() && user()->steam_id)
+                    <div class="flex flex-row items-center gap-2 font-bold">
                         <x-bi-steam class="w-4 h-4" />
-                        Steam
-                    </span>
+                        {{ user()->steam_nickname }}
+                    </div>
+                @else
+                    <a href="{{ route('auth.steam') }}" class="flex flex-col items-center gap-2 whitespace-nowrap rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white">
+                        <span class="text-xs">Sign in through / Connect</span>
+                        <span class="flex flex-row items-center gap-2">
+                            <x-bi-steam class="w-4 h-4" />
+                            Steam
+                        </span>
+                    </a>
+                @endif
+            </div>
+            @auth
+                <a href="{{ route('characters.index') }}" class="flex flex-row items-center min-w-full gap-2 rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 text-white">
+                    <span class="text-sm font-bold">Characters & Rewards</span>
                 </a>
-            @endif
+            @endauth
         </div>
     </div>
 </section>
