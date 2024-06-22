@@ -40,6 +40,13 @@ class MetricsController extends Controller
             'name' => $data['epoch']['name'],
         ], $data['epoch']);
 
+        // If the epoch ended more than 1 hour ago (buffer for slow final submission) we reject the submission
+        if ($epoch->ends_at->addHour()->isPast()) {
+            return response()->json([
+                'message' => 'Epoch has ended, no more metrics can be submitted',
+            ], 400);
+        }
+
         foreach ($data['players'] as $player) {
             Player::updateOrCreate([
                 'steam_id' => $player['steam_id'],
