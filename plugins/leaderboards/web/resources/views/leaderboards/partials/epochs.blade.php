@@ -32,9 +32,9 @@
 
 <section class="text-xs text-slate-400 flex flex-col text-center mb-4">
     @if ($selectedEpoch->ends_at->isPast())
-        <span>This epoch ran from <strong>{{ $selectedEpoch->started_at->format('Y-m-d H:i:s') }}</strong> to <strong>{{ $selectedEpoch->ends_at->format('Y-m-d H:i:s') }}</strong></span>
+        <span>This epoch ran from <strong>{{ $selectedEpoch->started_at->format('Y-m-d H:i:s') }} (UTC)</strong> to <strong>{{ $selectedEpoch->ends_at->format('Y-m-d H:i:s') }} (UTC)</strong></span>
     @else
-        <span>This epoch started on <strong>{{ $selectedEpoch->started_at->format('Y-m-d H:i:s') }}</strong> and ends in</span>
+        <span>This epoch started on <strong>{{ $selectedEpoch->started_at->format('Y-m-d H:i:s') }} (UTC)</strong> and ends in</span>
 
         <span id="countdown"
             class="text-amber-400 font-bold text-xl"
@@ -42,14 +42,14 @@
 
         <script>
             const countdown = document.getElementById('countdown');
-            const epochEndsAt = new Date("{{ $selectedEpoch->ends_at->format('Y-m-d H:i:s') }}").getTime();
+            const epochEndsAtUTC = new Date("{{ $selectedEpoch->ends_at->format('Y-m-d H:i:s') }} UTC").getTime();
 
             const updateCountdown = () => {
                 const now = new Date().getTime();
-                const distanceInSeconds = epochEndsAt - now;
+                const distanceInSeconds = epochEndsAtUTC - now;
 
                 if (distanceInSeconds < 0) {
-                    location.reload();
+                    countdown.innerHTML = '0s';
                     return;
                 }
 
