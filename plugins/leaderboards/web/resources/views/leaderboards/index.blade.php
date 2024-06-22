@@ -32,7 +32,7 @@
             </a>
         @endif
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             @foreach ($metrics as $metric)
                 <a href="{{ route('leaderboards.show', $metric['id']) }}" class="group flex flex-col overflow-clip rounded bg-slate-800 hover:bg-slate-900 transition duration-200">
                     <h3 class="text-xl text-center font-bold p-4">

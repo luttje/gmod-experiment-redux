@@ -34,6 +34,7 @@
             </div>
         </div>
     </header>
+    @include('components.user')
 
     <main class="container mx-auto p-6 px-8 flex-1">
         {{ $slot }}

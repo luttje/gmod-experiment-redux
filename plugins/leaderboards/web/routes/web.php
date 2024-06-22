@@ -12,3 +12,5 @@ Route::get('/leaderboards/historic/{metric}/{epoch?}', [LeaderboardController::c
 Route::resource('/leaderboards', LeaderboardController::class)
     ->except(['index'])
     ->parameter('leaderboards', 'metric');
+
+require __DIR__.'/auth.php';

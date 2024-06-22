@@ -5,7 +5,7 @@
         <span class="flex w-10 shrink-0 text-xl">
             #
         </span>
-        <span class="text-xl">
+        <span class="text-xl md:w-96">
             Character
         </span>
         <span class="text-xl flex-1 text-slate-600">
@@ -36,11 +36,16 @@
                 <span class="flex w-10 shrink-0 text-xl">
                     {{ $loop->iteration }}
                 </span>
-                <span class="text-xl">
+                <span class="text-xl md:w-96">
                     {{ $character['name'] }}
                 </span>
-                <span class="text-xl flex-1 text-slate-600 group-hover:text-slate-400">
+                <span class="flex flex-row gap-2 items-center text-xl flex-1 text-amber-900 group-hover:text-amber-800">
                     {{ $player['steam_name'] }}
+                    @auth
+                    @if (user() && user()->steam_id === $player['steam_id'])
+                    <span class="text-white ml-4"><x-bi-steam class="inline w-4 h-4" /></span>
+                    @endif
+                    @endauth
                 </span>
                 <span class="text-xl">
                     {{ $score }}
