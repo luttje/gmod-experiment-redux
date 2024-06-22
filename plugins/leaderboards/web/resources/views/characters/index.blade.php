@@ -43,7 +43,7 @@
                                                 {!! $characterReward->reward->render() !!}
                                             </div>
 
-                                            <div class="hidden group-hover:block absolute top-full bg-slate-600 whitespace-nowrap text-xs text-white p-2 rounded z-50 drop-shadow-lg">
+                                            <div class="hidden group-hover:block absolute top-full left-full bg-slate-600 whitespace-nowrap text-xs text-white p-2 rounded z-50 drop-shadow-lg">
                                                 {{ $characterReward->reward->getName() }}
                                             </div>
                                         </div>

@@ -1,3 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.shine {
+    mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
+    overflow: clip;
+}
+.shine div {
+    transform: translate(-100%, -100%);
+    background: linear-gradient(-45deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 60%);
+    width: 100%;
+    height: 100%;
+    animation-name: shine-animation;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+}
+
+@keyframes shine-animation {
+    0% {
+        transform: translate(-100%, -100%);
+    }
+
+    100% {
+        transform: translate(100%, 100%);
+    }
+}

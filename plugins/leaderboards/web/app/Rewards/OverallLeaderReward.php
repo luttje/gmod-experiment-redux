@@ -13,7 +13,7 @@ class OverallLeaderReward extends BaseReward
     {
         return [
             'design001_blank2.png',
-            'symbol_overall_leader.png',
+            'symbol_overall_leader.png' => 'shine',
         ];
     }
 

@@ -11,9 +11,9 @@ class ParticipationReward extends BaseReward
     public function getMedalImageStack(): array
     {
         return [
-            'design003_blank.png',
             'ribbon001.png',
-            'symbol_epoch_1.png',
+            'design003_blank.png' => 'shine',
+            'symbol_epoch_1.png' => 'shine',
         ];
     }
 
