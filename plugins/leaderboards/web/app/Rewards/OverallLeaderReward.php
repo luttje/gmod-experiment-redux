@@ -9,7 +9,18 @@ class OverallLeaderReward extends BaseReward
 {
     protected static string $name = 'Overall Leader';
 
-    public function getMedalImageStack(): array
+    /**
+     * @inheritDoc
+     */
+    public static function getDiscordRole(): ?string
+    {
+        return 'Hero of an Epoch';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function getMedalImageStack(): array
     {
         return [
             'design001_blank2.png',
@@ -18,7 +29,7 @@ class OverallLeaderReward extends BaseReward
     }
 
     /**
-     * Called to check if the reward can be claimed.
+     * @inheritDoc
      */
     public static function canClaim(Character $character): bool
     {

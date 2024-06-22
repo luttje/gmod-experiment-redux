@@ -8,20 +8,21 @@ class ParticipationReward extends BaseReward
 {
     protected static string $name = 'Participated in {epoch_name}';
 
-    public function getMedalImageStack(): array
+    /**
+     * @inheritDoc
+     */
+    public static function getMedalImageStack(): array
     {
         return [
             'ribbon001.png',
             'design003_blank.png' => 'shine',
+            // TODO: Participation symbols for other epochs
             'symbol_epoch_1.png' => 'shine',
         ];
     }
 
     /**
-     * Called when a reward needs to be setup for a character.
-     *
-     * This should only set data and not save anything to the database as
-     * the reward may not be claimed yet.
+     * @inheritDoc
      */
     public static function setup(Character $character, array &$data): void
     {

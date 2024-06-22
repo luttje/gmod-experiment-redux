@@ -1,4 +1,4 @@
-<div class="relative h-full overflow-clip hover:scale-[200%] hover:drop-shadow-xl transition-transform duration-500 ease-[cubic-bezier(1,-0.03,.28,1.5)]">
+<div class="relative h-full overflow-clip hover:scale-125 hover:drop-shadow-xl transition-transform duration-500 ease-[cubic-bezier(1,-0.03,.28,1.5)]">
     @php
     $randomAnimationDelay = rand(2000, 10000);
     @endphp

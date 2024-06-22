@@ -3,6 +3,7 @@
 namespace App\Rewards;
 
 use App\Models\Character;
+use App\Services\Discord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\Support\Renderable;
 
@@ -39,25 +40,22 @@ abstract class BaseReward
 
     /**
      * Saves the claimed reward to the database.
+     *
+     * Override this to execute additional logic when claiming a reward.
+     * Be sure to call parent::claim() if you override this method.
      */
     public function claim(): void
     {
+        $discordRole = static::getDiscordRole();
+
+        if ($discordRole) {
+            Discord::setRoleForMember(user()->discord_id, $discordRole);
+        }
+
         $this->character->characterRewards()->create([
             'reward_class' => static::class,
             'data' => $this->getData(),
         ]);
-    }
-
-    /**
-     * Returns the images that represent the reward.
-     * The path of the images is relative to
-     * public/images/medals/
-     */
-    public function getMedalImageStack(): array
-    {
-        return [
-            'design001_blank2.png',
-        ];
     }
 
     /**
@@ -67,8 +65,29 @@ abstract class BaseReward
     {
         return view('rewards.base', [
             'reward' => $this,
-            'medalImageStack' => $this->getMedalImageStack(),
+            'medalImageStack' => static::getMedalImageStack(),
         ])->render();
+    }
+
+    /**
+     * Returns a discord role that should be assigned to the user
+     * (and created if it doesn't exist).
+     */
+    public static function getDiscordRole(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Returns the images that represent the reward.
+     * The path of the images is relative to
+     * public/images/medals/
+     */
+    public static function getMedalImageStack(): array
+    {
+        return [
+            'design001_blank2.png',
+        ];
     }
 
     /**

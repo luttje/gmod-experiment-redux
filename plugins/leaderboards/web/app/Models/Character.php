@@ -18,7 +18,7 @@ class Character extends Model
     public function characterRewards()
     {
         return $this->hasMany(CharacterReward::class)
-            ->with('character');
+            ->with('character.player');
     }
 
     public function player()
