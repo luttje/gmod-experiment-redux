@@ -262,8 +262,30 @@ function PLUGIN:ShouldSubmitMetrics()
 		return false
 	end
 
+    if (self.hasSubmittedFinalMetrics) then
+        return false
+    end
+
+    local currentDate = os.date("*t")
+	local epochEndDateAndTime = string.Explode(" ", self.currentEpoch.ends_at)
+    local epochEndDateString = epochEndDateAndTime[1]
+    local currentDateStr = currentDate.year .. "-" .. currentDate.month .. "-" .. currentDate.day
+
+    if (currentDateStr == epochEndDateString) then
+        local epochEndTime = string.Explode(":", epochEndDateAndTime[2])
+        local epochEndHour = tonumber(epochEndTime[1])
+        local epochEndMinute = tonumber(epochEndTime[2])
+
+        -- If the current time is past the epoch end time, submit the metrics if they haven't been submitted yet
+        if (currentDate.hour > epochEndHour or (currentDate.hour == epochEndHour and currentDate.min >= epochEndMinute)) then
+			if (not self.hasSubmittedFinalMetrics) then
+				self.hasSubmittedFinalMetrics = true
+				return true
+			end
+		end
+	end
+
 	local lastSubmittedDay = self.lastSubmittedDay
-	local currentDate = os.date("*t")
 
 	if (not lastSubmittedDay) then
 		lastSubmittedDay = file.Read(LAST_SUBMITTED_DATE_FILE, "DATA") or -1
