@@ -82,7 +82,7 @@ class Metric extends Model
         }
 
         // Add any empty metrics to the metric leaderboard
-        $metrics = Metric::all();
+        $metrics = Metric::with('epoch')->get();
 
         foreach ($metrics as $metric) {
             $metricId = $metric->id;
@@ -155,8 +155,22 @@ class Metric extends Model
         // Store for quick access
         $overallScores['updatedAt'] = $now;
         $metricScores['updatedAt'] = $now;
-        cache()->forever('overallScores', $overallScores);
-        cache()->forever('metricScores', $metricScores);
-        cache()->forever('overallLeader', $overallLeader);
+
+        $epoch = $metrics->first()->epoch;
+
+        cache()->forever('scores:' . $epoch->id, [
+            'overallScores' => $overallScores,
+            'metricScores' => $metricScores,
+            'overallLeader' => $overallLeader,
+        ]);
+    }
+
+    public static function leaderboardsFromCache(Epoch $epoch): array
+    {
+        return cache('scores:' . $epoch->id) ?? [
+            'overallScores' => [],
+            'metricScores' => [],
+            'overallLeader' => null,
+        ];
     }
 }

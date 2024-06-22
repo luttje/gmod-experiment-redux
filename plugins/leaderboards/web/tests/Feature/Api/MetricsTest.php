@@ -16,8 +16,8 @@ class MetricsTest extends TestCase
         $response = $this->postJson(route('submit-metrics'), [
             'epoch' => [
                 'name' => 'Epoch 1',
-                'started_at' => '2024-01-01',
-                'ends_at' => '2024-01-31',
+                'started_at' => '2024-06-01 12:00:00',
+                'ends_at' => '2024-06-23 12:00:00',
             ],
             'players' => [
                 ['steam_name' => 'Player 1', 'steam_id' => '90071996842377318'],

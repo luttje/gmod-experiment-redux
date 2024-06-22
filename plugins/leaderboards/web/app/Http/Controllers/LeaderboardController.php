@@ -2,49 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Epoch;
 use App\Models\Metric;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
 class LeaderboardController extends Controller
 {
-    public function index()
+    private static function shareCommonViewData(Epoch $selectedEpoch, array &$metrics)
     {
-        $metrics = cache('metricScores');
+        $epochs = cache('epochs');
+        $latestEpoch = Epoch::latest()->first();
+
+        View::share('epochs', $epochs);
+        View::share('latestEpoch', $latestEpoch);
+        View::share('selectedEpoch', $selectedEpoch);
+
+        if (empty($metrics)) {
+            return;
+        }
+
+        View::share('lastUpdatedAt', $metrics['updatedAt']);
+        unset($metrics['updatedAt']);
+    }
+
+    public function index(?Epoch $epoch = null)
+    {
+        $latestEpoch = Epoch::latest()->first();
+        $epoch = $epoch ?? $latestEpoch;
+        $leaderboardScores = Metric::leaderboardsFromCache($epoch);
+        $metrics = $leaderboardScores['metricScores'];
+
+        self::shareCommonViewData($epoch, $metrics);
 
         if (empty($metrics)) {
             return view('leaderboards.no-data');
         }
 
-        $overallLeader = cache('overallLeader');
-
-        View::share('lastUpdatedAt', $metrics['updatedAt']);
-        unset($metrics['updatedAt']);
+        $overallLeader = $leaderboardScores['overallLeader'];
 
         return view('leaderboards.index', compact('metrics', 'overallLeader'));
     }
 
-    public function overall()
+    public function overall(?Epoch $epoch = null)
     {
-        $characterScores = cache('overallScores');
+        $epoch = $epoch ?? Epoch::latest()->first();
+        $leaderboardScores = Metric::leaderboardsFromCache($epoch);
+        $characterScores = isset($leaderboardScores['overallScores']) ? $leaderboardScores['overallScores'] : [];
 
-        View::share('lastUpdatedAt', $characterScores['updatedAt']);
-        unset($characterScores['updatedAt']);
+        self::shareCommonViewData($epoch, $characterScores);
 
         return view('leaderboards.overall', compact('characterScores'));
     }
 
-    public function show(Metric $metric)
+    public function show(Metric $metric, ?Epoch $epoch = null)
     {
-        $metrics = cache('metricScores');
-        $characterScores = $metrics[$metric->id];
+        $epoch = $epoch ?? Epoch::latest()->first();
+        $leaderboardScores = Metric::leaderboardsFromCache($epoch);
+        $metrics = $leaderboardScores['metricScores'];
+        $characterScores = isset($metrics[$metric->id]) ? $metrics[$metric->id] : [];
 
-        if (empty($characterScores)) {
-            return view('leaderboards.no-data');
-        }
+        self::shareCommonViewData($epoch, $metrics);
 
-        $characterScores = $characterScores['scores'];
-        View::share('lastUpdatedAt', $metrics['updatedAt']);
+        $characterScores = isset($characterScores['scores']) ? $characterScores['scores'] : [];
 
         return view('leaderboards.show', compact('metric', 'characterScores'));
     }

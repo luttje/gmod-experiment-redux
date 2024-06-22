@@ -6,8 +6,8 @@ PLUGIN.description = "Adds tracking metrics and leaderboards to track player pro
 
 PLUGIN.currentEpoch = {
     name = "Beta Test Epoch",
-    started_at = "2024-06-01",
-	ends_at = "2024-06-23",
+    started_at = "2024-06-01 12:00:00",
+	ends_at = "2024-06-23 12:00:00",
 }
 
 ix.util.Include("sv_plugin.lua")

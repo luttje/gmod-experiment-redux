@@ -11,6 +11,11 @@ class Epoch extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'started_at' => 'datetime',
+        'ends_at' => 'datetime',
+    ];
+
     public function getMetricScoresArray()
     {
         return $this->metrics()
@@ -55,5 +60,15 @@ class Epoch extends Model
     public function alliances()
     {
         return $this->hasMany(Alliance::class);
+    }
+
+    /**
+     * Static helpers
+     */
+
+    public static function precacheEpochs()
+    {
+        $epochs = Epoch::orderBy('id', 'desc')->get();
+        cache()->forever('epochs', $epochs);
     }
 }

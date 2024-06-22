@@ -36,7 +36,9 @@ class MetricsController extends Controller
             'character_metrics' => 'present|array',
         ]);
 
-        $epoch = Epoch::firstOrCreate($data['epoch']);
+        $epoch = Epoch::updateOrCreate([
+            'name' => $data['epoch']['name'],
+        ], $data['epoch']);
 
         foreach ($data['players'] as $player) {
             Player::updateOrCreate([
@@ -130,6 +132,7 @@ class MetricsController extends Controller
         }
 
         Metric::precacheLeaderboards();
+        Epoch::precacheEpochs();
 
         return [
             'message' => 'Metrics submitted successfully',
