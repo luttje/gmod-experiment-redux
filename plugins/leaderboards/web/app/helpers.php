@@ -51,8 +51,7 @@ if (!function_exists('getRewardsForCharacter')) {
         });
 
         return array_map(function($rewardClass) use ($character) {
-            return setupRewardForCharacter($character, $rewardClass)
-                ->getName();
+            return setupRewardForCharacter($character, $rewardClass);
         }, $availableRewards);
     }
 }

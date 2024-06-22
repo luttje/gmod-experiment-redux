@@ -11,7 +11,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 @forelse ($characters as $character)
-                    <div class="flex flex-col overflow-clip rounded bg-slate-800 transition duration-200">
+                    <div class="flex flex-col rounded bg-slate-800 transition duration-200 overflow-visible">
                         <span class="text-xs text-center p-4">{{ $character['epoch']['name'] }}</span>
                         <h3 class="text-xl text-center font-bold p-4 bg-amber-400 text-black">
                             {{ $character['name'] }}
@@ -34,18 +34,21 @@
                         @endforeach
 
                         @if ($character->characterRewards->count() > 0)
-                            <div class="flex flex-col gap-4 p-4 bg-slate-800">
+                            <div class="flex flex-col gap-4 p-4">
                                 <h4 class="text-xl font-bold text-center">Claimed Rewards</h4>
-                                @foreach ($character->characterRewards as $characterReward)
-                                    <div class="flex flex-row items-center justify-between gap-4 font-bold">
-                                        <span>{{ $characterReward->reward->getName() }}</span>
-                                        <span class="flex flex-row gap-2 items-center text-xl font-bold">
-                                            <span class="text-amber-400">
-                                                <x-bi-check2-circle />
-                                            </span>
-                                        </span>
-                                    </div>
-                                @endforeach
+                                <div class="flex flex-row justify-center gap-4">
+                                    @foreach ($character->characterRewards as $characterReward)
+                                        <div class="group relative h-16 w-16">
+                                            <div class="h-16 w-16">
+                                                {!! $characterReward->reward->render() !!}
+                                            </div>
+
+                                            <div class="hidden group-hover:block absolute top-full bg-slate-600 whitespace-nowrap text-xs text-white p-2 rounded z-50 drop-shadow-lg">
+                                                {{ $characterReward->reward->getName() }}
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
                             </div>
                         @else
                             <a href="{{ route('characters.claim-rewards', $character) }}" class="flex items-center gap-2 justify-center text-center bg-amber-400 hover:bg-amber-300 text-black p-4 rounded-b font-bold">

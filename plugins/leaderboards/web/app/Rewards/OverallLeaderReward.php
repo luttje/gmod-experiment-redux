@@ -9,6 +9,14 @@ class OverallLeaderReward extends BaseReward
 {
     protected static string $name = 'Overall Leader';
 
+    public function getMedalImageStack(): array
+    {
+        return [
+            'design001_blank2.png',
+            'symbol_overall_leader.png',
+        ];
+    }
+
     /**
      * Called to check if the reward can be claimed.
      */

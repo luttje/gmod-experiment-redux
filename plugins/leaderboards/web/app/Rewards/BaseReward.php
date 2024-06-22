@@ -3,6 +3,8 @@
 namespace App\Rewards;
 
 use App\Models\Character;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\Support\Renderable;
 
 abstract class BaseReward
 {
@@ -44,6 +46,29 @@ abstract class BaseReward
             'reward_class' => static::class,
             'data' => $this->getData(),
         ]);
+    }
+
+    /**
+     * Returns the images that represent the reward.
+     * The path of the images is relative to
+     * public/images/medals/
+     */
+    public function getMedalImageStack(): array
+    {
+        return [
+            'design001_blank2.png',
+        ];
+    }
+
+    /**
+     * Draws the images that represent the reward.
+     */
+    public function render(): string
+    {
+        return view('rewards.base', [
+            'reward' => $this,
+            'medalImageStack' => $this->getMedalImageStack(),
+        ])->render();
     }
 
     /**
