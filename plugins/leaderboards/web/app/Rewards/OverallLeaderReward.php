@@ -36,6 +36,6 @@ class OverallLeaderReward extends BaseReward
         $cachedScores = Metric::leaderboardsFromCache($character->epoch);
         $overallLeader = $cachedScores['overallLeader']['character']['id'] ?? null;
 
-        return $overallLeader === $character->id;
+        return $overallLeader === $character->id && parent::canClaim($character);
     }
 }

@@ -106,6 +106,8 @@ abstract class BaseReward
      */
     public static function canClaim(Character $character): bool
     {
-        return true;
+        return !$character->characterRewards()
+            	->where('reward_class', static::class)
+                ->exists();
     }
 }
