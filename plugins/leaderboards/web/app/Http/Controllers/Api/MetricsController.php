@@ -40,8 +40,10 @@ class MetricsController extends Controller
             'name' => $data['epoch']['name'],
         ], $data['epoch']);
 
-        // If the epoch ended more than 1 hour ago (buffer for slow final submission) we reject the submission
-        if ($epoch->ends_at->addHour()->isPast()) {
+        // If the epoch ended more than 10 hours ago we reject the submission
+        // We use 10 hours, because nobody might be on the server around the end of the epoch, so we can have
+        // admins login within 10 hours to submit the metrics
+        if ($epoch->ends_at->addHours(10)->isPast()) {
             return response()->json([
                 'message' => 'Epoch has ended, no more metrics can be submitted',
             ], 400);
