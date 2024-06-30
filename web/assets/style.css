@@ -38,6 +38,30 @@ body {
     font-size: 1.4em;
 }
 
+.quote {
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5em 1.5em;
+    margin: -0.5em;
+    border-radius: 0.25rem;
+}
+
+.quote::before {
+    content: "“";
+    font-size: 1.5em;
+    position: absolute;
+    top: 0.5em;
+    left: 0.5em;
+}
+
+.quote::after {
+    content: "”";
+    font-size: 1.5em;
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.5em;
+}
+
 h1,
 h2,
 h3,
@@ -57,7 +81,7 @@ h2 {
 }
 
 .wrapper {
-    max-width: 512px;
+    max-width: 640px;
     margin: 0 auto;
 }
 
@@ -120,12 +144,20 @@ ul li::before {
     margin-top: 2em;
     margin-bottom: 2em;
 }
+.my-s{
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
 .mt-s {
     margin-top: 1em;
 }
 
 a, .highlight {
     color: #A33426;
+}
+
+a:has(img) {
+    text-decoration: none;
 }
 
 button {
@@ -285,4 +317,39 @@ input {
     mask-position: center;
     mask-repeat: no-repeat;
     mask-size: contain;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-gap: 1rem;
+
+    padding: 0.5em 0;
+    justify-content: center;
+}
+
+.gallery a {
+    display: block;
+}
+
+.gallery img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    filter: grayscale(100%);
+    z-index: 1;
+}
+
+.gallery img:hover {
+    transform: scale(1.05);
+    filter: grayscale(0%);
+    z-index: 2;
+}
+
+@media (min-width: 768px) {
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

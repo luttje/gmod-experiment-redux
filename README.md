@@ -38,7 +38,7 @@
 
 <summary>Create a single character to play for the Epoch</summary>
 
-![One Character](docs/screenshots/screenshot01_one_character.jpg)
+![One Character](web/assets/screenshots/screenshot01_one_character.jpg)
 
 </details>
 
@@ -46,7 +46,7 @@
 
 <summary>Select a spawn point to start/respawn from</summary>
 
-![Spawn Select](docs/screenshots/screenshot02_spawn_select.jpg)
+![Spawn Select](web/assets/screenshots/screenshot02_spawn_select.jpg)
 
 </details>
 
@@ -54,7 +54,7 @@
 
 <summary>Manage your inventory and equipment</summary>
 
-![Inventory](docs/screenshots/screenshot03_inventory.jpg)
+![Inventory](web/assets/screenshots/screenshot03_inventory.jpg)
 
 </details>
 
@@ -62,7 +62,7 @@
 
 <summary>View your character's stats and nano buffs</summary>
 
-![You](docs/screenshots/screenshot04_you.jpg)
+![You](web/assets/screenshots/screenshot04_you.jpg)
 
 </details>
 
@@ -70,7 +70,7 @@
 
 <summary>Store items in your locker for safekeeping</summary>
 
-![Locker](docs/screenshots/screenshot05_locker.jpg)
+![Locker](web/assets/screenshots/screenshot05_locker.jpg)
 
 </details>
 
@@ -78,7 +78,7 @@
 
 <summary>Buy and sell items at The Business</summary>
 
-![The Business](docs/screenshots/screenshot06_the_business.jpg)
+![The Business](web/assets/screenshots/screenshot06_the_business.jpg)
 
 </details>
 
@@ -86,9 +86,9 @@
 
 <summary>Protect your door with a door protector</summary>
 
-![The Business Door Protector](docs/screenshots/screenshot07_the_business_door_protector.jpg)
+![The Business Door Protector](web/assets/screenshots/screenshot07_the_business_door_protector.jpg)
 
-![Door Protector](docs/screenshots/screenshot08_door_protector.jpg)
+![Door Protector](web/assets/screenshots/screenshot08_door_protector.jpg)
 
 </details>
 
@@ -96,9 +96,9 @@
 
 <summary>Upgrade your bolt generator to produce more bolts</summary>
 
-![Bolt Generator](docs/screenshots/screenshot09_bolt_generator.jpg)
+![Bolt Generator](web/assets/screenshots/screenshot09_bolt_generator.jpg)
 
-![Bolt Generator Upgrade](docs/screenshots/screenshot10_bolt_generator_upgrade.jpg)
+![Bolt Generator Upgrade](web/assets/screenshots/screenshot10_bolt_generator_upgrade.jpg)
 
 </details>
 
@@ -106,9 +106,9 @@
 
 <summary>Scavenge for items in this forsaken city</summary>
 
-![Scavenging](docs/screenshots/screenshot11_scanvenging.jpg)
+![Scavenging](web/assets/screenshots/screenshot11_scanvenging.jpg)
 
-![Scavenging Loot](docs/screenshots/screenshot12_scavenging_loot.jpg)
+![Scavenging Loot](web/assets/screenshots/screenshot12_scavenging_loot.jpg)
 
 </details>
 
@@ -116,9 +116,9 @@
 
 <summary>The medic NPC will ask for your aid</summary>
 
-![NPC Medic](docs/screenshots/screenshot13_npc_medic.jpg)
+![NPC Medic](web/assets/screenshots/screenshot13_npc_medic.jpg)
 
-![NPC Medic Dialog](docs/screenshots/screenshot14_npc_medic_dialog.jpg)
+![NPC Medic Dialog](web/assets/screenshots/screenshot14_npc_medic_dialog.jpg)
 
 </details>
 
@@ -126,9 +126,9 @@
 
 <summary>Monsters roam a select location in the city, slay them for loot</summary>
 
-![Monsters](docs/screenshots/screenshot15_monsters.jpg)
+![Monsters](web/assets/screenshots/screenshot15_monsters.jpg)
 
-![Monsters](docs/screenshots/screenshot16_monsters.jpg)
+![Monsters](web/assets/screenshots/screenshot16_monsters.jpg)
 
 </details>
 
@@ -136,9 +136,9 @@
 
 <summary>Compete in a footrace against other players to improve your attributes</summary>
 
-![NPC Footrace](docs/screenshots/screenshot17_npc_footrace.jpg)
+![NPC Footrace](web/assets/screenshots/screenshot17_npc_footrace.jpg)
 
-![NPC Footrace Dialog](docs/screenshots/screenshot18_npc_footrace_dialog.jpg)
+![NPC Footrace Dialog](web/assets/screenshots/screenshot18_npc_footrace_dialog.jpg)
 
 </details>
 
@@ -146,9 +146,9 @@
 
 <summary>Improve your attributes at the target practice NPC</summary>
 
-![NPC Target Practice](docs/screenshots/screenshot19_npc_target_practice.jpg)
+![NPC Target Practice](web/assets/screenshots/screenshot19_npc_target_practice.jpg)
 
-![NPC Target Practice Dialog](docs/screenshots/screenshot20_npc_target_practice_dialog.jpg)
+![NPC Target Practice Dialog](web/assets/screenshots/screenshot20_npc_target_practice_dialog.jpg)
 
 </details>
 
