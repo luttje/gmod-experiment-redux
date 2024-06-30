@@ -337,15 +337,18 @@ input {
     height: auto;
     border-radius: 0.25rem;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    transition: all 0.2s;
+    transition-timing-function: ease-out;
     filter: grayscale(100%);
     z-index: 1;
+    border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .gallery img:hover {
     transform: scale(1.05);
     filter: grayscale(0%);
     z-index: 2;
+    border-color: transparent;
 }
 
 @media (min-width: 768px) {
