@@ -45,15 +45,13 @@ Additionally you should consider this for a production server:
     git clone https://github.com/NebulousCloud/helix helix
     ```
 
-5. Ensure Git LFS is installed and initialized according to the [Git LFS instructions](https://github.com/git-lfs/git-lfs?tab=readme-ov-file#installing):
-
-6. Clone this repository into the `garrysmod/gamemodes` directory and ensure the directory is named `experiment-redux`:
+5. Clone this repository into the `garrysmod/gamemodes` directory and ensure the directory is named `experiment-redux`:
 
     ```sh
     git clone https://github.com/luttje/experiment-redux experiment-redux
     ```
 
-7. (Optional) If you have content other than the default content you will want to create a Workshop Collection for your server, following [the instructions on the official Garry's Mod documentation](https://wiki.facepunch.com/gmod/Workshop_for_Dedicated_Servers). When creating the collection:
+6. (Optional) If you have content other than the default content you will want to create a Workshop Collection for your server, following [the instructions on the official Garry's Mod documentation](https://wiki.facepunch.com/gmod/Workshop_for_Dedicated_Servers). When creating the collection:
 
     * **The following workshop items are required:**
         * [Content for the `customizable_weaponry` plugin](https://steamcommunity.com/sharedfiles/filedetails/?id=2588031232)

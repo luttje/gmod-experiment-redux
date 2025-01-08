@@ -1,31 +1,28 @@
 #
-# 1.    Install Git LFS following instructions @ https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md
-#       sudo apt install git-lfs
-#
-# 2.    Clone this repository to `/srv/experiment-redux/`:
+# 1.    Clone this repository to `/srv/experiment-redux/`:
 #       sudo git clone https://github.com/luttje/gmod-experiment-redux /srv/experiment-redux/
 #
-# 3.    Add `caddy` and `steam` to the 'www-data' group:
+# 2.    Add `caddy` and `steam` to the 'www-data' group:
 #       sudo usermod -aG www-data caddy
 #       sudo usermod -aG www-data steam
 #
-# 4.    Change ownership to the 'www-data' group:
+# 3.    Change ownership to the 'www-data' group:
 #       sudo chown -R www-data:www-data /srv/experiment-redux/
 #
-# 5.    Navigate to the directory:
+# 4.    Navigate to the directory:
 #       cd /srv/experiment-redux/
 #
-# 6.    Have caddy load the configuration: (https://caddyserver.com/docs/running#overrides)
+# 5.    Have caddy load the configuration: (https://caddyserver.com/docs/running#overrides)
 #       sudo systemctl edit caddy
 #
-# 7.    Add the following configuration:
+# 6.    Add the following configuration:
 #       [Service]
 #       ExecStart=
 #       ExecStart=/usr/bin/caddy run --environ --config /srv/experiment-redux/Caddyfile
 #       ExecReload=
 #       ExecReload=/usr/bin/caddy reload --config /srv/experiment-redux/Caddyfile
 #
-# 8.    Make caddy restart:
+# 7.    Make caddy restart:
 #       sudo systemctl restart caddy
 
 # Specifically set HTTP for the FastDL server to avoid issues with GMod
