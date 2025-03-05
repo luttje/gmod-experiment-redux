@@ -93,6 +93,10 @@ function Schema:InitializedPlugins()
         if (item.mergeIntoSwep and item.class) then
             local swep = weapons.GetStored(item.class)
 
+			if (not swep) then
+				ErrorNoHaltWithStack("Item " .. tostring(item.uniqueID) .. " has a mergeIntoSwep but the weapon class (" .. tostring(item.class) .. ") does not exist!\n")
+			end
+
             table.Merge(swep, item.mergeIntoSwep, true)
         end
 
