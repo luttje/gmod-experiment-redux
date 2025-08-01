@@ -102,9 +102,9 @@ function Schema.ammo.ForceWeaponCalibre(swepClass, calibre)
 
 	if (not Schema.ammo.ammoCalibre[ammoName]) then
 		error("Attempt to force invalid calibre '" ..
-		calibre ..
-		"' on weapon '" ..
-		swepClass .. "'. You should add this type of ammo to the schema first (don't forget to also make an item!)")
+			calibre ..
+			"' on weapon '" ..
+			swepClass .. "'. You should add this type of ammo to the schema first (don't forget to also make an item!)")
 	end
 
 	local ammo = Schema.ammo.ammoCalibre[ammoName].ammo
@@ -123,4 +123,43 @@ function Schema.ammo.ForceWeaponCalibre(swepClass, calibre)
 	else
 		swep.Primary.Ammo = ammoName
 	end
+end
+
+--- Finds all ammo items that match the given ammo type.
+--- @param ammo string|number The ammo type to search for.
+--- @return table # A table of items that match the ammo type.
+function Schema.ammo.FindAmmoItems(ammo)
+	local items = {}
+
+	if (isnumber(ammo)) then
+		ammo = game.GetAmmoName(ammo)
+	end
+
+	for _, item in pairs(ix.item.list) do
+		if (item.ammo and item.ammo:lower() == ammo:lower()) then
+			table.insert(items, item)
+		end
+	end
+
+	return items
+end
+
+--- Finds the main ammo item for the given ammo type.
+--- @param ammo string|number The ammo type to search for.
+--- @return table|nil # The item that matches the ammo type, or nil if not
+function Schema.ammo.FindMainAmmoItem(ammo)
+	local items = Schema.ammo.FindAmmoItems(ammo)
+
+	if (#items == 0) then
+		return nil
+	end
+
+	-- Find the first item that has the base base_ammo, since we also have stackable ammo items in some cases
+	for _, item in ipairs(items) do
+		if (item.base == "base_ammo") then
+			return item
+		end
+	end
+
+	return items[1] -- Fallback to the first item if no base_ammo found
 end

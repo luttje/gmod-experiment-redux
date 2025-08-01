@@ -475,11 +475,30 @@ function Schema:CreateCharacterInfo(panel)
 	panel.buffs:SizeToContents()
 
 	hook.Run("CreateCharacterBuffInfo", panel, panel.buffs)
+
+	-- Adds the ammo manager to the character panel
+	panel.ammo = panel:Add("ixCategoryPanel")
+	panel.ammo:SetText("Equipped Ammunition")
+	panel.ammo:Dock(TOP)
+	panel.ammo:DockMargin(0, 0, 0, 8)
+
+	panel.ammoManager = panel.ammo:Add("expAmmoManager")
+	panel.ammoManager:Dock(TOP)
+	panel.ammoManager:RefreshAmmo()
+	panel.ammo.manager = panel.ammoManager
+
+	panel.ammo:SizeToContents()
+
+	hook.Run("CreateCharacterAmmoInfo", panel, panel.ammoManager)
 end
 
 function Schema:UpdateCharacterInfo(panel, character)
 	if (panel.buffs and panel.buffs.manager) then
 		panel.buffs.manager:RefreshBuffs()
+	end
+
+	if (panel.ammo and panel.ammoManager) then
+		panel.ammoManager:RefreshAmmo()
 	end
 end
 

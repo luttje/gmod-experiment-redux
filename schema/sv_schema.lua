@@ -1,6 +1,7 @@
 util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
 util.AddNetworkString("expClearEntityInfoTooltip")
+util.AddNetworkString("expAmmoUnequip")
 
 resource.AddFile("materials/experiment-redux/symbol_background.vmt")
 resource.AddFile("materials/experiment-redux/logo.png")
@@ -37,7 +38,7 @@ Schema.dropMode = {
 }
 
 ix.log.AddType("playerHealed", function(client, ...)
-	local arg = {...}
+	local arg = { ... }
 	return Format("%s has healed %s for %d hp", client:Name(), arg[1], arg[2])
 end, FLAG_WARNING)
 
@@ -299,7 +300,8 @@ function Schema.TiedPlayerResetBreakFree(client, additionalTime)
 	client.expCanBreakFree = nil
 	client:SetNetVar("canBreakFreeKey")
 
-	baseBreakFreeInterval = math.max(baseBreakFreeInterval - (baseBreakFreeInterval * agilityFraction), breakFreeMaxReactDuration + (baseBreakFreeInterval * .05))
+	baseBreakFreeInterval = math.max(baseBreakFreeInterval - (baseBreakFreeInterval * agilityFraction),
+		breakFreeMaxReactDuration + (baseBreakFreeInterval * .05))
 	client.expNextBreakFreeTime = CurTime() + baseBreakFreeInterval + (additionalTime or 0)
 end
 
@@ -727,3 +729,77 @@ function Schema.DecayEntity(entity, seconds, callback)
 		timer.Remove(name)
 	end)
 end
+
+net.Receive("expAmmoUnequip", function(length, client)
+	local ammoID = net.ReadUInt(32)
+	local shouldDrop = net.ReadBool()
+
+	if (not ammoID) then
+		return
+	end
+
+	if (client.expIsUnEquippingAmmo) then
+		return
+	end
+
+	local relevantItem = Schema.ammo.FindMainAmmoItem(ammoID)
+
+	if (not relevantItem) then
+		ix.util.SchemaErrorNoHalt("Tried to unequip an ammo item that doesn't exist! Ammo ID: " .. ammoID)
+		return
+	end
+
+	-- Ensure the player has this much ammo + unequip it per max ammo stack.
+	-- We don't want to put more ammo than the max in a box, otherwise that would be used to
+	-- manage the inventory unfairly (e.g: by equipping a ton and then unequipping it into a
+	-- single box)
+	local amount = math.min(client:GetAmmoCount(ammoID), relevantItem.ammoAmount)
+
+	if (amount <= 0) then
+		ix.util.SchemaErrorNoHalt("Tried to unequip an ammo item that the player doesn't have! Ammo ID: " .. ammoID)
+		return
+	end
+
+	local inventory = client:GetCharacter() and client:GetCharacter():GetInventory()
+
+	if (not shouldDrop) then
+		if (not inventory) then
+			return
+		end
+
+		if (not inventory:CanItemsFit(relevantItem.width, relevantItem.height, 1)) then
+			client:NotifyLocalized("noFit")
+			return
+		end
+	end
+
+	client.expIsUnEquippingAmmo = true
+
+	ix.item.Instance(0, relevantItem.uniqueID, relevantItem.data, 1, 1, function(item)
+		if (not IsValid(client)) then
+			item:Remove()
+			return
+		end
+
+		if (not shouldDrop) then
+			local status, error = inventory:Add(item:GetID())
+
+			if (not status) then
+				client:NotifyLocalized(error)
+				item:Remove()
+				client.expIsUnEquippingAmmo = nil
+				return
+			end
+		else
+			item:Spawn(client)
+		end
+
+		item:SetData("rounds", amount)
+
+		-- Remove the ammo from the player
+		client:RemoveAmmo(amount, ammoID)
+		client:EmitSound("items/ammopickup.wav", 90, 120)
+
+		client.expIsUnEquippingAmmo = nil
+	end)
+end)
