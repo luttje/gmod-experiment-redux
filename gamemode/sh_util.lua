@@ -10,10 +10,10 @@ ix.util._existingLibraries = ix.util._existingLibraries or {}
 --- @param constructor? fun(): table The constructor function for an object.
 --- @return table # The library table.
 function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
-    local libraryGlobalName = libraryName:gsub("%s+", "_"):upper()
+	local libraryGlobalName = libraryName:gsub("%s+", "_"):upper()
 
 	local library = ix.util._existingLibraries[libraryName] or {}
-    ix.util._existingLibraries[libraryName] = library
+	ix.util._existingLibraries[libraryName] = library
 
 	library.stored = library.stored or {}
 	library.buffer = library.buffer or {}
@@ -33,11 +33,11 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 			local uniqueID = string.lower(fileName:sub(4, -5))
 			local LIBRARY
 
-            if (constructor) then
-                LIBRARY = library.stored[uniqueID] or constructor()
-            else
-                LIBRARY = library.stored[uniqueID] or {}
-            end
+			if (constructor) then
+				LIBRARY = library.stored[uniqueID] or constructor()
+			else
+				LIBRARY = library.stored[uniqueID] or {}
+			end
 
 			LIBRARY.hooks = LIBRARY.hooks or {}
 
@@ -118,24 +118,24 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 	library.FindByProperty = function(key, value, handleLibraryValueAsPattern)
 		local results = {}
 
-        for _, libraryObject in pairs(library.stored) do
+		for _, libraryObject in pairs(library.stored) do
 			local libraryValues = libraryObject[key]
 
-            if (not libraryValues) then
-                continue
-            end
+			if (not libraryValues) then
+				continue
+			end
 
-            if (not istable(libraryValues)) then
-                libraryValues = { libraryValues }
-            end
+			if (not istable(libraryValues)) then
+				libraryValues = { libraryValues }
+			end
 
 			for _, libraryValue in ipairs(libraryValues) do
-                local matched = handleLibraryValueAsPattern
-                    and string.find(value, libraryValue)
+				local matched = handleLibraryValueAsPattern
+					and string.find(value, libraryValue)
 					or libraryValue == value
 
 				if (matched) then
-                    results[#results + 1] = libraryObject
+					results[#results + 1] = libraryObject
 					break
 				end
 			end
@@ -144,15 +144,15 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 		return results
 	end
 
-    library.GetProperty = function(name, key)
-        local libraryObject = library.Get(name)
+	library.GetProperty = function(name, key)
+		local libraryObject = library.Get(name)
 
-        if (not libraryObject or not libraryObject[key]) then
-            error(libraryName .. " '" .. name .. "' does not have property '" .. key .. "'.")
-        end
+		if (not libraryObject or not libraryObject[key]) then
+			error(libraryName .. " '" .. name .. "' does not have property '" .. key .. "'.")
+		end
 
-        return libraryObject[key]
-    end
+		return libraryObject[key]
+	end
 
 	return library
 end
@@ -199,4 +199,19 @@ end
 --- @vararg any
 function ix.util.SchemaError(...)
 	error("[Experiment Redux] " .. string.format(...), 2)
+end
+
+--- Checks if the server or client has the given addon mounted.
+--- @param workshopID number The workshop ID of the addon.
+--- @return boolean # True if the addon is mounted, false otherwise.
+function ix.util.IsAddonMounted(workshopID)
+	local addons = engine.GetAddons()
+
+	for _, addon in ipairs(addons) do
+		if (addon.wsid == workshopID) then
+			return addon.mounted
+		end
+	end
+
+	return false
 end

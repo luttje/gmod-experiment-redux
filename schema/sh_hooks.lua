@@ -1,5 +1,9 @@
 local function hackOptionRestrictions()
 	timer.Simple(0, function()
+		if (not ix.option.stored["language"]) then
+			return
+		end
+
 		-- ! Hack to disable other languages for now.
 		-- TODO: Write translations for other languages than English
 		ix.option.stored["language"].populate = function()
@@ -37,14 +41,14 @@ end
 
 function Schema:Tick()
 	if (CLIENT) then
-        if (IsValid(ix.gui.openedStorage)
-                and ix.gui.openedStorage.storageInventory.invID
-                and ix.gui.inv1.invID
-                and not ix.gui.openedStorage.hasSchemaSetup) then
-            ix.gui.openedStorage.hasSchemaSetup = true
+		if (IsValid(ix.gui.openedStorage)
+				and ix.gui.openedStorage.storageInventory.invID
+				and ix.gui.inv1.invID
+				and not ix.gui.openedStorage.hasSchemaSetup) then
+			ix.gui.openedStorage.hasSchemaSetup = true
 
-            Schema.SetupStoragePanel(ix.gui.openedStorage, ix.gui.openedStorage.storageInventory, ix.gui.inv1)
-        end
+			Schema.SetupStoragePanel(ix.gui.openedStorage, ix.gui.openedStorage.storageInventory, ix.gui.inv1)
+		end
 
 		if (IsValid(ix.gui.inv1)
 				and not ix.gui.inv1.hasSchemaSetup) then
@@ -86,131 +90,135 @@ function Schema:CanPlayerUseBusiness(client, uniqueID)
 end
 
 function Schema:InitializedPlugins()
-    local ammoItems = {}
-    local items = ix.item.list
+	local ammoItems = {}
+	local items = ix.item.list
 
-    for _, item in pairs(items) do
-        if (item.mergeIntoSwep and item.class) then
-            local swep = weapons.GetStored(item.class)
+	for _, item in pairs(items) do
+		if (item.mergeIntoSwep and item.class) then
+			local swep = weapons.GetStored(item.class)
 
 			if (not swep) then
-				ErrorNoHaltWithStack("Item " .. tostring(item.uniqueID) .. " has a mergeIntoSwep but the weapon class (" .. tostring(item.class) .. ") does not exist!\n")
+				ErrorNoHaltWithStack("Item " ..
+				tostring(item.uniqueID) ..
+				" has a mergeIntoSwep but the weapon class (" .. tostring(item.class) .. ") does not exist!\n")
 			end
 
-            table.Merge(swep, item.mergeIntoSwep, true)
-        end
+			table.Merge(swep, item.mergeIntoSwep, true)
+		end
 
-        if (item.isAttachment and item.class) then
-            Schema.RegisterWeaponAttachment(item)
-        end
+		if (item.isAttachment and item.class) then
+			Schema.RegisterWeaponAttachment(item)
+		end
 
-        if (item:IsBasedOn("base_ammo") and item.calibre) then
-            ammoItems[item.calibre] = item
-        end
+		if (item:IsBasedOn("base_ammo") and item.calibre) then
+			ammoItems[item.calibre] = item
+		end
 
-        if (item.forcedWeaponCalibre) then
-            if (not item.class) then
-                ix.util.SchemaErrorNoHalt("Item " .. item.uniqueID .. " does not have a class, can't force bullet calibre.")
-                continue
-            end
+		if (item.forcedWeaponCalibre) then
+			if (not item.class) then
+				ix.util.SchemaErrorNoHalt("Item " ..
+				item.uniqueID .. " does not have a class, can't force bullet calibre.")
+				continue
+			end
 
-            Schema.ammo.ForceWeaponCalibre(item.class, item.forcedWeaponCalibre)
-        end
-    end
+			Schema.ammo.ForceWeaponCalibre(item.class, item.forcedWeaponCalibre)
+		end
+	end
 
-    local calibres = Schema.ammo.GetAllCalibres()
+	local calibres = Schema.ammo.GetAllCalibres()
 
-    -- Check if the calibre has a matching ammo item
-    for _, calibre in ipairs(calibres) do
-        if (not ammoItems[calibre]) then
-            ix.util.SchemaErrorNoHalt("No ammo item found for calibre '" ..
-                calibre .. "'. You should create an ammo item for this calibre.\n")
-        end
-    end
+	-- Check if the calibre has a matching ammo item
+	for _, calibre in ipairs(calibres) do
+		if (not ammoItems[calibre]) then
+			ix.util.SchemaErrorNoHalt("No ammo item found for calibre '" ..
+				calibre .. "'. You should create an ammo item for this calibre.\n")
+		end
+	end
 
-    if (SERVER) then
-        local anyNewUnloaded = false
+	if (SERVER) then
+		local anyNewUnloaded = false
 
-        for _, pluginID in ipairs(Schema.disabledPlugins) do
-            local pluginUnloaded = ix.plugin.unloaded[pluginID] == true
+		for _, pluginID in ipairs(Schema.disabledPlugins) do
+			local pluginUnloaded = ix.plugin.unloaded[pluginID] == true
 
-            if (not pluginUnloaded) then
-                anyNewUnloaded = true
-                ix.plugin.SetUnloaded(pluginID, true)
-                ix.util.SchemaErrorNoHalt("Helix Plugin Notice: The plugin '" .. pluginID .. "' is marked as disabled in the schema.\n")
-            end
-        end
+			if (not pluginUnloaded) then
+				anyNewUnloaded = true
+				ix.plugin.SetUnloaded(pluginID, true)
+				ix.util.SchemaErrorNoHalt("Helix Plugin Notice: The plugin '" ..
+				pluginID .. "' is marked as disabled in the schema.\n")
+			end
+		end
 
-        if (anyNewUnloaded) then
-            ix.util.SchemaErrorNoHalt(
+		if (anyNewUnloaded) then
+			ix.util.SchemaErrorNoHalt(
 				"Helix Plugin Notice: Some plugins were disabled by the schema. You should most definitely restart the server to apply these changes!\n"
 			)
-        end
-    end
+		end
+	end
 
-    Schema.RegisterMaterialSources()
+	Schema.RegisterMaterialSources()
 end
 
 function Schema:EntityKeyValue(entity, key, value)
-    local maps = Schema.map.FindByProperty("mapName", game.GetMap(), true)
+	local maps = Schema.map.FindByProperty("mapName", game.GetMap(), true)
 
-    for _, map in ipairs(maps) do
-        if (map.EntityKeyValue) then
-            local override = map:EntityKeyValue(entity, key, value)
+	for _, map in ipairs(maps) do
+		if (map.EntityKeyValue) then
+			local override = map:EntityKeyValue(entity, key, value)
 
-            if (override ~= nil) then
-                return override
-            end
-        end
-    end
+			if (override ~= nil) then
+				return override
+			end
+		end
+	end
 end
 
 function Schema:PlayerFootstep(client, position, foot, soundName, volume, filter)
-    local mode = client:IsRunning() and "run" or "walk"
+	local mode = client:IsRunning() and "run" or "walk"
 
-    if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
-        return true
-    end
+	if (mode == "walk" and Schema.perk.GetOwned("light_step", client)) then
+		return true
+	end
 
-    if (client:IsBot()) then
-        -- Bots wont have an inventory
-        return
-    end
+	if (client:IsBot()) then
+		-- Bots wont have an inventory
+		return
+	end
 
-    local armorItems = client:GetCharacterNetVar("armorItems", {})
-    local soundOverride
+	local armorItems = client:GetCharacterNetVar("armorItems", {})
+	local soundOverride
 
-    for _, uniqueId in ipairs(armorItems) do
-        local item = ix.item.list[uniqueId]
+	for _, uniqueId in ipairs(armorItems) do
+		local item = ix.item.list[uniqueId]
 
-        if (not item or not item.footstepSounds) then
-            continue
-        end
+		if (not item or not item.footstepSounds) then
+			continue
+		end
 
-        local footstepSounds = item.footstepSounds[mode]
+		local footstepSounds = item.footstepSounds[mode]
 
-        if (not footstepSounds) then
-            continue
-        end
+		if (not footstepSounds) then
+			continue
+		end
 
-        soundOverride = footstepSounds[math.random(#footstepSounds)]
-    end
+		soundOverride = footstepSounds[math.random(#footstepSounds)]
+	end
 
-    if (soundOverride) then
-        EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, 100, 0, filter)
-        return true
-    end
+	if (soundOverride) then
+		EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, 100, 0, filter)
+		return true
+	end
 
-    if (soundName:StartsWith("player/footsteps/wood")) then
-        local shouldPlaySqueekSound = math.Rand(0, 100) <= 0.5
+	if (soundName:StartsWith("player/footsteps/wood")) then
+		local shouldPlaySqueekSound = math.Rand(0, 100) <= 0.5
 
-        if (shouldPlaySqueekSound) then
-            soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or
-            "ambient/materials/squeekyfloor2.wav"
+		if (shouldPlaySqueekSound) then
+			soundOverride = mode == "walk" and "ambient/materials/squeekyfloor1.wav" or
+				"ambient/materials/squeekyfloor2.wav"
 
-            EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, math.random(95, 105), 0, filter)
-        end
-    end
+			EmitSound(soundOverride, position, 0, CHAN_BODY, volume, 75, 0, math.random(95, 105), 0, filter)
+		end
+	end
 end
 
 function Schema:GetDefaultAttributePoints(client)
@@ -219,10 +227,10 @@ end
 
 function Schema:AdjustMaterialSources(materialSources)
 	local VERY_RARE = 0.5
-    local RARE = 4
-    local UNCOMMON = 10
-    local COMMON = 15
-    local VERY_COMMON = 30
+	local RARE = 4
+	local UNCOMMON = 10
+	local COMMON = 15
+	local VERY_COMMON = 30
 
 	--[[
 		Wooden props
@@ -238,7 +246,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 3,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk2",
@@ -248,7 +256,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 3,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk3",
@@ -258,7 +266,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk4",
@@ -268,7 +276,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk5",
@@ -278,7 +286,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 3,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk6",
@@ -288,7 +296,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 3,
 		}
-    })
+	})
 
 	-- Wooden chair
 
@@ -300,7 +308,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 3,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_chair_chunk2",
@@ -311,7 +319,7 @@ function Schema:AdjustMaterialSources(materialSources)
 			["material_wood"] = 2,
 			["material_cloth"] = 1,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_chair_chunk3",
@@ -321,9 +329,9 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 2,
 		}
-    })
+	})
 
-    -- Barricade 1
+	-- Barricade 1
 
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk1",
@@ -375,7 +383,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_wood"] = 2,
 		}
-    })
+	})
 
 	-- Barricade 2
 
@@ -417,7 +425,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		Hard metal props
 	--]]
 
-    -- Big props
+	-- Big props
 
 	materialSources:Add({
 		uniqueID = "source_metal_bedframe_chunk1",
@@ -439,21 +447,21 @@ function Schema:AdjustMaterialSources(materialSources)
 			["material_metal"] = 6,
 		},
 		noDrop = true,
-    })
+	})
 
-    -- Small props
+	-- Small props
 
-    for i = 1, 8 do
-        materialSources:Add({
-            uniqueID = "source_metal_vent_chunk" .. i,
-            name = "Ventilation Cover Chunk",
-            chanceToScavenge = COMMON,
-            model = "models/props_junk/vent001_chunk" .. i .. ".mdl",
-            scrapMaterials = {
-                ["material_metal"] = 2,
-            }
-        })
-    end
+	for i = 1, 8 do
+		materialSources:Add({
+			uniqueID = "source_metal_vent_chunk" .. i,
+			name = "Ventilation Cover Chunk",
+			chanceToScavenge = COMMON,
+			model = "models/props_junk/vent001_chunk" .. i .. ".mdl",
+			scrapMaterials = {
+				["material_metal"] = 2,
+			}
+		})
+	end
 
 	materialSources:Add({
 		uniqueID = "source_metal_toilet_chunk1",
@@ -463,7 +471,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_metal"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_metal_sink_chunk1",
@@ -473,7 +481,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_metal"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_metal_connector_chunk2",
@@ -513,7 +521,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_metal"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_metal_gascan",
@@ -523,7 +531,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_metal"] = 2,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_metal_popcan",
@@ -539,7 +547,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		Plastic props
 	--]]
 
-    -- Small props
+	-- Small props
 
 	materialSources:Add({
 		uniqueID = "source_plastic_milkcarton",
@@ -549,7 +557,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		scrapMaterials = {
 			["material_plastic"] = 1,
 		}
-    })
+	})
 
 	materialSources:Add({
 		uniqueID = "source_plastic_bottle",
