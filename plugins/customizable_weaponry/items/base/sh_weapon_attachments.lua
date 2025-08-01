@@ -18,14 +18,14 @@ function ITEM:GetModel()
 end
 
 function ITEM:GetAttachment()
-	local attachment = TacRP.GetAttTable(self.attachmentId)
+	local attachment = PLUGIN.GetAttTable(self.attachmentId)
 
 	return attachment
 end
 
 -- Hack a context menu into the business panel for attachments to list compatible weapons before the player buys them
 function ITEM.PaintOver(icon, itemTable, w, h)
-    local parent = icon:GetParent()
+	local parent = icon:GetParent()
 
 	if (not parent) then
 		return
@@ -103,15 +103,15 @@ ITEM.functions.Attach = {
 		end
 
 		return options
-    end,
+	end,
 
 	OnRun = function(attachmentItem, data)
 		local client = attachmentItem.player
 		local character = client:GetCharacter()
 
-        if (not data.itemID) then
-            local inventory = character:GetInventory()
-            local matchedWeapons = #inventory:GetItemsByNestedBase("base_customizable_weaponry")
+		if (not data.itemID) then
+			local inventory = character:GetInventory()
+			local matchedWeapons = #inventory:GetItemsByNestedBase("base_customizable_weaponry")
 
 			if (matchedWeapons == 0) then
 				client:Notify("You do not have any weapons to attach this to.")
@@ -152,18 +152,18 @@ ITEM.functions.Attach = {
 			return false
 		end
 
-        -- Find the attachment slot on the SWEP that goes with the attachment category
-        local attachmentCategories = istable(attachment.Category)
+		-- Find the attachment slot on the SWEP that goes with the attachment category
+		local attachmentCategories = istable(attachment.Category)
 			and attachment.Category
 			or { attachment.Category }
-        local foundAttachmentSlot
+		local foundAttachmentSlot
 
 		for attachmentSlotId, attachmentSlot in ipairs(swep.Attachments) do
 			local slotCategories = istable(attachmentSlot.Category)
 				and attachmentSlot.Category
-                or { attachmentSlot.Category }
+				or { attachmentSlot.Category }
 
-            for _, slotCategory in ipairs(slotCategories) do
+			for _, slotCategory in ipairs(slotCategories) do
 				for _, attachmentCategory in ipairs(attachmentCategories) do
 					if (slotCategory == attachmentCategory) then
 						foundAttachmentSlot = attachmentSlotId
@@ -182,11 +182,13 @@ ITEM.functions.Attach = {
 		-- Check if the weapon item's slot is already taken
 		local attachments = weaponItem:GetData("attachments", {})
 
-        if (attachments[foundAttachmentSlot]) then
-            local existingAttachment = TacRP.GetAttTable(attachments[foundAttachmentSlot].id)
+		if (attachments[foundAttachmentSlot]) then
+			local existingAttachment = PLUGIN.GetAttTable(attachments[foundAttachmentSlot].id)
 
 			if (existingAttachment) then
-				client:Notify("This weapon already has an attachment (" .. (TacRP:GetPhrase(existingAttachment.PrintName) or existingAttachment.PrintName) .. ") occupying the same slot.")
+				client:Notify("This weapon already has an attachment (" ..
+					(PLUGIN:GetPhrase(existingAttachment.PrintName) or existingAttachment.PrintName) ..
+					") occupying the same slot.")
 			else
 				client:Notify("This weapon already has an attachment occupying the same slot.")
 			end
@@ -219,20 +221,20 @@ ITEM.functions.Attach = {
 		if (IsValid(weapon) and weapon.ixItem == weaponItem) then
 			weapon:Attach(foundAttachmentSlot, attachmentItem.attachmentId, true, true)
 			weapon:NetworkWeapon()
-            TacRP:PlayerSendAttInv(client)
+			PLUGIN:PlayerSendAttInv(client)
 		end
 
 		-- We have manually removed the item from the inventory (so the instance isn't destroyed)
 		return false
-    end,
+	end,
 
-    OnCanRun = function(item)
-        local client = item.player
+	OnCanRun = function(item)
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		return true
 	end,

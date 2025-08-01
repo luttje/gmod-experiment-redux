@@ -202,7 +202,7 @@ function ix.util.SchemaError(...)
 end
 
 --- Checks if the server or client has the given addon mounted.
---- @param workshopID number The workshop ID of the addon.
+--- @param workshopID string The workshop ID of the addon.
 --- @return boolean # True if the addon is mounted, false otherwise.
 function ix.util.IsAddonMounted(workshopID)
 	local addons = engine.GetAddons()

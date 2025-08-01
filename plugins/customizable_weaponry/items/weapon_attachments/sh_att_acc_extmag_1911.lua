@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "Mag Extender for M1911 and SIG 1911"

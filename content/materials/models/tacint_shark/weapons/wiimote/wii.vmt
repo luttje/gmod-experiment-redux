@@ -1,0 +1,10 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\tacint_shark\weapons\wiimote\wii"
+	"$envmap" "env_cubemap"
+	"$bumpmap" "models\tacint_shark\weapons\wiimote\wii1_normal"
+	"$normalmapalphaenvmapmask" "1"	
+ 	"$selfillum" 1	
+}
+
+

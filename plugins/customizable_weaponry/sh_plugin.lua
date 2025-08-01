@@ -1,3 +1,19 @@
+--[[
+	Based on PLUGIN: https://steamcommunity.com/sharedfiles/filedetails/?id=2588031232
+
+	Copied credits from that Workshop listing:
+	- 8Z: Weapon balance, post-launch features, extra weapons.
+	- speedonerd: Model edits and various contributions.
+	- Fesiug: Attachment highlight display.
+	- Arqu: Animations for Riot Shield.
+	- FIXGames Korea: Tactical Intervention
+	- Minh "Gooseman" Le: Original animator
+	- Arctic: Laying the foundations
+
+	We copied over this addon and the weapons, such that we can remove any unwanted features and prevent the
+	author from updating the addon and breaking our schema. This version is a fork from the version that
+	was on the Steam Workshop @ 25-5-2024.
+--]]
 local PLUGIN = PLUGIN
 
 PLUGIN.name = "Customizable Weaponry"
@@ -8,14 +24,12 @@ ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 
 local conVarsToSet = {
-	["tacrp_funny_loudnoises"] = { isServer = true, value = false },
-	["tacrp_checknews"] = { isServer = true, value = false },
 	["tacrp_hud"] = { isServer = true, value = false },
 	["tacrp_drawhud"] = { isServer = false, value = false },
 	["tacrp_shutup"] = { isServer = false, value = true },
 	["tacrp_hints"] = { isServer = false, value = false },
 
-	-- Note that without setting this to false the server errors in TacRP.LoadAtt.
+	-- Note that without setting this to false the server errors in PLUGIN.LoadAtt.
 	-- This is because Material("*.png") fails to load on the server
 	-- See https://wiki.facepunch.com/gmod/Global.Material#description
 	["tacrp_generateattentities"] = { isServer = true, value = false },
@@ -23,12 +37,12 @@ local conVarsToSet = {
 	-- Balance recoil, damage and other features
 	["tacrp_mult_recoil_kick"] = { isServer = true, value = 0.75 },
 	["tacrp_mult_recoil_vis"] = { isServer = true, value = 0.85 },
-	["tacrp_sway"] = { isServer = true, value = false }, -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
-	["tacrp_freeaim"] = { isServer = true, value = false }, -- false disables: While not aiming, moving around will cause the crosshair to move off center
-    ["tacrp_autoreload"] = { isServer = false, value = false },
-    ["tacrp_flashlight_blind"] = { isServer = true, value = false }, -- false disables the blinding glare growing, the hook.Remove for TacRP_TranslucentDraw actually fully disables its functionality. We manually re-enable lasers in PostDrawTranslucentRenderables
+	["tacrp_sway"] = { isServer = true, value = false },          -- false disables: Weapon point of aim will move around gently. While aiming, hold sprint key to hold breath and steady aim
+	["tacrp_freeaim"] = { isServer = true, value = false },       -- false disables: While not aiming, moving around will cause the crosshair to move off center
+	["tacrp_autoreload"] = { isServer = false, value = false },
+	["tacrp_flashlight_blind"] = { isServer = true, value = false }, -- false disables the blinding glare growing, the hook.Remove for TacRP_TranslucentDraw actually fully disables its functionality. We manually re-enable lasers in PostDrawTranslucentRenderables
 
-	["tacrp_autosave"] = { isServer = false, value = false }, -- Prevents TacRP's SWEP:LoadPreset from being called and wiping attachments we add
+	["tacrp_autosave"] = { isServer = false, value = false },     -- Prevents TacRP's SWEP:LoadPreset from being called and wiping attachments we add
 	-- ["tacrp_physbullet"] = false, -- false disables: Bullets will be hitscan up to a certain range depending on muzzle velocity
 	-- ["tacrp_recoilpattern"] = false,
 	-- ["tacrp_altrecoil"] = false, -- false disables: If enabled, gaining bloom intensifies recoil but does not modify spread.\nIf disabled, gaining bloom increases spread but does not modify recoil kick (old behavior).\nBloom is gained when firing consecutive shots.
@@ -46,7 +60,7 @@ Schema.util.ForceConVars(conVarsToSet)
 PLUGIN.compatibleItemsLookup = PLUGIN.compatibleItemsLookup or {}
 
 function PLUGIN:GetCompatibleItems(attachmentId)
-	local attachment = TacRP.GetAttTable(attachmentId)
+	local attachment = PLUGIN.GetAttTable(attachmentId)
 	local categories = istable(attachment.Category) and attachment.Category or { attachment.Category }
 	local compatibleItems = {}
 
@@ -78,7 +92,8 @@ function PLUGIN:InitializedPlugins()
 		end
 
 		for attachmentSlotId, attachmentSlot in pairs(swep.Attachments) do
-			local categories = istable(attachmentSlot.Category) and attachmentSlot.Category or { attachmentSlot.Category }
+			local categories = istable(attachmentSlot.Category) and attachmentSlot.Category or
+				{ attachmentSlot.Category }
 
 			for _, category in ipairs(categories) do
 				if (not self.compatibleItemsLookup[category]) then

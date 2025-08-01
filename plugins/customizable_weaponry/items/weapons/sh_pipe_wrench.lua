@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "Pipe Wrench"
@@ -10,7 +12,7 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Melee"
 ITEM.weaponCategory = "melee"
-ITEM.class = "tacrp_m_wrench"
+ITEM.class = "exp_tacrp_m_wrench"
 
 ITEM.isAttachment = true
 ITEM.attachmentBone = "ValveBiped.Bip01_Pelvis"
@@ -18,5 +20,5 @@ ITEM.attachmentOffsetAngles = Angle(0, 180, 87)
 ITEM.attachmentOffsetVector = Vector(0, 0, -7.2)
 
 ITEM.mergeIntoSwep = {
-	MeleeRange = 50,
+  MeleeRange = 50,
 }

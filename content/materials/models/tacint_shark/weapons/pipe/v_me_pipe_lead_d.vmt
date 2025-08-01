@@ -1,0 +1,9 @@
+"vertexlitgeneric"
+{
+$baseTexture "models\tacint_shark\weapons\pipe\v_me_pipe_lead_d"
+$bumpmap "models\tacint_shark\weapons\pipe\v_me_pipe_lead_n"
+
+$surfaceprop "metal"
+	"keywords" "leadpipe"
+}
+}

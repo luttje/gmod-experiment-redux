@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "Cheek Rest"

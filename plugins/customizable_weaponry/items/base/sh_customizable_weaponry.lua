@@ -1,3 +1,4 @@
+local PLUGIN = PLUGIN
 local ITEM = ITEM
 
 ITEM.base = "base_weapons"
@@ -13,35 +14,35 @@ function ITEM:GetFilters()
 end
 
 function ITEM:OnEquipWeapon(client, weapon)
-    local attachments = self:GetData("attachments", {})
+	local attachments = self:GetData("attachments", {})
 
-    if (not IsValid(weapon)) then
-        return
-    end
+	if (not IsValid(weapon)) then
+		return
+	end
 
-    for attachmentSlotId, attachmentData in pairs(attachments) do
+	for attachmentSlotId, attachmentData in pairs(attachments) do
 		local silent, suppress = true, true
-        weapon:Attach(attachmentSlotId, attachmentData.id, silent, suppress)
-    end
+		weapon:Attach(attachmentSlotId, attachmentData.id, silent, suppress)
+	end
 
-    weapon:NetworkWeapon()
-    weapon:NetworkWeapon(client) -- Ensure the player always has the weapon networked even if they're not in the weapon's PVS :/
-    TacRP:PlayerSendAttInv(client)
+	weapon:NetworkWeapon()
+	weapon:NetworkWeapon(client) -- Ensure the player always has the weapon networked even if they're not in the weapon's PVS :/
+	PLUGIN:PlayerSendAttInv(client)
 end
 
 function ITEM:OnRestored()
-    -- Attachment items attached to this weapon exist, but aren't automatically loaded into ix.item.instances
-    -- So let's do that manually
-    local attachments = self:GetData("attachments", {})
+	-- Attachment items attached to this weapon exist, but aren't automatically loaded into ix.item.instances
+	-- So let's do that manually
+	local attachments = self:GetData("attachments", {})
 	local itemIds = {}
 
 	for _, attachmentData in pairs(attachments) do
 		table.insert(itemIds, attachmentData.itemID)
 	end
 
-    if (#itemIds == 0) then
-        return
-    end
+	if (#itemIds == 0) then
+		return
+	end
 
 	ix.item.LoadItemByID(itemIds)
 end
@@ -55,10 +56,10 @@ ITEM.functions.DetachAttachment = {
 		local options = {}
 
 		for attachmentSlotId, attachmentData in pairs(attachments) do
-			local attachment = TacRP.GetAttTable(attachmentData.id)
+			local attachment = PLUGIN.GetAttTable(attachmentData.id)
 
 			options[attachmentSlotId] = {
-				name = (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName),
+				name = (PLUGIN:GetPhrase(attachment.PrintName) or attachment.PrintName),
 				data = {
 					attachmentSlotId = attachmentSlotId,
 				},
@@ -74,7 +75,7 @@ ITEM.functions.DetachAttachment = {
 		local attachmentSlotId = data.attachmentSlotId
 		local attachmentData = attachments[attachmentSlotId]
 
-        if (not attachmentData) then
+		if (not attachmentData) then
 			client:Notify("Select one of the listed attachments to detach.")
 
 			return false
@@ -83,7 +84,8 @@ ITEM.functions.DetachAttachment = {
 		local attachmentItem = ix.item.instances[attachmentData.itemID]
 
 		if (not attachmentItem) then
-			ix.util.SchemaErrorNoHalt("Attachment item not found for item " .. weaponItem.uniqueID .. " when attempting to detach from weapon.\n")
+			ix.util.SchemaErrorNoHalt("Attachment item not found for item " ..
+				weaponItem.uniqueID .. " when attempting to detach from weapon.\n")
 			client:Notify("This attachment no longer belongs to a valid item.")
 
 			return false
@@ -127,16 +129,16 @@ ITEM.functions.DetachAttachment = {
 		if (IsValid(weapon) and weapon.ixItem == weaponItem) then
 			weapon:Detach(attachmentSlotId, true, true)
 			weapon:NetworkWeapon()
-			TacRP:PlayerSendAttInv(client)
+			PLUGIN:PlayerSendAttInv(client)
 		end
 
 		return false
 	end,
 
-    OnCanRun = function(item)
-        local client = item.player
+	OnCanRun = function(item)
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
+		-- Ensure it's in the player's inventory
 		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
 			return false
 		end
@@ -148,30 +150,30 @@ ITEM.functions.DetachAttachment = {
 }
 
 if (CLIENT) then
-    function ITEM:PopulateTooltip(tooltip)
-        local attachments = self:GetData("attachments", {})
-        local swep = weapons.Get(self.class)
-        local ammo = swep.Primary.Ammo
+	function ITEM:PopulateTooltip(tooltip)
+		local attachments = self:GetData("attachments", {})
+		local swep = weapons.Get(self.class)
+		local ammo = swep.Primary.Ammo
 
-		if (weapons.IsBasedOn(self.class, "tacrp_base")) then
-			ammo = swep.Ammo -- For TacRP
+		if (weapons.IsBasedOn(self.class, "exp_tacrp_base")) then
+			ammo = swep.Ammo -- For our TacRP modification
 		end
 
 		ammo = Schema.ammo.ConvertToCalibreName(ammo)
 
-        local panel = tooltip:AddRowAfter("name", "ammo")
-        panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
-        panel:SetText("Ammo: " .. ammo)
+		local panel = tooltip:AddRowAfter("name", "ammo")
+		panel:SetBackgroundColor(derma.GetColor("Info", tooltip))
+		panel:SetText("Ammo: " .. ammo)
 		panel:SizeToContents()
 
-        for attachmentSlotId, attachmentData in pairs(attachments) do
-            local attachment = TacRP.GetAttTable(attachmentData.id)
+		for attachmentSlotId, attachmentData in pairs(attachments) do
+			local attachment = PLUGIN.GetAttTable(attachmentData.id)
 
-            local panel = tooltip:AddRowAfter("ammo", "attachments" .. attachmentSlotId)
-            panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-            panel:SetText(TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName)
-            panel:SizeToContents()
-        end
+			local panel = tooltip:AddRowAfter("ammo", "attachments" .. attachmentSlotId)
+			panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
+			panel:SetText(PLUGIN:GetPhrase(attachment.PrintName) or attachment.PrintName)
+			panel:SizeToContents()
+		end
 
 		return tooltip
 	end

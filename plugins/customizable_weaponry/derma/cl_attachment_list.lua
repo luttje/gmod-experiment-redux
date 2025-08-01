@@ -52,11 +52,12 @@ end
 
 function PANEL:Populate(attachmentId)
 	local compatibleItems = table.ClearKeys(PLUGIN:GetCompatibleItems(attachmentId))
-	local attachment = TacRP.GetAttTable(attachmentId)
+	local attachment = PLUGIN.GetAttTable(attachmentId)
 
 	table.SortByMember(compatibleItems, "name", true)
 
-	self:SetTitle("Weapons compatible with the '" .. (TacRP:GetPhrase(attachment.PrintName) or attachment.PrintName) .. "'")
+	self:SetTitle("Weapons compatible with the '" ..
+		(PLUGIN:GetPhrase(attachment.PrintName) or attachment.PrintName) .. "'")
 
 	for _, weaponItem in pairs(compatibleItems) do
 		self:AddCompatibleWeapon(weaponItem)

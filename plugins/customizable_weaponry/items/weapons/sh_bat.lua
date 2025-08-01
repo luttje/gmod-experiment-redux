@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "Louisville Slugger TPX"
@@ -9,7 +11,7 @@ ITEM.width = 1
 ITEM.height = 2
 ITEM.category = "Melee"
 ITEM.weaponCategory = "melee"
-ITEM.class = "tacrp_m_bat"
+ITEM.class = "exp_tacrp_m_bat"
 
 ITEM.isAttachment = true
 ITEM.attachmentBone = "ValveBiped.Bip01_Spine"

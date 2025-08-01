@@ -1,8 +1,10 @@
+local PLUGIN = PLUGIN
+
 if SERVER then
-    AddCSLuaFile()
+	AddCSLuaFile()
 end
 
-SWEP.Base = "tacrp_m4star10"
+SWEP.Base = "exp_tacrp_m4star10"
 
 SWEP.PrintName = "Beanbag Shotgun"
 SWEP.Category = "Experiment Redux"

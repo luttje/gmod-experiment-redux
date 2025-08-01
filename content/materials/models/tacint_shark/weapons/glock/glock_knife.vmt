@@ -1,0 +1,7 @@
+VertexLitGeneric
+{
+	"$basetexture"	"models\tacint_shark\weapons\glock\glock_knife"
+      	"$bumpmap" "models\tacint_shark\weapons\glock\glock_knife_normal"
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" "1"
+}

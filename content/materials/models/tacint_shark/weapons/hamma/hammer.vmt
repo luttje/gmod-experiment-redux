@@ -1,0 +1,6 @@
+ VertexLitGeneric
+{
+   "$baseTexture" "models\tacint_shark\weapons\hamma\Hammer Yellow"
+   "$envmap" "env_cubemap"
+   "$envmapmask" "models\tacint_shark\weapons\hamma\Hammer_ref"
+}

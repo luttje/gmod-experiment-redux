@@ -1,6 +1,0 @@
-"AddonInfo"
-{
-	"name" "[TacRP] Tactical RP Weapons"
-	"author_name" "Author Name"
-	"info" "{"title":"[TacRP] Tactical RP Weapons","type":"weapon","tags":["fun","roleplay","realism"],"ignore":["*.cmd","snowdoom_content.jpg","_workfolder/*","dz_ents.gif","arccw extra.png","arccw extra.jpg","*.bat","*.code-workspace",".gitattributes","tacrp_interops.jpg","*.log","arccw.jpg","workfolder/*","*.py","model credits.txt","*.md"]}"
-}

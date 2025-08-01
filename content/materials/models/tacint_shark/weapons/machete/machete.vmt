@@ -1,0 +1,35 @@
+"vertexlitgeneric"
+{
+	"$basetexture"             "models\tacint_shark\weapons\machete\machete"
+	"$bumpmap"                 "models\tacint_shark\weapons\machete\machete_n"
+	"$normalmapalphaenvmapmask" "1"
+	"$model" "1"
+
+	"$envmap"                  "env_cubemap"
+	"$envmaptint"              "[.5 .5 .5]"
+	"$envmapfresnel"           "1"
+
+	"$phong"                    "1"
+	//"$phongexponenttexture"     "models\tacint_shark\weapons\machete\machete_exp"
+	"$phongexponent"            "128"
+	"$phongboost"	            "10"
+	"$phongfresnelranges"       "[.75 1 8]"
+	"$phongalbedotint"          "1"
+	
+	"$rimlight"                 "1"
+	"$rimlightexponent"         "80"	
+	"$rimlightboost"            ".65"
+	"$rimmask"                  "1"
+	
+	"$detail" "blood_hands"
+	"$detailblendmode" "2"
+	"$detailblendfactor" "0.0"
+	"$detailscale" "1.0"
+
+	"Proxies"
+	{
+		"BloodyTexture"
+		{
+		}
+	}	
+}
