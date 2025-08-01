@@ -13,14 +13,24 @@ function Schema.draw.DrawCircle(x, y, radius, seg)
 	for i = 0, seg do
 		local a = math.rad((i / seg) * -360)
 		table.insert(cir,
-			{ x = x + math.sin(a) * radius, y = y + math.cos(a) * radius, u = math.sin(a) / 2 + 0.5, v = math.cos(a) /
-			2 + 0.5 })
+			{
+				x = x + math.sin(a) * radius,
+				y = y + math.cos(a) * radius,
+				u = math.sin(a) / 2 + 0.5,
+				v = math.cos(a) /
+					2 + 0.5
+			})
 	end
 
 	local a = math.rad(0) -- This is needed for non absolute segment counts
 	table.insert(cir,
-		{ x = x + math.sin(a) * radius, y = y + math.cos(a) * radius, u = math.sin(a) / 2 + 0.5, v = math.cos(a) / 2 +
-		0.5 })
+		{
+			x = x + math.sin(a) * radius,
+			y = y + math.cos(a) * radius,
+			u = math.sin(a) / 2 + 0.5,
+			v = math.cos(a) / 2 +
+				0.5
+		})
 
 	surface.DrawPoly(cir)
 end
@@ -37,25 +47,30 @@ end
 --- @param partH number The height of each part in the spritesheet.
 --- @param mirror? boolean Whether to mirror the spritesheet part.
 function Schema.draw.DrawSpritesheetMaterial(spritesheet, x, y, w, h, partX, partY, partW, partH, mirror)
-    local spritesheetWidth, spritesheetHeight = spritesheet:Width(), spritesheet:Height()
-    local spriteX, spriteY = spritesheetWidth / partW, spritesheetHeight / partH
-    local u = partX / spriteX
-    local v = partY / spriteY
-    local u2 = (partX + 1) / spriteX
-    local v2 = (partY + 1) / spriteY
+	local spritesheetWidth, spritesheetHeight = spritesheet:Width(), spritesheet:Height()
+	local spriteX, spriteY = spritesheetWidth / partW, spritesheetHeight / partH
+	local u = partX / spriteX
+	local v = partY / spriteY
+	local u2 = (partX + 1) / spriteX
+	local v2 = (partY + 1) / spriteY
 
-    if (mirror) then
-        u, u2 = u2, u
-    end
+	if (mirror) then
+		u, u2 = u2, u
+	end
 
-    surface.SetMaterial(spritesheet)
-    surface.DrawTexturedRectUV(x, y, w, h, u, v, u2, v2)
+	surface.SetMaterial(spritesheet)
+	surface.DrawTexturedRectUV(x, y, w, h, u, v, u2, v2)
 end
 
 --- Draws a label and value on screen
+--- @param label string The label to display.
+--- @param value string The value to display.
+--- @param x? number The X position to draw the label and value at.
+--- @param y? number The Y position to draw the label and value at.
+--- @return number # The final Y position after drawing the label and value.
 function Schema.draw.DrawLabeledValue(label, value, x, y)
 	x = x or ScrW() * 0.5
-    y = y or ScrH() * 0.1
+	y = y or ScrH() * 0.1
 
 	local font = "ixSmallTitleFont"
 
@@ -71,7 +86,7 @@ function Schema.draw.DrawLabeledValue(label, value, x, y)
 		color_black
 	)
 
-	draw.SimpleTextOutlined(
+	local _, finalY = draw.SimpleTextOutlined(
 		value,
 		font,
 		x,
@@ -82,6 +97,8 @@ function Schema.draw.DrawLabeledValue(label, value, x, y)
 		1,
 		color_black
 	)
+
+	return y + labelHeight + finalY
 end
 
 --- Shows a spritesheet picker to get the x and y position of a spritesheet part.
@@ -156,7 +173,7 @@ concommand.Add("debug_spritesheet_picker", function(client, command, arguments)
 		end
 
 		local outputText = [[{
-			spritesheet = "]] ..spritesheetPath .. [[",
+			spritesheet = "]] .. spritesheetPath .. [[",
 			x = ]] .. selectedSpriteX .. [[,
 			y = ]] .. selectedSpriteY .. [[,
 			]] .. spriteDimensions .. [[,
@@ -196,7 +213,8 @@ concommand.Add("debug_spritesheet_picker", function(client, command, arguments)
 		local partY = selectedSpriteY
 
 		surface.SetDrawColor(255, 0, 0, 255)
-		surface.DrawOutlinedRect(partX * spriteWidth * scaleX, partY * spriteHeight * scaleY, spriteWidth * scaleX, spriteHeight * scaleY)
+		surface.DrawOutlinedRect(partX * spriteWidth * scaleX, partY * spriteHeight * scaleY, spriteWidth * scaleX,
+			spriteHeight * scaleY)
 	end
 
 	spritePicker.OnMousePressed = function(self, code)
