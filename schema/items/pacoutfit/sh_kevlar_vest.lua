@@ -16,6 +16,7 @@ ITEM.width = 2
 ITEM.height = 1
 ITEM.category = "Clothing"
 ITEM.outfitCategory = "vests"
+ITEM.removeOnDestroy = true
 ITEM.description = "A kevlar vest that provides you with extra armor."
 ITEM.maxArmor = 100
 ITEM.pacData = {
@@ -85,7 +86,7 @@ if (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)
 		local panel = tooltip:AddRowAfter("name", "armor")
 		panel:SetBackgroundColor(derma.GetColor("Warning", tooltip))
-		panel:SetText("Armor: " .. self:GetData("armor", self.maxArmor))
+		panel:SetText("Armor: " .. math.Round(self:GetData("armor", self.maxArmor), 2))
 		panel:SizeToContents()
 	end
 end
