@@ -11,4 +11,4 @@ ITEM.maxArmor = 2
 ITEM.bodyGroups = {
 	["hands"] = 1,
 }
-ITEM.chanceToScavenge = 1
+ITEM.chanceToScavenge = Schema.RARITY_SUPER_RARE

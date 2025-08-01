@@ -9,6 +9,6 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.maxArmor = 2
 ITEM.bodyGroups = {
-	["legs"] = 0,
+  ["legs"] = 0,
 }
-ITEM.chanceToScavenge = 2
+ITEM.chanceToScavenge = Schema.RARITY_RARE

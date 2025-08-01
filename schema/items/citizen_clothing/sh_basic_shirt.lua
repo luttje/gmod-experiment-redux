@@ -11,4 +11,4 @@ ITEM.maxArmor = 2
 ITEM.bodyGroups = {
 	["torso"] = 0,
 }
-ITEM.chanceToScavenge = 4
+ITEM.chanceToScavenge = Schema.RARITY_UNCOMMON

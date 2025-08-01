@@ -3,7 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Construction Assignment"
 ITEM.model = Model("models/props_c17/paper01.mdl")
 ITEM.description = "A piece of paper with a list of construction assignments."
-ITEM.chanceToScavenge = 2
+ITEM.chanceToScavenge = Schema.RARITY_SUPER_RARE
 
 function ITEM:GetText()
 	return [[

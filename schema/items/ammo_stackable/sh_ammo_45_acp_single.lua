@@ -7,9 +7,9 @@ ITEM.model = "models/experiment-redux/ammo/45acp.mdl"
 ITEM.noBusiness = true
 ITEM.ammoAmount = 1
 ITEM.description = "A single .45 ACP cartridge"
-ITEM.chanceToScavenge = 4
+ITEM.chanceToScavenge = Schema.RARITY_UNCOMMON
 
 if (SERVER) then
 	resource.AddFile("models/experiment-redux/ammo/45acp.mdl")
-    resource.AddFile("materials/models/experiment-redux/ammo/45acp.vmt")
+	resource.AddFile("materials/models/experiment-redux/ammo/45acp.vmt")
 end

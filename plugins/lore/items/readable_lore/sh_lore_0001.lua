@@ -3,7 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Arriane's Diary"
 ITEM.model = Model("models/props_lab/binderblue.mdl")
 ITEM.description = "A diary with a worn cover."
-ITEM.chanceToScavenge = 2
+ITEM.chanceToScavenge = Schema.RARITY_SUPER_RARE
 
 function ITEM:GetText()
 	return [[

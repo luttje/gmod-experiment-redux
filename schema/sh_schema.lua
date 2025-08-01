@@ -19,12 +19,12 @@ Schema.disabledPlugins = {
 	"strength",
 
 	-- We don't want player positions to be saved, they can only spawn at the spawn points
-    "spawnsaver",
+	"spawnsaver",
 
-    -- We disable the default spawn point system, because we want players to select one from a list
-    "spawns",
+	-- We disable the default spawn point system, because we want players to select one from a list
+	"spawns",
 
-    -- We do doors differently with our own plugin.
+	-- We do doors differently with our own plugin.
 	"doors",
 }
 
@@ -40,6 +40,15 @@ ix.util.Include("sh_hooks.lua")
 
 ix.util.Include("sv_schema.lua")
 ix.util.Include("sv_hooks.lua")
+
+-- Rarity enumerations
+Schema.RARITY_LEGENDARY = 0.001
+Schema.RARITY_GIGA_RARE = 0.5
+Schema.RARITY_SUPER_RARE = 2
+Schema.RARITY_RARE = 5
+Schema.RARITY_UNCOMMON = 15
+Schema.RARITY_COMMON = 45
+Schema.RARITY_VERY_COMMON = 60
 
 RANK_RCT = 0
 RANK_PVT = 1
@@ -73,14 +82,15 @@ ix.chat.Register("achievement", {
 	OnChatAdd = function(self, speaker, text)
 		local icon = ix.util.GetMaterial("icon16/star.png")
 
-		chat.AddText(icon, Color(139, 174, 179, 255), speaker, " has achieved the ", Color(139, 174, 179, 255), text, " achievement!")
+		chat.AddText(icon, Color(139, 174, 179, 255), speaker, " has achieved the ", Color(139, 174, 179, 255), text,
+			" achievement!")
 	end,
 	deadCanChat = true,
 })
 
 ix.chat.Register("broadcast", {
 	OnChatAdd = function(self, speaker, text)
-		chat.AddText("(Broadcast) ", Color(150, 125, 175, 255), speaker..": "..text)
+		chat.AddText("(Broadcast) ", Color(150, 125, 175, 255), speaker .. ": " .. text)
 	end,
 })
 
@@ -124,54 +134,54 @@ function Schema.RegisterWeaponAttachment(itemTable)
 end
 
 function Schema.GetWeaponAttachment(class)
-    return Schema.registeredWeaponAttachments[class]
+	return Schema.registeredWeaponAttachments[class]
 end
 
 function Schema.RegisterMaterialSources()
-    local helperMetaTable = {}
-    helperMetaTable.__index = helperMetaTable
-    local toBeRemoved = {}
+	local helperMetaTable = {}
+	helperMetaTable.__index = helperMetaTable
+	local toBeRemoved = {}
 
-    function helperMetaTable:Add(data)
-        table.insert(self, data)
-    end
+	function helperMetaTable:Add(data)
+		table.insert(self, data)
+	end
 
-    function helperMetaTable:Remove(uniqueID)
-        table.insert(toBeRemoved, uniqueID)
-    end
+	function helperMetaTable:Remove(uniqueID)
+		table.insert(toBeRemoved, uniqueID)
+	end
 
-    function helperMetaTable:RemoveQueued()
-        for _, uniqueID in ipairs(toBeRemoved) do
-            for i, data in ipairs(self) do
-                if (data.uniqueID == uniqueID) then
-                    table.remove(self, i)
-                end
-            end
-        end
+	function helperMetaTable:RemoveQueued()
+		for _, uniqueID in ipairs(toBeRemoved) do
+			for i, data in ipairs(self) do
+				if (data.uniqueID == uniqueID) then
+					table.remove(self, i)
+				end
+			end
+		end
 
-        toBeRemoved = {}
-    end
+		toBeRemoved = {}
+	end
 
-    local materialSources = setmetatable({}, helperMetaTable)
+	local materialSources = setmetatable({}, helperMetaTable)
 
-    hook.Run("AdjustMaterialSources", materialSources)
+	hook.Run("AdjustMaterialSources", materialSources)
 
-    materialSources:RemoveQueued()
+	materialSources:RemoveQueued()
 
-    -- Register the allowed props as blueprint items
-    for _, data in ipairs(materialSources) do
-        local uniqueID = string.lower(data.uniqueID)
-        local ITEM = ix.item.Register(
-            uniqueID,
-            "base_material_sources",
-            false,
-            nil,
-            true
-        )
+	-- Register the allowed props as blueprint items
+	for _, data in ipairs(materialSources) do
+		local uniqueID = string.lower(data.uniqueID)
+		local ITEM = ix.item.Register(
+			uniqueID,
+			"base_material_sources",
+			false,
+			nil,
+			true
+		)
 
-        table.Merge(ITEM, data, true)
-        ITEM.uniqueID = uniqueID
-    end
+		table.Merge(ITEM, data, true)
+		ITEM.uniqueID = uniqueID
+	end
 end
 
 local function randomElement(table)
@@ -179,27 +189,27 @@ local function randomElement(table)
 end
 
 function Schema.GetRandomName()
-    local NAMES_FIRST,
-		NAMES_LAST = include(Schema.folder .. "/schema/content/sh_names.lua")
+	local NAMES_FIRST,
+	NAMES_LAST = include(Schema.folder .. "/schema/content/sh_names.lua")
 
 	return randomElement(NAMES_FIRST) .. " " .. randomElement(NAMES_LAST)
 end
 
 function Schema.GetRandomDescription()
 	local DESCRIPTION_AGE_INDICATOR,
-		DESCRIPTION_BODY_TYPE_HEIGHT,
-		DESCRIPTION_BODY_TYPE_FRAME,
-		DESCRIPTION_FACIAL_FEATURES,
-		DESCRIPTION_TRAITS,
-		DESCRIPTION_BEHAVIOR = include(Schema.folder .. "/schema/content/sh_descriptions.lua")
+	DESCRIPTION_BODY_TYPE_HEIGHT,
+	DESCRIPTION_BODY_TYPE_FRAME,
+	DESCRIPTION_FACIAL_FEATURES,
+	DESCRIPTION_TRAITS,
+	DESCRIPTION_BEHAVIOR = include(Schema.folder .. "/schema/content/sh_descriptions.lua")
 
-    return randomElement(DESCRIPTION_AGE_INDICATOR)
-        .. " "
-        .. randomElement(DESCRIPTION_BODY_TYPE_HEIGHT):format("person")
-        .. " "
-        .. randomElement(DESCRIPTION_BODY_TYPE_FRAME)
-        .. ". They've got "
-        .. randomElement(DESCRIPTION_FACIAL_FEATURES)
-        .. ". " .. randomElement(DESCRIPTION_TRAITS)
-    	.. "."
+	return randomElement(DESCRIPTION_AGE_INDICATOR)
+		.. " "
+		.. randomElement(DESCRIPTION_BODY_TYPE_HEIGHT):format("person")
+		.. " "
+		.. randomElement(DESCRIPTION_BODY_TYPE_FRAME)
+		.. ". They've got "
+		.. randomElement(DESCRIPTION_FACIAL_FEATURES)
+		.. ". " .. randomElement(DESCRIPTION_TRAITS)
+		.. "."
 end

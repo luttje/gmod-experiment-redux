@@ -99,8 +99,8 @@ function Schema:InitializedPlugins()
 
 			if (not swep) then
 				ErrorNoHaltWithStack("Item " ..
-				tostring(item.uniqueID) ..
-				" has a mergeIntoSwep but the weapon class (" .. tostring(item.class) .. ") does not exist!\n")
+					tostring(item.uniqueID) ..
+					" has a mergeIntoSwep but the weapon class (" .. tostring(item.class) .. ") does not exist!\n")
 			end
 
 			table.Merge(swep, item.mergeIntoSwep, true)
@@ -117,7 +117,7 @@ function Schema:InitializedPlugins()
 		if (item.forcedWeaponCalibre) then
 			if (not item.class) then
 				ix.util.SchemaErrorNoHalt("Item " ..
-				item.uniqueID .. " does not have a class, can't force bullet calibre.")
+					item.uniqueID .. " does not have a class, can't force bullet calibre.")
 				continue
 			end
 
@@ -145,7 +145,7 @@ function Schema:InitializedPlugins()
 				anyNewUnloaded = true
 				ix.plugin.SetUnloaded(pluginID, true)
 				ix.util.SchemaErrorNoHalt("Helix Plugin Notice: The plugin '" ..
-				pluginID .. "' is marked as disabled in the schema.\n")
+					pluginID .. "' is marked as disabled in the schema.\n")
 			end
 		end
 
@@ -226,12 +226,6 @@ function Schema:GetDefaultAttributePoints(client)
 end
 
 function Schema:AdjustMaterialSources(materialSources)
-	local VERY_RARE = 0.5
-	local RARE = 4
-	local UNCOMMON = 10
-	local COMMON = 15
-	local VERY_COMMON = 30
-
 	--[[
 		Wooden props
 	--]]
@@ -241,7 +235,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk1",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk01.mdl",
 		scrapMaterials = {
 			["material_wood"] = 3,
@@ -251,7 +245,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk2",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk02.mdl",
 		scrapMaterials = {
 			["material_wood"] = 3,
@@ -261,7 +255,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk3",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk03.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -271,7 +265,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk4",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk04.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -281,7 +275,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk5",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk05.mdl",
 		scrapMaterials = {
 			["material_wood"] = 3,
@@ -291,7 +285,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_drawer_chunk6",
 		name = "Wooden Drawer Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_c17/furnituredrawer001a_chunk06.mdl",
 		scrapMaterials = {
 			["material_wood"] = 3,
@@ -303,7 +297,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_chair_chunk1",
 		name = "Wooden Chair Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_c17/furniturechair001a_chunk01.mdl",
 		scrapMaterials = {
 			["material_wood"] = 3,
@@ -313,18 +307,18 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_wood_chair_chunk2",
 		name = "Wooden Chair Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/furniturechair001a_chunk02.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
-			["material_cloth"] = 1,
+			-- ["material_cloth"] = 1,
 		}
 	})
 
 	materialSources:Add({
 		uniqueID = "source_wood_chair_chunk3",
 		name = "Wooden Chair Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/furniturechair001a_chunk03.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -336,7 +330,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk1",
 		name = "Barricade Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_wasteland/barricade001a_chunk01.mdl",
 		scrapMaterials = {
 			["material_wood"] = 1,
@@ -347,7 +341,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk2",
 		name = "Barricade Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_wasteland/barricade001a_chunk02.mdl",
 		scrapMaterials = {
 			["material_wood"] = 1,
@@ -358,7 +352,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk3",
 		name = "Barricade Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_wasteland/barricade001a_chunk03.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -368,7 +362,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk4",
 		name = "Barricade Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_wasteland/barricade001a_chunk04.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -378,7 +372,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade_chunk5",
 		name = "Barricade Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_wasteland/barricade001a_chunk05.mdl",
 		scrapMaterials = {
 			["material_wood"] = 2,
@@ -390,7 +384,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade2_chunk1",
 		name = "Barricade Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_wasteland/barricade002a_chunk01.mdl",
 		scrapMaterials = {
 			["material_wood"] = 1,
@@ -401,7 +395,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_barricade2_chunk2",
 		name = "Barricade Chunk",
-		chanceToScavenge = UNCOMMON,
+		chanceToScavenge = Schema.RARITY_UNCOMMON,
 		model = "models/props_wasteland/barricade002a_chunk02.mdl",
 		scrapMaterials = {
 			["material_wood"] = 1,
@@ -413,7 +407,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		materialSources:Add({
 			uniqueID = "source_barricade2_chunk" .. i,
 			name = "Barricade Chunk",
-			chanceToScavenge = COMMON,
+			chanceToScavenge = Schema.RARITY_COMMON,
 			model = "models/props_wasteland/barricade001a_chunk0" .. i .. ".mdl",
 			scrapMaterials = {
 				["material_wood"] = 2,
@@ -430,7 +424,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_bedframe_chunk1",
 		name = "Damaged Bedframe",
-		chanceToScavenge = RARE,
+		chanceToScavenge = Schema.RARITY_RARE,
 		model = "models/props_wasteland/prison_bedframe001a.mdl",
 		scrapMaterials = {
 			["material_metal"] = 6,
@@ -441,7 +435,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_bedframe_chunk2",
 		name = "Damaged Bedframe",
-		chanceToScavenge = RARE,
+		chanceToScavenge = Schema.RARITY_RARE,
 		model = "models/props_wasteland/prison_bedframe001b.mdl",
 		scrapMaterials = {
 			["material_metal"] = 6,
@@ -455,7 +449,7 @@ function Schema:AdjustMaterialSources(materialSources)
 		materialSources:Add({
 			uniqueID = "source_metal_vent_chunk" .. i,
 			name = "Ventilation Cover Chunk",
-			chanceToScavenge = COMMON,
+			chanceToScavenge = Schema.RARITY_COMMON,
 			model = "models/props_junk/vent001_chunk" .. i .. ".mdl",
 			scrapMaterials = {
 				["material_metal"] = 2,
@@ -466,7 +460,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_toilet_chunk1",
 		name = "Toilet Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_wasteland/prison_toiletchunk01c.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -476,7 +470,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_sink_chunk1",
 		name = "Sink Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_wasteland/prison_sinkchunk001e.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -486,7 +480,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_connector_chunk2",
 		name = "Connector Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/utilityconnecter002.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -496,7 +490,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_connector_chunk3",
 		name = "Connector Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/utilityconnecter003.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -506,7 +500,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_connector_chunk5",
 		name = "Connector Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/utilityconnecter005.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -516,7 +510,7 @@ function Schema:AdjustMaterialSources(materialSources)
 	materialSources:Add({
 		uniqueID = "source_metal_connector_chunk6",
 		name = "Connector Chunk",
-		chanceToScavenge = COMMON,
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_c17/utilityconnecter006.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -525,8 +519,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_metal_gascan",
-		name = "Gas Can",
-		chanceToScavenge = COMMON,
+		name = "Empty Gas Can",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/metalgascan.mdl",
 		scrapMaterials = {
 			["material_metal"] = 2,
@@ -535,8 +529,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_metal_popcan",
-		name = "Pop Can",
-		chanceToScavenge = VERY_COMMON,
+		name = "Empty Pop Can",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/popcan01a.mdl",
 		scrapMaterials = {
 			["material_metal"] = 1,
@@ -551,8 +545,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_plastic_milkcarton",
-		name = "Milk Carton",
-		chanceToScavenge = VERY_COMMON,
+		name = "Empty Milk Carton",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/garbage_milkcarton001a.mdl",
 		scrapMaterials = {
 			["material_plastic"] = 1,
@@ -561,8 +555,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_plastic_bottle",
-		name = "Plastic Bottle",
-		chanceToScavenge = VERY_COMMON,
+		name = "Empty Plastic Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/garbage_plasticbottle001a.mdl",
 		scrapMaterials = {
 			["material_plastic"] = 1,
@@ -571,8 +565,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_plastic_bottle_chunk2",
-		name = "Plastic Bottle",
-		chanceToScavenge = VERY_COMMON,
+		name = "Empty Plastic Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/garbage_plasticbottle002a.mdl",
 		scrapMaterials = {
 			["material_plastic"] = 1,
@@ -581,8 +575,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_plastic_bottle_chunk3",
-		name = "Plastic Bottle",
-		chanceToScavenge = VERY_COMMON,
+		name = "Empty Plastic Bottle",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/garbage_plasticbottle003a.mdl",
 		scrapMaterials = {
 			["material_plastic"] = 1,
@@ -591,8 +585,8 @@ function Schema:AdjustMaterialSources(materialSources)
 
 	materialSources:Add({
 		uniqueID = "source_plastic_gascan",
-		name = "Gas Can",
-		chanceToScavenge = COMMON,
+		name = "Empty Gas Can",
+		chanceToScavenge = Schema.RARITY_COMMON,
 		model = "models/props_junk/gascan001a.mdl",
 		scrapMaterials = {
 			["material_plastic"] = 2,

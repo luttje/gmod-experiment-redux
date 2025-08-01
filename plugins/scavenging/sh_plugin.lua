@@ -8,30 +8,31 @@ PLUGIN.junkChances = PLUGIN.junkChances or {}
 ix.util.Include("sh_commands.lua")
 
 ix.config.Add("scavengeSourceOpenTime", 3, "How long it takes to search a scavenging source.", nil, {
-	data = {min = 0, max = 100, decimals = 0},
+	data = { min = 0, max = 100, decimals = 0 },
 	category = "scavenging"
 })
 
 ix.config.Add("scavengeSourceRefillInterval", 300, "What interval to refill the scavenging source with a new item.",
-    function(oldValue, value)
+	function(oldValue, value)
 		if (timer.Exists("expScavengingSourceSpawner")) then
 			timer.Adjust("expScavengingSourceSpawner", value)
 		end
 	end, {
-		data = {min = 0, max = 1000, decimals = 0},
+		data = { min = 0, max = 1000, decimals = 0 },
 		category = "scavenging"
 	})
 
-ix.config.Add("scavengeSourceMaxFillPercentage", 30, "What percentage of the scavenge source may be filled with items, to get a new random item.", nil, {
-	data = {min = 0, max = 100, decimals = 0},
-	category = "scavenging"
-})
+ix.config.Add("scavengeSourceMaxFillPercentage", 50,
+	"What percentage of the scavenge source may be filled with items, to get a new random item.", nil, {
+		data = { min = 0, max = 100, decimals = 0 },
+		category = "scavenging"
+	})
 
 ix.inventory.Register("scavenging:base", 5, 1)
 ix.inventory.Register("scavenging:medium", 5, 2)
 
 if (not SERVER) then
-    return
+	return
 end
 
 -- Let's allow players to store items in scavenging sources (might result in fun where players can hide items for others to find)
@@ -70,43 +71,75 @@ function PLUGIN:InitializedPlugins()
 	table.SortByMember(self.junkChances, "chance", true)
 end
 
+function PLUGIN:InitializedPlugins()
+	local items = ix.item.list
+
+	for _, item in pairs(items) do
+		if (not item.chanceToScavenge) then
+			continue
+		end
+
+		self.junkChances[#self.junkChances + 1] = {
+			item = item.uniqueID,
+			chance = item.chanceToScavenge
+		}
+	end
+
+	table.SortByMember(self.junkChances, "chance", true)
+end
+
 function PLUGIN:AddItemsToScavengingSource(entity, inventory)
-    local maxFillPercentage = ix.config.Get("scavengeSourceMaxFillPercentage") / 100
-    local inventorySlotCount = inventory:GetFilledSlotCount()
+	local maxFillPercentage = ix.config.Get("scavengeSourceMaxFillPercentage") / 100
+	local inventorySlotCount = inventory:GetFilledSlotCount()
 
-    if (inventorySlotCount >= math.ceil(inventory:GetSize() * maxFillPercentage)) then
-        return
-    end
+	if (inventorySlotCount >= math.ceil(inventory:GetSize() * maxFillPercentage)) then
+		return
+	end
 
-    local roll = math.Rand(0, 100)
+	local roll = math.Rand(0, 100)
+	local validItems = {}
 
-    for _, junkChance in ipairs(self.junkChances) do
-        if (roll > junkChance.chance) then
-            continue
-        end
+	-- Collect all items that meet the roll criteria
+	for _, junkChance in ipairs(self.junkChances) do
+		if (roll > junkChance.chance) then
+			continue
+		end
 
-        local itemTable = ix.item.list[junkChance.item]
+		local itemTable = ix.item.list[junkChance.item]
 
-        if (itemTable) then
-            local addToScavenge = true
+		if (not itemTable) then
+			ix.util.SchemaErrorNoHaltWithStack(
+				"Attempt to add item to scavenging source that does not exist: "
+				.. junkChance.item .. "\n"
+			)
+			continue
+		end
 
-            if (itemTable.OnFillScavengeSource) then
-                addToScavenge = itemTable:OnFillScavengeSource(entity, inventory) ~= false
-            end
+		local addToScavenge = true
 
-            if (addToScavenge) then
-                inventory:Add(junkChance.item)
-                break
-            end
-        end
-    end
+		if (itemTable.OnFillScavengeSource) then
+			addToScavenge = itemTable:OnFillScavengeSource(entity, inventory) ~= false
+		end
+
+		if (addToScavenge) then
+			validItems[#validItems + 1] = junkChance
+		end
+	end
+
+	-- If we have valid items, randomly select one
+	if (#validItems > 0) then
+		local selectedItem = validItems[math.random(1, #validItems)]
+		local itemTable = ix.item.list[selectedItem.item]
+
+		inventory:Add(selectedItem.item)
+	end
 end
 
 function PLUGIN:OnLoaded()
 	local refillInterval = ix.config.Get("scavengeSourceRefillInterval")
 
 	timer.Create("expScavengingSourceSpawner", refillInterval, 0, function()
-        for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
+		for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
 			local inventory = entity:GetInventory()
 
 			if (not inventory) then
@@ -168,24 +201,24 @@ end
 function PLUGIN:LoadData()
 	local scavengingSources = self:GetData()
 
-    if (scavengingSources) then
-        local function restore(scavengingSourceData, entity)
-            local inventoryType = ix.item.inventoryTypes[scavengingSourceData.inventoryType]
+	if (scavengingSources) then
+		local function restore(scavengingSourceData, entity)
+			local inventoryType = ix.item.inventoryTypes[scavengingSourceData.inventoryType]
 			entity.expScavengingSourceRestoring = true
 
-            ix.inventory.Restore(scavengingSourceData.inventoryID, inventoryType.w, inventoryType.h, function(inventory)
-                if (IsValid(entity)) then
-                    entity:SetInventory(inventory)
-                end
+			ix.inventory.Restore(scavengingSourceData.inventoryID, inventoryType.w, inventoryType.h, function(inventory)
+				if (IsValid(entity)) then
+					entity:SetInventory(inventory)
+				end
 
-                inventory.vars.isScavengingSource = entity
-            end)
-        end
+				inventory.vars.isScavengingSource = entity
+			end)
+		end
 
-        for _, scavengingSourceData in pairs(scavengingSources) do
-            if (scavengingSourceData.mapCreationID and scavengingSourceData.mapCreationID > -1) then
-                -- Only restore inventory for map entities
-                local nearbyEntities = ents.FindInSphere(scavengingSourceData.position, 1)
+		for _, scavengingSourceData in pairs(scavengingSources) do
+			if (scavengingSourceData.mapCreationID and scavengingSourceData.mapCreationID > -1) then
+				-- Only restore inventory for map entities
+				local nearbyEntities = ents.FindInSphere(scavengingSourceData.position, 1)
 				local mapEntity = nil
 
 				for _, entity in ipairs(nearbyEntities) do
@@ -196,13 +229,13 @@ function PLUGIN:LoadData()
 				end
 
 				-- When a map is recompiled the map creation ID can change, so we need to check for the closest entity
-                if (not IsValid(mapEntity)) then
+				if (not IsValid(mapEntity)) then
 					local closestDistance = math.huge
 
-                    for _, entity in ipairs(nearbyEntities) do
-                        if (entity:GetClass() ~= "exp_scavenging_source") then
-                            continue
-                        end
+					for _, entity in ipairs(nearbyEntities) do
+						if (entity:GetClass() ~= "exp_scavenging_source") then
+							continue
+						end
 
 						local distance = entity:GetPos():DistToSqr(scavengingSourceData.position)
 
@@ -224,34 +257,34 @@ function PLUGIN:LoadData()
 				restore(scavengingSourceData, mapEntity)
 
 				continue
-            end
+			end
 
-            local entity = ents.Create("exp_scavenging_source")
+			local entity = ents.Create("exp_scavenging_source")
 
-            scavengingSourceData.inventoryType = scavengingSourceData.inventoryType or "scavenging:base"
+			scavengingSourceData.inventoryType = scavengingSourceData.inventoryType or "scavenging:base"
 
-            entity:SetPos(scavengingSourceData.position)
-            entity:SetAngles(scavengingSourceData.angles)
-            entity:SetSourceName(scavengingSourceData.name)
-            entity:SetInventoryType(scavengingSourceData.inventoryType)
-            entity:Spawn()
-            entity:SetModel(scavengingSourceData.model)
+			entity:SetPos(scavengingSourceData.position)
+			entity:SetAngles(scavengingSourceData.angles)
+			entity:SetSourceName(scavengingSourceData.name)
+			entity:SetInventoryType(scavengingSourceData.inventoryType)
+			entity:Spawn()
+			entity:SetModel(scavengingSourceData.model)
 
-            if (scavengingSourceData.invisible) then
-                entity:SetInvisible(true)
-            end
+			if (scavengingSourceData.invisible) then
+				entity:SetInvisible(true)
+			end
 
-            entity:Activate()
+			entity:Activate()
 
-            restore(scavengingSourceData, entity)
-        end
-    end
+			restore(scavengingSourceData, entity)
+		end
+	end
 
-    -- Go through all scavenging sources that now have a MapCreationID, but no inventory and create them one
-    for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
-        if (entity:MapCreationID() == -1) then
-            continue
-        end
+	-- Go through all scavenging sources that now have a MapCreationID, but no inventory and create them one
+	for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
+		if (entity:MapCreationID() == -1) then
+			continue
+		end
 
 		if (entity.expScavengingSourceRestoring) then
 			continue

@@ -1,52 +1,52 @@
 local PLUGIN = PLUGIN
 
 do
-    local COMMAND = {}
+	local COMMAND = {}
 
-    COMMAND.description = "Spawn a scavenging source at your target position."
-    COMMAND.arguments = {
-        bit.bor(ix.type.string, ix.type.optional),
-        bit.bor(ix.type.string, ix.type.optional),
-    }
+	COMMAND.description = "Spawn a scavenging source at your target position."
+	COMMAND.arguments = {
+		bit.bor(ix.type.string, ix.type.optional),
+		bit.bor(ix.type.string, ix.type.optional),
+	}
 
-    COMMAND.superAdminOnly = true
+	COMMAND.superAdminOnly = true
 
-    function COMMAND:OnRun(client, inventoryType, model)
-        if (inventoryType) then
-            if (inventoryType == "medium") then
-                inventoryType = "scavenging:medium"
-            elseif (inventoryType == "base") then
-                inventoryType = "scavenging:base"
-            end
+	function COMMAND:OnRun(client, inventoryType, model)
+		if (inventoryType) then
+			if (inventoryType == "medium") then
+				inventoryType = "scavenging:medium"
+			elseif (inventoryType == "base") then
+				inventoryType = "scavenging:base"
+			end
 
-            if (inventoryType ~= "scavenging:base" and inventoryType ~= "scavenging:medium") then
-                client:Notify("Invalid inventory type.")
-                return
-            end
-        end
+			if (inventoryType ~= "scavenging:base" and inventoryType ~= "scavenging:medium") then
+				client:Notify("Invalid inventory type.")
+				return
+			end
+		end
 
-        local trace = client:GetEyeTraceNoCursor()
-        local entity = ents.Create("exp_scavenging_source")
-        entity:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 32))
-        entity:Spawn()
-        entity:MakeInventory(inventoryType)
+		local trace = client:GetEyeTraceNoCursor()
+		local entity = ents.Create("exp_scavenging_source")
+		entity:SetPos(trace.HitPos + trace.HitNormal + Vector(0, 0, 32))
+		entity:Spawn()
+		entity:MakeInventory(inventoryType)
 
-        if (model) then
-            if (model == "invisible") then
-                entity:SetInvisible(true)
-            else
-                entity:SetModel(model)
-                entity:SetSolid(SOLID_VPHYSICS)
-                entity:PhysicsInit(SOLID_VPHYSICS)
-            end
-        end
+		if (model) then
+			if (model == "invisible") then
+				entity:SetInvisible(true)
+			else
+				entity:SetModel(model)
+				entity:SetSolid(SOLID_VPHYSICS)
+				entity:PhysicsInit(SOLID_VPHYSICS)
+			end
+		end
 
-        entity:Activate()
+		entity:Activate()
 
-        client:Notify("Scavenging source spawned.")
-    end
+		client:Notify("Scavenging source spawned.")
+	end
 
-    ix.command.Add("ScavengeSpawn", COMMAND)
+	ix.command.Add("ScavengeSpawn", COMMAND)
 end
 
 do
@@ -60,23 +60,23 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, inventoryType)
-        local entity = client:GetEyeTraceNoCursor().Entity
+		local entity = client:GetEyeTraceNoCursor().Entity
 
-        if (not IsValid(entity) or entity:GetClass() ~= "exp_scavenging_source") then
-            client:Notify("You must be looking at a scavenging source.")
-            return
-        end
+		if (not IsValid(entity) or entity:GetClass() ~= "exp_scavenging_source") then
+			client:Notify("You must be looking at a scavenging source.")
+			return
+		end
 
 		local index = entity:GetID()
 
 		-- Remove the old inventory.
 		if (index) then
 			local query = mysql:Delete("ix_items")
-				query:Where("inventory_id", index)
+			query:Where("inventory_id", index)
 			query:Execute()
 
 			query = mysql:Delete("ix_inventories")
-				query:Where("inventory_id", index)
+			query:Where("inventory_id", index)
 			query:Execute()
 		end
 
@@ -169,4 +169,96 @@ do
 	end
 
 	ix.command.Add("ScavengeCleanInventories", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Empties all inventories of all scavenging sources."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		for _, entity in ipairs(ents.FindByClass("exp_scavenging_source")) do
+			local inventory = entity:GetInventory()
+
+			for item, _ in inventory:Iter() do
+				inventory:Remove(item:GetID())
+			end
+		end
+
+		client:Notify("All scavenging source inventories have been emptied.")
+	end
+
+	ix.command.Add("ScavengeEmptyAll", COMMAND)
+end
+
+do
+	local COMMAND = {}
+	local maxAttempts = 10000000
+
+	COMMAND.description =
+		"Tries to see how long it takes to get a certain rarity random chance. Will bail after " ..
+		maxAttempts .. " attempts."
+	COMMAND.arguments = {
+		ix.type.number,
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, rarity)
+		local attempts = 0
+		local startTime = SysTime()
+
+		while (attempts < maxAttempts) do
+			if (math.Rand(0, 100) < rarity) then
+				break
+			end
+
+			attempts = attempts + 1
+		end
+
+		if (attempts >= maxAttempts) then
+			client:Notify("Failed to get a random chance of " .. rarity .. " after " .. maxAttempts .. " attempts.")
+			return
+		end
+
+		local endTime = SysTime()
+		local duration = math.Round((endTime - startTime) * 1000, 2)
+
+		client:Notify(
+			"Took " .. attempts .. " attempts to get a random chance of "
+			.. rarity .. ". Took " .. duration .. "ms."
+		)
+	end
+
+	ix.command.Add("ScavengeTestChance", COMMAND)
+end
+
+do
+	local COMMAND = {}
+	local maxAttempts = 10000000
+
+	COMMAND.description = "Runs " .. maxAttempts .. " rolls and reports distribution across 10-point intervals."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client)
+		local buckets = {}
+
+		for i = 0, 9 do
+			buckets[i] = 0
+		end
+
+		for i = 1, maxAttempts do
+			local roll = math.Rand(0, 100)
+			local index = math.min(math.floor(roll / 10), 9)
+			buckets[index] = buckets[index] + 1
+		end
+
+		for i = 0, 9 do
+			local rangeStart = i * 10
+			local rangeEnd = (i + 1) * 10
+			client:Notify(rangeStart .. "-" .. rangeEnd .. ": " .. buckets[i])
+		end
+	end
+
+	ix.command.Add("ScavengeTestDistribution", COMMAND)
 end
