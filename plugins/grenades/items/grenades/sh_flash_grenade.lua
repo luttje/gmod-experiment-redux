@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Flash Grenade"
 ITEM.price = 195
+ITEM.shipmentSize = 10
 ITEM.model = "models/items/grenadeammo.mdl"
 ITEM.width = 1
 ITEM.height = 1

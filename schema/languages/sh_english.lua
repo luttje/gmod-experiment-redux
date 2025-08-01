@@ -10,7 +10,7 @@ LANGUAGE = {
 	random = "Random",
 	attribPointsDesc =
 	"These enhance your character's abilities. You get %d points to distribute now and can train to get more later.",
-    attribPointsHint = "Hover over an attribute to see what it affects.",
+	attribPointsHint = "Hover over an attribute to see what it affects.",
 	dTitleOwned = "Owned Door",
 
 	achievements = "Achievements",
@@ -29,6 +29,7 @@ LANGUAGE = {
 	filter = "Filter",
 	wallet = "Wallet",
 	confirmPurchase = "Do you want to purchase this item for %s?",
+	confirmPurchaseShipment = "Do you want to purchase this shipment of %s items for %s?",
 	completePurchase = "Purchase",
 
 	grenades = "Grenades",

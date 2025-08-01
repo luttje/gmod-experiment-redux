@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Chloroform"
 ITEM.price = 450
+ITEM.shipmentSize = 5
 ITEM.model = "models/props_junk/garbage_newspaper001a.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -15,7 +16,7 @@ ITEM.functions.Apply = {
 		local data = {}
 		data.start = client:GetShootPos()
 		data.endpos = data.start + client:GetAimVector() * 70
-        data.filter = client
+		data.filter = client
 
 		local target = util.TraceLine(data).Entity
 		local isTargetValid = IsValid(target) and target:IsPlayer() and target:GetCharacter()
@@ -68,12 +69,12 @@ ITEM.functions.Apply = {
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		return not item.bBeingUsed
 	end

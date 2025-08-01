@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Melon"
 ITEM.price = 15
+ITEM.shipmentSize = 10
 ITEM.model = "models/props_junk/watermelon01.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -19,7 +20,7 @@ ITEM.attributeBoosts = {
 }
 
 function ITEM:OnRegistered()
-    self.functions.Consume.name = "Eat"
+	self.functions.Consume.name = "Eat"
 end
 
 function ITEM:OnBoosted()

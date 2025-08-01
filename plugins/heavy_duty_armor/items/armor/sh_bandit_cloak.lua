@@ -1,6 +1,7 @@
 local ITEM = ITEM
 
 ITEM.price = 450
+ITEM.shipmentSize = 5
 ITEM.name = "Bandit Cloak"
 ITEM.maxArmor = 50
 ITEM.description = "A bandit uniform with a mandatory hood and trenchcoat."

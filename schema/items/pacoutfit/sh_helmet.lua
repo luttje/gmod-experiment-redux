@@ -2,13 +2,15 @@ local ITEM = ITEM
 
 ITEM.name = "Helmet"
 ITEM.price = 95
+ITEM.shipmentSize = 10
 ITEM.model = "models/props_junk/metalbucket01a.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Clothing"
 ITEM.damageScale = 0.25
 ITEM.outfitCategory = "helmet"
-ITEM.description = "When hit in the head, you will take 75%% less damage. The helmet will break immediately after taking damage."
+ITEM.description =
+"When hit in the head, you will take 75%% less damage. The helmet will break immediately after taking damage."
 ITEM.pacData = {}
 
 function ITEM:OnEquipped()

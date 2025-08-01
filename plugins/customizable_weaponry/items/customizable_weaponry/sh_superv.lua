@@ -1,8 +1,10 @@
 local ITEM = ITEM
 
 ITEM.name = "Kriss Vector"
-ITEM.description = "Close range SMG with extremely high fire rate and practically no recoil. Low armor penetration, but can chew through it very quickly."
+ITEM.description =
+"Close range SMG with extremely high fire rate and practically no recoil. Low armor penetration, but can chew through it very quickly."
 ITEM.price = 2300
+ITEM.shipmentSize = 5
 ITEM.class = "tacrp_superv"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_superv.mdl"

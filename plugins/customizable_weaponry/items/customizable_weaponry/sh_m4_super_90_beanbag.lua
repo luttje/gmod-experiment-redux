@@ -4,6 +4,7 @@ local ITEM = ITEM
 ITEM.name = "Benelli M4 Super 90 (Non-Lethal)"
 ITEM.description = "A shotgun-like weapon which fires beanbags. This weapon utilises beanbag ammo"
 ITEM.price = 5500
+ITEM.shipmentSize = 5
 ITEM.class = "exp_beanbag_shotgun"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_m4star10.mdl"

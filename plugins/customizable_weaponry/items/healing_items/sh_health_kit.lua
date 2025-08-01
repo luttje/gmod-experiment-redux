@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Health Kit"
 ITEM.price = 75
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint/w_medkit.mdl"
 ITEM.width = 1
 ITEM.height = 1

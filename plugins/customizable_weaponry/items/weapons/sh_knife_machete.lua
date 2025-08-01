@@ -1,8 +1,10 @@
 local ITEM = ITEM
 
 ITEM.name = "Machete"
-ITEM.description = "Versatile blade that can be used as an agricultural tool, a weapon of war or as a navigational aid when deep in the bush."
+ITEM.description =
+"Versatile blade that can be used as an agricultural tool, a weapon of war or as a navigational aid when deep in the bush."
 ITEM.price = 195
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_machete.mdl"
 ITEM.width = 1
 ITEM.height = 1

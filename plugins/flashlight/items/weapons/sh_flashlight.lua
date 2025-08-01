@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Flashlight"
 ITEM.price = 55
+ITEM.shipmentSize = 5
 ITEM.model = "models/maxofs2d/lamp_flashlight.mdl"
 ITEM.modelScale = 0.35
 ITEM.width = 1
@@ -12,7 +13,7 @@ ITEM.weaponCategory = "utility"
 ITEM.description = "A flashlight to help you see in the dark."
 
 function ITEM:OnEntityCreated(entity)
-    entity:SetModelScale(self.modelScale)
+	entity:SetModelScale(self.modelScale)
 	entity:Activate()
 end
 

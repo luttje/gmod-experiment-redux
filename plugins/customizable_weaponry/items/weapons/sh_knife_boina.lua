@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Cudeman Boina Verde"
 ITEM.description = "Sturdy, oversized survival knife."
 ITEM.price = 350
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_boina.mdl"
 ITEM.width = 1
 ITEM.height = 1

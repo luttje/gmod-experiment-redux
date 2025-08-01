@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Running Shoes"
 ITEM.price = 65
+ITEM.shipmentSize = 5
 ITEM.model = "models/props_junk/shoe001a.mdl"
 ITEM.width = 1
 ITEM.height = 1

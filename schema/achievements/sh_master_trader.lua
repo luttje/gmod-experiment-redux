@@ -9,5 +9,4 @@ ACHIEVEMENT.foregroundImage = {
 }
 ACHIEVEMENT.reward = 1000
 ACHIEVEMENT.maximum = 10
-ACHIEVEMENT.description = "Acquire ten items from the shadowy Business."
-
+ACHIEVEMENT.description = "Acquire ten shipments from the shadowy Business."

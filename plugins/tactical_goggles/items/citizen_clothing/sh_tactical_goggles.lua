@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Tactical Goggles"
 ITEM.price = 1250
+ITEM.shipmentSize = 5
 ITEM.model = "models/gibs/shield_scanner_gib1.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -12,10 +13,10 @@ ITEM.description = "Tactical goggles which work with radio frequencies, it has s
 function ITEM:OnEquipped()
 	local client = self.player
 
-    timer.Simple(1, function()
-        if (not IsValid(client)) then
-            return
-        end
+	timer.Simple(1, function()
+		if (not IsValid(client)) then
+			return
+		end
 
 		client:AddDisplayLineFrequency(
 			"Somebody has connected to the network...",
@@ -33,14 +34,14 @@ end
 function ITEM:OnUnequipped()
 	local client = self.player
 
-    client:AddDisplayLineFrequency(
+	client:AddDisplayLineFrequency(
 		"Somebody has disconnected from the network...",
-        Color(255, 100, 255, 255)
+		Color(255, 100, 255, 255)
 	)
 	client:AddDisplayLine(
-        "You have disconnected from the network...",
+		"You have disconnected from the network...",
 		Color(255, 100, 255, 255)
-    )
+	)
 
 	client:DisableTacticalGoggles()
 end

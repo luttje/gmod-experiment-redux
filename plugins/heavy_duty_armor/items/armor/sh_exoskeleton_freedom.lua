@@ -2,9 +2,10 @@ local ITEM = ITEM
 
 ITEM.base = "base_armor_exoskeleton"
 ITEM.price = 1400
+ITEM.shipmentSize = 5
 ITEM.name = "Freedom Exoskeleton"
 ITEM.description =
-	"A Freedom™ branded exoskeleton. Provides you with great bullet resistance."
+"A Freedom™ branded exoskeleton. Provides you with great bullet resistance."
 ITEM.replacement = "models/stalkertnb/exo_free.mdl"
 ITEM.attribBoosts = {
 	["medical"] = 35,

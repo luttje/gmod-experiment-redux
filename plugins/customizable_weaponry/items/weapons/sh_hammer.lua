@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Hammer"
 ITEM.description = "When you have a hammer, everything looks like a nail..."
 ITEM.price = 80
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_hammer.mdl"
 ITEM.width = 1
 ITEM.height = 1

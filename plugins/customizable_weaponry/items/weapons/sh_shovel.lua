@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Shovel"
 ITEM.description = "An old army shovel, designed to quickly dig trenches. Works great as a crude melee weapon."
 ITEM.price = 85
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_shovel.mdl"
 ITEM.width = 1
 ITEM.height = 2

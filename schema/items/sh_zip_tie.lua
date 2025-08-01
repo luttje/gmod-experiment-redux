@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Zip Tie"
 ITEM.price = 165
+ITEM.shipmentSize = 10
 ITEM.model = "models/items/crossbowrounds.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -40,7 +41,7 @@ ITEM.functions.Tie = {
 			return false
 		end
 
-        local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
+		local hasQuickHands, quickHandsPerkTable = Schema.perk.GetOwned("quick_hands", client)
 
 		if (hasQuickHands) then
 			taskTime = taskTime * quickHandsPerkTable.tieTimeMultiplier
@@ -56,15 +57,15 @@ ITEM.functions.Tie = {
 		target:SetNetVar("beingTied", true)
 		target:SetAction("@fBeingTied", taskTime)
 
-        client:DoStaredAction(lookTarget, function()
-            client:SetNetVar("tying")
+		client:DoStaredAction(lookTarget, function()
+			client:SetNetVar("tying")
 			Schema.TiePlayer(target)
 
 			itemTable:Remove()
 
-            Schema.PlayerClearEntityInfoTooltip(client)
+			Schema.PlayerClearEntityInfoTooltip(client)
 			hook.Run("OnPlayerBecameTied", target, client)
-        end, taskTime, function()
+		end, taskTime, function()
 			if (IsValid(client)) then
 				client:SetAction()
 				client:SetNetVar("tying")
@@ -83,12 +84,12 @@ ITEM.functions.Tie = {
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		return not item.bBeingUsed
 	end

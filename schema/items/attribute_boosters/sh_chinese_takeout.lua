@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Chinese Takeout"
 ITEM.price = 20
+ITEM.shipmentSize = 10
 ITEM.model = "models/props_junk/garbage_takeoutcarton001a.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -15,7 +16,7 @@ ITEM.attributeBoosts = {
 }
 
 function ITEM:OnRegistered()
-    self.functions.Consume.name = "Eat"
+	self.functions.Consume.name = "Eat"
 end
 
 function ITEM:OnBoosted()
@@ -26,4 +27,3 @@ end
 function ITEM:GetEmitBoostSound()
 	return "npc/barnacle/barnacle_crunch" .. math.random(2, 3) .. ".wav", 50, 155, 0.2
 end
-

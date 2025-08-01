@@ -2,9 +2,10 @@ local ITEM = ITEM
 
 ITEM.base = "base_armor_exoskeleton"
 ITEM.price = 1800
+ITEM.shipmentSize = 5
 ITEM.name = "Duty Exoskeleton"
 ITEM.description =
-	"A Duty™ branded exoskeleton. Provides you with great bullet resistance."
+"A Duty™ branded exoskeleton. Provides you with great bullet resistance."
 ITEM.replacement = "models/stalkertnb/exo_skat_duty.mdl"
 ITEM.attribBoosts = {
 	["endurance"] = 20,

@@ -12,7 +12,7 @@ if (not TacRP) then
 	ix.util.SchemaErrorNoHaltWithStack("TacRP is not installed or enabled! Expect errors!")
 end
 
-if (not ix.util.IsAddonMounted(3009874388)) then
+if (not ix.util.IsAddonMounted("3009874388")) then
 	ix.util.SchemaErrorNoHaltWithStack("Brute Force Melee Pack is not installed or enabled! Expect errors!")
 end
 

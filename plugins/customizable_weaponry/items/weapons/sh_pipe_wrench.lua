@@ -1,8 +1,10 @@
 local ITEM = ITEM
 
 ITEM.name = "Pipe Wrench"
-ITEM.description = "Sturdy wrench designed for tightening water and gas pipes.  All-iron construction makes it quite the blunt weapon."
+ITEM.description =
+"Sturdy wrench designed for tightening water and gas pipes.  All-iron construction makes it quite the blunt weapon."
 ITEM.price = 99
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_wrench.mdl"
 ITEM.width = 1
 ITEM.height = 1

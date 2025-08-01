@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Molot Bekas-16M"
 ITEM.description = "Accurate hunting shotgun with a low fire rate.\nLimited effectiveness against armor."
 ITEM.price = 2250
+ITEM.shipmentSize = 5
 ITEM.class = "tacrp_bekas"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_bekas.mdl"

@@ -1,9 +1,10 @@
 local ITEM = ITEM
 
-ITEM.price = 950
 ITEM.name = "Military Uniform"
+ITEM.price = 950
+ITEM.shipmentSize = 5
 ITEM.description =
-	"A Military Uniform. Provides you with some bullet resistance."
+"A Military Uniform. Provides you with some bullet resistance."
 ITEM.width = 2
 ITEM.height = 1
 ITEM.hasTearGasProtection = true

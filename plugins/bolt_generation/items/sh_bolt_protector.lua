@@ -2,12 +2,14 @@ local ITEM = ITEM
 
 ITEM.name = "Bolt Generator Protector"
 ITEM.price = 100
+ITEM.shipmentSize = 5
 ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.noDrop = true
 ITEM.category = "Protection"
-ITEM.description = "When placed near a Bolt Generator it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
+ITEM.description =
+"When placed near a Bolt Generator it will reduce the damage they take by 50%%. This is not permanent and can be destroyed by others."
 ITEM.maximum = 5
 
 if (CLIENT) then
@@ -27,10 +29,10 @@ ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
 
-        if (client:IsObjectLimited("boltProtectors", item.maximum)) then
-            client:Notify("You can not place this as you have reached the maximum amount of this item!")
-            return false
-        end
+		if (client:IsObjectLimited("boltProtectors", item.maximum)) then
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance()
 
@@ -50,12 +52,12 @@ ITEM.functions.Place = {
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance()
 

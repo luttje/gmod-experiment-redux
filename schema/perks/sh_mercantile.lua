@@ -9,4 +9,5 @@ PERK.foregroundImage = {
 	size = 32,
 }
 PERK.priceRebate = 0.1
-PERK.description = "Fancy yourself as a merchant? With this perk, you will receive ten percent off all business items and generator upgrades."
+PERK.description =
+"Fancy yourself as a merchant? With this perk, you will receive ten percent cashback for all business items and generator upgrades."

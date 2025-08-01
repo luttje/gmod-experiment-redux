@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Meat Cleaver"
 ITEM.description = "Large, sturdy blade made for chopping meat, be that animal meat or human meat."
 ITEM.price = 95
+ITEM.shipmentSize = 5
 ITEM.model = "models/weapons/tacint_melee/w_cleaver.mdl"
 ITEM.width = 1
 ITEM.height = 1

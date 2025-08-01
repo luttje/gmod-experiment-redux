@@ -8,12 +8,12 @@ function PANEL:GetItems(category, search)
 	category = category ~= "searchResults" and category or nil
 	search = search and search:lower() or nil
 
-    local items = {}
+	local items = {}
 
-    for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
-        if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
-            continue
-        end
+	for uniqueID, itemTable in SortedPairsByMemberValue(ix.item.list, "name") do
+		if (hook.Run("CanPlayerUseBusiness", LocalPlayer(), uniqueID) == false) then
+			continue
+		end
 
 		local searchMismatch = search and search ~= "" and not L(itemTable.name):lower():find(search, 1, true)
 
@@ -25,17 +25,17 @@ function PANEL:GetItems(category, search)
 			continue
 		end
 
-        if (not category or itemTable.category == category) then
-            items[#items + 1] = itemTable
-        end
-    end
+		if (not category or itemTable.category == category) then
+			items[#items + 1] = itemTable
+		end
+	end
 
-    return items
+	return items
 end
 
 function PANEL:Init()
 	ix.gui.business = self
-    Schema.businessPanel = self
+	Schema.businessPanel = self
 
 	self:DockPadding(16, 48, 16, 48)
 
@@ -55,7 +55,7 @@ function PANEL:Init()
 	self.categoryPanels = {}
 
 	self.scroll = self:Add("DScrollPanel")
-    self.scroll:Dock(FILL)
+	self.scroll:Dock(FILL)
 
 	self.itemList = self.scroll:Add("DIconLayout")
 	self.itemList:Dock(TOP)
@@ -70,13 +70,13 @@ function PANEL:Init()
 			continue
 		end
 
-		if (!self.categoryPanels[L(v.category)]) then
+		if (! self.categoryPanels[L(v.category)]) then
 			self.categoryPanels[L(v.category)] = v.category
 		end
 	end
 
 	local label = self.categories:Add("DLabel")
-	label:SetText(L"categories" .. ":")
+	label:SetText(L "categories" .. ":")
 	label:SetFont("expSmallerFont")
 	label:DockMargin(5, 5, 5, 5)
 	label:SetTextColor(Color(255, 255, 255, 100))
@@ -124,7 +124,7 @@ function PANEL:Init()
 		addCategoryButton(category, realName)
 	end
 
-	local searchResultButton = addCategoryButton(L"searchResults", "searchResults")
+	local searchResultButton = addCategoryButton(L "searchResults", "searchResults")
 
 	if (not PLUGIN.lastBusinessSearch) then
 		searchResultButton:SetVisible(false)
@@ -147,7 +147,7 @@ function PANEL:SetupWalletInfo()
 	wallet:SetPaintBackground(false)
 
 	local walletLabel = wallet:Add("DLabel")
-	walletLabel:SetText(L"wallet" .. ":")
+	walletLabel:SetText(L "wallet" .. ":")
 	walletLabel:SetFont("expSmallerFont")
 	walletLabel:DockMargin(5, 5, 5, 5)
 	walletLabel:SetTextColor(Color(255, 255, 255, 100))
@@ -183,36 +183,36 @@ function PANEL:SetupSearch()
 	-- A button to open the filter menu
 	self.filterButton = self.searchPanel:Add("expButton")
 	self.filterButton:Dock(LEFT)
-	self.filterButton:SetText(L"filter")
-    self.filterButton.DoClick = function(button)
-        local allItems = self:GetItems(self.selected.category, self.search:GetText())
-        local filters = {}
+	self.filterButton:SetText(L "filter")
+	self.filterButton.DoClick = function(button)
+		local allItems = self:GetItems(self.selected.category, self.search:GetText())
+		local filters = {}
 
-        for _, itemTable in ipairs(allItems) do
-            if (not itemTable.GetFilters) then
-                continue
-            end
+		for _, itemTable in ipairs(allItems) do
+			if (not itemTable.GetFilters) then
+				continue
+			end
 
-            for filter, filterType in pairs(itemTable:GetFilters()) do
-                filters[filter] = filters[filter] or {
-                    type = filterType,
-                    items = {},
-                }
-                filters[filter].items[#filters[filter].items + 1] = itemTable
-            end
-        end
+			for filter, filterType in pairs(itemTable:GetFilters()) do
+				filters[filter] = filters[filter] or {
+					type = filterType,
+					items = {},
+				}
+				filters[filter].items[#filters[filter].items + 1] = itemTable
+			end
+		end
 
-        if (IsValid(self.filterMenu)) then
-            self.filterMenu:SetVisible(true)
-            self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
+		if (IsValid(self.filterMenu)) then
+			self.filterMenu:SetVisible(true)
+			self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
 			self.filterMenu:MakePopup()
-            return
-        end
+			return
+		end
 
-        self.filterMenu = vgui.Create("expBusinessFilters", self)
-        self.filterMenu:SetFilters(filters, allItems)
-        self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
-    end
+		self.filterMenu = vgui.Create("expBusinessFilters", self)
+		self.filterMenu:SetFilters(filters, allItems)
+		self.filterMenu:SetPos(button:LocalToScreen(0, button:GetTall()))
+	end
 
 	-- Reparent the search bar to the search panel
 	self.search = self.searchPanel:Add("DTextEntry")
@@ -241,8 +241,8 @@ function PANEL:SetupSearch()
 		self.scroll:InvalidateLayout()
 	end
 	self.search.PaintOver = function(this, cw, ch)
-		if (self.search:GetValue() == "" and !self.search:HasFocus()) then
-			ix.util.DrawText("V", 10, ch/2 - 1, color_black, 3, 1, "ixIconsSmall")
+		if (self.search:GetValue() == "" and ! self.search:HasFocus()) then
+			ix.util.DrawText("V", 10, ch / 2 - 1, color_black, 3, 1, "ixIconsSmall")
 		end
 	end
 end
@@ -329,9 +329,33 @@ vgui.Register("expBusiness", PANEL, "EditablePanel")
 
 PANEL = {}
 
+DEFINE_BASECLASS("ixBusinessItem")
+
 function PANEL:Init()
 	local size = math.max(ScrW() * 0.1, 128)
 	self:SetSize(size, size * 1.4)
+end
+
+function PANEL:SetItem(itemTable)
+	self.shipmentSize = self:Add("DLabel")
+	self.shipmentSize:Dock(BOTTOM)
+	self.shipmentSize:SetContentAlignment(5)
+	self.shipmentSize:SetTextColor(Color(255, 255, 255, 60))
+	self.shipmentSize:SetFont("ixSmallFont")
+	self.shipmentSize:SetExpensiveShadow(1, Color(0, 0, 0, 200))
+
+	BaseClass.SetItem(self, itemTable)
+
+	if (itemTable.shipmentSize) then
+		self.shipmentSize:SetText("(Batch of " .. itemTable.shipmentSize .. ")")
+		self.price:SetText(
+			itemTable.price
+			and ix.currency.Get(itemTable.price * itemTable.shipmentSize)
+			or L("free"):utf8upper()
+		)
+	else
+		self.shipmentSize:SetText("(Each)")
+	end
 end
 
 vgui.Register("expBusinessItem", PANEL, "ixBusinessItem")

@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "HK MG4"
 ITEM.description = "Machine gun with huge volume of fire, but is difficult to use without bipod deployed."
 ITEM.price = 4550
+ITEM.shipmentSize = 5
 ITEM.class = "tacrp_mg4"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_mg4.mdl"

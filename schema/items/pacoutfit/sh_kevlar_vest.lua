@@ -1,15 +1,16 @@
 for _, resourceFile in pairs(file.Find("materials/models/kevlarvest/*.*", "GAME")) do
-	resource.AddFile("materials/models/kevlarvest/"..resourceFile)
+	resource.AddFile("materials/models/kevlarvest/" .. resourceFile)
 end
 
 for _, resourceFile in pairs(file.Find("models/kevlarvest/*.mdl", "GAME")) do
-	resource.AddFile("models/kevlarvest/"..resourceFile)
+	resource.AddFile("models/kevlarvest/" .. resourceFile)
 end
 
 local ITEM = ITEM
 
 ITEM.name = "Kevlar Vest"
 ITEM.price = 150
+ITEM.shipmentSize = 10
 ITEM.model = "models/weapons/w_suitcase_passenger.mdl"
 ITEM.width = 2
 ITEM.height = 1

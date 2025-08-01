@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Door Protector"
 ITEM.price = 50
+ITEM.shipmentSize = 5
 ITEM.model = "models/experiment-redux/door_protector_basic.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -13,7 +14,7 @@ ITEM.functions.Place = {
 		local client = item.player
 		local success, message, trace = client:TryTraceInteractAtDistance(true)
 
-        if (not success) then
+		if (not success) then
 			client:Notify(message)
 
 			return false
@@ -45,12 +46,12 @@ ITEM.functions.Place = {
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance(true)
 

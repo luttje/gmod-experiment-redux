@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Bolt Generator Informer"
 ITEM.price = 100
+ITEM.shipmentSize = 5
 ITEM.model = "models/props_combine/breenlight.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -27,10 +28,10 @@ ITEM.functions.Place = {
 	OnRun = function(item)
 		local client = item.player
 
-        if (client:IsObjectLimited("boltInformers", item.maximum)) then
-            client:Notify("You can not place this as you have reached the maximum amount of this item!")
-            return false
-        end
+		if (client:IsObjectLimited("boltInformers", item.maximum)) then
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance()
 
@@ -43,19 +44,19 @@ ITEM.functions.Place = {
 		local entity = ents.Create("exp_bolt_informer")
 		entity:SetupBoltInformer(client)
 		entity:SetPos(trace.HitPos)
-        entity:Spawn()
+		entity:Spawn()
 		client:AddLimitedObject("boltInformers", entity)
 		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
-        if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
-            return false
-        end
+		-- Ensure it's in the player's inventory
+		if (not client or item.invID ~= client:GetCharacter():GetInventory():GetID()) then
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance()
 

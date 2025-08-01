@@ -2,6 +2,7 @@ local ITEM = ITEM
 
 ITEM.name = "Vegetable Oil"
 ITEM.price = 55
+ITEM.shipmentSize = 5
 ITEM.model = "models/props_junk/garbage_plasticbottle002a.mdl"
 ITEM.width = 1
 ITEM.height = 1

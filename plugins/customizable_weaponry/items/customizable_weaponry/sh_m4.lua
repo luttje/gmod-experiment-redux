@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Diemaco C8A1"
 ITEM.description = "A close cousin to the classic American rifle with a slower but more controllable rate of fire."
 ITEM.price = 2450
+ITEM.shipmentSize = 5
 ITEM.class = "tacrp_m4"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_m4.mdl"

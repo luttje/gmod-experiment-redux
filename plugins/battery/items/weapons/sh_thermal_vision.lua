@@ -3,6 +3,7 @@ local ITEM = ITEM
 
 ITEM.name = "Thermal Vision"
 ITEM.price = 5000
+ITEM.shipmentSize = 5
 ITEM.model = "models/gibs/shield_scanner_gib1.mdl"
 ITEM.width = 1
 ITEM.height = 1

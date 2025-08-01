@@ -2,18 +2,18 @@ local PLUGIN = PLUGIN
 
 PLUGIN.name = "The Business"
 PLUGIN.author = "Experiment Redux"
-PLUGIN.description = "Adds physical business locations to the game world" --, that appear at random locations."
+PLUGIN.description = "Adds physical business locations to the game world" -- TODO: , that appear at random locations."
 
 function PLUGIN:BuildBusinessMenu()
-    return false
+	return false
 end
 
 if (SERVER) then
-    util.AddNetworkString("expBusinessPurchase")
-    util.AddNetworkString("expBusinessPurchaseCompleted")
+	util.AddNetworkString("expBusinessPurchase")
+	util.AddNetworkString("expBusinessPurchaseCompleted")
 
-    resource.AddFile("models/experiment-redux/shopkeeper.mdl")
-    resource.AddFile("models/experiment-redux/shopkeeper_portal_door.mdl")
+	resource.AddFile("models/experiment-redux/shopkeeper.mdl")
+	resource.AddFile("models/experiment-redux/shopkeeper_portal_door.mdl")
 	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_eye.vmt")
 	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_paint.vmt")
 	resource.AddFile("materials/models/experiment-redux/shopkeeper/robot_shipment_portal.vmt")
@@ -24,39 +24,57 @@ if (SERVER) then
 		local uniqueID = net.ReadString()
 		local itemTable = ix.item.Get(uniqueID)
 
-        if (not itemTable) then
-            client:Notify("This item is not valid.")
-            return
-        end
+		if (not itemTable) then
+			client:Notify("This item is not valid.")
+			return
+		end
 
-        if (not IsValid(entity) or entity:GetPos():Distance(client:GetPos()) > ix.config.Get("maxInteractionDistance")) then
+		if (not IsValid(entity) or entity:GetPos():Distance(client:GetPos()) > ix.config.Get("maxInteractionDistance")) then
 			client:Notify("You are too far away from the business vendor to buy this item.")
 			return
 		end
 
-        if (hook.Run("CanPlayerUseBusiness", client, uniqueID) == false) then
-            client:Notify("You cannot buy this item.")
-            return
-        end
+		if (hook.Run("CanPlayerUseBusiness", client, uniqueID) == false) then
+			client:Notify("You cannot buy this item.")
+			return
+		end
 
 		local character = client:GetCharacter()
-		local price = itemTable.price
+		local batchSize = itemTable.shipmentSize or 1
+		local price = itemTable.price * batchSize
 
 		if (not character:HasMoney(price)) then
 			client:Notify("You do not have enough money to purchase this item.")
 			return
 		end
 
-		local status, errorMessage = character:GetInventory():Add(uniqueID)
+		local inventory = character:GetInventory()
+		local canFitOrPositions, maxFit = inventory:CanItemsFit(itemTable.width or 1, itemTable.height or 1, batchSize)
 
-        if (not status) then
-            client:NotifyLocalized(errorMessage)
-            return
-        end
+		if (not canFitOrPositions) then
+			if (batchSize > 1) then
+				client:Notify("You do not have enough space in your inventory to purchase this batch of items.")
+			else
+				client:Notify("You do not have enough space in your inventory to purchase this item.")
+			end
 
-        character:TakeMoney(price)
+			return
+		end
 
-        Schema.achievement.Progress("master_trader", client)
+		local status, errorMessage = inventory:Add(uniqueID, batchSize)
+
+		-- This shouldn't happen since we checked with CanItemsFit before adding.
+		if (not status) then
+			ix.util.SchemaErrorNoHaltWithStack("Failed to add item to inventory (DEV THOUGHT THIS SHOULD NOT HAPPEN): " ..
+				errorMessage)
+			return
+		end
+
+		character:TakeMoney(price)
+
+		if (batchSize > 1) then
+			Schema.achievement.Progress("master_trader", client)
+		end
 
 		hook.Run("OnBusinessItemPurchased", client, itemTable, price, entity)
 
@@ -70,11 +88,11 @@ if (SERVER) then
 			end
 		end
 
-        net.Start("expBusinessPurchaseCompleted")
+		net.Start("expBusinessPurchaseCompleted")
 		net.WriteUInt(character:GetMoney(), 32)
-        net.Send(client)
+		net.Send(client)
 
-        entity:SetNWBool("open", true)
+		entity:SetNWBool("open", true)
 		entity:OneShotSequence("inspect", function()
 			entity:SetNWBool("open", false)
 		end)
@@ -82,19 +100,19 @@ if (SERVER) then
 end
 
 if (not CLIENT) then
-    return
+	return
 end
 
 net.Receive("expBusinessPurchaseCompleted", function()
 	local money = net.ReadUInt(32)
-    Schema.businessPurchasePanel:SetItemVisible(false)
-    Schema.businessPanel:UpdateWallet(money)
+	Schema.businessPurchasePanel:SetItemVisible(false)
+	Schema.businessPanel:UpdateWallet(money)
 
 	LocalPlayer():EmitSound("items/suitchargeok1.wav", SNDLVL_40dB, 90, 0.5)
 end)
 
 function PLUGIN:ShowEntityMenu(entity)
-    local builderOrOptions = entity:GetEntityMenu(LocalPlayer())
+	local builderOrOptions = entity:GetEntityMenu(LocalPlayer())
 
 	if (not isfunction(builderOrOptions)) then
 		return
@@ -104,14 +122,14 @@ function PLUGIN:ShowEntityMenu(entity)
 		return
 	end
 
-    local panel = vgui.Create("expEntityMenu")
-    panel:InitDoubleList()
+	local panel = vgui.Create("expEntityMenu")
+	panel:InitDoubleList()
 	panel:SetShowCloseButton(true)
-    panel:SetEntity(entity)
+	panel:SetEntity(entity)
 
-    local mainPanel, entityPanel = builderOrOptions()
+	local mainPanel, entityPanel = builderOrOptions()
 
-    panel:SetMainPanel(mainPanel)
+	panel:SetMainPanel(mainPanel)
 
 	if (entityPanel) then
 		panel:SetEntityPanel(entityPanel)

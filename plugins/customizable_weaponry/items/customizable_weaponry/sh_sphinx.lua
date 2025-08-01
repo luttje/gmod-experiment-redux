@@ -3,6 +3,7 @@ local ITEM = ITEM
 ITEM.name = "Sphinx 2000"
 ITEM.description = "Burst fire pistol with high firerate but long burst delay."
 ITEM.price = 1500
+ITEM.shipmentSize = 5
 ITEM.class = "tacrp_sphinx"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint/w_sphinx.mdl"
