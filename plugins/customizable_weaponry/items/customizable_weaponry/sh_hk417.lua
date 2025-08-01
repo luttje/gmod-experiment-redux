@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "HK417"
@@ -5,7 +7,7 @@ ITEM.description =
 "Battle rifle with superb damage, fire rate and precision. Capable of automatic fire, although it is very unstable."
 ITEM.price = 4200
 ITEM.shipmentSize = 5
-ITEM.class = "tacrp_hk417"
+ITEM.class = "exp_tacrp_hk417"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_hk417.mdl"
 ITEM.width = 2

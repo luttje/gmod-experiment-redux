@@ -1,10 +1,12 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "SIG P250"
 ITEM.description = "Powerful handgun that exchanges capacity for damage and precision."
 ITEM.price = 1750
 ITEM.shipmentSize = 5
-ITEM.class = "tacrp_p250"
+ITEM.class = "exp_tacrp_p250"
 ITEM.weaponCategory = "sidearm"
 ITEM.model = "models/weapons/tacint/w_p250.mdl"
 ITEM.width = 2

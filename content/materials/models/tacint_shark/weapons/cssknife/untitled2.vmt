@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\tacint_shark\weapons\cssknife\Untitled2"
+	"$envmap" "env_cubemap"
+	"$envmapmask" "models\tacint_shark\weapons\cssknife\Untitled2_ref"
+}

@@ -1,0 +1,8 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_shark\weapons\gerber\Knife_CLEAN"
+                "$bumpmap" "models\tacint_shark\weapons\gerber\Knife_Norm"
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" 1
+}
+	

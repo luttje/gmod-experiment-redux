@@ -1,0 +1,21 @@
+VertexLitGeneric
+{
+	"$basetexture"   "models\tacint_shark\weapons\sog\fasthawk"
+	"$bumpmap"   "models\tacint_shark\weapons\sog\fasthawk_n"
+	"$nocull" "1"
+	
+	"$normalmapalphaenvmapmask" "1"
+	"$envmaptint" "[ 0.3 0.3 0.3 ]"
+	"$envmapconstrast" "1"
+
+	"$basealphaenvmapmask" "1"
+ 	"$phong" "1"
+	"$phongexponent" "20"
+	"$phongboost" "0.5"
+	"$phongfresnelranges" "[0.2 0.2 0.2]"
+	"$phongalbedotint" "1"
+	
+	"$rimlight" "1"
+	"$rimlightexponent" "15"
+	"$rimlightboost" "0.3"
+}

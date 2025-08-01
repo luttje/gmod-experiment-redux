@@ -1,0 +1,39 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/tacint_shark/weapons/bayonet/m9_phrobis_dif"
+	"$bumpmap"     "models/tacint_shark/weapons/bayonet/m9_phrobis_nrm"
+
+	"$normalmapalphaenvmapmask" "1" 
+
+	"$halflambert"          "1"
+	
+	"$envmap"  "env_cubemap"
+
+	"$envmapmask"           "models/tacint_shark/weapons/bayonet/m9_phrobis_msk"
+	"$envmaptint"           "[0.1 0.1 0.1]"
+	
+	"$phong" "1"
+
+	"$phongexponent"        "3"
+	"$phongexponenttexture" "models/tacint_shark/weapons/bayonet/m9_phrobis_exp"
+	"$phongboost"	        "3"
+	"$phongalbedotint"      "1"
+	"$phongfresnelranges"	"[.35 0.75 3.0]"
+
+	"$rimlight" "1"
+
+	"$rimlightexponent"     "20"
+	"$rimlightboost"        "1"
+	
+	"$detail" "blood_hands"
+	"$detailblendmode" "2"
+	"$detailblendfactor" "0.0"
+	"$detailscale" "1.0"
+
+	"Proxies"
+	{
+		"BloodyTexture"
+		{
+		}
+	}	
+} 

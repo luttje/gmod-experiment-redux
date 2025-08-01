@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$baseTexture" "models\tacint_shark\weapons\harpoon\Harpoon_Knife"
+                "$bumpmap" "models\tacint_shark\weapons\harpoon\Harpoon_Knife_normal"
+                "$normalmapalphaenvmapmask" 1
+}

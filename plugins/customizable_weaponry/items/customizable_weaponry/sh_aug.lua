@@ -1,10 +1,12 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "Steyr AUG"
 ITEM.description = "Burst bullpup rifle with a generous magazine capacity and great handling."
 ITEM.price = 3800
 ITEM.shipmentSize = 5
-ITEM.class = "tacrp_aug"
+ITEM.class = "exp_tacrp_aug"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_aug.mdl"
 ITEM.width = 2

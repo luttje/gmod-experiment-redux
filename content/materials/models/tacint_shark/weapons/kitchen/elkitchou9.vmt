@@ -1,0 +1,7 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_shark\weapons\kitchen\elkitchou9"
+	"$bumpmap" "models\tacint_shark\weapons\kitchen\elkitchou9_norm"
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" 1	
+}

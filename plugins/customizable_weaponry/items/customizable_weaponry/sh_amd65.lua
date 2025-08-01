@@ -1,3 +1,5 @@
+local PLUGIN = PLUGIN
+
 local ITEM = ITEM
 
 ITEM.name = "AMD-65"
@@ -5,7 +7,7 @@ ITEM.description =
 "Hungarian AK clone with integrated grip and wire stock. High damage, but lower range than most rifles."
 ITEM.price = 4000
 ITEM.shipmentSize = 5
-ITEM.class = "tacrp_amd65"
+ITEM.class = "exp_tacrp_amd65"
 ITEM.weaponCategory = "primary"
 ITEM.model = "models/weapons/tacint/w_amd65.mdl"
 ITEM.width = 2

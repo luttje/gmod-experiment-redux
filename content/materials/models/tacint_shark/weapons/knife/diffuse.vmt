@@ -1,0 +1,12 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_shark\weapons\knife\diffuse"
+	"$bumpmap" "models\tacint_shark\weapons\knife\normal"
+	"$normalmapalphaenvmapmask" 1
+	"$envmap" "env_cubemap"
+ 	"$phong" "1"
+	"$phongexponent" "40"
+	"$phongboost"	"1"
+	"$phongfresnelranges"	"[1 8 6]"
+	"$halflambert" "1"
+}

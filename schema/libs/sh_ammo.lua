@@ -52,7 +52,7 @@ Schema.ammo.RegisterCalibre(createCustomAmmoType(".40 S&W"), ".40 S&W", ".40 S&W
 Schema.ammo.RegisterCalibre(createCustomAmmoType("4.6x30mm"), "4.6x30mm", "4.6x30mm Rounds")
 
 function Schema.ammo.GetCalibreName(calibre)
-    local ammo = Schema.ammo.lookupCalibre[calibre]
+	local ammo = Schema.ammo.lookupCalibre[calibre]
 
 	if (not ammo) then
 		error("Attempt to get name of invalid calibre '" .. calibre .. "'. Ammo not found!")
@@ -76,13 +76,13 @@ function Schema.ammo.GetAllCalibres()
 end
 
 function Schema.ammo.ConvertToCalibreName(ammo)
-    local calibre = Schema.ammo.ammoCalibre[ammo:lower()]
+	local calibre = Schema.ammo.ammoCalibre[ammo:lower()]
 
-    if (not calibre) then
-        error("Attempt to convert invalid ammo '" .. ammo .. "' to calibre.")
-    end
+	if (not calibre) then
+		error("Attempt to convert invalid ammo '" .. ammo .. "' to calibre.")
+	end
 
-    return calibre.name
+	return calibre.name
 end
 
 function Schema.ammo.ConvertToAmmo(calibre)
@@ -101,7 +101,10 @@ function Schema.ammo.ForceWeaponCalibre(swepClass, calibre)
 	local ammoName = Schema.ammo.lookupCalibre[calibre]
 
 	if (not Schema.ammo.ammoCalibre[ammoName]) then
-		error("Attempt to force invalid calibre '" .. calibre .. "' on weapon '" .. swepClass .. "'. You should add this type of ammo to the schema first (don't forget to also make an item!)")
+		error("Attempt to force invalid calibre '" ..
+		calibre ..
+		"' on weapon '" ..
+		swepClass .. "'. You should add this type of ammo to the schema first (don't forget to also make an item!)")
 	end
 
 	local ammo = Schema.ammo.ammoCalibre[ammoName].ammo
@@ -115,8 +118,8 @@ function Schema.ammo.ForceWeaponCalibre(swepClass, calibre)
 		error("Attempt to force calibre on invalid weapon '" .. swepClass .. "'.")
 	end
 
-	if (weapons.IsBasedOn(swepClass, "tacrp_base")) then
-		swep.Ammo = ammoName -- For TacRP
+	if (weapons.IsBasedOn(swepClass, "exp_tacrp_base")) then
+		swep.Ammo = ammoName -- For our TacRP modification
 	else
 		swep.Primary.Ammo = ammoName
 	end

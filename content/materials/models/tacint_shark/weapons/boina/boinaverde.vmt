@@ -1,0 +1,13 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_shark\weapons\boina\BoinaVerde"
+	"$bumpmap" "models\tacint_shark\weapons\boina\BoinaVerde_normal"
+	"$phong" "1"
+	"$phongexponent" "40"
+	"$phongboost" "0.3"	
+	"$phongfresnelranges"	"[1 2.5 4]"
+	"$phongalbedotint" "1"
+}
+
+
+

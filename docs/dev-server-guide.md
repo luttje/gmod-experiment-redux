@@ -54,7 +54,6 @@ Additionally you should consider this for a production server:
 6. (Optional) If you have content other than the default content you will want to create a Workshop Collection for your server, following [the instructions on the official Garry's Mod documentation](https://wiki.facepunch.com/gmod/Workshop_for_Dedicated_Servers). When creating the collection:
 
     * **The following workshop items are required:**
-        * <s>[Content for the `customizable_weaponry` plugin](https://steamcommunity.com/sharedfiles/filedetails/?id=2588031232)</s> (No longer required, we include our own version of TacRP)
         * [Content for the `heavy_duty_armor` plugin](https://steamcommunity.com/sharedfiles/filedetails/?id=355101935)
 
     * We recommend including these, but you can choose alternatives if you prefer:
@@ -62,15 +61,15 @@ Additionally you should consider this for a production server:
 
     **Make note of the collection ID, you'll need it later.**
 
-8. Start the server so you can test it. Run the following server start command:
+7. Start the server so you can test it. Run the following server start command:
 
     ```bash
     /path/to/gmod/srcds -console -game garrysmod -tickrate 100 +maxplayers 64 +gamemode experiment-redux +map rp_c18_v2 +host_workshop_collection 3215035081
     ```
 
-    *Replace `3215035081` with the ID of the Workshop Collection you created. You can use `3215035081` for the default content and `rp_c18_v2` map*
+    *Replace `3215035081` with the ID of the Workshop Collection you created. You can use `3215035081` for the default content and `exp_c18_v1_alpha031` map*
 
-9. Open Garry's Mod and connect to the server by typing `connect <server ip>:27015` in the console. Replace `<server-ip>` with the IP of the server:
+8. Open Garry's Mod and connect to the server by typing `connect <server ip>:27015` in the console. Replace `<server-ip>` with the IP of the server:
 
     * If the server is remote you have to use the public IP (which is listed towards the end of the server start output) and ensure the port is open in the firewall.
 
@@ -81,7 +80,7 @@ Additionally you should consider this for a production server:
       Network: IP 192.168.x.x, mode MP, dedicated Yes, ports 27015 SV / 27005 CL
       ```
 
-10. (Optional) Setup FastDL locally by following [the instructions on the official Garry's Mod documentation](https://wiki.facepunch.com/gmod/Serving_Content). This is useful to test if you're using `resource.AddFile` correctly in your code:
+9. (Optional) Setup FastDL locally by following [the instructions on the official Garry's Mod documentation](https://wiki.facepunch.com/gmod/Serving_Content). This is useful to test if you're using `resource.AddFile` correctly in your code:
 
     1. Use the following tool to apply `bzip2` compression to all contents of the content folder:
 
@@ -106,7 +105,7 @@ Additionally you should consider this for a production server:
 
     4. Now when you start the server, content should be downloaded from the local web server quickly.
 
-11. To easily start the server with the required command line arguments we use a `start-srcds.bat` and `start-srcds.sh` for Windows and Linux respectively. These scripts are located in [the `tools/dev` directory of this project](../tools/dev).
+10. To easily start the server with the required command line arguments we use a `start-srcds.bat` and `start-srcds.sh` for Windows and Linux respectively. These scripts are located in [the `tools/dev` directory of this project](../tools/dev).
 
 ### Authenticating your server (Recommended)
 
