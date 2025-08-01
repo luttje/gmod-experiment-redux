@@ -56,11 +56,11 @@ function ITEM:AddOutfit(client)
 		end
 	end
 
-	local materials  = self:GetData("submaterial", {})
+	local materials = self:GetData("submaterial", {})
 
-	if (!table.IsEmpty(materials) and self:ShouldRestoreSubMaterials()) then
+	if (! table.IsEmpty(materials) and self:ShouldRestoreSubMaterials()) then
 		for k, v in pairs(materials) do
-			if (!isnumber(k) or !isstring(v)) then
+			if (! isnumber(k) or ! isstring(v)) then
 				continue
 			end
 
@@ -84,7 +84,7 @@ local function ForEachSubMaterial(client, callback)
 end
 
 function ITEM:RemoveOutfit(client)
-	client = IsValid(client) and client or self.player  -- TODO: Sometimes not valid, find out when
+	client = IsValid(client) and client or self.player -- TODO: Sometimes not valid, find out when
 
 	if (not IsValid(client)) then
 		ix.util.SchemaErrorNoHaltWithStack("ITEM:RemoveOutfit: client is not valid in this case.")
@@ -98,7 +98,13 @@ function ITEM:RemoveOutfit(client)
 	local materials = {}
 
 	ForEachSubMaterial(client, function(materialIndex)
-		materials[materialIndex] = client:GetSubMaterial(materialIndex - 1)
+		local material = client:GetSubMaterial(materialIndex - 1)
+
+		if (material == "") then
+			return
+		end
+
+		materials[materialIndex] = material
 	end)
 
 	-- Save outfit submaterials

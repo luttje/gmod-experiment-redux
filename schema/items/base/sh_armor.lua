@@ -53,27 +53,27 @@ if (CLIENT) then
 	end
 
 	-- Only show the armor on the client (not for dropping item entity)
-    function ITEM:GetModel()
-        if (self.replacement or (self.replacements and isstring(self.replacements))) then
-            return self.replacement or self.replacements
-        end
+	function ITEM:GetModel()
+		if (self.replacement or (self.replacements and isstring(self.replacements))) then
+			return self.replacement or self.replacements
+		end
 
-        if (istable(self.replacements)) then
-            local model = (self.player or LocalPlayer()):GetModel()
+		if (istable(self.replacements)) then
+			local model = (self.player or LocalPlayer()):GetModel()
 
-            for _, v in ipairs(self.replacements) do
-                if (model:find(v[1])) then
-                    return model:gsub(v[1], v[2])
-                end
-            end
-        end
+			for _, v in ipairs(self.replacements) do
+				if (model:find(v[1])) then
+					return model:gsub(v[1], v[2])
+				end
+			end
+		end
 
-        if (self.model) then
-            return self.model
-        end
+		if (self.model) then
+			return self.model
+		end
 
-        error("Failed to get model for item " .. self.uniqueID)
-    end
+		error("Failed to get model for item " .. self.uniqueID)
+	end
 else
 	function ITEM:GetModel()
 		return "models/props_c17/suitcase_passenger_physics.mdl"
@@ -82,11 +82,31 @@ end
 
 function ITEM:OnEquipped()
 	local client = self.player
+
+	if (not IsValid(client)) then
+		return
+	end
+
 	local character = client:GetCharacter()
+
+	-- Set any armor
 	local armor = self:GetData("armor", self.maxArmor)
 	self:SetData("armor", armor)
-    Schema.armor.SetArmor(character, self.id)
+	Schema.armor.SetArmor(character, self.id)
 
+	-- Check if any citizen clothing is equipped, if it is then we want to set the same body groups they set.
+	-- So for example if gloves are equipped, we want the gloves to be set on this armor as well.
+	local inventory = character:GetInventory()
+	local citizenClothing = inventory:GetItemsByBase("base_citizen_clothing")
+
+	for _, item in ipairs(citizenClothing) do
+		-- Note that citizen clothing derive from this base item, so we have to check if its not the same item
+		if (item ~= self and item:GetData("equip") == true) then
+			item:AddOutfit(client)
+		end
+	end
+
+	-- Play the equip sound
 	if (self.expNoEquipSound) then
 		return
 	end
@@ -101,14 +121,26 @@ function ITEM:OnUnequipped()
 		return
 	end
 
+	-- Remove the armor this added
 	local character = client:GetCharacter()
 	Schema.armor.RemoveArmor(character, self.id)
+
+	-- Restore any other citizen clothing that is equipped
+	local inventory = character:GetInventory()
+	local citizenClothing = inventory:GetItemsByBase("base_citizen_clothing")
+
+	for _, item in ipairs(citizenClothing) do
+		-- Note that citizen clothing derive from this base item, so we have to check if its not the same item
+		if (item ~= self and item:GetData("equip") == true) then
+			item:AddOutfit(client)
+		end
+	end
 
 	client:EmitSound("physics/body/body_medium_impact_soft2.wav", 25, 50)
 end
 
 function ITEM:Repair(amount)
-    self:SetData("armor", math.Clamp(self:GetData("armor", 0) + amount, 0, self.maxArmor))
+	self:SetData("armor", math.Clamp(self:GetData("armor", 0) + amount, 0, self.maxArmor))
 end
 
 function ITEM:CanRepair()
@@ -116,19 +148,19 @@ function ITEM:CanRepair()
 		return false
 	end
 
-    if (not self.noArmor and self:GetData("armor", self.maxArmor) >= self.maxArmor) then
-        return false
-    end
+	if (not self.noArmor and self:GetData("armor", self.maxArmor) >= self.maxArmor) then
+		return false
+	end
 
-    local client = self.player
+	local client = self.player
 
-    for material, amount in pairs(self.repairMaterials) do
-        if (client:GetCharacter():GetInventory():GetItemCount(material) < amount) then
-            return false
-        end
-    end
+	for material, amount in pairs(self.repairMaterials) do
+		if (client:GetCharacter():GetInventory():GetItemCount(material) < amount) then
+			return false
+		end
+	end
 
-    return true
+	return true
 end
 
 function ITEM:OnRepair()
@@ -139,9 +171,9 @@ function ITEM:OnRepair()
 		character:GetInventory():RemoveStackedItem(material, amount)
 	end
 
-    if (not self.noArmor) then
-        self:Repair(self.maxArmor * .5)
-    end
+	if (not self.noArmor) then
+		self:Repair(self.maxArmor * .5)
+	end
 
 	client:EmitSound("ambient/levels/labs/machine_stop1.wav", 25, 1000)
 end
