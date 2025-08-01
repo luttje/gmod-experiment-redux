@@ -30,10 +30,10 @@ SWEP.Slot = 2
 SWEP.SlotAlt = 4
 
 SWEP.BalanceStats = {
-  [PLUGIN.BALANCE_SBOX] = {
-  },
-  [PLUGIN.BALANCE_TTT] = {
-  },
+	[PLUGIN.BALANCE_SBOX] = {
+	},
+	[PLUGIN.BALANCE_TTT] = {
+	},
 }
 
 -- "ballistics"
@@ -134,7 +134,7 @@ SWEP.ClipSize = 1
 SWEP.Ammo = "rpg_round"
 
 SWEP.BulletBodygroups = {
-  [1] = { 5, 1 }
+	[1] = { 5, 1 }
 }
 
 -- sounds
@@ -158,41 +158,41 @@ SWEP.MuzzleEffect = "muzzleflash_1"
 -- anims
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "draw",
-  ["blind_fire"] = "aimed_fire",
-  ["blind_idle"] = "aimed_idle",
+	["deploy"] = "draw",
+	["blind_fire"] = "aimed_fire",
+	["blind_idle"] = "aimed_idle",
 }
 
 -- attachments
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Ammo",
-    Category = { "ammo_rpg" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [2] = {
-    PrintName = "Accessory",
-    Category = { "acc", "acc_duffle", "acc_sling" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [3] = {
-    PrintName = "Perk",
-    Category = { "perk", "perk_shooting", "perk_reload" },
-    AttachSound = "tacrp/weapons/flashlight_on.wav",
-    DetachSound = "tacrp/weapons/flashlight_off.wav",
-  },
+	[1] = {
+		PrintName = "Ammo",
+		Category = { "ammo_rpg" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[2] = {
+		PrintName = "Accessory",
+		Category = { "acc", "acc_duffle", "acc_sling" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[3] = {
+		PrintName = "Perk",
+		Category = { "perk", "perk_shooting", "perk_reload" },
+		AttachSound = "tacrp/weapons/flashlight_on.wav",
+		DetachSound = "tacrp/weapons/flashlight_off.wav",
+	},
 }
 
 local function addsound(name, spath)
-  sound.Add({
-    name = name,
-    channel = 16,
-    volume = 1.0,
-    sound = spath
-  })
+	sound.Add({
+		name = name,
+		channel = 16,
+		volume = 1.0,
+		sound = spath
+	})
 end
 
 addsound("TacInt_rpg7.jingle", path .. "handling-1.wav")
@@ -200,18 +200,18 @@ addsound("TacInt_rpg7.insert_rocket", path .. "insert_rocket.wav")
 addsound("TacInt_rpg7.flipup_sight", path .. "flipup_sight.wav")
 
 if engine.ActiveGamemode() == "terrortown" then
-  SWEP.AutoSpawnable = false
-  SWEP.Kind          = WEAPON_EQUIP
-  SWEP.Slot          = 6
-  SWEP.CanBuy        = { ROLE_TRAITOR }
-  SWEP.LimitedStock  = true
-  SWEP.EquipMenuData = {
-    type = "Weapon",
-    desc =
-    "Rocket launcher. Can't explode at point blank.\nComes with 2 rockets.\n\nBEWARE: May be visible while holstered!",
-  }
+	SWEP.AutoSpawnable = false
+	SWEP.Kind          = WEAPON_EQUIP
+	SWEP.Slot          = 6
+	SWEP.CanBuy        = { ROLE_TRAITOR }
+	SWEP.LimitedStock  = true
+	SWEP.EquipMenuData = {
+		type = "Weapon",
+		desc =
+		"Rocket launcher. Can't explode at point blank.\nComes with 2 rockets.\n\nBEWARE: May be visible while holstered!",
+	}
 
-  function SWEP:TTTBought(buyer)
-    buyer:GiveAmmo(1, "RPG_Round")
-  end
+	function SWEP:TTTBought(buyer)
+		buyer:GiveAmmo(1, "RPG_Round")
+	end
 end

@@ -10,9 +10,9 @@ ITEM.model = "models/weapons/tacint_extras/w_glock_new.mdl"
 ITEM.width = 2
 ITEM.height = 2
 ITEM.iconCam = {
-  pos = Vector(79.84, 180.88, 30.11),
-  ang = Angle(8.66, 246.18, 0),
-  fov = 5.13
+	pos = Vector(79.84, 180.88, 30.11),
+	ang = Angle(8.66, 246.18, 0),
+	fov = 5.13
 }
 
 ITEM.forcedWeaponCalibre = "9x19mm"

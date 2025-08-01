@@ -15,6 +15,6 @@ ITEM.forcedWeaponCalibre = "12 Gauge"
 ITEM.requiresGunsmith = true
 
 ITEM.mergeIntoSwep = {
-  -- Spread = 0.025, (spread radius)
-  ShotgunPelletSpread = 0.2, -- was 0.02 (deviation from spread, even going out of spread radius)
+	-- Spread = 0.025, (spread radius)
+	ShotgunPelletSpread = 0.2, -- was 0.02 (deviation from spread, even going out of spread radius)
 }

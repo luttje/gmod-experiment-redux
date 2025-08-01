@@ -57,8 +57,8 @@ SWEP.CustomizeAng = Angle(0, 25, 0)
 SWEP.CustomizePos = Vector(2, 0, -12)
 
 SWEP.SprintMidPoint = {
-  Pos = Vector(2, 0, -5),
-  Ang = Angle(0, 0, 0)
+	Pos = Vector(2, 0, -5),
+	Ang = Angle(0, 0, 0)
 }
 
 SWEP.HolsterVisible = false
@@ -71,50 +71,50 @@ SWEP.HolsterAng = Angle(-90, -90, 15)
 local path = "tacrp/weapons/knife/"
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "deploy",
-  ["melee"] = { "slash_left1", "slash_left2", "slash_right1", "slash_right2" },
-  ["melee2"] = { "slash_forward1", "slash_forward2" },
-  ["meleethrow"] = { "knifethrow" },
+	["deploy"] = "deploy",
+	["melee"] = { "slash_left1", "slash_left2", "slash_right1", "slash_right2" },
+	["melee2"] = { "slash_forward1", "slash_forward2" },
+	["meleethrow"] = { "knifethrow" },
 }
 
 SWEP.Sound_MeleeHit = {
-  path .. "/scrape_metal-1.wav",
-  path .. "/scrape_metal-2.wav",
-  path .. "/scrape_metal-3.wav",
+	path .. "/scrape_metal-1.wav",
+	path .. "/scrape_metal-2.wav",
+	path .. "/scrape_metal-3.wav",
 }
 
 SWEP.Sound_MeleeHitBody = {
-  path .. "/flesh_hit-1.wav",
-  path .. "/flesh_hit-2.wav",
-  path .. "/flesh_hit-3.wav",
-  path .. "/flesh_hit-4.wav",
-  path .. "/flesh_hit-5.wav",
+	path .. "/flesh_hit-1.wav",
+	path .. "/flesh_hit-2.wav",
+	path .. "/flesh_hit-3.wav",
+	path .. "/flesh_hit-4.wav",
+	path .. "/flesh_hit-5.wav",
 }
 
 SWEP.Sound_MeleeSwing = {
-  path .. "swing-1.wav",
-  path .. "swing-2.wav",
-  path .. "swing-3.wav",
-  path .. "swing-4.wav",
-  path .. "swing-5.wav",
-  path .. "swing-6.wav",
+	path .. "swing-1.wav",
+	path .. "swing-2.wav",
+	path .. "swing-3.wav",
+	path .. "swing-4.wav",
+	path .. "swing-5.wav",
+	path .. "swing-6.wav",
 }
 
 -- attachments
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Technique",
-    Category = "melee_tech",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [2] = {
-    PrintName = "Special",
-    Category = "melee_spec",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
+	[1] = {
+		PrintName = "Technique",
+		Category = "melee_tech",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[2] = {
+		PrintName = "Special",
+		Category = "melee_spec",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
 }
 
 SWEP.FreeAim = false
@@ -124,22 +124,22 @@ SWEP.DrawCrosshairInSprint = true
 SWEP.CrosshairStatic = true
 
 local function addsound(name, spath)
-  sound.Add({
-    name = name,
-    channel = 16,
-    volume = 1.0,
-    sound = spath
-  })
+	sound.Add({
+		name = name,
+		channel = 16,
+		volume = 1.0,
+		sound = spath
+	})
 end
 
 addsound("tacint_knife2.deploy", "tacrp/magtap.ogg")
 
 function SWEP:PrimaryAttack()
-  local stop = self:RunHook("Hook_PreShoot")
-  if stop then return end
+	local stop = self:RunHook("Hook_PreShoot")
+	if stop then return end
 
-  self:Melee()
-  return
+	self:Melee()
+	return
 end
 
 function SWEP:ThinkSprint()

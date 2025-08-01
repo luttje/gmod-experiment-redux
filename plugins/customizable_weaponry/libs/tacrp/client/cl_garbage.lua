@@ -1,4 +1,4 @@
-local PLUGIN = PLUGIN
+local PLUGIN          = PLUGIN
 PLUGIN.CSModelPile    = {} -- { {Model = NULL, Weapon = NULL} }
 PLUGIN.FlashlightPile = {}
 

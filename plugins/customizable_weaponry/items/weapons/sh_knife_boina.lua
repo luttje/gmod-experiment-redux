@@ -19,5 +19,5 @@ ITEM.attachmentOffsetAngles = Angle(0, 180, 87)
 ITEM.attachmentOffsetVector = Vector(0, 0, -7.2)
 
 ITEM.mergeIntoSwep = {
-  MeleeRange = 64,
+	MeleeRange = 64,
 }

@@ -21,10 +21,10 @@ local noise3 = Material("tacrp/hud/noise3.png")
 local noise4 = Material("tacrp/hud/noise4.png")
 
 local noisemats = {
-  noise1,
-  noise2,
-  noise3,
-  noise4
+	noise1,
+	noise2,
+	noise3,
+	noise4
 }
 
 local lastrendertime = 0
@@ -32,154 +32,154 @@ local lastrendertime = 0
 local fps = 30
 
 function SWEP:DoRT()
-  if not self:GetBlindFire() and not IsValid(self:GetCornershotEntity()) then
-    lastblindfire = false
-    return
-  end
-  if PLUGIN.OverDraw then return end
+	if not self:GetBlindFire() and not IsValid(self:GetCornershotEntity()) then
+		lastblindfire = false
+		return
+	end
+	if PLUGIN.OverDraw then return end
 
-  if not lastblindfire then
-    blindfiretime = 0
-  end
+	if not lastblindfire then
+		blindfiretime = 0
+	end
 
-  if lastrendertime > CurTime() - (1 / fps) then return end
+	if lastrendertime > CurTime() - (1 / fps) then return end
 
-  local angles = self:GetShootDir()
-  local origin = self:GetMuzzleOrigin()
+	local angles = self:GetShootDir()
+	local origin = self:GetMuzzleOrigin()
 
-  if IsValid(self:GetCornershotEntity()) then
-    origin = self:GetCornershotEntity():LocalToWorld(self:GetCornershotEntity().CornershotOffset)
-    angles = self:GetCornershotEntity():LocalToWorldAngles(self:GetCornershotEntity().CornershotAngles)
-    PLUGIN.CornerCamDrawSelf = true
-  elseif self:GetBlindFireMode() == PLUGIN.BLINDFIRE_KYS then
-    local bone = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
+	if IsValid(self:GetCornershotEntity()) then
+		origin = self:GetCornershotEntity():LocalToWorld(self:GetCornershotEntity().CornershotOffset)
+		angles = self:GetCornershotEntity():LocalToWorldAngles(self:GetCornershotEntity().CornershotAngles)
+		PLUGIN.CornerCamDrawSelf = true
+	elseif self:GetBlindFireMode() == PLUGIN.BLINDFIRE_KYS then
+		local bone = self:GetOwner():LookupBone("ValveBiped.Bip01_R_Hand")
 
-    if bone then
-      local pos, ang = self:GetOwner():GetBonePosition(bone)
+		if bone then
+			local pos, ang = self:GetOwner():GetBonePosition(bone)
 
-      angles = ang
-      angles:RotateAroundAxis(angles:Forward(), 180)
-      origin = pos
+			angles = ang
+			angles:RotateAroundAxis(angles:Forward(), 180)
+			origin = pos
 
-      PLUGIN.CornerCamDrawSelf = true
-    end
-  end
+			PLUGIN.CornerCamDrawSelf = true
+		end
+	end
 
-  local rt = {
-    x = 0,
-    y = 0,
-    w = rt_w,
-    h = rt_h,
-    aspect = 4 / 3,
-    angles = angles,
-    origin = origin,
-    drawviewmodel = false,
-    fov = 40,
-    znear = 6
-  }
+	local rt = {
+		x = 0,
+		y = 0,
+		w = rt_w,
+		h = rt_h,
+		aspect = 4 / 3,
+		angles = angles,
+		origin = origin,
+		drawviewmodel = false,
+		fov = 40,
+		znear = 6
+	}
 
-  render.PushRenderTarget(rtmat, 0, 0, rt_w, rt_h)
+	render.PushRenderTarget(rtmat, 0, 0, rt_w, rt_h)
 
-  if blindfiretime >= 1 or blindfiretime == 0 then
-    PLUGIN.OverDraw = true
-    render.RenderView(rt)
-    PLUGIN.OverDraw = false
-  end
+	if blindfiretime >= 1 or blindfiretime == 0 then
+		PLUGIN.OverDraw = true
+		render.RenderView(rt)
+		PLUGIN.OverDraw = false
+	end
 
-  PLUGIN.CornerCamDrawSelf = false
+	PLUGIN.CornerCamDrawSelf = false
 
-  DrawColorModify({
-    ["$pp_colour_addr"] = 0.25 * 132 / 255,
-    ["$pp_colour_addg"] = 0.25 * 169 / 255,
-    ["$pp_colour_addb"] = 0.25 * 154 / 255,
-    ["$pp_colour_brightness"] = 0.2,
-    ["$pp_colour_contrast"] = 0.85,
-    ["$pp_colour_colour"] = 0.95,
-    ["$pp_colour_mulr"] = 0,
-    ["$pp_colour_mulg"] = 0,
-    ["$pp_colour_mulb"] = 0
-  })
+	DrawColorModify({
+		["$pp_colour_addr"] = 0.25 * 132 / 255,
+		["$pp_colour_addg"] = 0.25 * 169 / 255,
+		["$pp_colour_addb"] = 0.25 * 154 / 255,
+		["$pp_colour_brightness"] = 0.2,
+		["$pp_colour_contrast"] = 0.85,
+		["$pp_colour_colour"] = 0.95,
+		["$pp_colour_mulr"] = 0,
+		["$pp_colour_mulg"] = 0,
+		["$pp_colour_mulb"] = 0
+	})
 
-  -- if blindfiretime < 0.33 then
-  --     surface.SetMaterial(csm_boot_1)
-  -- elseif blindfiretime < 0.66 then
-  --     surface.SetMaterial(csm_boot_2)
-  -- elseif blindfiretime < 1.25 then
-  --     surface.SetMaterial(csm_boot_3)
-  -- else
-  -- end
+	-- if blindfiretime < 0.33 then
+	--     surface.SetMaterial(csm_boot_1)
+	-- elseif blindfiretime < 0.66 then
+	--     surface.SetMaterial(csm_boot_2)
+	-- elseif blindfiretime < 1.25 then
+	--     surface.SetMaterial(csm_boot_3)
+	-- else
+	-- end
 
-  cam.Start2D()
+	cam.Start2D()
 
-  render.ClearDepth()
+	render.ClearDepth()
 
-  if blindfiretime < 1 then
-    if blindfiretime < 0.75 then
-      surface.SetDrawColor(255, 255, 255)
-      surface.SetMaterial(noisemats[math.random(#noisemats)])
-      surface.DrawTexturedRect(0, 0, rt_w, rt_h)
-    else
-      surface.SetDrawColor(0, 0, 0)
-      surface.DrawRect(0, 0, rt_w, rt_h)
-    end
+	if blindfiretime < 1 then
+		if blindfiretime < 0.75 then
+			surface.SetDrawColor(255, 255, 255)
+			surface.SetMaterial(noisemats[math.random(#noisemats)])
+			surface.DrawTexturedRect(0, 0, rt_w, rt_h)
+		else
+			surface.SetDrawColor(0, 0, 0)
+			surface.DrawRect(0, 0, rt_w, rt_h)
+		end
 
-    DrawColorModify({
-      ["$pp_colour_addr"] = 0.25 * 132 / 255,
-      ["$pp_colour_addg"] = 0.25 * 169 / 255,
-      ["$pp_colour_addb"] = 0.25 * 154 / 255,
-      ["$pp_colour_brightness"] = 0.2,
-      ["$pp_colour_contrast"] = 0.85,
-      ["$pp_colour_colour"] = 0.95,
-      ["$pp_colour_mulr"] = 0,
-      ["$pp_colour_mulg"] = 0,
-      ["$pp_colour_mulb"] = 0
-    })
-  end
+		DrawColorModify({
+			["$pp_colour_addr"] = 0.25 * 132 / 255,
+			["$pp_colour_addg"] = 0.25 * 169 / 255,
+			["$pp_colour_addb"] = 0.25 * 154 / 255,
+			["$pp_colour_brightness"] = 0.2,
+			["$pp_colour_contrast"] = 0.85,
+			["$pp_colour_colour"] = 0.95,
+			["$pp_colour_mulr"] = 0,
+			["$pp_colour_mulg"] = 0,
+			["$pp_colour_mulb"] = 0
+		})
+	end
 
-  if blindfiretime < 0.2 then
-    surface.SetMaterial(csm_boot_1)
-  elseif blindfiretime < 0.4 then
-    surface.SetMaterial(csm_boot_2)
-  elseif blindfiretime < 0.6 then
-    surface.SetMaterial(csm_boot_3)
-  else
-    if math.sin(CurTime() * 3) > 0.5 then
-      surface.SetMaterial(csm_1)
-    else
-      surface.SetMaterial(csm_2)
-    end
-  end
+	if blindfiretime < 0.2 then
+		surface.SetMaterial(csm_boot_1)
+	elseif blindfiretime < 0.4 then
+		surface.SetMaterial(csm_boot_2)
+	elseif blindfiretime < 0.6 then
+		surface.SetMaterial(csm_boot_3)
+	else
+		if math.sin(CurTime() * 3) > 0.5 then
+			surface.SetMaterial(csm_1)
+		else
+			surface.SetMaterial(csm_2)
+		end
+	end
 
-  surface.SetDrawColor(255, 255, 255)
-  surface.DrawTexturedRect(0, 0, rt_w, rt_h)
-  cam.End2D()
+	surface.SetDrawColor(255, 255, 255)
+	surface.DrawTexturedRect(0, 0, rt_w, rt_h)
+	cam.End2D()
 
-  render.PopRenderTarget()
+	render.PopRenderTarget()
 
-  blindfiretime = blindfiretime + (math.random(0, 5) * math.random(0, 5) * (1 / fps) / 6.25)
+	blindfiretime = blindfiretime + (math.random(0, 5) * math.random(0, 5) * (1 / fps) / 6.25)
 
-  lastblindfire = true
-  lastrendertime = CurTime()
+	lastblindfire = true
+	lastrendertime = CurTime()
 end
 
 function SWEP:DoCornershot()
-  if not self:GetBlindFire() and not IsValid(self:GetCornershotEntity()) then
-    lastblindfire = false
-    return
-  end
+	if not self:GetBlindFire() and not IsValid(self:GetCornershotEntity()) then
+		lastblindfire = false
+		return
+	end
 
-  local w = PLUGIN.SS(640 / 4)
-  local h = PLUGIN.SS(480 / 4)
-  local x = (ScrW() - w) / 2
-  local y = (ScrH() - h) / 2
-  y = y + (ScrH() / 4)
-  render.DrawTextureToScreenRect(rtmat, x, y, w, h)
+	local w = PLUGIN.SS(640 / 4)
+	local h = PLUGIN.SS(480 / 4)
+	local x = (ScrW() - w) / 2
+	local y = (ScrH() - h) / 2
+	y = y + (ScrH() / 4)
+	render.DrawTextureToScreenRect(rtmat, x, y, w, h)
 end
 
 hook.Add("ShouldDrawLocalPlayer", "TacRP_CornerCamDrawSelf", function(ply)
-  if PLUGIN.CornerCamDrawSelf then
-    return true
-  end
+	if PLUGIN.CornerCamDrawSelf then
+		return true
+	end
 end)
 
 SWEP.NearWallTick = 0
@@ -188,11 +188,11 @@ SWEP.NearWallCached = false
 local traceResults = {}
 
 local traceData = {
-  start = true,
-  endpos = true,
-  filter = true,
-  mask = MASK_SHOT_HULL,
-  output = traceResults
+	start = true,
+	endpos = true,
+	filter = true,
+	mask = MASK_SHOT_HULL,
+	output = traceResults
 }
 
 local VECTOR = FindMetaTable("Vector")
@@ -203,37 +203,37 @@ local angleForward = FindMetaTable("Angle").Forward
 local entityGetOwner = FindMetaTable("Entity").GetOwner
 
 function SWEP:GetNearWallAmount()
-  local now = engine.TickCount()
+	local now = engine.TickCount()
 
-  if not PLUGIN.ConVars["nearwall"]:GetBool() or LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP then
-    return 0
-  end
+	if not PLUGIN.ConVars["nearwall"]:GetBool() or LocalPlayer():GetMoveType() == MOVETYPE_NOCLIP then
+		return 0
+	end
 
-  if self.NearWallTick == now then
-    return self.NearWallCached
-  end
+	if self.NearWallTick == now then
+		return self.NearWallCached
+	end
 
-  local length = 32
+	local length = 32
 
-  local startPos = self:GetMuzzleOrigin()
+	local startPos = self:GetMuzzleOrigin()
 
-  local endPos = angleForward(self:GetShootDir())
-  vectorMul(endPos, length)
-  vectorAdd(endPos, startPos)
+	local endPos = angleForward(self:GetShootDir())
+	vectorMul(endPos, length)
+	vectorAdd(endPos, startPos)
 
-  traceData.start = startPos
-  traceData.endpos = endPos
-  traceData.filter = entityGetOwner(self)
+	traceData.start = startPos
+	traceData.endpos = endPos
+	traceData.filter = entityGetOwner(self)
 
-  util.TraceLine(traceData)
-  local hit = 1 - traceResults.Fraction
+	util.TraceLine(traceData)
+	local hit = 1 - traceResults.Fraction
 
-  self.NearWallCached = hit
-  self.NearWallTick = now
+	self.NearWallCached = hit
+	self.NearWallTick = now
 
-  return hit
+	return hit
 end
 
 function SWEP:ThinkNearWall()
-  self:GetNearWallAmount()
+	self:GetNearWallAmount()
 end

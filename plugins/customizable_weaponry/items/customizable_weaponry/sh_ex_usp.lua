@@ -10,9 +10,9 @@ ITEM.model = "models/weapons/tacint_extras/w_usp.mdl"
 ITEM.width = 2
 ITEM.height = 2
 ITEM.iconCam = {
-  pos = Vector(46.42, 184.39, 62.01),
-  ang = Angle(18.06, 255.87, 0),
-  fov = 5.13
+	pos = Vector(46.42, 184.39, 62.01),
+	ang = Angle(18.06, 255.87, 0),
+	fov = 5.13
 }
 
 ITEM.forcedWeaponCalibre = ".40 S&W"

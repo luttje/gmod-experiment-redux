@@ -30,10 +30,10 @@ SWEP.NoRanger = true
 SWEP.Slot = 4
 
 SWEP.BalanceStats = {
-  [PLUGIN.BALANCE_SBOX] = {
-  },
-  [PLUGIN.BALANCE_TTT] = {
-  },
+	[PLUGIN.BALANCE_SBOX] = {
+	},
+	[PLUGIN.BALANCE_TTT] = {
+	},
 }
 
 -- "ballistics"
@@ -47,14 +47,14 @@ SWEP.ShootEnt = "tacrp_proj_40mm_he"
 SWEP.ShootEntForce = 4000
 
 SWEP.BodyDamageMultipliers = {
-  [HITGROUP_HEAD] = 1,
-  [HITGROUP_CHEST] = 1,
-  [HITGROUP_STOMACH] = 1,
-  [HITGROUP_LEFTARM] = 1,
-  [HITGROUP_RIGHTARM] = 1,
-  [HITGROUP_LEFTLEG] = 0.9,
-  [HITGROUP_RIGHTLEG] = 0.9,
-  [HITGROUP_GEAR] = 0.9
+	[HITGROUP_HEAD] = 1,
+	[HITGROUP_CHEST] = 1,
+	[HITGROUP_STOMACH] = 1,
+	[HITGROUP_LEFTARM] = 1,
+	[HITGROUP_RIGHTARM] = 1,
+	[HITGROUP_LEFTLEG] = 0.9,
+	[HITGROUP_RIGHTLEG] = 0.9,
+	[HITGROUP_GEAR] = 0.9
 }
 
 SWEP.MuzzleVelocity = 7000
@@ -165,77 +165,77 @@ SWEP.MuzzleEffect = "muzzleflash_m79"
 -- anims
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "draw",
-  ["blind_idle"] = "idle",
-  ["blind_fire"] = "fire",
+	["deploy"] = "draw",
+	["blind_idle"] = "idle",
+	["blind_fire"] = "fire",
 }
 
 -- attachments
 
 SWEP.AttachmentElements = {
-  ["foldstock"] = {
-    BGs_VM = {
-      { 1, 1 }
-    },
-    BGs_WM = {
-      { 1, 1 }
-    }
-  },
-  ["3gl"] = {
-    BGs_VM = {
-      { 2, 1 }
-    },
-  },
-  ["buck"] = {
-    BGs_VM = {
-      { 2, 2 }
-    },
-  },
-  ["heat"] = {
-    BGs_VM = {
-      { 2, 3 }
-    },
-  },
-  ["lvg"] = {
-    BGs_VM = {
-      { 2, 4 }
-    },
-  },
-  ["smoke"] = {
-    BGs_VM = {
-      { 2, 5 }
-    },
-  },
+	["foldstock"] = {
+		BGs_VM = {
+			{ 1, 1 }
+		},
+		BGs_WM = {
+			{ 1, 1 }
+		}
+	},
+	["3gl"] = {
+		BGs_VM = {
+			{ 2, 1 }
+		},
+	},
+	["buck"] = {
+		BGs_VM = {
+			{ 2, 2 }
+		},
+	},
+	["heat"] = {
+		BGs_VM = {
+			{ 2, 3 }
+		},
+	},
+	["lvg"] = {
+		BGs_VM = {
+			{ 2, 4 }
+		},
+	},
+	["smoke"] = {
+		BGs_VM = {
+			{ 2, 5 }
+		},
+	},
 }
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Ammo",
-    Category = "ammo_40mm",
-    AttachSound = "TacRP/weapons/m320/shell_in-1.wav",
-    DetachSound = "TacRP/weapons/m320/shell_out-1.wav",
-  },
-  [2] = {
-    PrintName = "Accessory",
-    Category = { "acc", "acc_foldstock2", "acc_holster" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [3] = {
-    PrintName = "Perk",
-    Category = { "perk", "perk_shooting", "perk_reload", "perk_melee" },
-    AttachSound = "tacrp/weapons/flashlight_on.wav",
-    DetachSound = "tacrp/weapons/flashlight_off.wav",
-  },
+	[1] = {
+		PrintName = "Ammo",
+		Category = "ammo_40mm",
+		AttachSound = "TacRP/weapons/m320/shell_in-1.wav",
+		DetachSound = "TacRP/weapons/m320/shell_out-1.wav",
+	},
+	[2] = {
+		PrintName = "Accessory",
+		Category = { "acc", "acc_foldstock2", "acc_holster" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[3] = {
+		PrintName = "Perk",
+		Category = { "perk", "perk_shooting", "perk_reload", "perk_melee" },
+		AttachSound = "tacrp/weapons/flashlight_on.wav",
+		DetachSound = "tacrp/weapons/flashlight_off.wav",
+	},
 }
 
 local function addsound(name, spath)
-  sound.Add({
-    name = name,
-    channel = 16,
-    volume = 1.0,
-    sound = spath
-  })
+	sound.Add({
+		name = name,
+		channel = 16,
+		volume = 1.0,
+		sound = spath
+	})
 end
 
 addsound("TacInt_m320.Tube_Open", path .. "tube_open-1.wav")
@@ -248,17 +248,17 @@ addsound("TacInt_m320.sight_flipup", path .. "sight_flipup-1.wav")
 SWEP.AutoSpawnable = false
 
 if engine.ActiveGamemode() == "terrortown" then
-  SWEP.AutoSpawnable = false
-  SWEP.Kind = WEAPON_EQUIP
-  SWEP.Slot = 6
-  SWEP.CanBuy = { ROLE_TRAITOR }
-  SWEP.EquipMenuData = {
-    type = "Weapon",
-    desc =
-    "Low power grenade launcher. Variety of payload\noptions, but standard explosive grenades are weak.\nComes with 3 grenades.\n\nBEWARE: May be visible while holstered!",
-  }
+	SWEP.AutoSpawnable = false
+	SWEP.Kind = WEAPON_EQUIP
+	SWEP.Slot = 6
+	SWEP.CanBuy = { ROLE_TRAITOR }
+	SWEP.EquipMenuData = {
+		type = "Weapon",
+		desc =
+		"Low power grenade launcher. Variety of payload\noptions, but standard explosive grenades are weak.\nComes with 3 grenades.\n\nBEWARE: May be visible while holstered!",
+	}
 
-  function SWEP:TTTBought(buyer)
-    buyer:GiveAmmo(2, "SMG1_Grenade")
-  end
+	function SWEP:TTTBought(buyer)
+		buyer:GiveAmmo(2, "SMG1_Grenade")
+	end
 end

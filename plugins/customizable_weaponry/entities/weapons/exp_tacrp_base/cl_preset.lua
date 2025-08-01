@@ -1,83 +1,83 @@
 local PLUGIN = PLUGIN
 
 function SWEP:SavePreset(filename)
-  if LocalPlayer() ~= self:GetOwner() then return end
+	if LocalPlayer() ~= self:GetOwner() then return end
 
-  filename = filename or "autosave"
+	filename = filename or "autosave"
 
-  local str = ""
-  for i, k in pairs(self.Attachments) do
-    if k.Installed then
-      str = str .. k.Installed
-    end
+	local str = ""
+	for i, k in pairs(self.Attachments) do
+		if k.Installed then
+			str = str .. k.Installed
+		end
 
-    str = str .. "\n"
-  end
+		str = str .. "\n"
+	end
 
-  filename = PLUGIN.PresetPath .. self:GetClass() .. "/" .. filename .. ".txt"
+	filename = PLUGIN.PresetPath .. self:GetClass() .. "/" .. filename .. ".txt"
 
-  file.CreateDir(PLUGIN.PresetPath .. self:GetClass())
-  file.Write(filename, str)
+	file.CreateDir(PLUGIN.PresetPath .. self:GetClass())
+	file.Write(filename, str)
 end
 
 function SWEP:LoadPreset(filename)
-  if LocalPlayer() ~= self:GetOwner() then return end
+	if LocalPlayer() ~= self:GetOwner() then return end
 
-  filename = PLUGIN.PresetPath .. self:GetClass() .. "/" .. "autosave" .. ".txt"
+	filename = PLUGIN.PresetPath .. self:GetClass() .. "/" .. "autosave" .. ".txt"
 
-  if not file.Exists(filename, "DATA") then return end
+	if not file.Exists(filename, "DATA") then return end
 
-  local f = file.Open(filename, "r", "DATA")
-  if not f then return end
+	local f = file.Open(filename, "r", "DATA")
+	if not f then return end
 
-  local presetTbl = {}
+	local presetTbl = {}
 
-  for i = 1, table.Count(self.Attachments) do
-    local line = f:ReadLine()
-    if not line then continue end
-    presetTbl[i] = string.Trim(line, "\n")
-  end
+	for i = 1, table.Count(self.Attachments) do
+		local line = f:ReadLine()
+		if not line then continue end
+		presetTbl[i] = string.Trim(line, "\n")
+	end
 
-  local anyinstalled = false
+	local anyinstalled = false
 
-  for i = 1, table.Count(self.Attachments) do
-    if not self.Attachments[i] then continue end
+	for i = 1, table.Count(self.Attachments) do
+		if not self.Attachments[i] then continue end
 
-    local att = presetTbl[i]
-    if att == "" then
-      self.Attachments[i].Installed = nil
-      continue
-    end
+		local att = presetTbl[i]
+		if att == "" then
+			self.Attachments[i].Installed = nil
+			continue
+		end
 
 
-    if att == self.Attachments[i].Installed then continue end
-    if not PLUGIN.GetAttTable(att) then continue end
+		if att == self.Attachments[i].Installed then continue end
+		if not PLUGIN.GetAttTable(att) then continue end
 
-    self.Attachments[i].Installed = att
+		self.Attachments[i].Installed = att
 
-    anyinstalled = true
-  end
+		anyinstalled = true
+	end
 
-  f:Close()
+	f:Close()
 
-  if not anyinstalled then return end
+	if not anyinstalled then return end
 
-  net.Start("TacRP_receivepreset")
-  net.WriteEntity(self)
-  for i, k in pairs(self.Attachments) do
-    if not k.Installed then
-      net.WriteUInt(0, PLUGIN.Attachments_Bits)
-    else
-      local atttbl = PLUGIN.GetAttTable(k.Installed)
-      net.WriteUInt(atttbl.ID or 0, PLUGIN.Attachments_Bits)
-    end
-  end
-  net.SendToServer()
+	net.Start("TacRP_receivepreset")
+	net.WriteEntity(self)
+	for i, k in pairs(self.Attachments) do
+		if not k.Installed then
+			net.WriteUInt(0, PLUGIN.Attachments_Bits)
+		else
+			local atttbl = PLUGIN.GetAttTable(k.Installed)
+			net.WriteUInt(atttbl.ID or 0, PLUGIN.Attachments_Bits)
+		end
+	end
+	net.SendToServer()
 
-  self:SetupModel(false)
-  self:SetupModel(true)
+	self:SetupModel(false)
+	self:SetupModel(true)
 
-  self:InvalidateCache()
+	self:InvalidateCache()
 
-  self:SetBaseSettings()
+	self:SetBaseSettings()
 end

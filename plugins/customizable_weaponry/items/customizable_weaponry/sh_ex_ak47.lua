@@ -11,9 +11,9 @@ ITEM.model = "models/weapons/tacint_extras/w_ak47.mdl"
 ITEM.width = 2
 ITEM.height = 2
 ITEM.iconCam = {
-  pos = Vector(-55, 450, 0),
-  ang = Angle(0, 276, 0),
-  fov = 5.55
+	pos = Vector(-55, 450, 0),
+	ang = Angle(0, 276, 0),
+	fov = 5.55
 }
 
 ITEM.forcedWeaponCalibre = "7.62x39mm"

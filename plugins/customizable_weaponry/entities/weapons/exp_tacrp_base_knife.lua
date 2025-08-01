@@ -90,8 +90,8 @@ SWEP.CustomizeAng = Angle(0, 25, 0)
 SWEP.CustomizePos = Vector(2, 0, -12)
 
 SWEP.SprintMidPoint = {
-  Pos = Vector(2, 0, -5),
-  Ang = Angle(0, 0, 0)
+	Pos = Vector(2, 0, -5),
+	Ang = Angle(0, 0, 0)
 }
 
 SWEP.HolsterVisible = false
@@ -102,24 +102,24 @@ SWEP.HolsterAng = Angle(-90, -90, 15)
 -- attachments
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Technique",
-    Category = "melee_tech",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [2] = {
-    PrintName = "Special",
-    Category = "melee_spec",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [3] = {
-    PrintName = "Boost",
-    Category = "melee_boost",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
+	[1] = {
+		PrintName = "Technique",
+		Category = "melee_tech",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[2] = {
+		PrintName = "Special",
+		Category = "melee_spec",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[3] = {
+		PrintName = "Boost",
+		Category = "melee_boost",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
 }
 
 SWEP.FreeAim = false
@@ -129,11 +129,11 @@ SWEP.DrawCrosshairInSprint = true
 SWEP.CrosshairStatic = true
 
 function SWEP:PrimaryAttack()
-  local stop = self:RunHook("Hook_PreShoot")
-  if stop then return end
+	local stop = self:RunHook("Hook_PreShoot")
+	if stop then return end
 
-  self:Melee()
-  return
+	self:Melee()
+	return
 end
 
 function SWEP:ThinkSprint()
@@ -143,11 +143,11 @@ function SWEP:ThinkSights()
 end
 
 function SWEP:ThinkHoldBreath()
-  local ret = self:RunHook("Hook_Recharge")
-  if ret then return end
-  local f = 10 - math.min(self:GetValue("MeleePerkInt"), 0.5) * 2 -
-  math.max((self:GetValue("MeleePerkInt") - 0.5) * 2, 0) * 6
-  self:SetBreath(math.min(1, self:GetBreath() + FrameTime() / f * self:GetValue("MeleeRechargeRate")))
+	local ret = self:RunHook("Hook_Recharge")
+	if ret then return end
+	local f = 10 - math.min(self:GetValue("MeleePerkInt"), 0.5) * 2 -
+		math.max((self:GetValue("MeleePerkInt") - 0.5) * 2, 0) * 6
+	self:SetBreath(math.min(1, self:GetBreath() + FrameTime() / f * self:GetValue("MeleeRechargeRate")))
 end
 
 SWEP.NoBreathBar = false
@@ -157,48 +157,48 @@ local breath_a = 0
 local last = 1
 local lastt = 0
 function SWEP:DrawBreathBar(x, y, w, h)
-  if self:GetValue("NoBreathBar") then return end
-  local seg = self:GetValue("BreathSegmentSize")
-  if CurTime() > lastt + 1 then
-    breath_a = math.Approach(breath_a, 0, FrameTime() * 2)
-  elseif breath_a < 1 then
-    breath_a = math.Approach(breath_a, 1, FrameTime())
-  end
-  local breath = self:GetBreath()
-  if last ~= self:GetBreath() then
-    lastt = CurTime()
-    last = breath
-  end
-  if breath_a == 0 then return end
+	if self:GetValue("NoBreathBar") then return end
+	local seg = self:GetValue("BreathSegmentSize")
+	if CurTime() > lastt + 1 then
+		breath_a = math.Approach(breath_a, 0, FrameTime() * 2)
+	elseif breath_a < 1 then
+		breath_a = math.Approach(breath_a, 1, FrameTime())
+	end
+	local breath = self:GetBreath()
+	if last ~= self:GetBreath() then
+		lastt = CurTime()
+		last = breath
+	end
+	if breath_a == 0 then return end
 
-  x = x - w / 2
-  y = y - h / 2
+	x = x - w / 2
+	y = y - h / 2
 
-  surface.SetDrawColor(90, 90, 90, 200 * breath_a)
-  surface.DrawOutlinedRect(x - 1, y - 1, w + 2, h + 2, 1)
-  surface.SetDrawColor(0, 0, 0, 75 * breath_a)
-  surface.DrawRect(x, y, w, h)
+	surface.SetDrawColor(90, 90, 90, 200 * breath_a)
+	surface.DrawOutlinedRect(x - 1, y - 1, w + 2, h + 2, 1)
+	surface.SetDrawColor(0, 0, 0, 75 * breath_a)
+	surface.DrawRect(x, y, w, h)
 
-  if seg > 0 then
-    local segcount = math.ceil(1 / seg)
-    surface.SetDrawColor(255, 255, 255, 200 * breath_a)
-    for i = 1, segcount - 1 do
-      local d = i / segcount
-      surface.DrawLine(x + w * d, y, x + w * d, y + h)
-    end
-  end
+	if seg > 0 then
+		local segcount = math.ceil(1 / seg)
+		surface.SetDrawColor(255, 255, 255, 200 * breath_a)
+		for i = 1, segcount - 1 do
+			local d = i / segcount
+			surface.DrawLine(x + w * d, y, x + w * d, y + h)
+		end
+	end
 
-  if seg > 0 and breath < seg then
-    surface.SetDrawColor(255, 128, 0, 150 * breath_a)
-  else
-    surface.SetDrawColor(255, 255, 255, 150 * breath_a)
-  end
+	if seg > 0 and breath < seg then
+		surface.SetDrawColor(255, 128, 0, 150 * breath_a)
+	else
+		surface.SetDrawColor(255, 255, 255, 150 * breath_a)
+	end
 
-  surface.DrawRect(x, y, w * breath, h)
+	surface.DrawRect(x, y, w * breath, h)
 end
 
 function SWEP:CalcView(ply, pos, ang, fov)
-  return pos, ang, fov
+	return pos, ang, fov
 end
 
 SWEP.AutoSpawnable = false

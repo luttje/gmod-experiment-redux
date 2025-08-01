@@ -144,7 +144,7 @@ hook.Add("DoPlayerDeath", "TacRP_DropGrenade", function(ply, attacker, dmginfo)
 		end
 
 		if nade.Spoon then
-			local mag = ents.Create("TacRP_droppedmag")
+			local mag = ents.Create("exp_dropped_mag")
 
 			if mag then
 				mag:SetPos(src)

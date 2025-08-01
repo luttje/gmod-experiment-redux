@@ -53,8 +53,8 @@ SWEP.CustomizeAng = Angle(25, 20, 0)
 SWEP.CustomizePos = Vector(-5, 0, -5)
 
 SWEP.SprintMidPoint = {
-  Pos = Vector(2, 0, -5),
-  Ang = Angle(0, 0, 0)
+	Pos = Vector(2, 0, -5),
+	Ang = Angle(0, 0, 0)
 }
 
 -- sounds
@@ -62,10 +62,10 @@ SWEP.SprintMidPoint = {
 local path = "tacint_shark/weapons/melee/"
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "deploy",
-  ["melee"] = { "slash_left1", "slash_right1" },
-  ["melee2"] = "slash_forward1",
-  ["meleethrow"] = { "knifethrow" },
+	["deploy"] = "deploy",
+	["melee"] = { "slash_left1", "slash_right1" },
+	["melee2"] = "slash_forward1",
+	["meleethrow"] = { "knifethrow" },
 }
 
 SWEP.DeployTimeMult = 0.85
@@ -75,5 +75,5 @@ SWEP.Sound_MeleeHit = path .. "bat_hit.wav"
 SWEP.Sound_MeleeHitBody = path .. "bat_hit.wav"
 
 SWEP.Sound_MeleeSwing = {
-  "weapons/iceaxe/iceaxe_swing1.wav"
+	"weapons/iceaxe/iceaxe_swing1.wav"
 }

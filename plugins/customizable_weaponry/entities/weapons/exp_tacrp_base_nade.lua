@@ -49,33 +49,33 @@ SWEP.Sway = 0
 SWEP.QuickNadeTimeMult = 0.6
 
 function SWEP:Equip(newowner)
-  local wep = self:GetOwner():GetActiveWeapon()
-  if self:GetOwner():IsPlayer() and wep ~= self and wep.ArcticTacRP and not wep:CheckGrenade(nil, true) then
-    self:GetOwner():SetNWInt("ti_nade", PLUGIN.QuickNades[self.PrimaryGrenade].Index)
-  end
+	local wep = self:GetOwner():GetActiveWeapon()
+	if self:GetOwner():IsPlayer() and wep ~= self and wep.ArcticTacRP and not wep:CheckGrenade(nil, true) then
+		self:GetOwner():SetNWInt("ti_nade", PLUGIN.QuickNades[self.PrimaryGrenade].Index)
+	end
 
-  if engine.ActiveGamemode() == "terrortown" and SERVER then
-    if self:IsOnFire() then
-      self:Extinguish()
-    end
+	if engine.ActiveGamemode() == "terrortown" and SERVER then
+		if self:IsOnFire() then
+			self:Extinguish()
+		end
 
-    self.fingerprints = self.fingerprints or {}
+		self.fingerprints = self.fingerprints or {}
 
-    if not table.HasValue(self.fingerprints, newowner) then
-      table.insert(self.fingerprints, newowner)
-    end
+		if not table.HasValue(self.fingerprints, newowner) then
+			table.insert(self.fingerprints, newowner)
+		end
 
-    if self:HasSpawnFlags(SF_WEAPON_START_CONSTRAINED) then
-      local flags = self:GetSpawnFlags()
-      local newflags = bit.band(flags, bit.bnot(SF_WEAPON_START_CONSTRAINED))
-      self:SetKeyValue("spawnflags", newflags)
-    end
-  end
+		if self:HasSpawnFlags(SF_WEAPON_START_CONSTRAINED) then
+			local flags = self:GetSpawnFlags()
+			local newflags = bit.band(flags, bit.bnot(SF_WEAPON_START_CONSTRAINED))
+			self:SetKeyValue("spawnflags", newflags)
+		end
+	end
 
-  if engine.ActiveGamemode() == "terrortown" and SERVER and IsValid(newowner) and (self.StoredAmmo or 0) > 0 and self.Primary.Ammo ~= "none" then
-    newowner:GiveAmmo(self.StoredAmmo, self.Primary.Ammo)
-    self.StoredAmmo = 0
-  end
+	if engine.ActiveGamemode() == "terrortown" and SERVER and IsValid(newowner) and (self.StoredAmmo or 0) > 0 and self.Primary.Ammo ~= "none" then
+		newowner:GiveAmmo(self.StoredAmmo, self.Primary.Ammo)
+		self.StoredAmmo = 0
+	end
 end
 
 function SWEP:ThinkSprint()
@@ -85,97 +85,97 @@ function SWEP:ThinkSights()
 end
 
 function SWEP:ThinkGrenade()
-  if self:GetPrimedGrenade() and self:GetAnimLockTime() < CurTime() then
-    if not self:GetOwner():KeyDown(self.GrenadeDownKey) then
-      self:ThrowGrenade()
-      self:SetPrimedGrenade(false)
-    elseif SERVER and self.GrenadeDownKey == IN_ATTACK then
-      self.GrenadeThrowCharge = math.Clamp(CurTime() - self:GetAnimLockTime(), 0, 0.25) * 2
-    end
-  elseif not self:GetPrimedGrenade() then
-    local nade = PLUGIN.QuickNades[self:GetValue("PrimaryGrenade")]
-    if not PLUGIN.IsGrenadeInfiniteAmmo(nade) and self:GetOwner():GetAmmoCount(nade.Ammo) == 0 then
-      if SERVER then
-        self:Remove()
-      elseif CLIENT and IsValid(self:GetOwner():GetPreviousWeapon()) and self:GetOwner():GetPreviousWeapon():IsWeapon() then
-        input.SelectWeapon(self:GetOwner():GetPreviousWeapon())
-      end
-    end
-  end
+	if self:GetPrimedGrenade() and self:GetAnimLockTime() < CurTime() then
+		if not self:GetOwner():KeyDown(self.GrenadeDownKey) then
+			self:ThrowGrenade()
+			self:SetPrimedGrenade(false)
+		elseif SERVER and self.GrenadeDownKey == IN_ATTACK then
+			self.GrenadeThrowCharge = math.Clamp(CurTime() - self:GetAnimLockTime(), 0, 0.25) * 2
+		end
+	elseif not self:GetPrimedGrenade() then
+		local nade = PLUGIN.QuickNades[self:GetValue("PrimaryGrenade")]
+		if not PLUGIN.IsGrenadeInfiniteAmmo(nade) and self:GetOwner():GetAmmoCount(nade.Ammo) == 0 then
+			if SERVER then
+				self:Remove()
+			elseif CLIENT and IsValid(self:GetOwner():GetPreviousWeapon()) and self:GetOwner():GetPreviousWeapon():IsWeapon() then
+				input.SelectWeapon(self:GetOwner():GetPreviousWeapon())
+			end
+		end
+	end
 end
 
 function SWEP:PrimaryAttack()
-  if engine.ActiveGamemode() == "terrortown" and GetRoundState() == ROUND_PREP and
-      ((TTT2 and not GetConVar("ttt_nade_throw_during_prep"):GetBool()) or (not TTT2 and GetConVar("ttt_no_nade_throw_during_prep"):GetBool())) then
-    return
-  end
+	if engine.ActiveGamemode() == "terrortown" and GetRoundState() == ROUND_PREP and
+		((TTT2 and not GetConVar("ttt_nade_throw_during_prep"):GetBool()) or (not TTT2 and GetConVar("ttt_no_nade_throw_during_prep"):GetBool())) then
+		return
+	end
 
-  self.Primary.Automatic = false
-  self.Secondary.Automatic = false
-  self.GrenadeDownKey = IN_ATTACK
-  self.GrenadeThrowOverride = false
-  self.GrenadeThrowCharge = 0
+	self.Primary.Automatic = false
+	self.Secondary.Automatic = false
+	self.GrenadeDownKey = IN_ATTACK
+	self.GrenadeThrowOverride = false
+	self.GrenadeThrowCharge = 0
 
-  if self:GetValue("Melee") and self:GetOwner():KeyDown(IN_USE) then
-    self:Melee()
-    return
-  end
+	if self:GetValue("Melee") and self:GetOwner():KeyDown(IN_USE) then
+		self:Melee()
+		return
+	end
 
-  if self:StillWaiting() then
-    return
-  end
+	if self:StillWaiting() then
+		return
+	end
 
-  self:SetBaseSettings()
+	self:SetBaseSettings()
 
-  local stop = self:RunHook("Hook_PreShoot")
-  if stop then return end
+	local stop = self:RunHook("Hook_PreShoot")
+	if stop then return end
 
-  self:PrimeGrenade()
-  self:SetNextPrimaryFire(self:GetAnimLockTime())
-  self:SetNextSecondaryFire(self:GetAnimLockTime())
+	self:PrimeGrenade()
+	self:SetNextPrimaryFire(self:GetAnimLockTime())
+	self:SetNextSecondaryFire(self:GetAnimLockTime())
 
-  self:RunHook("Hook_PostShoot")
+	self:RunHook("Hook_PostShoot")
 
-  if game.SinglePlayer() and SERVER then self:CallOnClient("PrimaryAttack") end
+	if game.SinglePlayer() and SERVER then self:CallOnClient("PrimaryAttack") end
 end
 
 function SWEP:SecondaryAttack()
-  if engine.ActiveGamemode() == "terrortown" and GetRoundState() == ROUND_PREP and GetConVar("ttt_no_nade_throw_during_prep"):GetBool() then
-    return
-  end
+	if engine.ActiveGamemode() == "terrortown" and GetRoundState() == ROUND_PREP and GetConVar("ttt_no_nade_throw_during_prep"):GetBool() then
+		return
+	end
 
-  self.Primary.Automatic = false
-  self.Secondary.Automatic = false
-  self.GrenadeDownKey = IN_ATTACK2
-  self.GrenadeThrowOverride = true
+	self.Primary.Automatic = false
+	self.Secondary.Automatic = false
+	self.GrenadeDownKey = IN_ATTACK2
+	self.GrenadeThrowOverride = true
 
-  if self:StillWaiting() then
-    return
-  end
+	if self:StillWaiting() then
+		return
+	end
 
-  self:SetBaseSettings()
+	self:SetBaseSettings()
 
-  local stop = self:RunHook("Hook_PreShoot")
-  if stop then return end
+	local stop = self:RunHook("Hook_PreShoot")
+	if stop then return end
 
-  self:PrimeGrenade()
-  self:SetNextPrimaryFire(self:GetAnimLockTime())
-  self:SetNextSecondaryFire(self:GetAnimLockTime())
+	self:PrimeGrenade()
+	self:SetNextPrimaryFire(self:GetAnimLockTime())
+	self:SetNextSecondaryFire(self:GetAnimLockTime())
 
-  self:RunHook("Hook_PostShoot")
+	self:RunHook("Hook_PostShoot")
 
-  if game.SinglePlayer() and SERVER then self:CallOnClient("SecondaryAttack") end
+	if game.SinglePlayer() and SERVER then self:CallOnClient("SecondaryAttack") end
 end
 
 function SWEP:Reload()
 end
 
 function SWEP:PreDrop()
-  if SERVER and IsValid(self:GetOwner()) and self.Primary.Ammo ~= "" and self.Primary.Ammo ~= "none" then
-    local ammo = self:Ammo1()
-    if ammo > 0 then
-      self.StoredAmmo = 1
-      self:GetOwner():RemoveAmmo(1, self.Primary.Ammo)
-    end
-  end
+	if SERVER and IsValid(self:GetOwner()) and self.Primary.Ammo ~= "" and self.Primary.Ammo ~= "none" then
+		local ammo = self:Ammo1()
+		if ammo > 0 then
+			self.StoredAmmo = 1
+			self:GetOwner():RemoveAmmo(1, self.Primary.Ammo)
+		end
+	end
 end

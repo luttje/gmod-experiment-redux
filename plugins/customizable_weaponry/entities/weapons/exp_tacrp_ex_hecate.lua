@@ -32,41 +32,41 @@ SWEP.Slot = 2
 SWEP.SlotAlt = 3
 
 SWEP.BalanceStats = {
-  [PLUGIN.BALANCE_SBOX] = {
-    Damage_Max = 80,
-    Damage_Min = 150,
-    Range_Min = 700,
-    Range_Max = 5000,
-  },
-  [PLUGIN.BALANCE_TTT] = {   -- this is a buyable weapon in TTT
-    Damage_Max = 80,
-    Damage_Min = 200,
-    Range_Min = 500,
-    Range_Max = 5000,
+	[PLUGIN.BALANCE_SBOX] = {
+		Damage_Max = 80,
+		Damage_Min = 150,
+		Range_Min = 700,
+		Range_Max = 5000,
+	},
+	[PLUGIN.BALANCE_TTT] = { -- this is a buyable weapon in TTT
+		Damage_Max = 80,
+		Damage_Min = 200,
+		Range_Min = 500,
+		Range_Max = 5000,
 
-    Penetration = 75,
-    RecoilDissipationRate = 0.5,
+		Penetration = 75,
+		RecoilDissipationRate = 0.5,
 
-    BodyDamageMultipliers = {
-      [HITGROUP_HEAD] = 5,
-      [HITGROUP_CHEST] = 1.25,
-      [HITGROUP_STOMACH] = 1,
-      [HITGROUP_LEFTARM] = 0.75,
-      [HITGROUP_RIGHTARM] = 0.75,
-      [HITGROUP_LEFTLEG] = 0.5,
-      [HITGROUP_RIGHTLEG] = 0.5,
-      [HITGROUP_GEAR] = 0.5
-    },
-  },
-  [PLUGIN.BALANCE_PVE] = {
-    Damage_Max = 90,
-    Damage_Min = 75,
-    Range_Min = 4000,
-    Range_Max = 8000,
-  },
-  [PLUGIN.BALANCE_OLDSCHOOL] = {
-    HipFireSpreadPenalty = 0.025,
-  }
+		BodyDamageMultipliers = {
+			[HITGROUP_HEAD] = 5,
+			[HITGROUP_CHEST] = 1.25,
+			[HITGROUP_STOMACH] = 1,
+			[HITGROUP_LEFTARM] = 0.75,
+			[HITGROUP_RIGHTARM] = 0.75,
+			[HITGROUP_LEFTLEG] = 0.5,
+			[HITGROUP_RIGHTLEG] = 0.5,
+			[HITGROUP_GEAR] = 0.5
+		},
+	},
+	[PLUGIN.BALANCE_PVE] = {
+		Damage_Max = 90,
+		Damage_Min = 75,
+		Range_Min = 4000,
+		Range_Max = 8000,
+	},
+	[PLUGIN.BALANCE_OLDSCHOOL] = {
+		HipFireSpreadPenalty = 0.025,
+	}
 }
 
 -- "ballistics"
@@ -80,14 +80,14 @@ SWEP.ArmorPenetration = 1.5
 SWEP.ArmorBonus = 5
 
 SWEP.BodyDamageMultipliers = {
-  [HITGROUP_HEAD] = 5,   -- nobody is surviving this
-  [HITGROUP_CHEST] = 1,
-  [HITGROUP_STOMACH] = 1,
-  [HITGROUP_LEFTARM] = 0.75,
-  [HITGROUP_RIGHTARM] = 0.75,
-  [HITGROUP_LEFTLEG] = 0.5,
-  [HITGROUP_RIGHTLEG] = 0.5,
-  [HITGROUP_GEAR] = 0.5
+	[HITGROUP_HEAD] = 5, -- nobody is surviving this
+	[HITGROUP_CHEST] = 1,
+	[HITGROUP_STOMACH] = 1,
+	[HITGROUP_LEFTARM] = 0.75,
+	[HITGROUP_RIGHTARM] = 0.75,
+	[HITGROUP_LEFTLEG] = 0.5,
+	[HITGROUP_RIGHTLEG] = 0.5,
+	[HITGROUP_GEAR] = 0.5
 }
 
 SWEP.MuzzleVelocity = 20000
@@ -226,134 +226,134 @@ SWEP.EjectDelay = 1.15
 -- anims
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "unholster",
-  ["fire"] = "shoot1",
-  ["blind_idle"] = "idle",
-  ["blind_fire"] = "shoot1",
-  ["reload"] = "reload",
+	["deploy"] = "unholster",
+	["fire"] = "shoot1",
+	["blind_idle"] = "idle",
+	["blind_fire"] = "shoot1",
+	["reload"] = "reload",
 }
 
 SWEP.BulletBodygroups = {
-  [1] = { 4, 1 },
+	[1] = { 4, 1 },
 }
 
 -- attachments
 
 SWEP.AttachmentElements = {
-  ["optic"] = {
-    BGs_VM = {
-      { 1, 2 }
-    },
-    BGs_WM = {
-      { 1, 2 }
-    },
-  },
-  ["irons"] = {
-    BGs_VM = {
-      { 1, 1 }
-    },
-    BGs_WM = {
-      { 1, 1 }
-    },
-    SortOrder = 2,
-  },
-  ["tactical"] = {
-    BGs_VM = {
-      { 2, 1 }
-    },
-    BGs_WM = {
-      { 2, 1 }
-    },
-  },
-  ["bipod"] = {
-    BGs_VM = {
-      { 3, 1 }
-    },
-    BGs_WM = {
-      { 3, 1 }
-    },
-  },
+	["optic"] = {
+		BGs_VM = {
+			{ 1, 2 }
+		},
+		BGs_WM = {
+			{ 1, 2 }
+		},
+	},
+	["irons"] = {
+		BGs_VM = {
+			{ 1, 1 }
+		},
+		BGs_WM = {
+			{ 1, 1 }
+		},
+		SortOrder = 2,
+	},
+	["tactical"] = {
+		BGs_VM = {
+			{ 2, 1 }
+		},
+		BGs_WM = {
+			{ 2, 1 }
+		},
+	},
+	["bipod"] = {
+		BGs_VM = {
+			{ 3, 1 }
+		},
+		BGs_WM = {
+			{ 3, 1 }
+		},
+	},
 }
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Optic",
-    Category = { "ironsights_sniper", "optic_cqb", "optic_medium", "optic_sniper" },
-    WMBone = "Box01",
-    Bone = "ValveBiped.uratio_rootbone",
-    AttachSound = "TacRP/weapons/optic_on.wav",
-    DetachSound = "TacRP/weapons/optic_off.wav",
-    InstalledElements = { "optic" },
-    VMScale = 0.9,
-    Pos_VM = Vector(-5.75, 0, 5),
-    Ang_VM = Angle(90, 0, 0),
-    Pos_WM = Vector(0, 5.5, 2.2),
-    Ang_WM = Angle(0, -90, 0),
-  },
-  [2] = {
-    PrintName = "Muzzle",
-    Category = "barrel",
-    WMBone = "Box01",
-    Bone = "ValveBiped.uratio_rootbone",
-    AttachSound = "TacRP/weapons/silencer_on.wav",
-    DetachSound = "TacRP/weapons/silencer_off.wav",
-    Pos_VM = Vector(-4.1, 0, 30),
-    Ang_VM = Angle(90, 0, 0),
-    Pos_WM = Vector(0, 35, 0.25),
-    Ang_WM = Angle(0, -90, 0),
-  },
-  [3] = {
-    PrintName = "Tactical",
-    Category = "tactical",
-    WMBone = "Box01",
-    Bone = "ValveBiped.uratio_rootbone",
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-    InstalledElements = { "tactical" },
-    Pos_VM = Vector(-3.9, -1.5, 19.25),
-    Ang_VM = Angle(90, 0, 270),
-    Pos_WM = Vector(0, 23.75, -2),
-    Ang_WM = Angle(0, -90, 180),
-  },
-  [4] = {
-    PrintName = "Accessory",
-    Category = { "acc", "acc_extmag_sniper", "acc_sling", "acc_duffle", "acc_bipod" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [5] = {
-    PrintName = "Bolt",
-    Category = { "bolt_manual" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [6] = {
-    PrintName = "Trigger",
-    Category = { "trigger_manual" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [7] = {
-    PrintName = "Ammo",
-    Category = { "ammo_amr" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [8] = {
-    PrintName = "Perk",
-    Category = { "perk", "perk_melee", "perk_shooting", "perk_reload" },
-    AttachSound = "tacrp/weapons/flashlight_on.wav",
-    DetachSound = "tacrp/weapons/flashlight_off.wav",
-  },
+	[1] = {
+		PrintName = "Optic",
+		Category = { "ironsights_sniper", "optic_cqb", "optic_medium", "optic_sniper" },
+		WMBone = "Box01",
+		Bone = "ValveBiped.uratio_rootbone",
+		AttachSound = "TacRP/weapons/optic_on.wav",
+		DetachSound = "TacRP/weapons/optic_off.wav",
+		InstalledElements = { "optic" },
+		VMScale = 0.9,
+		Pos_VM = Vector(-5.75, 0, 5),
+		Ang_VM = Angle(90, 0, 0),
+		Pos_WM = Vector(0, 5.5, 2.2),
+		Ang_WM = Angle(0, -90, 0),
+	},
+	[2] = {
+		PrintName = "Muzzle",
+		Category = "barrel",
+		WMBone = "Box01",
+		Bone = "ValveBiped.uratio_rootbone",
+		AttachSound = "TacRP/weapons/silencer_on.wav",
+		DetachSound = "TacRP/weapons/silencer_off.wav",
+		Pos_VM = Vector(-4.1, 0, 30),
+		Ang_VM = Angle(90, 0, 0),
+		Pos_WM = Vector(0, 35, 0.25),
+		Ang_WM = Angle(0, -90, 0),
+	},
+	[3] = {
+		PrintName = "Tactical",
+		Category = "tactical",
+		WMBone = "Box01",
+		Bone = "ValveBiped.uratio_rootbone",
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+		InstalledElements = { "tactical" },
+		Pos_VM = Vector(-3.9, -1.5, 19.25),
+		Ang_VM = Angle(90, 0, 270),
+		Pos_WM = Vector(0, 23.75, -2),
+		Ang_WM = Angle(0, -90, 180),
+	},
+	[4] = {
+		PrintName = "Accessory",
+		Category = { "acc", "acc_extmag_sniper", "acc_sling", "acc_duffle", "acc_bipod" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[5] = {
+		PrintName = "Bolt",
+		Category = { "bolt_manual" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[6] = {
+		PrintName = "Trigger",
+		Category = { "trigger_manual" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[7] = {
+		PrintName = "Ammo",
+		Category = { "ammo_amr" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[8] = {
+		PrintName = "Perk",
+		Category = { "perk", "perk_melee", "perk_shooting", "perk_reload" },
+		AttachSound = "tacrp/weapons/flashlight_on.wav",
+		DetachSound = "tacrp/weapons/flashlight_off.wav",
+	},
 }
 
 local function addsound(name, spath)
-  sound.Add({
-    name = name,
-    channel = 16,
-    volume = 1.0,
-    sound = spath
-  })
+	sound.Add({
+		name = name,
+		channel = 16,
+		volume = 1.0,
+		sound = spath
+	})
 end
 
 addsound("tacint_extras_hecate.Clip_Out", path .. "magout.wav")
@@ -364,15 +364,15 @@ addsound("tacint_extras_hecate.Bolt_Up", path .. "boltup.wav")
 addsound("tacint_extras_hecate.bolt_down", path .. "boltdown.wav")
 
 if engine.ActiveGamemode() == "terrortown" then
-  SWEP.AutoSpawnable = false
-  SWEP.Kind = WEAPON_HEAVY
-  SWEP.CanBuy = { ROLE_TRAITOR, ROLE_DETECTIVE }
-  SWEP.EquipMenuData = {
-    type = "Weapon",
-    desc = "Heavy bolt-action anti-materiel rifle.\nComes with 10 rounds.\n\nBEWARE: May be visible while holstered!",
-  }
+	SWEP.AutoSpawnable = false
+	SWEP.Kind = WEAPON_HEAVY
+	SWEP.CanBuy = { ROLE_TRAITOR, ROLE_DETECTIVE }
+	SWEP.EquipMenuData = {
+		type = "Weapon",
+		desc = "Heavy bolt-action anti-materiel rifle.\nComes with 10 rounds.\n\nBEWARE: May be visible while holstered!",
+	}
 
-  function SWEP:TTTBought(buyer)
-    buyer:GiveAmmo(3, "ti_sniper")
-  end
+	function SWEP:TTTBought(buyer)
+		buyer:GiveAmmo(3, "ti_sniper")
+	end
 end

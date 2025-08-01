@@ -22,7 +22,7 @@ SWEP.NoStatBox = true
 
 
 SWEP.ArcadeStats = {
-  MeleeSpeedMult = 1,
+	MeleeSpeedMult = 1,
 }
 
 SWEP.Slot = 4
@@ -77,25 +77,25 @@ SWEP.HolsterAng = Angle(-90, -90, 15)
 local path = "TacRP/weapons/c4/"
 
 SWEP.AnimationTranslationTable = {
-  ["deploy"] = "deploy",
-  ["melee"] = { "melee1", "melee2" }
+	["deploy"] = "deploy",
+	["melee"] = { "melee1", "melee2" }
 }
 
 -- attachments
 
 SWEP.Attachments = {
-  [1] = {
-    PrintName = "Accessory",
-    Category = { "acc_holster" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  },
-  [2] = {
-    PrintName = "Perk",
-    Category = { "perk_melee", "perk_throw" },
-    AttachSound = "TacRP/weapons/flashlight_on.wav",
-    DetachSound = "TacRP/weapons/flashlight_off.wav",
-  }
+	[1] = {
+		PrintName = "Accessory",
+		Category = { "acc_holster" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	},
+	[2] = {
+		PrintName = "Perk",
+		Category = { "perk_melee", "perk_throw" },
+		AttachSound = "TacRP/weapons/flashlight_on.wav",
+		DetachSound = "TacRP/weapons/flashlight_off.wav",
+	}
 }
 
 SWEP.FreeAim = false
@@ -105,64 +105,64 @@ SWEP.AttachmentCapacity = 30 -- amount of "Capacity" this gun can accept
 SWEP.DrawCrosshair = false
 
 local function addsound(name, spath)
-  sound.Add({
-    name = name,
-    channel = 16,
-    volume = 1.0,
-    sound = spath
-  })
+	sound.Add({
+		name = name,
+		channel = 16,
+		volume = 1.0,
+		sound = spath
+	})
 end
 
 addsound("TacInt_C4_Detonator.Detonator_Press", path .. "detonator_press.wav")
 addsound("TacInt_C4_Detonator.antenna_open", path .. "antenna_open.wav")
 
 function SWEP:PrimaryAttack()
-  if self:GetValue("Melee") then
-    if self:GetOwner():KeyDown(IN_USE) then
-      self.Primary.Automatic = true
-      self:Melee()
-      return
-    end
-  end
+	if self:GetValue("Melee") then
+		if self:GetOwner():KeyDown(IN_USE) then
+			self.Primary.Automatic = true
+			self:Melee()
+			return
+		end
+	end
 
-  if self:StillWaiting() then return end
+	if self:StillWaiting() then return end
 
-  self:SetBaseSettings()
+	self:SetBaseSettings()
 
-  self:PlayAnimation("detonate")
+	self:PlayAnimation("detonate")
 
-  for i, k in pairs(ents.FindByClass("tacrp_proj_nade_*")) do
-    if (k:GetOwner() == self:GetOwner() or k.Attacker == self:GetOwner()) and k.RemoteFuse then
-      k:RemoteDetonate()
-    end
-  end
+	for i, k in pairs(ents.FindByClass("tacrp_proj_nade_*")) do
+		if (k:GetOwner() == self:GetOwner() or k.Attacker == self:GetOwner()) and k.RemoteFuse then
+			k:RemoteDetonate()
+		end
+	end
 
-  self:SetNextPrimaryFire(CurTime() + (60 / self:GetValue("RPM")))
+	self:SetNextPrimaryFire(CurTime() + (60 / self:GetValue("RPM")))
 end
 
 function SWEP:SecondaryAttack()
-  local nade = self:GetOwner():GetNWInt("ti_nade")
-  if nade ~= 11 and nade ~= 6 then
-    self:GetOwner():SetNWInt("ti_nade", 11)
-  end
-  self:PrimeGrenade()
+	local nade = self:GetOwner():GetNWInt("ti_nade")
+	if nade ~= 11 and nade ~= 6 then
+		self:GetOwner():SetNWInt("ti_nade", 11)
+	end
+	self:PrimeGrenade()
 end
 
 SWEP.AutoSpawnable = false
 
 if engine.ActiveGamemode() == "terrortown" then
-  SWEP.AutoSpawnable = false
-  SWEP.HolsterVisible = false
-  SWEP.Kind = WEAPON_EQUIP
-  SWEP.Slot = 6
-  SWEP.CanBuy = { ROLE_TRAITOR }
-  SWEP.EquipMenuData = {
-    type = "Weapon",
-    desc = "A remote detonator for C4s and Breaching Charges.\nComes with 1 C4 and 3 Breaching Charges.",
-  }
+	SWEP.AutoSpawnable = false
+	SWEP.HolsterVisible = false
+	SWEP.Kind = WEAPON_EQUIP
+	SWEP.Slot = 6
+	SWEP.CanBuy = { ROLE_TRAITOR }
+	SWEP.EquipMenuData = {
+		type = "Weapon",
+		desc = "A remote detonator for C4s and Breaching Charges.\nComes with 1 C4 and 3 Breaching Charges.",
+	}
 
-  function SWEP:TTTBought(buyer)
-    buyer:GiveAmmo(1, "ti_c4")
-    buyer:GiveAmmo(3, "ti_charge")
-  end
+	function SWEP:TTTBought(buyer)
+		buyer:GiveAmmo(1, "ti_c4")
+		buyer:GiveAmmo(3, "ti_charge")
+	end
 end

@@ -1,4 +1,5 @@
 local PLUGIN = PLUGIN
+
 PLUGIN.QuickNades = {
 	["frag"] = {
 		PrintName = "FRAG",
