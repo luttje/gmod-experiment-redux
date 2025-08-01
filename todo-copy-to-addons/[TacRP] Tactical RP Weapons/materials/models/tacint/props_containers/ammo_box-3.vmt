@@ -1,0 +1,4 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/props_containers/ammo_box-3"
+}

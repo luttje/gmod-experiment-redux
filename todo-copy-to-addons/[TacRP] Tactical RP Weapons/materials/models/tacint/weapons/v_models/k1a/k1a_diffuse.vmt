@@ -1,0 +1,17 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/k1a/k1a_diffuse"
+ $bumpmap "models/tacint/weapons/v_models/k1a/k1a_NORMAL"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.250000"
+ $envmaptint "[0.05 0.05 0.05]"
+ $envmapfresnel 1
+ $phong 1
+ $phongboost 1
+ $phongfresnelranges "[0.1 16 40]"
+ $phongexponent 31
+ $rimlight 0
+ $rimlightexponent 31
+ $rimlightboost "0.300000"
+}

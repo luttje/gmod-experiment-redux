@@ -1,0 +1,9 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/door_breech/door_breech"
+ $envmapmask "models/tacint/weapons/w_models/door_breech/door_breech_envmask"
+ $envmap env_cubemap
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.7 0.7 0.7]"
+}

@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" 	"models/tacint_extras/mp9/linse"
+	"$additive" "1"
+	"$model" "1"	
+}

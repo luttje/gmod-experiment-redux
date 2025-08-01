@@ -1,0 +1,14 @@
+"VertexLitGeneric"
+{
+	"$basetexture" 	"models/tacint_extras/mp9/bullet"
+	"$bumpmap" 	"models/tacint_extras/mp9/bullet_normal"
+	"$envmap" 	"env_cubemap"
+	"$normalmapalphaenvmapmask" "1"
+	"$envmaptint"		"[0.02 0.02 0.02]"
+	"$phong" 		"1"
+	"$phongtint"		"[0.7 0.9 1]"
+	"$phongexponent" 		"20"
+	"$phongboost"		"1"
+	"$phongfresnelranges"	"[1 4 5]"
+	"$halflambert" 		"1"
+}

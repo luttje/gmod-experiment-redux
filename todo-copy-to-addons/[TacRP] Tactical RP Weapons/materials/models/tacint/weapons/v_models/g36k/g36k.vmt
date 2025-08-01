@@ -1,0 +1,19 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/g36k/g36k"
+ $bumpmap "models/tacint/weapons/v_models/g36k/g36k_normal"
+ $phong 1
+ $phongboost "0.400000"
+ $phongfresnelranges "[.1 4 37]"
+ $phongexponent 12
+ $rimlight 0
+ $rimlightexponent 12
+ $rimlightboost "0.300000"
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

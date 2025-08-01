@@ -1,0 +1,25 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/ak47/ak47"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/ak47/ak47_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.250000"
+ $envmaptint "[0.004 0.004 0.004]"
+ $envmapfresnel 1
+ $phong 1
+ $phongboost 1
+ $phongfresnelranges "[0.1 8 40]"
+ $phongexponent 22
+ $rimlight 0
+ $rimlightexponent 45
+ $rimlightboost "0.350000"
+ $phongalbedotint 1
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ }
+}

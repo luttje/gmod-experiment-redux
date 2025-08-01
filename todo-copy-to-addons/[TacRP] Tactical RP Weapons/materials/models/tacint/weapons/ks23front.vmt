@@ -1,0 +1,14 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\tacint\weapons\ks23front"
+	"$model"	1
+	"$envmap" "env_cubemap"
+	"$basealphaenvmapmask"		"1"
+	"$envmaptint" "[.1 .1 .1]"
+	"$basemapalphaphongmask" 	"1"
+	"$phong" 			"1"
+	"$phongtint" 			"[0.8 0.8 1.0]"
+	"$phongexponent" 		"50"
+	"$phongboost" 			"1"
+	"$phongfresnelranges"		"[0.5 1.5 3.0]"//"[0.1 0.4 .8]"
+}

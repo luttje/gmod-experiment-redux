@@ -1,0 +1,17 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/sg551/sg551-magazine"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/sg551/sg551-magazine_normal"
+ $normalmapalphaenvmapmask 1
+ $translucent 0
+ $envmapsaturation "0.350000"
+ $envmaptint "[0.25 0.25 0.25]"
+ $phong 1
+ $phongboost "0.800000"
+ $phongfresnelranges "[.5 11 38]"
+ $phongexponent 15
+ $rimlight 0
+ $rimlightexponent 41
+ $rimlightboost "0.100000"
+}

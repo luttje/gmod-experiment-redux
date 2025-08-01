@@ -1,0 +1,20 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/p90/p90"
+ $bumpmap "models/tacint/weapons/v_models/p90/p90_normal"
+ $phong 1
+ $phongboost "0.350000"
+ $phongfresnelranges "[.1 9 45]"
+ $phongexponenttexture "models/tacint/weapons/v_models/p90/p90_phongmask"
+ $phongalbedotint 1
+ $rimlight 0
+ $rimlightexponent 41
+ $rimlightboost "0.350000"
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

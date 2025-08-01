@@ -1,0 +1,6 @@
+spritecard
+{
+ $baseTexture "particle\muzzleflash/muzzleflash_side2"
+ $additive 1
+ $depthblend 0
+}

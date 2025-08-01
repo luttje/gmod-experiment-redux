@@ -1,0 +1,9 @@
+unlitgeneric
+{
+$basetexture "tacrp\particle_flare_008"
+$additive 1
+$translucent 1
+$alpha 0.9
+$depthblend 0
+$ignorez 0
+}

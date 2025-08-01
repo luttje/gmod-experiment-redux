@@ -1,0 +1,19 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/m1/Ruger"
+ $bumpmap "models/tacint/weapons/w_models/m1/Ruger_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.1 0.1 0.1]"
+ 
+ $phong 1
+ $phongboost "0.82"
+ $phongfresnelranges "[.5 6 13]"
+ $phongexponent 20
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}

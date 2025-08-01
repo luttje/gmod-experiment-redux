@@ -1,7 +1,8 @@
 local PLUGIN = PLUGIN
 
+-- Commented because we include our own version of TacRP without grenade menu and broken hands.
 -- [TacRP] Tactical RP Weapons (https://steamcommunity.com/sharedfiles/filedetails/?id=2588031232)
-resource.AddWorkshop("2588031232")
+-- resource.AddWorkshop("2588031232")
 
 -- [TacRP] Brute Force Melee Pack (https://steamcommunity.com/sharedfiles/filedetails/?id=3009874388)
 resource.AddWorkshop("3009874388")

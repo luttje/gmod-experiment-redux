@@ -1,0 +1,29 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/fp6/fp6"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/fp6/fp6_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.1 0.1 0.1]"
+ 
+ $phong 1
+ $phongboost "0.8"
+ $phongfresnelranges "[.1 7 16]"
+ $phongexponent 25
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ UIWeaponSkin
+ {
+ }
+ } 
+}

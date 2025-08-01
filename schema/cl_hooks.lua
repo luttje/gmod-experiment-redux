@@ -25,7 +25,7 @@ net.Receive("expClearEntityInfoTooltip", function()
 	ix.gui.entityInfo:Remove()
 
 	local infoPanel = vgui.Create(ix.option.Get("minimalTooltips", false) and "ixTooltipMinimal" or "ixTooltip")
-    infoPanel:StopAnimations() -- Stop the expanding
+	infoPanel:StopAnimations() -- Stop the expanding
 
 	local entityPlayer = targetEntity:GetNetVar("player")
 
@@ -54,21 +54,21 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 	surface.CreateFont("expTinyFont", {
 		font = readableFont,
-        size = scaleFont(math.max(ScreenScale(4), 16)),
+		size = scaleFont(math.max(ScreenScale(4), 16)),
 		extended = true,
 		weight = 600
 	})
 
 	surface.CreateFont("expSmallerFont", {
 		font = readableFont,
-        size = scaleFont(math.max(ScreenScale(6), 24)),
+		size = scaleFont(math.max(ScreenScale(6), 24)),
 		extended = true,
 		weight = 400
 	})
 
 	surface.CreateFont("expSmallItalicFont", {
 		font = readableFont,
-        size = scaleFont(math.max(ScreenScale(6), 26)),
+		size = scaleFont(math.max(ScreenScale(6), 26)),
 		extended = true,
 		weight = 400,
 		italic = true
@@ -76,7 +76,7 @@ function Schema:LoadFonts(headingFont, readableFont)
 
 	surface.CreateFont("expSmallOutlinedFont", {
 		font = readableFont,
-        size = scaleFont(math.max(ScreenScale(6), 24)),
+		size = scaleFont(math.max(ScreenScale(6), 24)),
 		extended = true,
 		shadow = true,
 		weight = 600,
@@ -468,11 +468,11 @@ function Schema:CreateCharacterInfo(panel)
 
 	local buffManager = panel.buffs:Add("expBuffManager")
 	buffManager:Dock(TOP)
-    buffManager:RefreshBuffs()
+	buffManager:RefreshBuffs()
 	buffManager.characterPanel = panel
 	panel.buffs.manager = buffManager
 
-    panel.buffs:SizeToContents()
+	panel.buffs:SizeToContents()
 
 	hook.Run("CreateCharacterBuffInfo", panel, panel.buffs)
 end
@@ -537,48 +537,48 @@ end
 function Schema:HUDPaintBackground()
 	local client = LocalPlayer()
 
-    if (not client:GetCharacter()) then
-        return
-    end
+	if (not client:GetCharacter()) then
+		return
+	end
 
-    if (not client:GetLocalVar("tied")) then
-        return
-    end
+	if (not client:GetLocalVar("tied")) then
+		return
+	end
 
-    local canBreakFreeKey = client:GetNetVar("canBreakFreeKey")
+	local canBreakFreeKey = client:GetNetVar("canBreakFreeKey")
 	local breakFreeText
 
-    if (canBreakFreeKey) then
+	if (canBreakFreeKey) then
 		local keyName = input.GetKeyName(canBreakFreeKey):upper()
 		breakFreeText = L("tiedBreakFreeStart", keyName)
-    end
+	end
 
-	Schema.draw.DrawLabeledValue(L"fTiedUp", breakFreeText or "")
+	Schema.draw.DrawLabeledValue(L "fTiedUp", breakFreeText or "")
 end
 
 function Schema:PostDrawHUD()
-    local curTime = CurTime()
+	local curTime = CurTime()
 
-    if (self.stunEffects) then
-        for k, stunEffect in pairs(self.stunEffects) do
-            local alpha = math.Clamp((255 / stunEffect.duration) * (stunEffect.endAt - curTime), 0, 255)
+	if (self.stunEffects) then
+		for k, stunEffect in pairs(self.stunEffects) do
+			local alpha = math.Clamp((255 / stunEffect.duration) * (stunEffect.endAt - curTime), 0, 255)
 
-            if (alpha ~= 0) then
-                draw.RoundedBox(0, 0, 0, ScrW(), ScrH(), Color(255, 255, 255, alpha))
-            else
-                table.remove(self.stunEffects, k)
-            end
-        end
-    end
+			if (alpha ~= 0) then
+				draw.RoundedBox(0, 0, 0, ScrW(), ScrH(), Color(255, 255, 255, alpha))
+			else
+				table.remove(self.stunEffects, k)
+			end
+		end
+	end
 end
 
 function Schema:PostDrawInventory(inventory)
-    if (not IsValid(inventory)) then
-        return
-    end
+	if (not IsValid(inventory)) then
+		return
+	end
 
 	local client = LocalPlayer()
-    local character = IsValid(client) and client:GetCharacter() or nil
+	local character = IsValid(client) and client:GetCharacter() or nil
 
 	if (not character) then
 		return
@@ -586,34 +586,34 @@ function Schema:PostDrawInventory(inventory)
 
 	local menuPanel = ix.gui.menu
 
-    if (not IsValid(menuPanel) or menuPanel.bIsClosing) then
-        return
-    end
+	if (not IsValid(menuPanel) or menuPanel.bIsClosing) then
+		return
+	end
 
 	if (menuPanel:GetActiveTab() ~= "inv") then
 		return
 	end
 
-    local money = character:GetMoney()
+	local money = character:GetMoney()
 	local font = "ixBigFont"
 	local moneyText = ix.currency.Get(money)
-    local moneyX, moneyY = ScrW() - 64, ScrH() - 64
+	local moneyX, moneyY = ScrW() - 64, ScrH() - 64
 
-    local moneyWidth, moneyHeight = draw.SimpleText(
-        moneyText,
-        font,
-        moneyX, moneyY,
+	local moneyWidth, moneyHeight = draw.SimpleText(
+		moneyText,
+		font,
+		moneyX, moneyY,
 		ColorAlpha(ix.config.Get("color"), menuPanel.currentAlpha),
-        TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM
+		TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM
 	)
 
-    draw.SimpleText(
-		L"wallet" .. ":",
-        "expSmallerFont",
-        moneyX - moneyWidth - 8,
-        moneyY - (moneyHeight * .5),
+	draw.SimpleText(
+		L "wallet" .. ":",
+		"expSmallerFont",
+		moneyX - moneyWidth - 8,
+		moneyY - (moneyHeight * .5),
 		Color(255, 255, 255, menuPanel.currentAlpha * .5),
-        TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER
+		TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER
 	)
 end
 
@@ -637,31 +637,32 @@ function Schema:PopulateCharacterInfo(client, character, tooltip)
 end
 
 function Schema:CreateItemInteractionMenu(inventoryPanel, menu, itemTable)
-    local hasCashbackPerk, cashbackPerkTable = Schema.perk.GetOwned("cashback")
+	local hasCashbackPerk, cashbackPerkTable = Schema.perk.GetOwned("cashback")
 
-    if (not hasCashbackPerk) then
-        return
-    end
+	if (not hasCashbackPerk) then
+		return
+	end
 
-    if (not itemTable.price or itemTable.noBusiness) then
-        return
-    end
+	if (not itemTable.price or itemTable.noBusiness) then
+		return
+	end
 
-    -- TODO: This is a hacky way to get cashback to appear at the end of the menu, if Helix provides a way to do this, we should use it
-    local oldMenuOpen = menu.Open
+	-- TODO: This is a hacky way to get cashback to appear at the end of the menu, if Helix provides a way to do this, we should use it
+	local oldMenuOpen = menu.Open
 
-    function menu:Open(...)
-        menu:AddOption(L("cashback"), function()
-            Derma_Query(L("cashbackConfirmation", cashbackPerkTable.returnFraction * 100), L("cashback"), L("yes"),
-                function()
-                    net.Start("expCashbackRequest")
-                    net.WriteUInt(itemTable:GetID(), 32)
-                    net.SendToServer()
-                end, L("no"))
-        end):SetImage("icon16/money_delete.png")
+	function menu:Open(...)
+		menu:AddOption(L("cashback"), function()
+			local cashbackPrice = math.floor(itemTable.price * cashbackPerkTable.returnFraction)
+			Derma_Query(L("cashbackConfirmation", ix.currency.Get(cashbackPrice)), L("cashback"), L("yes"),
+				function()
+					net.Start("expCashbackRequest")
+					net.WriteUInt(itemTable:GetID(), 32)
+					net.SendToServer()
+				end, L("no"))
+		end):SetImage("icon16/money_delete.png")
 
-        oldMenuOpen(self, ...)
-    end
+		oldMenuOpen(self, ...)
+	end
 end
 
 function Schema:ShouldBarDraw(info)
@@ -677,25 +678,25 @@ function Schema:PlayerPerkBought(client, perk)
 end
 
 function Schema:NetworkEntityCreated(entity)
-    local client = LocalPlayer()
+	local client = LocalPlayer()
 
-    if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
-        return
-    end
+	if (entity:GetClass() ~= "prop_ragdoll" or not IsValid(client)) then
+		return
+	end
 
-    local monsterCorpseIndex = entity:GetNetVar("monsterCorpse")
+	local monsterCorpseIndex = entity:GetNetVar("monsterCorpse")
 
 	if (monsterCorpseIndex) then
-        entity.GetEntityMenu = function(entity)
-            if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
-                return
-            end
+		entity.GetEntityMenu = function(entity)
+			if (client:IsRestricted() or not client:Alive() or not client:GetCharacter()) then
+				return
+			end
 
-            local options = {}
-            options[L("searchCorpse")] = true
+			local options = {}
+			options[L("searchCorpse")] = true
 
-            return options
-        end
+			return options
+		end
 
 		return
 	end
@@ -720,8 +721,8 @@ function Schema:NetworkEntityCreated(entity)
 	if (not IsValid(player)) then
 		-- try again in a moment, since the player netvar might not exist yet
 		timer.Simple(2, setupPlayerCorpse)
-        return
-    end
+		return
+	end
 
 	setupPlayerCorpse()
 end
@@ -745,26 +746,26 @@ function Schema:AdjustPlayerRagdollEntityMenu(options, target, ragdoll)
 		return
 	end
 
-    local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
+	local corpseOwnerID = ragdoll:GetNetVar("corpseOwnerID")
 
-    if (not corpseOwnerID and target:IsPlayer()) then
-        if (target:Alive() and target:IsRestricted()) then
-            options[L("searchTied")] = true
-            options[L("untie")] = true
-        end
+	if (not corpseOwnerID and target:IsPlayer()) then
+		if (target:Alive() and target:IsRestricted()) then
+			options[L("searchTied")] = true
+			options[L("untie")] = true
+		end
 
-        return
-    end
+		return
+	end
 
-    options[L("searchCorpse")] = true
+	options[L("searchCorpse")] = true
 
-    local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
+	local hasMutilatorPerk, mutilatorPerkTable = Schema.perk.GetOwned("mutilator")
 
-    if (hasMutilatorPerk and ragdoll:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
-        if (hook.Run("CanPlayerMutilate", LocalPlayer(), target, ragdoll) ~= false) then
-            options[L("mutilateCorpse")] = true
-        end
-    end
+	if (hasMutilatorPerk and ragdoll:GetNetVar("mutilated", 0) < mutilatorPerkTable.maximumMutilations) then
+		if (hook.Run("CanPlayerMutilate", LocalPlayer(), target, ragdoll) ~= false) then
+			options[L("mutilateCorpse")] = true
+		end
+	end
 end
 
 function Schema:ShouldPopulateEntityInfo(entity)
@@ -772,19 +773,19 @@ function Schema:ShouldPopulateEntityInfo(entity)
 		return false
 	end
 
-    local corpseOwnerID = entity:GetNetVar("corpseOwnerID")
+	local corpseOwnerID = entity:GetNetVar("corpseOwnerID")
 
-    if (corpseOwnerID) then
-        local character = ix.char.loaded[corpseOwnerID]
+	if (corpseOwnerID) then
+		local character = ix.char.loaded[corpseOwnerID]
 		local player = character and character:GetPlayer() or nil
 
-        if (IsValid(player)) then
+		if (IsValid(player)) then
 			-- Annoying how Helix doesnt keep a record of the real entity being looked at, but replaces that information with the player (from the NetVar)
-            player.expPopulatingCorpse = CurTime()
+			player.expPopulatingCorpse = CurTime()
 
 			return true
 		end
-    end
+	end
 end
 
 function Schema:PopulateCharacterInfo(client, character, tooltip)
@@ -796,32 +797,32 @@ function Schema:PopulateCharacterInfo(client, character, tooltip)
 		return
 	end
 
-	local ownerName = L"someone"
+	local ownerName = L "someone"
 
 	if (character) then
 		local ourCharacter = LocalPlayer():GetCharacter()
 
 		if (ourCharacter and character and ourCharacter:DoesRecognize(character)) then
-            ownerName = character:GetName()
+			ownerName = character:GetName()
 		end
 	end
 
-    local name = L("corpseOwnerName", ownerName)
+	local name = L("corpseOwnerName", ownerName)
 
-    -- Remove the default name and description
+	-- Remove the default name and description
 	-- Needed because Helix doesnt keep a record of the real entity being looked at (see expPopulatingCorpse above)
-    tooltip:Clear()
+	tooltip:Clear()
 
 	-- Clear only removes children the next frame, so we need this hacky delay
-    timer.Simple(0, function()
-        if (not IsValid(tooltip)) then
-            return
-        end
+	timer.Simple(0, function()
+		if (not IsValid(tooltip)) then
+			return
+		end
 
 		local corpse = tooltip:AddRow("corpse")
 		corpse:SetImportant()
 		corpse:SetText(name)
-        corpse:SizeToContents()
+		corpse:SizeToContents()
 		tooltip:SizeToContents()
 	end)
 end

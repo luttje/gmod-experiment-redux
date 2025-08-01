@@ -1,0 +1,20 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/uratio/scope_lense"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/uratio/scope_lense_normal"
+ $normalmapalphaenvmapmask 1
+ $translucent 1
+ $envmapsaturation 1
+ $envmaptint "[0.035 0.035 0.035]"
+ $phong 1
+ $phongboost 5
+ $phongfresnelranges "[.1 11 35]"
+ $phongexponent 35
+ $phongalbedotint 1
+ $envmapfresnel 1
+ $envmapFresnelMinMaxExp "[0 5 .4]"
+ $rimlight 0
+ $rimlightexponent 45
+ $rimlightboost "0.550000"
+}

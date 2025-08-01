@@ -1,0 +1,13 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_extras\usp\Frame"
+	"$bumpmap" 	"models\tacint_extras\usp\Frame_Normal"
+ 	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" 1
+	"$halflambert" 	"1"
+ 	"$phong" "1"
+	"$phongexponenttexture" "models\tacint_extras\usp\Frame_Exponent"
+	"$phongboost" "1"
+	"$phongfresnelranges"	"[1 6 12]"
+	"$phongalbedotint" "1"
+}

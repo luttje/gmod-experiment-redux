@@ -1,0 +1,13 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/aug/magazine"
+ $bumpmap "models/tacint/weapons/v_models/aug/magazine_normal"
+ $translucent 0
+ $phong 1
+ $phongboost "0.250000"
+ $phongfresnelranges "[0.5 8 36]"
+ $phongexponent 19
+ $rimlight 0
+ $rimlightexponent 22
+ $rimlightboost "0.100000"
+}

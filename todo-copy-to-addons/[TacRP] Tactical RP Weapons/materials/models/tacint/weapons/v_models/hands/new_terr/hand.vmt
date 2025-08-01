@@ -1,0 +1,14 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/hands/new_terr/hand"
+ $bumpmap "models/tacint/weapons/v_models/hands/new_terr/hand_normal"
+
+ $phong 1
+ $phongboost "0.5"
+ $phongexponent 16
+ $phongfresnelranges "[.25 7 1]"
+ 
+ $rimlight 1 
+ $rimlightexponent 28
+ $rimlightboost "0.01"
+}

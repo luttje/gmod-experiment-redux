@@ -1,0 +1,5 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_extras\glock\internals"
+	"$bumpmap" "models\tacint_extras\glock\internals_normal"
+}

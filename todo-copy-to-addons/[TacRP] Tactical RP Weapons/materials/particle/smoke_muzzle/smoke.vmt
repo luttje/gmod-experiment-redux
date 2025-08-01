@@ -1,0 +1,9 @@
+spritecard
+{
+ $baseTexture "particle\smoke_muzzle/smoke"
+ $vertexcolor 1
+ $vertexalpha 1
+ $translucent 1
+ $startfadesize .55
+ $endfadesize .8
+}

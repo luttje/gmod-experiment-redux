@@ -1,0 +1,31 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/hk417/hk417"
+ $bumpmap "models/tacint/weapons/w_models/hk417/hk417_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.4"
+ $envmaptint "[0.2 0.2 0.2]"
+ 
+ $alphatest 1
+ $nocull 1
+
+ $phong 1
+ $phongboost "0.8"
+ $phongfresnelranges "[.5 12 26]"
+ $phongexponent 28 
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6"
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ UIWeaponSkin
+ {
+ }
+ } 
+}

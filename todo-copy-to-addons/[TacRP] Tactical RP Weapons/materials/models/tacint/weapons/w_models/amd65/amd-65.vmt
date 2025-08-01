@@ -1,0 +1,31 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/amd65/amd65"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/amd65/amd-65_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.2"
+ $envmaptint "[0.1 0.1 0.1]"
+
+ $phong 1
+ $phongboost "0.8"
+ $phongfresnelranges "[0.1 8 25]"
+ $phongexponent 18
+
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+ 
+ $nocull 1
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ UIWeaponSkin
+ {
+ }
+ } 
+}

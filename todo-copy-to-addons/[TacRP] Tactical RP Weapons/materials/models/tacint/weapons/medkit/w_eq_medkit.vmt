@@ -1,0 +1,4 @@
+VertexLitGeneric
+{
+$baseTexture "models/tacint/weapons/medkit/w_eq_medkit"
+}

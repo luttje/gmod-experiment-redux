@@ -1,0 +1,17 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/bekas/bekas"
+ $bumpmap "models/tacint/weapons/v_models/bekas/bekas_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.250000"
+ $envmaptint "[0.006 0.006 0.006]"
+ $envmapfresnel 1
+ $phong 1
+ $phongboost "0.800000"
+ $phongfresnelranges "[.5 10 37]"
+ $phongexponent 25
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.350000"
+}

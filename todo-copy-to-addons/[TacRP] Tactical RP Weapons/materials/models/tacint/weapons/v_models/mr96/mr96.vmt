@@ -1,0 +1,29 @@
+vertexlitgeneric
+{
+ $basetexture "models/tacint/weapons/v_models/mr96/mr96"
+ $bumpmap "models/tacint/weapons/v_models/mr96/mr96_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.500000"
+ $envmaptint "[0.005 0.005 0.006]"
+
+ $phong 1
+ $phongboost "1.100000"
+ $phongfresnelranges "[.1 11 44]"
+ $phongexponent 45
+ $phongalbedotint 1
+
+ $rimlight 0
+ $rimlightexponent 65
+ $rimlightboost "0.300000"
+
+ $envmapfresnel 1
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

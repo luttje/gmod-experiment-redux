@@ -1,0 +1,6 @@
+"UnlitGeneric" 
+{ 
+    "$basetexture" "tacrp/grenades/thermite"
+    "$translucent" 1
+    "$vertexcolor" 1
+} 

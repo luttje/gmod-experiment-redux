@@ -1,0 +1,23 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/superv/superv"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/superv/superv_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.500000"
+ $envmaptint "[0.02 0.02 0.02]"
+ $phong 1
+ $phongboost "0.500000"
+ $phongfresnelranges "[.5 7 32]"
+ $phongexponent 67
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.320000"
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

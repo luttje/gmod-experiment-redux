@@ -1,0 +1,20 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/spr/scope_lense"
+ $envmap env_cubemap
+ $envmapmask "models/tacint/weapons/v_models/uratio/scope_lense_specular"
+ $translucent 1
+
+ $envmapsaturation 1
+ $envmaptint "[0.035 0.035 0.035]"
+
+ $phong 1
+ $phongboost "1.5"
+ $phongfresnelranges "[.1 11 35]"
+// $phongexponenttexture "models/tacint/weapons/v_models/spr/fn_spr_phongmask"
+ $phongexponent 35
+ $phongalbedotint 1
+
+ $envmapfresnel 1
+ $envmapFresnelMinMaxExp "[0 5 .4]"
+}

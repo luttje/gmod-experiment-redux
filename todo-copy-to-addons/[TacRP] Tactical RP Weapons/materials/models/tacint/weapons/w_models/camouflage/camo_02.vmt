@@ -1,0 +1,4 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/camouflage/camo_02"
+}

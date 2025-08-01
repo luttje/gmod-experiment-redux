@@ -1,0 +1,14 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/p2000/p2000"
+ $bumpmap "models/tacint/weapons/v_models/p2000/p2000_normal"
+ "$selfillummask " "models/tacint/weapons/v_models/p2000/p2000_selfillum"
+ $selfillum 1
+ $phong 1
+ $phongexponent 25
+ $phongboost "0.850000"
+ $phongfresnelranges "[.7 9 40]"
+ $rimlight 0
+ $rimlightexponent 51
+ $rimlightboost "0.400000"
+}

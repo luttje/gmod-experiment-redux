@@ -1,0 +1,24 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/mp5/mp5"
+ $bumpmap "models/tacint/weapons/w_models/mp5/mp5_normal"
+ 
+ $phong 1
+ $phongboost "1.1"
+ $phongfresnelranges "[.5 7 37]"
+ $phongexponent 55
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ UIWeaponSkin
+ {
+ }
+ }
+}

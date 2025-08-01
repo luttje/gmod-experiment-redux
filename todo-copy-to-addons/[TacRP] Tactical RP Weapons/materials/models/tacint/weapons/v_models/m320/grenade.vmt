@@ -1,0 +1,12 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/m320/grenade"
+ $phong 1
+ $phongboost "0.600000"
+ $phongfresnelranges "[.5 11 41]"
+ $phongexponent 26
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.300000"
+ $nocull 1
+}

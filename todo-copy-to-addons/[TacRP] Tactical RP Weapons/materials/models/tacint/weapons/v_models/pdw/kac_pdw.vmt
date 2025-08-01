@@ -1,0 +1,22 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/pdw/pdw"
+ $bumpmap "models/tacint/weapons/v_models/pdw/KAC_pdw_normal"
+ $envmaptint "[0.004 0.004 0.004]"
+ $phong 1
+ $phongboost "0.500000"
+ $phongfresnelranges "[.5 11 32]"
+ $phongexponent 25
+ $phongalbedotint 1
+ $rimlight 0
+ $rimlightexponent 51
+ $rimlightboost "0.350000"
+ $envmapfresnel 1
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ }
+}

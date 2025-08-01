@@ -1,0 +1,31 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/pdw/pdw"
+ $alphatest 1
+
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/pdw/KAC_pdw_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.1 0.1 0.1]"
+ 
+ $phong 1
+ $phongboost "0.6"
+ $phongfresnelranges "[.51 8 17]"
+ $phongexponent 25
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ UIWeaponSkin
+ {
+ }
+ }
+}

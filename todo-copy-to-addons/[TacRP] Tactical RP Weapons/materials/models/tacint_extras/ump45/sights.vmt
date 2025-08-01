@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\tacint_extras\ump45\sights"
+	"$bumpmap" "models\tacint_extras\ump45\sights norm"
+}

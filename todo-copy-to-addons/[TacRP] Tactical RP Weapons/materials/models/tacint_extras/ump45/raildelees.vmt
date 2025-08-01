@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\tacint_extras\ump45\raildelees"
+	"$bumpmap" "models\tacint_extras\ump45\raildelees norm"
+}

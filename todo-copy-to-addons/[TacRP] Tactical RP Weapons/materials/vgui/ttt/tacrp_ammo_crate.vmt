@@ -1,0 +1,5 @@
+"UnlitGeneric" 
+{ 
+    "$basetexture" "vgui/ttt/tacrp_ammo_crate" 
+    "$translucent" 1 
+} 

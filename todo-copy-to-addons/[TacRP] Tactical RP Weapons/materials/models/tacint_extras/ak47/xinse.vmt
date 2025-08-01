@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{	"$no_draw" "0"
+	"$baseTexture" 	"models\tacint_extras\ak47\linse"
+	"$additive" "1"
+	"$model" "1"	
+}

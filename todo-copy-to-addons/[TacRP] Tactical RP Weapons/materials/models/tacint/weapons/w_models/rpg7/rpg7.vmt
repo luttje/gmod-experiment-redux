@@ -1,0 +1,14 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/rpg7/rpg7"
+ $bumpmap "models/tacint/weapons/w_models/rpg7/rpg7_normal"
+ 
+ $phong 1
+ $phongboost "0.65"
+ $phongfresnelranges "[.51 8 17]"
+ $phongexponent 28
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}

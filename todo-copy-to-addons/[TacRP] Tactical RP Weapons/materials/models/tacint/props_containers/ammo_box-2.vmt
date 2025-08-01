@@ -1,0 +1,17 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/props_containers/ammo_box-2"
+ $bumpmap "models/tacint/props_containers/ammo_box-2_normal"
+ $normalmapalphaenvmapmask 1
+ $envmap env_cubemap
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.35 0.35 0.35]"
+
+
+ $phong 1
+ $phongexponent 30
+ $phongboost 1
+ $phongfresnelranges "[.7 11 25]"
+
+}

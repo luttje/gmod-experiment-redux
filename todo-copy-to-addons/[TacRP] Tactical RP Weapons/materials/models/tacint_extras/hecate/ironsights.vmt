@@ -1,0 +1,10 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/tacint_extras/hecate/ironsights"
+	"$bumpmap" "models/tacint_extras/hecate/ironsights_nm"
+	"$phong" "1"
+	"$phongexponent" "4"
+	"$phongboost" "1.25"	
+	"$phongfresnelranges"	"[.3 1 1]"
+}
+

@@ -1,0 +1,20 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/_accessories2/pistol_compensator1/body"
+ $bumpmap "models/tacint/weapons/v_models/_accessories2/pistol_compensator1/body_normal"
+// $envmap env_cubemap
+// $normalmapalphaenvmapmask 1
+ 
+ $envmapsaturation "0.100000"
+ $envmaptint "[0.1 0.1 0.1]"
+ 
+ $phong 1
+ $phongboost 1
+ $phongfresnelranges "[.3 4 15]"
+ $phongexponenttexture "models/tacint/weapons/v_models/_accessories2/pistol_compensator1/body_phongmask"
+ //$phongexponent 21
+ 
+// $rimlight 1
+ $rimlightexponent 22
+ $rimlightboost "0.120000"
+}

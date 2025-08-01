@@ -9,21 +9,21 @@ ITEM.category = "Stackable"
 ITEM.model = "models/props_c17/TrapPropeller_Lever.mdl"
 
 if (CLIENT) then
-    function ITEM:PaintOver(item, w, h)
-        local isMax = item:GetData("stacks", 1) == item:GetMaxStacks()
+	function ITEM:PaintOver(item, w, h)
+		local isMax = item:GetData("stacks", 1) == item:GetMaxStacks()
 
-        draw.SimpleTextOutlined(
-            item:GetData("stacks", 1),
-            "DermaDefault",
-            w - 5,
-            h - 5,
-            isMax and Color(120, 120, 120, 200) or Color(255, 255, 255, 200),
-            TEXT_ALIGN_RIGHT,
-            TEXT_ALIGN_BOTTOM,
-            1,
-            color_black
-        )
-    end
+		draw.SimpleTextOutlined(
+			item:GetData("stacks", 1),
+			"DermaDefault",
+			w - 5,
+			h - 5,
+			isMax and Color(120, 120, 120, 200) or Color(255, 255, 255, 200),
+			TEXT_ALIGN_RIGHT,
+			TEXT_ALIGN_BOTTOM,
+			1,
+			color_black
+		)
+	end
 end
 
 function ITEM:GetMaxStacks()
@@ -31,23 +31,23 @@ function ITEM:GetMaxStacks()
 end
 
 function ITEM:CanStackWith(otherItem)
-    local currentItemStacks = self:GetData("stacks", 1)
-    local otherItemStacks = otherItem:GetData("stacks", 1)
-    local totalStacks = otherItemStacks + currentItemStacks
+	local currentItemStacks = self:GetData("stacks", 1)
+	local otherItemStacks = otherItem:GetData("stacks", 1)
+	local totalStacks = otherItemStacks + currentItemStacks
 
-    if (self.uniqueID ~= otherItem.uniqueID) then
-        return false, "You can't stack these items."
-    end
+	if (self.uniqueID ~= otherItem.uniqueID) then
+		return false, "You can't stack these items."
+	end
 
 	if (self == otherItem) then
 		return false, "You can't stack an item with itself."
 	end
 
-    if (totalStacks > self:GetMaxStacks()) then
-        return false, "These items can't be stacked any further."
-    end
+	if (totalStacks > self:GetMaxStacks()) then
+		return false, "These items can't be stacked any further."
+	end
 
-    return true
+	return true
 end
 
 function ITEM:Stack(otherItem)
@@ -60,16 +60,16 @@ function ITEM:Stack(otherItem)
 		totalStacks,
 		ix.inventory.Get(self.invID):GetReceivers()
 	)
-    otherItem:Remove()
+	otherItem:Remove()
 end
 
 ITEM.functions.combine = {
 	name = "Combine",
 	icon = "icon16/arrow_in.png",
 	OnRun = function(item, data)
-        local otherItem = ix.item.instances[data[1]]
+		local otherItem = ix.item.instances[data[1]]
 		local canStack, message = item:CanStackWith(otherItem)
-        local client = item.player
+		local client = item.player
 
 		if (not canStack) then
 			client:Notify(message)
@@ -111,40 +111,40 @@ ITEM.functions.split = {
 					return false
 				end
 
-                local stackedCount = (stacks - cleanSplitStack)
-                local stackData = { stacks = cleanSplitStack }
+				local stackedCount = (stacks - cleanSplitStack)
+				local stackData = { stacks = cleanSplitStack }
 
 				client.expLastSplit = CurTime()
 
-                if (not character:GetInventory():Add(itemUniqueID, 1, stackData)) then
-                    ix.item.Spawn(itemUniqueID, client, nil, angle_zero, stackData)
-                end
+				if (not character:GetInventory():Add(itemUniqueID, 1, stackData)) then
+					ix.item.Spawn(itemUniqueID, client, nil, angle_zero, stackData)
+				end
 
-                local inventory = ix.inventory.Get(item.invID)
-                local receivers = nil
+				local inventory = ix.inventory.Get(item.invID)
+				local receivers = nil
 
 				-- World inventories don't have receivers (they don't even have the GetReceivers method)
-                if (inventory and inventory:GetID() > 0) then
+				if (inventory and inventory:GetID() > 0) then
 					if (inventory.GetReceivers) then
 						receivers = inventory:GetReceivers()
-                    else
-                        -- https://github.com/luttje/gmod-experiment-redux/issues/114
-                        -- Shouldn't happen anymore, but leaving it here for a while just in case.
+					else
+						-- https://github.com/luttje/gmod-experiment-redux/issues/114
+						-- Shouldn't happen anymore, but leaving it here for a while just in case.
 						-- TODO: Remove after 10-7-2024
-                        ix.util.SchemaError(
-                            "(Debugging) Inventory doesn't have a GetReceivers method, id of inventory: "
-                            .. tostring(item.invID)
+						ix.util.SchemaError(
+							"(Debugging) Inventory doesn't have a GetReceivers method, id of inventory: "
+							.. tostring(item.invID)
 						)
 					end
 				end
 
 				item:SetData("stacks", stackedCount, receivers)
 			end,
-            "1"
+			"1"
 		)
 
 		return false
-    end,
+	end,
 
 	OnCanRun = function(item)
 		return (item:GetData("stacks", 1) ~= 1)

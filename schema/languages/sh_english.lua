@@ -117,7 +117,7 @@ LANGUAGE = {
 	rareItem = "Rare Item",
 
 	cashback = "Cashback",
-	cashbackConfirmation = "Are you sure you want to sell this item for %s%%?",
+	cashbackConfirmation = "Are you sure you want to sell this item for %s?",
 
 	bloodBondRequest = "Request Blood Bond",
 	bloodBondRequestSent = "You have sent a blood bond request to %s.",

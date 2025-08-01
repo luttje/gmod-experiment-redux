@@ -1,0 +1,6 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/mg4/plastic_parts"
+ $bumpmap "models/tacint/weapons/v_models/mg4/plastic_parts_normal"
+ 
+}

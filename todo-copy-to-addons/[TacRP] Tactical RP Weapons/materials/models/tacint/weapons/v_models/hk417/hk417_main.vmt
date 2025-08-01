@@ -1,0 +1,22 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/hk417/hk417"
+ $bumpmap "models/tacint/weapons/v_models/hk417/hk417_normal"
+ $normalmapalphaenvmapmask 1
+
+ $phong 1
+ $phongboost 1
+ $phongfresnelranges "[0.5 10 35]"
+ $phongexponenttexture "models/tacint/weapons/v_models/hk417/hk417_phongmask"
+ 
+ $rimlight "0.1"
+ $rimlightexponent 12
+ $rimlightboost "0.300000"
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ }
+}

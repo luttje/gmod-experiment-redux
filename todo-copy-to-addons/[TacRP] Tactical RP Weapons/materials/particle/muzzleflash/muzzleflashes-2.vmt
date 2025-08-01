@@ -1,0 +1,6 @@
+spritecard
+{
+ $baseTexture "particle\muzzleflash/muzzleflashes-2"
+ $ADDSELF "0.5"
+ $overbrightfactor "33.0"
+}

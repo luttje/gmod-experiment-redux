@@ -1,0 +1,25 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/sphinx/sphinx"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/sphinx/sphinx_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.300000"
+ $envmaptint "[0.028 0.028 0.028]"
+ $phong 1
+ $phongboost 7
+ $phongfresnelranges "[.20 .4 .45]"
+ $phongexponent 16
+ $rimlight 1
+ $rimlightexponent 8
+ $rimlightboost "0.25"
+ $envmapfresnel 1
+ $envmapFresnelMinMaxExp "[0 5 .4]"
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

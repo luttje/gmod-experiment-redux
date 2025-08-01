@@ -1,0 +1,5 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/shells/shotgun_shell"
+ $DISABLECSMLOOKUP 1
+}

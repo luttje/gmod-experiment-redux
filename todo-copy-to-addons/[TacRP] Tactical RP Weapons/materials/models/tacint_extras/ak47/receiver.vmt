@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "models\tacint_extras\ak47\Receiver"
+	"$bumpmap" 	"models\tacint_extras\ak47\Receiver_Normal"
+
+}
+

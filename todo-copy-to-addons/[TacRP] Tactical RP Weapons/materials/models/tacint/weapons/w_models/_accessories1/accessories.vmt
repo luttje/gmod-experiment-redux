@@ -1,0 +1,19 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/_accessories1/accessories1"
+ $bumpmap "models/tacint/weapons/w_models/_accessories1/accessories1_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.2"
+ $envmaptint "[0.1 0.1 0.1]"
+ 
+ $phong 1
+ $phongboost "0.52"
+ $phongfresnelranges "[1 14 40]"
+ $phongexponent 35
+ 
+ $rimlight 1 
+ $rimlightexponent 22
+ $rimlightboost "0.12" 
+}

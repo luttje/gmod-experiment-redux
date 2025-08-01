@@ -1,0 +1,37 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/sg551/sg551"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/sg551/sg551_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.350000"
+ $envmaptint "[0.02 0.02 0.02]"
+ $phong 1
+ $phongboost "0.650000"
+ $phongfresnelranges "[.5 12 38]"
+ $phongexponenttexture "models/tacint/weapons/v_models/sg551/sg551_phongmask"
+ $phongexponent 29
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.350000"
+ $selfillum 0
+
+ Proxies
+ {
+ WeaponSkin
+ {
+ s0
+ {
+ $selfillum 0
+ }
+ s1
+ {
+ $selfillum 0
+ }
+ s2
+ {
+ $selfillum 1
+ }
+ }
+ } 
+}

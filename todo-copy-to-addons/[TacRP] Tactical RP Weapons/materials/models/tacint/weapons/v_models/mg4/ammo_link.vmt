@@ -1,0 +1,13 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/mg4/ammo_link"
+ $bumpmap "models/tacint/weapons/v_models/mg4/ammo_link_normal"
+ $phong 1
+ $phongboost "1.500000"
+ $phongfresnelranges "[.5 9 35]"
+ $phongexponent 35
+ $phongalbedotint 1
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.320000"
+}

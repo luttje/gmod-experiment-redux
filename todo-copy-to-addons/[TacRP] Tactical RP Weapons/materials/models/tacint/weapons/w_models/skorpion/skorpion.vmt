@@ -1,0 +1,19 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/skorpion/skorpion"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/skorpion/skorpion_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.2"
+ $envmaptint "[0.11 0.11 0.11]"
+ 
+ $phong 1
+ $phongboost "1.0"
+ $phongfresnelranges "[.51 8 17]"
+ $phongexponent 29
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}

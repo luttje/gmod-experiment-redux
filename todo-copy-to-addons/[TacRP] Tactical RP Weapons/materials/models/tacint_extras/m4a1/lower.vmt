@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\tacint_extras\m4a1\lower"
+	"$bumpmap"     "models\tacint_extras\m4a1\lower_normal"
+	"$normalmapalphaenvmapmask" "1"
+	"$phong" 		"1"
+	"$phongexponent" 	"10"
+	"$phongboost" "0.75"
+	"$phongfresnelranges" "[1 3 6]"
+}
+

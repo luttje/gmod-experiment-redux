@@ -1,0 +1,21 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/hands/watch/glass"
+ $bumpmap "models/tacint/weapons/v_models/hands/watch/glass_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ 
+ $translucent 1
+
+ $envmapsaturation "0.4"
+ $envmaptint "[0.8 0.8 0.8]"
+
+ $phong 1
+ $phongboost "1.5"
+ $phongexponent 10
+ $phongfresnelranges "[.1 15 44]"
+ 
+// $rimlight 1 
+ $rimlightexponent 2
+ $rimlightboost "0.4"
+}

@@ -1,0 +1,10 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/mg4/plastic_body"
+ $bumpmap "models/tacint/weapons/w_models/mg4/plastic_parts_normal"
+ 
+ $phong 1
+ $phongboost "0.01"
+ $phongfresnelranges "[1 8 28]"
+ $phongexponent 5
+}

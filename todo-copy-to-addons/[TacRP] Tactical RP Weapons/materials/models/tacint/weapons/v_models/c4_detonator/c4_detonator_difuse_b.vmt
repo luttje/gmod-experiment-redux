@@ -1,0 +1,14 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/c4_detonator/c4_detonator_difuse_B"
+ $bumpmap "models/tacint/weapons/v_models/c4_detonator/c4_detonator_normals"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.3"
+ $envmaptint "[0.15 0.15 0.15]"
+ 
+ $phong 1
+ $phongboost "1.0"
+ $phongfresnelranges "[.1 7 16]"
+ $phongexponent 10
+}

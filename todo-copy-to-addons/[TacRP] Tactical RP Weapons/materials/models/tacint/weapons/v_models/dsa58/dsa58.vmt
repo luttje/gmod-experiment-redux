@@ -1,0 +1,25 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/dsa58/dsa58"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/dsa58/dsa58_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.350000"
+ $envmaptint "[0.002 0.002 0.002]"
+ $phong 1
+ $phongboost "0.800000"
+ $phongfresnelranges "[0.1 14 36]"
+ $phongexponent 35
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.350000"
+ $envmapfresnel 1
+ $envmapFresnelMinMaxExp "[0 5 .4]"
+ $phongalbedotint 1
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

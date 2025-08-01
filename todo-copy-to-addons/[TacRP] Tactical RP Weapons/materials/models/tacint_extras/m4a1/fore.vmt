@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\tacint_extras\m4a1\fore"
+	"$bumpmap"     "models\tacint_extras\m4a1\fore_normal"
+	"$normalmapalphaenvmapmask" "1"
+
+}
+

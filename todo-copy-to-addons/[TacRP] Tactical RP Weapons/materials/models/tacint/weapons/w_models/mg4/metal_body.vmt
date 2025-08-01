@@ -1,0 +1,19 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/mg4/metal_body"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/mg4/metal_body_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.1"
+ $envmaptint "[0.04 0.04 0.04]"
+ 
+ $phong 1
+ $phongboost "1.0"
+ $phongfresnelranges "[.1 7 15]"
+ $phongexponent 25
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}

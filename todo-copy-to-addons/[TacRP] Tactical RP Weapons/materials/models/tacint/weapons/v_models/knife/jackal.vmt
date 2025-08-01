@@ -1,0 +1,4 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/knife/jackal"
+}

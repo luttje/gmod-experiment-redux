@@ -1,0 +1,25 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/p250/p250"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/v_models/p250/p250_normal"
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.350000"
+ $envmaptint "[0.005 0.005 0.005]"
+ $phong 1
+ $phongexponent 25
+ $phongboost "0.800000"
+ $phongfresnelranges "[.7 9 40]"
+ $rimlight 0
+ $rimlightexponent 51
+ $rimlightboost "0.400000"
+ $envmapfresnel 1
+ $envmapFresnelMinMaxExp "[0 5 .4]"
+ 
+ Proxies
+ {
+ WeaponSkin
+ {
+ }
+ } 
+}

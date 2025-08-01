@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/tacint_extras/addons/suppressor"
+	"$normalmap" "models/tacint_extras/addons/suppressor_normal"
+}

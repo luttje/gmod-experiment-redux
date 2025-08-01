@@ -1,0 +1,18 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/shield/riot_shield-2_GLASS"
+ $translucent 1
+ $bumpmap "models/tacint/weapons/shield/riot_shield-2_GLASS_NORMAL"
+ $normalmapalphaenvmapmask 1
+ $envmap env_cubemap
+ 
+ $envmapcontrast "1.2"
+ $envmapsaturation "0.6"
+ $envmaptint "[0.8 0.8 0.8]"
+
+ $phong 1
+ $phongexponent 25
+ $phongboost 2
+ $phongfresnelranges "[.7 25 42]"
+
+}

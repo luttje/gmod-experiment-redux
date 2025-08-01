@@ -1,0 +1,12 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_extras\m4a1\newacog"
+                "$bumpmap" "models\tacint_extras\m4a1\acognormal"
+	"$normalmapalphaenvmapmask" 1
+	"$envmaptint" "[ 0.6 0.6 0.6 ]"
+	"$phong" "1"
+	"$phongexponent" 35
+	"$phongboost"	"2"
+	"$phongfresnelranges"	"[0.05 0.5 1]"
+
+}

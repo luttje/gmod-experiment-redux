@@ -1,0 +1,13 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/v_models/_accessories1/glass_hq"
+ $envmap env_cubemap
+ $envmapmask "models/tacint/weapons/v_models/_accessories1/glass_envmask"
+ $normalmapalphaenvmapmask 1
+ $translucent 1
+
+// $envmapmaskscale "2.2"
+// $envmapcontrast "0.7"
+ //$envmapsaturation 2
+ $envmaptint "[0.25 0.25 0.25]"
+}

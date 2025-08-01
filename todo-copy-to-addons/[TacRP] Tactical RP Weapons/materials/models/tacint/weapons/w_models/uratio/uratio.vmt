@@ -1,0 +1,19 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/uratio/uratio"
+ $envmap env_cubemap
+ $bumpmap "models/tacint/weapons/w_models/uratio/uratio_normal"
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.3"
+ $envmaptint "[0.14 0.14 0.14]"
+
+ $phong 1
+ $phongboost "0.8"
+ $phongfresnelranges "[1 11 31]"
+ $phongexponent 45
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}

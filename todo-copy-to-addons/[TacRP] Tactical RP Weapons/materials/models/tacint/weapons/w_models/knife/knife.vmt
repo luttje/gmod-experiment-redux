@@ -1,0 +1,4 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/knife/knife"
+}

@@ -1,0 +1,5 @@
+VertexLitGeneric
+{
+	"$basetexture"	"models\tacint_extras\m4a1\grip"
+	"$no_draw" "1"
+}

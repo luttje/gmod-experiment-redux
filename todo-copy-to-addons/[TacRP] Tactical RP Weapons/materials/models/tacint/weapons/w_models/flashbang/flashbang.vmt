@@ -1,0 +1,10 @@
+VertexLitGeneric
+{
+ $basetexture "models/tacint/weapons/w_models/flashbang/flashbang"
+
+ $envmap env_cubemap
+ $envmapmask "models/tacint/weapons/w_models/flashbang/flashbang_envmask"
+
+ $envmapsaturation "0.6"
+ $envmaptint "[0.6 0.6 0.6]"
+}

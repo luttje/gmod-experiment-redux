@@ -1,0 +1,15 @@
+"VertexLitGeneric"
+{
+	"$basetexture"	"models\tacint_extras\addons\spr"
+	"$envmapmask" "models\tacint_extras\addons\spr_ref"
+	
+ $envmap env_cubemap
+ $envmapsaturation "0.05"
+ $envmaptint "[0.02 0.02 0.02]"
+ $phong 1
+ $phongboost "20"
+ $phongexponent 0.5
+ $nocull 1
+ 
+ 	$color2 "[2 2 2.5]"
+}

@@ -1,0 +1,10 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/hands/vip/hand"
+ $bumpmap "models/tacint/weapons/v_models/hands/vip/hand_normal"
+
+ $phong 1
+ $phongboost "0.15"
+ $phongexponent 2
+ $phongfresnelranges "[.1 8 28]"
+}

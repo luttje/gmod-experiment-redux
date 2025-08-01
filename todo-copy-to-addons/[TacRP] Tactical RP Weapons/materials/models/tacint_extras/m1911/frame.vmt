@@ -1,0 +1,5 @@
+VertexLitGeneric
+{
+	"$baseTexture" "models\tacint_extras\m1911\frame"
+	"$bumpmap" "models\tacint_extras\m1911\frame norm"
+}

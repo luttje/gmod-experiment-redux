@@ -1,0 +1,21 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/super90/super90"
+ $bumpmap "models/tacint/weapons/w_models/super90/super90_normal"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+
+ $envmapsaturation "0.4"
+ $envmaptint "[0.2 0.2 0.2]"
+
+ $phong 1
+ $phongboost "0.9"
+ $phongfresnelranges "[.5 12 26]"
+ $phongexponent 28 
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+ 
+ $nocull 1
+}

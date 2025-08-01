@@ -1,0 +1,20 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/hands/ct_hand_1"
+ $bumpmap "models/tacint/weapons/v_models/hands/ct_hand_1_normal"
+ 
+ $phong 1
+ $phongboost "0.015"
+ $phongexponent 30
+ $phongfresnelranges "[.25 7 1]"
+ //$phongtint "[.2 .4 1]"
+ 
+ $detail "detail/carpet_detail"
+ $detailscale 52
+ $detailblendfactor 1
+ $detailblendmode 0
+ 
+ $rimlight 1 
+ $rimlightexponent 100
+ $rimlightboost "0.1"
+}

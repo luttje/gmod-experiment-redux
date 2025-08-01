@@ -1,0 +1,17 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/tomahawk/body_diffuse"
+ $bumpmap "models/tacint/weapons/v_models/tomahawk/body_NORMAL"
+ $envmap env_cubemap
+ $normalmapalphaenvmapmask 1
+ $envmapsaturation "0.250000"
+ $envmaptint "[0.012 0.012 0.012]"
+ $envmapfresnel 1
+ $phong 1
+ $phongboost "0.900000"
+ $phongfresnelranges "[0.1 11 40]"
+ $phongexponent 27
+ $rimlight 0
+ $rimlightexponent 55
+ $rimlightboost "0.400000"
+}

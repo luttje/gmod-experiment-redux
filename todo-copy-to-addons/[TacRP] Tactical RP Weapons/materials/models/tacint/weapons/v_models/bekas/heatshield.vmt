@@ -1,0 +1,12 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/v_models/bekas/heatshield"
+ $bumpmap "models/tacint/weapons/v_models/bekas/heatshield_normal"
+ $alphatest 1
+ $nocull 1
+ 
+ $phong 1
+ $phongboost "0.25"
+ $phongfresnelranges "[.5 9 28]"
+ $phongexponent 15
+}

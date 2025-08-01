@@ -1,0 +1,14 @@
+vertexlitgeneric
+{
+ $baseTexture "models/tacint/weapons/w_models/m320/body"
+ $bumpmap "models/tacint/weapons/w_models/m320/body_normal"
+ 
+ $phong 1
+ $phongboost "0.4"
+ $phongfresnelranges "[1 17 31]"
+ $phongexponent 35
+ 
+ $rimlight 1
+ $rimlightexponent 15
+ $rimlightboost "0.6" 
+}
