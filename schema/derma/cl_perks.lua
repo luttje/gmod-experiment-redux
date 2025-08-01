@@ -62,7 +62,7 @@ function PANEL:Update()
 	local opacity = 255
 
 	if (Schema.perk.GetOwned(self.perk.uniqueID)) then
-        self.icon:SetBadge({
+		self.icon:SetBadge({
 			spritesheet = Material("experiment-redux/flatmsicons32.png"),
 			x = 29,
 			y = 5,
@@ -114,7 +114,19 @@ function PANEL:OnMouseReleased(keyCode)
 		return
 	end
 
-	Schema.perk.RequestBuy(self.perk)
+	Derma_Query(
+		string.format(
+			"Are you sure you want to buy the perk '%s' for %s?",
+			self.perk.name,
+			ix.currency.Get(self.perk.price)
+		),
+		"Confirm Purchase Perk",
+		L("yes"),
+		function()
+			Schema.perk.RequestBuy(self.perk)
+		end,
+		L("no")
+	)
 end
 
 function PANEL:Paint(width, height)
@@ -139,11 +151,11 @@ function PANEL:Init()
 	self:Dock(FILL)
 
 	self.perks = {}
-    self.nextThink = 0
+	self.nextThink = 0
 
-    local sortedPerks = table.ClearKeys(Schema.perk.GetAll())
+	local sortedPerks = table.ClearKeys(Schema.perk.GetAll())
 
-    table.SortByMember(sortedPerks, "name", true)
+	table.SortByMember(sortedPerks, "name", true)
 
 	for _, perk in ipairs(sortedPerks) do
 		local panel = self:Add("exp_Perk")
