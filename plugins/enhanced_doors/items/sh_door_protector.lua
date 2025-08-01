@@ -40,7 +40,7 @@ ITEM.functions.Place = {
 		end
 
 		local protector = ents.Create("exp_door_protector")
-		protector:SetupDoorProtector(client, entity)
+		protector:SetupDoorProtector(client, entity, item)
 		protector:Spawn()
 		client:RegisterEntityToRemoveOnLeave(protector)
 	end,

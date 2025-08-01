@@ -12,6 +12,9 @@ LANGUAGE = {
 	"These enhance your character's abilities. You get %d points to distribute now and can train to get more later.",
 	attribPointsHint = "Hover over an attribute to see what it affects.",
 	dTitleOwned = "Owned Door",
+	dHintManage = "Press %s to manage doors.",
+	pickupProtector = "Pick Up Door Protector",
+	pickupProtectorNotAllowed = "Cannot pick up the door protector because you are not the owner of the door.",
 
 	achievements = "Achievements",
 	alliance = "Alliance",

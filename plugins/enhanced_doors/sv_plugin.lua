@@ -1,5 +1,6 @@
 util.AddNetworkString("expDoorMenu")
 util.AddNetworkString("expDoorPermission")
+util.AddNetworkString("expDoorPickupProtector")
 
 resource.AddFile("models/experiment-redux/door_protector_basic.mdl")
 resource.AddFile("materials/models/experiment-redux/door-protectors/door_protector_basic.vmt")
@@ -33,15 +34,15 @@ function PLUGIN:OnCharacterCreated(client, character)
 end
 
 function PLUGIN:EntityIsDoor(entity)
-    if (entity:GetClass() == "exp_door_protector") then
-        return false
-    end
+	if (entity:GetClass() == "exp_door_protector") then
+		return false
+	end
 end
 
 function PLUGIN:PlayerCanBreachEntity(client, entity)
-    if (entity:GetClass() == "exp_door_protector") then
-        return true
-    end
+	if (entity:GetClass() == "exp_door_protector") then
+		return true
+	end
 end
 
 function PLUGIN:CanPlayerShootOpen(client, entity)
@@ -141,47 +142,47 @@ end
 function PLUGIN:SaveDoorData()
 	-- Create an empty table to save information in.
 	local data = {}
-		local doors = {}
+	local doors = {}
 
-		for _, v in ipairs(ents.GetAll()) do
-			if (v:IsDoor()) then
-				doors[v:MapCreationID()] = v
+	for _, v in ipairs(ents.GetAll()) do
+		if (v:IsDoor()) then
+			doors[v:MapCreationID()] = v
+		end
+	end
+
+	local doorData
+
+	-- Loop through doors with information.
+	for k, v in pairs(doors) do
+		-- Another empty table for actual information regarding the door.
+		doorData = {}
+
+		-- Save all of the needed variables to the doorData table.
+		for _, v2 in ipairs(variables) do
+			local value = v:GetNetVar(v2)
+
+			if (value) then
+				doorData[v2] = v:GetNetVar(v2)
 			end
 		end
 
-		local doorData
-
-		-- Loop through doors with information.
-		for k, v in pairs(doors) do
-			-- Another empty table for actual information regarding the door.
-			doorData = {}
-
-			-- Save all of the needed variables to the doorData table.
-			for _, v2 in ipairs(variables) do
-				local value = v:GetNetVar(v2)
-
-				if (value) then
-					doorData[v2] = v:GetNetVar(v2)
-				end
-			end
-
-			if (v.ixChildren) then
-				doorData.children = v.ixChildren
-			end
-
-			if (v.ixClassID) then
-				doorData.class = v.ixClassID
-			end
-
-			if (v.ixFactionID) then
-				doorData.faction = v.ixFactionID
-			end
-
-			-- Add the door to the door information.
-			if (not table.IsEmpty(doorData)) then
-				data[k] = doorData
-			end
+		if (v.ixChildren) then
+			doorData.children = v.ixChildren
 		end
+
+		if (v.ixClassID) then
+			doorData.class = v.ixClassID
+		end
+
+		if (v.ixFactionID) then
+			doorData.faction = v.ixFactionID
+		end
+
+		-- Add the door to the door information.
+		if (not table.IsEmpty(doorData)) then
+			data[k] = doorData
+		end
+	end
 	-- Save all of the door information.
 	self:SetData(data)
 end
@@ -229,9 +230,9 @@ end
 
 function PLUGIN:ShowTeam(client)
 	local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 96
-		data.filter = client
+	data.start = client:GetShootPos()
+	data.endpos = data.start + client:GetAimVector() * 96
+	data.filter = client
 	local trace = util.TraceLine(data)
 	local entity = trace.Entity
 
@@ -248,9 +249,9 @@ function PLUGIN:ShowTeam(client)
 			end
 
 			net.Start("expDoorMenu")
-				net.WriteEntity(door)
-				net.WriteTable(door.ixAccess)
-				net.WriteEntity(door)
+			net.WriteEntity(door)
+			net.WriteTable(door.ixAccess)
+			net.WriteEntity(door)
 			net.Send(client)
 		elseif (entity:IsDoor()) then
 			client:NotifyLocalized("notAllowed")
@@ -266,7 +267,7 @@ function PLUGIN:PlayerLoadedCharacter(client, curChar, prevChar)
 
 		for _, door in ipairs(doors) do
 			if (IsValid(door) and door:IsDoor() and door:GetDTEntity(0) == client) then
-                door:RemoveDoorAccessData()
+				door:RemoveDoorAccessData()
 			end
 		end
 
@@ -282,7 +283,7 @@ function PLUGIN:PlayerDisconnected(client)
 
 		for _, door in ipairs(doors) do
 			if (IsValid(door) and door:IsDoor() and door:GetDTEntity(0) == client) then
-                door:RemoveDoorAccessData()
+				door:RemoveDoorAccessData()
 			end
 		end
 
@@ -314,10 +315,29 @@ net.Receive("expDoorPermission", function(length, client)
 
 		if (#recipient > 0) then
 			net.Start("expDoorPermission")
-				net.WriteEntity(door)
-				net.WriteEntity(target)
-				net.WriteUInt(access, 4)
+			net.WriteEntity(door)
+			net.WriteEntity(target)
+			net.WriteUInt(access, 4)
 			net.Send(recipient)
 		end
 	end
+end)
+
+net.Receive("expDoorPickupProtector", function(length, client)
+	local door = net.ReadEntity()
+
+	if (not IsValid(door) or not IsValid(door.expProtector) or door.expProtector.expClient ~= client) then
+		client:NotifyLocalized("pickupProtectorNotAllowed")
+		return
+	end
+
+	local inventory = client:GetCharacter():GetInventory()
+	local success, error = inventory:Add(door.expProtector.expItemUniqueID)
+
+	if (not success) then
+		client:Notify(error)
+		return
+	end
+
+	door.expProtector:Remove()
 end)
