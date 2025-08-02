@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ChatLog extends Model
 {
@@ -13,6 +14,7 @@ class ChatLog extends Model
         'chat_type',
         'steam_id',
         'steam_name',
+        'rank',
         'character_id',
         'character_name',
         'ip_address',
@@ -20,6 +22,8 @@ class ChatLog extends Model
         'voice_chat_path',
         'moderated_at',
         'moderated_by',
+        'flagged_at',
+        'flagged_reason',
     ];
 
     protected $casts = [
@@ -41,4 +45,8 @@ class ChatLog extends Model
     /**
      * Relationships
      */
+    public function sanctions(): HasMany
+    {
+        return $this->hasMany(Sanction::class);
+    }
 }

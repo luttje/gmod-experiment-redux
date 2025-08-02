@@ -163,8 +163,8 @@
                     </x-table.cell>
                     <x-table.cell>
                         @if($chatLog->moderated_at)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Moderated
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-center whitespace-nowrap text-xs font-medium bg-green-100 text-green-800">
+                            Moderated {{ $chatLog->moderated_at->diffForHumans() }}
                         </span>
                         @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -188,15 +188,20 @@
                         </x-primary-button>
                         @else
                         <span class="text-gray-400 text-sm">
-                            Moderated {{ $chatLog->moderated_at->diffForHumans() }}
+                            @foreach ($chatLog->sanctions as $sanction)
+                            <x-primary-button href="{{ route('sanctions.show', $sanction) }}"
+                               target="_blank">
+                                View '{{ $sanction->type }}' Sanction
+                            </x-primary-button>
+                            @endforeach
                         </span>
 
-                        <!-- Undo Moderation Button -->
+                        {{-- <!-- Undo Moderation Button -->
                         <x-primary-button
                                 wire:click="undoModeration('{{ $chatLog->id }}')"
                                 wire:confirm="Are you sure you want to undo moderation for this chat log?">
                             Undo Moderation
-                        </x-primary-button>
+                        </x-primary-button> --}}
                         @endif
                     </x-table.cell>
                 </x-table.row>

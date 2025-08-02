@@ -82,4 +82,28 @@ class SanctionController extends Controller
                 ->with('success', 'Sanction has been applied successfully.');
         });
     }
+
+    /**
+     * Show the details of a specific sanction
+     */
+    public function show(Sanction $sanction)
+    {
+        $relatedSanctions = Sanction::where('steam_id', $sanction->steam_id)
+            ->where('id', '!=', $sanction->id)
+            ->get();
+
+        return view('sanctions.show', compact('sanction', 'relatedSanctions'));
+    }
+
+    /**
+     * Revoke a sanction (delete it)
+     */
+    public function revoke(Sanction $sanction)
+    {
+        $sanction->delete();
+
+        return redirect()
+            ->route('sanctions.index')
+            ->with('success', 'Sanction has been revoked successfully.');
+    }
 }

@@ -55,7 +55,7 @@
                     </x-navigation-button>
                 </li>
                 <li>
-                    <x-navigation-button href="{{ route('sanctions.overview') }}">
+                    <x-navigation-button href="{{ route('sanctions.index') }}">
                         Sanctions
                     </x-navigation-button>
                 </li>

@@ -33,6 +33,9 @@ return new class extends Migration
             $table->foreignId('chat_log_id')->nullable()->constrained('chat_logs');
 
             $table->timestamps();
+
+            // Index for escalation lookups
+            $table->index(['steam_id', 'rule_id', 'created_at'], 'idx_player_rule_history');
         });
     }
 

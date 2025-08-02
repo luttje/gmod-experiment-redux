@@ -34,6 +34,10 @@ return new class extends Migration
             $table->foreignId('moderated_by')->nullable()->constrained('users');
 
             $table->timestamps();
+
+            // Index for AI moderation queries
+            $table->index(['flagged_at', 'moderated_at', 'created_at'], 'idx_moderation_status');
+            $table->index(['message'], 'idx_message_search'); // For searching non-empty messages
         });
     }
 

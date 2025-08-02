@@ -1,10 +1,4 @@
 <x-layouts.app with-alpine>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl leading-tight">
-            {{ __('AI Testing') }}
-        </h2>
-    </x-slot>
-
     @php
         $rules = require app_path('Data/Rules.php');
     @endphp

@@ -24,8 +24,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/chat-logs', ChatLogModerationPage::class)->name('chat-logs.moderation');
 
-    Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.overview');
+    Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.index');
     Route::get('/sanctions/create/{chatLog}', [SanctionController::class, 'create'])->name('sanctions.create');
+    Route::get('/sanctions/{sanction}', [SanctionController::class, 'show'])->name('sanctions.show');
+    Route::patch('/sanctions/{sanction}', [SanctionController::class, 'revoke'])->name('sanctions.revoke');
     Route::post('/sanctions/{chatLog}', [SanctionController::class, 'store'])->name('sanctions.store');
 
     Route::get('/ai-tester', [AiTestController::class, 'index'])->name('sanctions.ai-tester');

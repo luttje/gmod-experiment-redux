@@ -12,6 +12,7 @@ class PlayerInfo extends Model
     protected $fillable = [
         'steam_id',
         'steam_name',
+        'rank',
         'character_id',
         'character_name',
         'ip_address',

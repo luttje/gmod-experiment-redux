@@ -36,6 +36,7 @@
             <x-slot name="body">
                 @foreach ($sanctions as $sanction)
                 <x-table.row :even="$loop->even"
+                             :class="$sanction->isActive() ? '' : 'opacity-20'"
                              wire:key="sanction-{{ $sanction->id }}">
                     <x-table.cell>
                         {{ $sanction->character_name }}
@@ -60,17 +61,9 @@
                         @endisset
                     </x-table.cell>
                     <x-table.cell class="flex gap-2 justify-end">
-                        @if ($sanction->expires_at->isFuture())
-                        <form method="POST"
-                              wire:submit="revoke('{{ $sanction->id }}')">
-                            @csrf
-                            @method('PATCH')
-
-                            <x-danger-button type="submit">
-                                Revoke
-                            </x-danger-button>
-                        </form>
-                        @endif
+                        <x-primary-button href="{{ route('sanctions.show', $sanction) }}">
+                            Manage
+                        </x-primary-button>
                     </x-table.cell>
                 </x-table.row>
                 @endforeach
