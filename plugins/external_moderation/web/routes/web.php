@@ -33,7 +33,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/sanctions/{sanction}', [SanctionController::class, 'revoke'])->name('sanctions.revoke');
     Route::post('/sanctions/{chatLog?}', [SanctionController::class, 'store'])->name('sanctions.store');
 
-    Route::get('/players/{player}', [PlayerController::class, 'show'])->name('player.show');
+    Route::get('/players', [PlayerController::class, 'index'])->name('players.index');
+    Route::get('/players/{player}', [PlayerController::class, 'show'])->name('players.show');
 
     Route::get('/ai-tester', [AiTestController::class, 'index'])->name('sanctions.ai-tester');
     Route::post('/ai-tester/character', [AiTestController::class, 'testCharacterModeration'])->name('sanctions.ai-tester.character');

@@ -80,7 +80,7 @@
                         <div class="flex flex-row gap-2">
                             <div class="text-white font-mono">{{ $sanction->steam_id }}</div>
                             <x-primary-button class="text-white font-mono"
-                                href="{{ route('player.show', $sanction->steam_id) }}">
+                                href="{{ route('players.show', $sanction->steam_id) }}">
                                 View More
                             </x-primary-button>
                         </div>

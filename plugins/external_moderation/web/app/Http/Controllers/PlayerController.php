@@ -84,6 +84,16 @@ class PlayerController extends Controller
     }
 
     /**
+     * Display index of all player info's we have received from the server
+     */
+    public function index()
+    {
+        $players = PlayerInfo::all();
+
+        return view('players.index', compact('players'));
+    }
+
+    /**
      * Calculate various statistics for the player
      */
     private function calculatePlayerStats(string $steamId, $sanctions, $chatLogs): array

@@ -55,6 +55,11 @@
                     </x-navigation-button>
                 </li>
                 <li>
+                    <x-navigation-button href="{{ route('players.index') }}">
+                        Players
+                    </x-navigation-button>
+                </li>
+                <li>
                     <x-navigation-button href="{{ route('sanctions.index') }}">
                         Sanctions
                     </x-navigation-button>
