@@ -62,7 +62,7 @@ class SanctionController extends Controller
     public function store(Request $request, ?ChatLog $chatLog = null)
     {
         $request->validate([
-            'type' => 'required|in:mute,kick,ban',
+            'type' => 'required|in:mute,ban', // no kicking, since its hard to implement with our polling API, just ban 5 mins or fewer
             'reason' => 'required|string',
             'expires_at' => 'nullable|date',
             'rule_id' => 'nullable|string',

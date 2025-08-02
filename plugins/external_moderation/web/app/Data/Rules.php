@@ -223,8 +223,8 @@ return [
                 'is_ai_enforcable' => true,
             ],
             [
-                'type' => 'kick',
-                'duration_in_minutes' => 0,
+                'type' => 'ban',
+                'duration_in_minutes' => 5,
                 'reason' => 'Second violation for inappropriate content. Please maintain family-friendly communication. [2nd Offense]',
                 'reason_ai' => 'Automated Warning: Second violation for inappropriate content. Please maintain family-friendly communication. [AI Detected Offense]',
                 'is_ai_enforcable' => true,
@@ -297,8 +297,8 @@ return [
                 'reason' => 'Warning: Please follow staff instructions and do not evade moderation actions. Ignoring, arguing with or evading moderation decisions is not allowed. [1st Offense]',
             ],
             [
-                'type' => 'kick',
-                'duration_in_minutes' => 0,
+                'type' => 'ban',
+                'duration_in_minutes' => 5,
                 'reason' => 'Second violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [2nd Offense]',
 
             ],

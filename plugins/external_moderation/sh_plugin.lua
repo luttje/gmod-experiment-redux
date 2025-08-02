@@ -6,8 +6,19 @@ PLUGIN.description = "Sends (voice) chat messages to an external moderation syst
 
 ix.util.Include("sv_plugin.lua")
 
+ix.chat.Register("sanction", {
+	CanSay = function(self, speaker, text)
+		return ! IsValid(speaker)
+	end,
+	OnChatAdd = function(self, speaker, text, bAnonymous, data)
+		local icon = ix.util.GetMaterial("icon16/exclamation.png")
+		chat.AddText(icon, Color(255, 150, 150, 255), text)
+	end,
+	noSpaceAfter = true
+})
+
 if (not SERVER) then
-    return
+	return
 end
 
 function PLUGIN:PlayerDataRemoved(client, steamID)

@@ -49,6 +49,7 @@ class Sanction extends Model
      */
     public function isActive(): bool
     {
+        // TODO: Not used anymore, just ban 5 mins or fewer
         if ($this->type === 'kick') {
             return false; // Kicks are immediate and don't have duration
         }

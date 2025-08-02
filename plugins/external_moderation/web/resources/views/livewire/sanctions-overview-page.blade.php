@@ -48,7 +48,7 @@
                         {{ $sanction->reason }}
                     </x-table.cell>
                     <x-table.cell>
-                        {{ $sanction->expires_at->diffForHumans() }}
+                        {{ $sanction->expires_at?->diffForHumans() ?? '' }}
                     </x-table.cell>
                     <x-table.cell>
                         {{ $sanction->created_at->diffForHumans() }}
