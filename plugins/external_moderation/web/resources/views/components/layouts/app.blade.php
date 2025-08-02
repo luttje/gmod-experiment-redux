@@ -43,7 +43,7 @@
             </div>
         </div>
         <nav class="bg-slate-700">
-            <ul class="container mx-auto p-6 px-8 flex flex-row gap-4">
+            <ul class="container mx-auto p-6 px-8 flex flex-row flex-wrap gap-4">
                 <li>
                     <x-navigation-button href="{{ route('dashboard') }}">
                         Dashboard

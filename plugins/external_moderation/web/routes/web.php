@@ -5,6 +5,7 @@ use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SanctionController;
 use App\Livewire\ChatLogModerationPage;
+use App\Livewire\MobileChatLogModeration;
 use App\Livewire\SanctionsOverviewPage;
 use App\Models\ChatLog;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/chat-logs', ChatLogModerationPage::class)->name('chat-logs.moderation');
+    Route::get('/chat-logs-mobile', MobileChatLogModeration::class)->name('chat-logs.moderation.mobile');
 
     Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.index');
     Route::get('/sanctions/create/{chatLog}', [SanctionController::class, 'create'])->name('sanctions.create');

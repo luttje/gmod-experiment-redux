@@ -100,8 +100,7 @@ class SanctionController extends Controller
                 'chat_log_id' => $chatLog?->id ?? null,
             ]);
 
-            return redirect()
-                ->route('chat-logs.moderation')
+            return redirect($request->session()->pull('url.back', route('chat-logs.moderation')))
                 ->with('success', 'Sanction has been applied successfully.');
         });
     }

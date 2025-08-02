@@ -7,6 +7,9 @@
         <p>
             This is a list of all chat logs that have yet to be moderated.
         </p>
+        <x-navigation-button href="{{ route('chat-logs.moderation.mobile') }}">
+            Switch to Mobile Moderation View
+        </x-navigation-button>
     </section>
 
     <section class="rounded bg-slate-700 p-4 flex flex-col gap-4"

@@ -1,1 +1,1 @@
-<img src="/images/logo.png" alt="Logo" class="h-24 w-auto">
+<img src="/images/logo.png" alt="Logo" class="max-h-24">
