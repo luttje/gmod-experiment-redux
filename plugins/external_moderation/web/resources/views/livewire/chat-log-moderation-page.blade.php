@@ -10,7 +10,7 @@
     </section>
 
     <section class="rounded bg-slate-700 p-4 flex flex-col gap-4"
-        x-data="{
+             x-data="{
             volume: 1,
             isPlayingAudio: false,
             audioPlayer: null,
@@ -118,17 +118,56 @@
                     <x-table.cell>
                         {{ $chatLog->created_at->diffForHumans() }}
                     </x-table.cell>
+                    @php
+                    $rules = require app_path('Data/Rules.php');
+                    @endphp
                     <x-table.cell class="flex gap-2 justify-end"
                                   x-data="{
                             sanctioning: false,
+                            selectedOffense: '',
+                            sanctionType: '',
+                            reason: '',
+                            expiresAt: '',
+                            offenseRules: {{ json_encode($rules) }},
+                            calculateExpiryTime(minutes) {
+                                if (minutes === -1) return ''; // Permanent ban
+                                if (minutes === 0) return ''; // Kick (no expiry needed)
+
+                                const now = new Date();
+                                const expiry = new Date(now.getTime() + (minutes * 60000));
+                                return expiry.toISOString().slice(0, 16);
+                            },
+                            selectOffense() {
+                                const [ruleID, escalationID] = this.selectedOffense.split('.');
+
+                                if (this.selectedOffense && this.offenseRules[ruleID]) {
+                                    const rule = this.offenseRules[ruleID];
+                                    const escalation = rule.escalations[escalationID];
+
+                                    this.sanctionType = escalation.type;
+                                    this.reason = escalation.reason;
+                                    this.expiresAt = this.calculateExpiryTime(escalation.duration_in_minutes);
+
+                                    $wire.set('type', escalation.type);
+                                    $wire.set('reason', escalation.reason);
+                                    $wire.set('expires_at', this.expiresAt);
+                                } else {
+                                    this.sanctionType = '';
+                                    this.reason = '';
+                                    this.expiresAt = '';
+                                    $wire.set('type', '');
+                                    $wire.set('reason', '');
+                                    $wire.set('expires_at', '');
+                                }
+                            }
                         }">
                         <div x-show="sanctioning"
-                             class="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center"
+                             class="fixed inset-0 bg-slate-800 bg-opacity-75 flex items-center justify-center z-50"
                              x-cloak>
                             <div @click.outside="sanctioning = false"
-                                 class="bg-slate-900 p-4 rounded shadow-lg text-start">
+                                 class="bg-slate-900 p-6 rounded shadow-lg text-start max-w-md w-full max-h-[90vh] overflow-y-auto">
                                 <h3 class="text-xl font-bold mb-4">
-                                    Sanction
+                                    Sanction Player
                                 </h3>
                                 <form method="POST"
                                       wire:submit="moderate('{{ $chatLog->id }}','sanction')"
@@ -137,9 +176,32 @@
                                     @method('PATCH')
 
                                     <div class="flex flex-col">
+                                        <x-input-label for="offense"
+                                                       :value="__('Select Offense (Optional)')" />
+                                        <select x-model="selectedOffense"
+                                                @change="selectOffense()"
+                                                class="bg-slate-800 text-white rounded p-2 text-sm">
+                                            <option value="">Custom Sanction</option>
+                                            @foreach ($rules as $ruleID => $rule)
+                                            <optgroup label="{{ $rule['title'] }}">
+                                                @foreach ($rule['escalations'] as $key => $sanction)
+                                                <option value="{{ $ruleID }}.{{ $key }}">
+                                                    Escalation {{ $key + 1 }}: {{ $sanction['type'] }}
+                                                    @if(isset($sanction['duration_in_minutes']) && $sanction['duration_in_minutes'] > 0)
+                                                    until {{ Carbon\Carbon::now()->addMinutes($sanction['duration_in_minutes'])->diffForHumans() }}
+                                                    @endif
+                                                </option>
+                                                @endforeach
+                                            </optgroup>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="flex flex-col">
                                         <x-input-label for="type"
-                                                       :value="__('Reason')" />
+                                                       :value="__('Sanction Type')" />
                                         <select wire:model="type"
+                                                x-model="sanctionType"
                                                 class="bg-slate-800 text-white rounded p-2">
                                             <option value=""
                                                     disabled
@@ -155,34 +217,48 @@
                                     <div class="flex flex-col">
                                         <x-input-label for="reason"
                                                        :value="__('Reason')" />
-                                        <input type="text"
-                                               wire:model="reason"
-                                               placeholder="Reason"
-                                               class="bg-slate-800 text-white rounded p-2">
+                                        <textarea wire:model="reason"
+                                                  x-model="reason"
+                                                  placeholder="Reason for sanction"
+                                                  class="bg-slate-800 text-white rounded p-2 text-sm"
+                                                  rows="3"></textarea>
                                         <x-input-error :messages="$errors->get('reason')"
                                                        class="mt-2" />
                                     </div>
 
-                                    <div class="flex flex-col">
+                                    <div class="flex flex-col"
+                                         x-show="sanctionType !== 'kick'">
                                         <x-input-label for="expires_at"
                                                        :value="__('Expires at (UTC)')" />
                                         <input type="datetime-local"
                                                wire:model="expires_at"
-                                               class="bg-slate-800 text-white rounded p-2"
-                                               required>
-                                        <span class="text-xs text-gray-400">Current UTC time: {{ now()->format('Y-m-d H:i') }}</span>
+                                               x-model="expiresAt"
+                                               class="bg-slate-800 text-white rounded p-2">
+                                        <span class="text-xs text-gray-400 mt-1">Current UTC time: {{ now()->format('Y-m-d H:i') }}</span>
+                                        <span class="text-xs text-yellow-400 mt-1"
+                                              x-show="selectedOffense && offenseRules[selectedOffense] && offenseRules[selectedOffense].duration_in_minutes === -1">
+                                            ⚠️ This is a permanent ban - no expiry date needed
+                                        </span>
                                         <x-input-error :messages="$errors->get('expires_at')"
                                                        class="mt-2" />
                                     </div>
 
-                                    <x-danger-button type="submit">
-                                        Sanction
-                                    </x-danger-button>
+                                    <div class="flex gap-2">
+                                        <x-danger-button type="submit"
+                                                         class="flex-1">
+                                            Apply Sanction
+                                        </x-danger-button>
+                                        <button type="button"
+                                                @click="sanctioning = false"
+                                                class="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500">
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
 
-                        <x-primary-button type="submit"
+                        <x-primary-button type="button"
                                           @click="sanctioning = !sanctioning">
                             Sanction
                         </x-primary-button>
@@ -192,7 +268,8 @@
                             @csrf
                             @method('PATCH')
 
-                            <x-primary-button type="submit" class="whitespace-nowrap">
+                            <x-primary-button type="submit"
+                                              class="whitespace-nowrap">
                                 Mark Safe
                             </x-primary-button>
                         </form>

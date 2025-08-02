@@ -14,7 +14,9 @@ class ChatLogModerationPage extends Component
     use LivewireAlert;
 
     public string $type = '';
+
     public string $reason;
+
     public ?string $expires_at;
 
     public function mount()
@@ -39,6 +41,7 @@ class ChatLogModerationPage extends Component
     {
         if ($action !== 'sanction' && $action !== 'mark-safe') {
             $this->alert('error', 'Invalid action.');
+
             return;
         }
 
@@ -93,8 +96,9 @@ class ChatLogModerationPage extends Component
     {
         $voicePath = realpath($chatLog->voice_chat_path);
 
-        if (!$voicePath) {
+        if (! $voicePath) {
             $this->alert('error', 'Voice chat file not found. It may have been deleted to save disk space.');
+
             return;
         }
 
