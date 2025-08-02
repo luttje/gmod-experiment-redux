@@ -5,6 +5,7 @@ use App\Http\Controllers\LeaderboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LeaderboardController::class, 'index'])->name('leaderboards.index');
+Route::get('/how-it-works', [LeaderboardController::class, 'howItWorks'])->name('leaderboards.how-it-works');
 
 Route::get('/overall/{epoch?}', [LeaderboardController::class, 'overall'])->name('leaderboards.overall');
 Route::get('/overall/historic/{epoch?}', [LeaderboardController::class, 'overall'])->name('leaderboards.overall-historic');

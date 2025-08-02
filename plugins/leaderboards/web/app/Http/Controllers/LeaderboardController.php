@@ -74,4 +74,9 @@ class LeaderboardController extends Controller
 
         return view('leaderboards.show', compact('metric', 'characterScores'));
     }
+
+    public function howItWorks()
+    {
+        return view('leaderboards.how-it-works');
+    }
 }

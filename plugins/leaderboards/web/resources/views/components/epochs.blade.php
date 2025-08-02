@@ -1,4 +1,4 @@
-<section class="rounded {{ $isInGame ? 'bg-slate-700/50' : 'bg-slate-700' }} p-4 mb-4 flex flex-col gap-4 font-bold">
+<section class="rounded {{ $isInGame ? 'bg-slate-700/50' : 'bg-slate-700' }} p-4 mb-4 flex flex-row justify-between gap-4 font-bold">
     <div class="flex flex-row flex-wrap items-center gap-4">
         <h3>
             Epochs:
@@ -27,6 +27,12 @@
                 @endif
             </a>
         @endforeach
+    </div>
+    <div class="flex flex-row items-center gap-2">
+        <a href="{{ route('leaderboards.how-it-works') }}" class="inline-flex flex-row items-center gap-2 rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900">
+            <span>How it works</span>
+            <x-bi-question-circle class="inline w-4 h-4" />
+        </a>
     </div>
 </section>
 
