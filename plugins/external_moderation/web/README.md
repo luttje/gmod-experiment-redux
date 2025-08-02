@@ -4,6 +4,13 @@ Backend for the Experiment gamemode to communicate chat logs to. This project wi
 
 Additionally, this project will allow for automatic flagging of messages that are deemed inappropriate by the system.
 
+## 🛠️ Requirements
+
+- PHP `^8.2`
+- Composer
+- Node.js `^20.19.0 || >=22.12.0`
+- npm
+
 ## 🚀 Getting Started
 
 1. Clone the repository
