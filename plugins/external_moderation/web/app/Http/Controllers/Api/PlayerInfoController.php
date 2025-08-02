@@ -14,6 +14,7 @@ class PlayerInfoController extends Controller
 
         $data = $request->validate([
             'steam_id' => 'required|string',
+            'rank' => 'required|string',
             'steam_name' => 'required|string',
             'character_name' => 'nullable|string',
             'character_id' => 'nullable|integer',
@@ -22,7 +23,7 @@ class PlayerInfoController extends Controller
 
         $playerInfo = PlayerInfo::updateOrCreate(
             [
-                'steam_id' => $data['steam_id']
+                'steam_id' => $data['steam_id'],
             ],
             $data
         );

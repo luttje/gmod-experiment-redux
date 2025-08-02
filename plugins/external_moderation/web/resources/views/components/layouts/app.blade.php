@@ -9,6 +9,8 @@
 
     <title>@isset($title){{ $title }}&nbsp;&bull;&nbsp;@endif{{ config('app.name') }}</title>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     {{-- Let pages without Livewire request to load Alpine.js using with-alpine --}}
     @isset($withAlpine)
         <script>
@@ -55,6 +57,11 @@
                 <li>
                     <x-navigation-button href="{{ route('sanctions.overview') }}">
                         Sanctions
+                    </x-navigation-button>
+                </li>
+                <li>
+                    <x-navigation-button href="{{ route('sanctions.ai-tester') }}">
+                        AI Tester
                     </x-navigation-button>
                 </li>
                 <li class="ml-auto">

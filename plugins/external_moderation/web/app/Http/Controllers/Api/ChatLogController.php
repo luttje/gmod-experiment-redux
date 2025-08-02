@@ -19,6 +19,7 @@ class ChatLogController extends Controller
 
             'steam_id' => 'required|string',
             'steam_name' => 'required|string',
+            'rank' => 'required|string',
             'character_id' => 'nullable|integer',
             'character_name' => 'nullable|string',
             'ip_address' => 'required|string',
@@ -36,6 +37,7 @@ class ChatLogController extends Controller
 
         $data = $request->validate([
             'steam_id' => 'required|string',
+            'rank' => 'required|string',
             'message' => 'required|string',
             'voice_chat_path' => 'required|string',
         ]);
@@ -46,10 +48,12 @@ class ChatLogController extends Controller
         if (! $playerInfo) {
             // This really shouldn't happen, so let's extra log it
             Log::error('Player info not found on voice chat', $data);
+
             return response()->json(['error' => 'Player info not found'], 404);
         }
 
         $data['steam_name'] = $playerInfo->steam_name;
+        $data['rank'] = $playerInfo->rank;
         $data['character_id'] = $playerInfo->character_id;
         $data['character_name'] = $playerInfo->character_name;
         $data['ip_address'] = $playerInfo->ip_address;

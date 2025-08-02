@@ -2,23 +2,35 @@ local PLUGIN = PLUGIN
 
 local API_KEY, APP_URL
 
+local function getClientRank(client)
+	local rank = "player"
+
+	if (client:IsSuperAdmin()) then
+		rank = "superadmin"
+	elseif (client:IsAdmin()) then
+		rank = "admin"
+	end
+
+	return rank
+end
+
 -- On loading the plugin we will get the API_KEY that we can use to authenticate with the moderation API.
 function PLUGIN:OnLoaded()
-    local envFile = file.Read(PLUGIN.folder .. "/web/.env", "LUA")
+	local envFile = file.Read(PLUGIN.folder .. "/web/.env", "LUA")
 
-    if (not envFile) then
+	if (not envFile) then
 		ix.util.SchemaErrorNoHalt("The .env file is missing from the web folder for External Moderation.")
 		self.disabled = true
 		return
-    end
+	end
 
-    local variables = Schema.util.EnvToTable(envFile)
+	local variables = Schema.util.EnvToTable(envFile)
 
-    API_KEY = variables.API_SECRET
-    APP_URL = Schema.util.ForceEndPath(variables.APP_URL)
+	API_KEY = variables.API_SECRET
+	APP_URL = Schema.util.ForceEndPath(variables.APP_URL)
 
 	-- gmsv_eightbit doesn't work in singleplayer or on listen servers, so we only load it on dedicated servers.
-    if (eightbit or not game.IsDedicated()) then
+	if (eightbit or not game.IsDedicated()) then
 		return
 	end
 
@@ -33,7 +45,7 @@ function PLUGIN:OnLoaded()
 		eightbit.SetBroadcastIP("127.0.0.1")
 		eightbit.SetBroadcastPort(4000)
 		eightbit.EnableBroadcast(true)
-    end)
+	end)
 
 	if (not success) then
 		ix.util.SchemaErrorNoHaltWithStack("Failed to load eightbit: " .. errorMessage)
@@ -42,73 +54,76 @@ end
 
 -- When the player uses normal chat, we send the chat log to the moderation API.
 function PLUGIN:PostPlayerSay(client, chatType, message, anonymous)
-    local character = client:GetCharacter()
-    local ipAddress = Schema.util.GetPlayerAddress(client).ip
+	local character = client:GetCharacter()
+	local ipAddress = Schema.util.GetPlayerAddress(client).ip
 
-    local data = {
+	local data = {
 		chat_type = chatType,
-        steam_id = client:SteamID64(),
-        steam_name = client:Name(),
+		steam_id = client:SteamID64(),
+		steam_name = client:Name(),
+		rank = getClientRank(client),
 		character_name = character and character:GetName() or nil,
-        character_id = character and client:GetCharacter():GetID() or nil,
-        ip_address = ipAddress,
-        message = message,
-    }
+		character_id = character and client:GetCharacter():GetID() or nil,
+		ip_address = ipAddress,
+		message = message,
+	}
 
-    self:PostJson("api/submit-chat-log", data, function(response)
-        if (not DEBUG_MODERATION) then
-            return
-        end
+	self:PostJson("api/submit-chat-log", data, function(response)
+		if (not DEBUG_MODERATION) then
+			return
+		end
 
-        ix.util.SchemaPrint("Chatlog submitted successfully.")
-    end, function(message)
-        ix.util.SchemaErrorNoHaltWithStack("Failed to submit chatlog: " .. message)
-    end)
+		ix.util.SchemaPrint("Chatlog submitted successfully.")
+	end, function(message)
+		ix.util.SchemaErrorNoHaltWithStack("Failed to submit chatlog: " .. message)
+	end)
 end
 
 -- When the player changes character, we inform the moderation API so it knows which character the player is currently using.
 -- This is especially needed for Voice Chat moderation, since that only receives the SteamID64 of the player.
 function PLUGIN:PlayerLoadedCharacter(client, character)
-    local ipAddress = Schema.util.GetPlayerAddress(client).ip
+	local ipAddress = Schema.util.GetPlayerAddress(client).ip
 
-    local data = {
-        steam_id = client:SteamID64(),
-        steam_name = client:Name(),
+	local data = {
+		steam_id = client:SteamID64(),
+		steam_name = client:Name(),
+		rank = getClientRank(client),
 		character_name = character:GetName(),
-        character_id = character:GetID(),
-        ip_address = ipAddress,
-    }
+		character_id = character:GetID(),
+		ip_address = ipAddress,
+	}
 
-    self:PostJson("api/submit-player-info", data, function(response)
-        if (not DEBUG_MODERATION) then
-            return
-        end
+	self:PostJson("api/submit-player-info", data, function(response)
+		if (not DEBUG_MODERATION) then
+			return
+		end
 
-        ix.util.SchemaPrint("Character info submitted successfully.")
-    end, function(message)
-        ix.util.SchemaErrorNoHaltWithStack("Failed to submit character info: " .. message)
-    end)
+		ix.util.SchemaPrint("Character info submitted successfully.")
+	end, function(message)
+		ix.util.SchemaErrorNoHaltWithStack("Failed to submit character info: " .. message)
+	end)
 end
 
 -- Same as with PlayerLoadedCharacter, but when we know the player IP, name and SteamID64, we can already inform the moderation API.
 gameevent.Listen("player_connect")
 function PLUGIN:player_connect(data)
-    if (data.bot == 1) then
-        return
-    end
+	if (data.bot == 1) then
+		return
+	end
 
 	local ipAddress = Schema.util.GetPlayerAddress(data.address).ip
 
 	local data = {
 		steam_id = util.SteamIDTo64(data.networkid),
+		rank = "player", -- Default to player for now, will be updated later when client fully connects.
 		steam_name = data.name,
 		ip_address = ipAddress,
 	}
 
 	self:PostJson("api/submit-player-info", data, function(response)
-        if (not DEBUG_MODERATION) then
-            return
-        end
+		if (not DEBUG_MODERATION) then
+			return
+		end
 
 		ix.util.SchemaPrint("Player info submitted successfully.")
 	end, function(message)
@@ -121,9 +136,9 @@ function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
 		return
 	end
 
-    endpoint = APP_URL .. endpoint
+	endpoint = APP_URL .. endpoint
 
-    http.Post(endpoint, {
+	http.Post(endpoint, {
 		json = util.TableToJSON(data),
 	}, function(body, length, headers, code)
 		if (onSuccess) then
@@ -138,10 +153,10 @@ function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)
 		if (onFailure) then
 			onFailure(message)
 		end
-    end, {
+	end, {
 		-- ! Do not uncomment this, with it, sometimes GMod will doubly set the Content-Type header (e.g: `application/x-www-form-urlencoded, application/x-www-form-urlencoded`) Bug?!
 		-- ["Content-Type"] = "application/x-www-form-urlencoded",
-        ["X-Api-Secret"] = API_KEY,
+		["X-Api-Secret"] = API_KEY,
 		["Accept"] = "application/json",
 	})
 end

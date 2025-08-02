@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiTestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SanctionController;
 use App\Livewire\ChatLogModerationPage;
@@ -22,9 +23,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/chat-logs', ChatLogModerationPage::class)->name('chat-logs.moderation');
+
     Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.overview');
     Route::get('/sanctions/create/{chatLog}', [SanctionController::class, 'create'])->name('sanctions.create');
     Route::post('/sanctions/{chatLog}', [SanctionController::class, 'store'])->name('sanctions.store');
+
+    Route::get('/ai-tester', [AiTestController::class, 'index'])->name('sanctions.ai-tester');
+    Route::post('/ai-tester/character', [AiTestController::class, 'testCharacterModeration'])->name('sanctions.ai-tester.character');
+    Route::post('/ai-tester/chat', [AiTestController::class, 'testChatModeration'])->name('sanctions.ai-tester.chat');
 
     // Streams the given audio file to the browser
     Route::get('/audio/{chatLog}', function (ChatLog $chatLog) {

@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ChatLogSeeder extends Seeder
@@ -17,6 +16,7 @@ class ChatLogSeeder extends Seeder
                 'chat_type' => 'ooc',
                 'steam_name' => 'Luttje',
                 'steam_id' => '76561198002016569',
+                'rank' => 'superadmin',
                 'character_name' => 'James Bond',
                 'character_id' => 1,
                 'ip_address' => '127.0.0.1',
@@ -26,6 +26,7 @@ class ChatLogSeeder extends Seeder
                 'chat_type' => 'ooc',
                 'steam_name' => 'Meanie',
                 'steam_id' => '90071996842377217',
+                'rank' => 'player',
                 'character_name' => 'Ernst Stavro Blofeld',
                 'character_id' => 2,
                 'ip_address' => '192.168.0.1',
@@ -37,6 +38,7 @@ class ChatLogSeeder extends Seeder
                 'chat_type' => 'ooc',
                 'steam_name' => 'Luttje',
                 'steam_id' => '76561198002016569',
+                'rank' => 'superadmin',
                 'character_name' => 'James Bond',
                 'character_id' => 1,
                 'ip_address' => '127.0.0.1',
@@ -46,6 +48,7 @@ class ChatLogSeeder extends Seeder
                 'chat_type' => 'voice',
                 'steam_name' => 'Meanie',
                 'steam_id' => '90071996842377217',
+                'rank' => 'player',
                 'character_name' => 'Ernst Stavro Blofeld',
                 'character_id' => 2,
                 'ip_address' => '192.168.0.1',

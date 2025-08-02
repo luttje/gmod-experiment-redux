@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->string('steam_name'); // if anonymized, this is a hash of the steam_id
             $table->string('steam_id')->index(); // if anonymized, this is a hash of the steam_id
+            $table->string('rank')->default('player'); // player, admin, superadmin
             $table->string('character_name')->nullable();
             $table->bigInteger('character_id')->nullable()->index();
             $table->string('ip_address')->index(); // if anonymized, this is a hash of the ip_address
