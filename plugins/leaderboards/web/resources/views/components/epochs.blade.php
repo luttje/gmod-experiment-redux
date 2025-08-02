@@ -1,4 +1,4 @@
-<section class="rounded bg-slate-700 p-4 mb-4 flex flex-col gap-4 font-bold">
+<section class="rounded {{ $isInGame ? 'bg-slate-700/50' : 'bg-slate-700' }} p-4 mb-4 flex flex-col gap-4 font-bold">
     <div class="flex flex-row flex-wrap items-center gap-4">
         <h3>
             Epochs:

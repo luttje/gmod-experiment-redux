@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
-    class="bg-slate-800 font-sans h-full">
+    class="{{ $isInGame ? 'bg-transparent' : 'bg-slate-800' }} font-sans h-full">
 
 <head>
     <meta charset="utf-8">
@@ -13,8 +13,17 @@
 </head>
 
 <body class="flex flex-col h-full text-white">
+    @if($isInGame)
+    @if(!request()->routeIs('leaderboards.index'))
+        <div class="container mx-auto pt-4 pb-0 px-8">
+            <a href="{{ route('leaderboards.index') }}" class="inline-flex flex-row items-center gap-2 rounded transition duration-200 py-2 px-4 bg-slate-800 hover:bg-slate-900 }}">
+                &larr; Back to Leaderboards Index
+            </a>
+        </div>
+    @endif
+    @else
     <header class="bg-slate-900">
-        <div class="container mx-auto p-6 px-8">
+        <div class="container mx-auto py-6 px-8">
             <div class="flex justify-between items-center">
                 <a href="{{ route('leaderboards.index') }}">
                     <img src="/images/logo.png" alt="Logo" class="h-24 w-auto">
@@ -35,8 +44,9 @@
         </div>
     </header>
     @include('components.user')
+    @endif
 
-    <main class="container mx-auto p-6 px-8 flex-1">
+    <main class="container mx-auto py-6 px-8 flex-1">
         {{ $slot }}
 
         @isset($lastUpdatedAt)
@@ -51,6 +61,7 @@
 
     @include('sweetalert::alert')
 
+    @unless($isInGame)
     <footer class="bg-slate-900 text-center">
         <div class="container mx-auto p-6 px-8 text-xs flex flex-col gap-1">
             <p>
@@ -62,6 +73,7 @@
             </p>
         </div>
     </footer>
+    @endunless
 </body>
 
 </html>

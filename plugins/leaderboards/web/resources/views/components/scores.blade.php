@@ -1,6 +1,6 @@
 @include('components.epochs')
 
-<section class="rounded bg-slate-700 p-4 mb-4 flex flex-col gap-2 font-bold">
+<section class="rounded {{ $isInGame ? 'bg-slate-700/50' : 'bg-slate-700' }} p-4 mb-4 flex flex-col gap-2 font-bold">
     <div class="flex flex-row gap-4 items-center rounded bg-slate-900 p-4 text-slate-400">
         <span class="flex w-10 shrink-0 text-xl">
             #

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Epoch;
 use App\Models\Metric;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
 class LeaderboardController extends Controller
@@ -29,6 +28,13 @@ class LeaderboardController extends Controller
     public function index(?Epoch $epoch = null)
     {
         $latestEpoch = Epoch::latest()->first();
+
+        // Show the homepage if we want to show the latest epoch, mostly so when $isInGame
+        // we can check if the route is leaderboards.index to not show the back button.
+        if ($epoch && $epoch == $latestEpoch) {
+            return redirect()->route('leaderboards.index');
+        }
+
         $epoch = $epoch ?? $latestEpoch;
         $leaderboardScores = Metric::leaderboardsFromCache($epoch);
         $metrics = $leaderboardScores['metricScores'];

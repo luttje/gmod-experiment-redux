@@ -5,7 +5,7 @@
 
     @include('components.epochs')
 
-    <section class="rounded bg-slate-700 p-4 mb-4 flex flex-col gap-4 font-bold">
+    <section class="rounded {{ $isInGame ? 'bg-slate-700/50' : 'bg-slate-700' }} p-4 mb-4 flex flex-col gap-4 font-bold">
         <p>
             Select a leaderboard to view the top players in that category.
         </p>

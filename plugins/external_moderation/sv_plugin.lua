@@ -90,6 +90,11 @@ local function syncSanctions()
 			end
 		end
 	end, function(message)
+		-- Stop the spam during development
+		if (message == "Requests to local resources are not allowed") then
+			PLUGIN.disabled = true
+		end
+
 		ix.util.SchemaErrorNoHalt("Failed to sync sanctions: " .. message)
 	end)
 end

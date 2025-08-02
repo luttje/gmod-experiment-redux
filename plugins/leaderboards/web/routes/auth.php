@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
 /*
@@ -19,16 +19,28 @@ Route::get('/auth/discord/callback', function () {
     // but just connect the account to the existing user
     if (user() !== null) {
         $user = user();
-        $user->update([
-            'discord_id' => $oauthUser->id,
-            'discord_nickname' => $oauthUser->nickname,
-            'discord_name' => $oauthUser->name,
-            'discord_email' => $oauthUser->email,
-            'discord_avatar' => $oauthUser->avatar,
 
-            'discord_token' => $oauthUser->token,
-            'discord_refresh_token' => $oauthUser->refreshToken,
-        ]);
+        try {
+            $user->update([
+                'discord_id' => $oauthUser->id,
+                'discord_nickname' => $oauthUser->nickname,
+                'discord_name' => $oauthUser->name,
+                'discord_email' => $oauthUser->email,
+                'discord_avatar' => $oauthUser->avatar,
+
+                'discord_token' => $oauthUser->token,
+                'discord_refresh_token' => $oauthUser->refreshToken,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'Duplicate entry')) {
+                alert()->error('This Discord account is already connected to another user.');
+
+                return redirect('/')
+                    ->withInput();
+            } else {
+                throw $e;
+            }
+        }
 
         return redirect('/');
     }

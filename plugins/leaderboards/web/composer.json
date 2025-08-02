@@ -1,8 +1,11 @@
 {
-    "name": "laravel/laravel",
+    "name": "experiment-redux/leaderboards",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "The backend for leaderboard and epoch data within the Experiment (Redux) gamemode.",
+    "keywords": [
+        "laravel",
+        "leaderboards"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",

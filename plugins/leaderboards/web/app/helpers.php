@@ -1,12 +1,12 @@
 <?php
 
+use const App\EPOCH_REWARDS;
+
 use App\Models\Character;
 use App\Models\Epoch;
 use App\Rewards\BaseReward;
 
-use const App\EPOCH_REWARDS;
-
-if (!function_exists('user')) {
+if (! function_exists('user')) {
     /**
      * Get the current user.
      *
@@ -18,7 +18,7 @@ if (!function_exists('user')) {
     }
 }
 
-if (!function_exists('setupRewardForCharacter')) {
+if (! function_exists('setupRewardForCharacter')) {
     /**
      * Setup the reward for the given character.
      */
@@ -35,8 +35,7 @@ if (!function_exists('setupRewardForCharacter')) {
     }
 }
 
-
-if (!function_exists('getRewardsForCharacter')) {
+if (! function_exists('getRewardsForCharacter')) {
     /**
      * Returns reward instances for the given character's epoch.
      */
@@ -44,20 +43,23 @@ if (!function_exists('getRewardsForCharacter')) {
     {
         $epoch = $character->epoch->name;
 
-        $availableRewards = array_filter(EPOCH_REWARDS[$epoch], function($rewardClass) use ($character) {
+        if (! isset(EPOCH_REWARDS[$epoch])) {
+            return [];
+        }
+
+        $availableRewards = array_filter(EPOCH_REWARDS[$epoch], function ($rewardClass) use ($character) {
             assert(is_subclass_of($rewardClass, BaseReward::class));
 
             return $rewardClass::canClaim($character);
         });
 
-        return array_map(function($rewardClass) use ($character) {
+        return array_map(function ($rewardClass) use ($character) {
             return setupRewardForCharacter($character, $rewardClass);
         }, $availableRewards);
     }
 }
 
-
-if (!function_exists('claimRewardsForCharacter')) {
+if (! function_exists('claimRewardsForCharacter')) {
     /**
      * Claims rewards for the given character.
      */
@@ -65,7 +67,11 @@ if (!function_exists('claimRewardsForCharacter')) {
     {
         $epoch = $character->epoch->name;
 
-        $availableRewards = array_filter(EPOCH_REWARDS[$epoch], function($rewardClass) use ($character) {
+        if (! isset(EPOCH_REWARDS[$epoch])) {
+            return;
+        }
+
+        $availableRewards = array_filter(EPOCH_REWARDS[$epoch], function ($rewardClass) use ($character) {
             assert(is_subclass_of($rewardClass, BaseReward::class));
 
             return $rewardClass::canClaim($character);
