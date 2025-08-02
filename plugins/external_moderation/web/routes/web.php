@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AiTestController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SanctionController;
 use App\Livewire\ChatLogModerationPage;
@@ -26,9 +27,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.index');
     Route::get('/sanctions/create/{chatLog}', [SanctionController::class, 'create'])->name('sanctions.create');
+    Route::get('/sanctions/create-for-player/{playerSteamID}', [SanctionController::class, 'createForPlayer'])
+        ->name('sanctions.create-for-player');
     Route::get('/sanctions/{sanction}', [SanctionController::class, 'show'])->name('sanctions.show');
     Route::patch('/sanctions/{sanction}', [SanctionController::class, 'revoke'])->name('sanctions.revoke');
-    Route::post('/sanctions/{chatLog}', [SanctionController::class, 'store'])->name('sanctions.store');
+    Route::post('/sanctions/{chatLog?}', [SanctionController::class, 'store'])->name('sanctions.store');
+
+    Route::get('/players/{player}', [PlayerController::class, 'show'])->name('player.show');
 
     Route::get('/ai-tester', [AiTestController::class, 'index'])->name('sanctions.ai-tester');
     Route::post('/ai-tester/character', [AiTestController::class, 'testCharacterModeration'])->name('sanctions.ai-tester.character');

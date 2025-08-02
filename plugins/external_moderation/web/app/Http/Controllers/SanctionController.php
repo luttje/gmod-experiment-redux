@@ -9,21 +9,20 @@ use Illuminate\Support\Facades\DB;
 
 class SanctionController extends Controller
 {
-    /**
-     * Show the sanction form for a specific chat log
-     */
-    public function create(ChatLog $chatLog)
+    private function baseCreate(string $steamId, ?ChatLog $chatLog = null)
     {
+        $player = PlayerController::getPlayerInfo($steamId);
+
         // Get previous sanctions for this player
-        $previousSanctions = Sanction::getPlayerSanctions($chatLog->steam_id);
+        $previousSanctions = Sanction::getPlayerSanctions($steamId);
 
         // Get rules and calculate next escalation levels
         $rules = require app_path('Data/Rules.php');
         $rulesWithEscalations = [];
 
         foreach ($rules as $ruleId => $rule) {
-            $offenseCount = Sanction::getOffenseCount($chatLog->steam_id, $ruleId);
-            $nextEscalationLevel = Sanction::getNextEscalationLevel($chatLog->steam_id, $ruleId);
+            $offenseCount = Sanction::getOffenseCount($steamId, $ruleId);
+            $nextEscalationLevel = Sanction::getNextEscalationLevel($steamId, $ruleId);
 
             $rulesWithEscalations[$ruleId] = [
                 'rule' => $rule,
@@ -38,13 +37,29 @@ class SanctionController extends Controller
             ];
         }
 
-        return view('sanctions.create', compact('chatLog', 'previousSanctions', 'rulesWithEscalations'));
+        return view('sanctions.create', compact('chatLog', 'player', 'previousSanctions', 'rulesWithEscalations'));
+    }
+
+    /**
+     * Show the sanction form for a specific chat log
+     */
+    public function create(ChatLog $chatLog)
+    {
+        return $this->baseCreate($chatLog->steam_id, $chatLog);
+    }
+
+    /**
+     * Show the sanction form for a specific player
+     */
+    public function createForPlayer(string $playerSteamID)
+    {
+        return $this->baseCreate($playerSteamID);
     }
 
     /**
      * Store a new sanction
      */
-    public function store(Request $request, ChatLog $chatLog)
+    public function store(Request $request, ?ChatLog $chatLog = null)
     {
         $request->validate([
             'type' => 'required|in:mute,kick,ban',
@@ -52,29 +67,37 @@ class SanctionController extends Controller
             'expires_at' => 'nullable|date',
             'rule_id' => 'nullable|string',
             'escalation_level' => 'nullable|integer|min:0',
+
+            'steam_name' => 'required|string|max:255',
+            'steam_id' => 'required|string|max:255',
+            'character_name' => 'nullable|string|max:255',
+            'character_id' => 'nullable|integer',
+            'ip_address' => 'required|string|max:255',
         ]);
 
         return DB::transaction(function () use ($request, $chatLog) {
-            // Mark chat log as moderated
-            $chatLog->update([
-                'moderated_at' => now(),
-                'moderated_by' => auth()->id(),
-            ]);
+            if ($chatLog) {
+                // Mark chat log as moderated
+                $chatLog->update([
+                    'moderated_at' => now(),
+                    'moderated_by' => auth()->id(),
+                ]);
+            }
 
             // Create the sanction
             Sanction::create([
-                'steam_name' => $chatLog->steam_name,
-                'steam_id' => $chatLog->steam_id,
-                'character_name' => $chatLog->character_name,
-                'character_id' => $chatLog->character_id,
-                'ip_address' => $chatLog->ip_address,
+                'steam_name' => $request->steam_name,
+                'steam_id' => $request->steam_id,
+                'character_name' => $request->character_name,
+                'character_id' => $request->character_id,
+                'ip_address' => $request->ip_address,
                 'type' => $request->type,
                 'reason' => $request->reason,
                 'expires_at' => $request->expires_at,
                 'issued_by' => auth()->id(),
                 'rule_id' => $request->rule_id,
                 'escalation_level' => $request->escalation_level,
-                'chat_log_id' => $chatLog->id,
+                'chat_log_id' => $chatLog?->id ?? null,
             ]);
 
             return redirect()

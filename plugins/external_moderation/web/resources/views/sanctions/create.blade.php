@@ -3,37 +3,39 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <!-- Chat Log Details -->
-                    <div class="mb-8 p-4 bg-slate-700 rounded">
-                        <h3 class="text-lg font-semibold mb-3">Chat Log Details</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <strong>Character:</strong> {{ $chatLog->character_name }}
-                            </div>
-                            <div>
-                                <strong>Steam Name:</strong> {{ $chatLog->steam_name }}
-                            </div>
-                            <div>
-                                <strong>Type:</strong>
-                                @if($chatLog->isVoiceChat())
-                                    Voice Chat
-                                @else
-                                    {{ strtoupper($chatLog->chat_type) }}
-                                @endif
-                            </div>
-                            <div>
-                                <strong>Received:</strong> {{ $chatLog->created_at->diffForHumans() }}
-                            </div>
-                        </div>
-                        @if($chatLog->message)
-                            <div class="mt-3">
-                                <strong>Message:</strong>
-                                <div class="bg-slate-600 p-3 rounded mt-1">
-                                    {{ $chatLog->message }}
+                    @if($chatLog)
+                        <!-- Chat Log Details -->
+                        <div class="mb-8 p-4 bg-slate-700 rounded">
+                            <h3 class="text-lg font-semibold mb-3">Chat Log Details</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <strong>Character:</strong> {{ $chatLog->character_name }}
+                                </div>
+                                <div>
+                                    <strong>Steam Name:</strong> {{ $chatLog->steam_name }}
+                                </div>
+                                <div>
+                                    <strong>Type:</strong>
+                                    @if($chatLog->isVoiceChat())
+                                        Voice Chat
+                                    @else
+                                        {{ strtoupper($chatLog->chat_type) }}
+                                    @endif
+                                </div>
+                                <div>
+                                    <strong>Received:</strong> {{ $chatLog->created_at->diffForHumans() }}
                                 </div>
                             </div>
-                        @endif
-                    </div>
+                            @if($chatLog->message)
+                                <div class="mt-3">
+                                    <strong>Message:</strong>
+                                    <div class="bg-slate-600 p-3 rounded mt-1">
+                                        {{ $chatLog->message }}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
 
                     <!-- Previous Sanctions -->
                     @if($previousSanctions->count() > 0)
@@ -229,6 +231,12 @@
                                     <div class="text-red-400 text-sm mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            <input type="hidden" name="steam_name" value="{{ $player->steam_name }}">
+                            <input type="hidden" name="steam_id" value="{{ $player->steam_id }}">
+                            <input type="hidden" name="character_name" value="{{ $player->character_name }}">
+                            <input type="hidden" name="character_id" value="{{ $player->character_id }}">
+                            <input type="hidden" name="ip_address" value="{{ $player->ip_address }}">
 
                             <!-- Action Buttons -->
                             <div class="flex gap-4 pt-4">

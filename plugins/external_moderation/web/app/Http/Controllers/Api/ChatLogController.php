@@ -37,7 +37,6 @@ class ChatLogController extends Controller
 
         $data = $request->validate([
             'steam_id' => 'required|string',
-            'rank' => 'required|string',
             'message' => 'required|string',
             'voice_chat_path' => 'required|string',
         ]);

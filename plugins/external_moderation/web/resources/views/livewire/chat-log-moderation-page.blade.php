@@ -174,7 +174,7 @@
                     </x-table.cell>
                     <x-table.cell class="flex gap-2 justify-end">
                         @if(!$chatLog->moderated_at)
-                        <!-- Sanction Button - Now links to new page -->
+                        <!-- Sanction Button -->
                         <x-primary-button href="{{ route('sanctions.create', $chatLog) }}"
                             target="_blank">
                             Sanction

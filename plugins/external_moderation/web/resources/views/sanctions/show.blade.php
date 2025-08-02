@@ -16,10 +16,9 @@
                         </button>
                     </form>
                 @endif
-                <a href="{{ route('sanctions.index') }}"
-                   class="px-4 py-2 bg-slate-600 text-white rounded hover:bg-slate-500 text-sm font-medium">
+                <x-primary-button href="{{ route('sanctions.index') }}">
                     Back to Sanctions
-                </a>
+                </x-primary-button>
             </div>
         </div>
     </header>
@@ -76,12 +75,16 @@
                         <label class="block text-sm font-medium text-gray-400 mb-1">Steam Name</label>
                         <div class="text-white font-medium">{{ $sanction->steam_name }}</div>
                     </div>
-                    @if($sanction->steam_id)
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-1">Steam ID</label>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Steam ID</label>
+                        <div class="flex flex-row gap-2">
                             <div class="text-white font-mono">{{ $sanction->steam_id }}</div>
+                            <x-primary-button class="text-white font-mono"
+                                href="{{ route('player.show', $sanction->steam_id) }}">
+                                View More
+                            </x-primary-button>
                         </div>
-                    @endif
+                    </div>
                 </div>
             </div>
 
