@@ -83,7 +83,8 @@ return [
       "reasoning": {
         "type": "string",
         "description": "Brief explanation of why this classification was made.",
-        "minLength": 10
+        "minLength": 10,
+        "pattern": "^[\\w\\s.,]+$"
       }
     },
     "required": [

@@ -257,43 +257,75 @@ return [
         ],
     ],
     7 => [
-        'title' => 'Follow Staff Instructions',
-        'description' => 'Do not ignore or argue with moderation decisions in-game.',
+        'title' => 'No In-Game Cheating or Exploiting',
+        'description' => 'Do not use cheats, hacks, or exploits to gain unfair advantage.',
         'escalations' => [
             [
-                'type' => 'mute',
-                'duration_in_minutes' => 10,
-                'reason' => 'Warning: Please follow staff instructions. Arguing with or ignoring moderation decisions disrupts the game. [1st Offense]',
-            ],
-            [
-                'type' => 'kick',
-                'duration_in_minutes' => 0,
-                'reason' => 'Second violation for disobeying staff. Moderation decisions must be respected for fair gameplay. [2nd Offense]',
-            ],
-            [
                 'type' => 'ban',
-                'duration_in_minutes' => 60 * 2,
-                'reason' => 'Third violation for disobeying staff instructions. Continued defiance disrupts server management. [3rd Offense]',
+                'duration_in_minutes' => 60,
+                'reason' => 'Warning: Cheating or exploiting is strictly prohibited. This includes using hacks or exploits to gain unfair advantage. [1st Offense]',
             ],
             [
                 'type' => 'ban',
                 'duration_in_minutes' => 60 * 24,
-                'reason' => 'Fourth violation for disobeying staff instructions. Continued defiance disrupts server management. [4th Offense]',
+                'reason' => 'Second violation for cheating or exploiting. Continued unfair advantage will result in extended removal. [2nd Offense]',
             ],
             [
                 'type' => 'ban',
                 'duration_in_minutes' => 60 * 24 * 7,
-                'reason' => 'Fifth violation for disobeying staff instructions. Continued defiance disrupts server management. [5th Offense]',
+                'reason' => 'Third violation for cheating or exploiting. Continued unfair advantage will result in extended removal. [3rd Offense]',
             ],
             [
                 'type' => 'ban',
                 'duration_in_minutes' => 60 * 24 * 30,
-                'reason' => 'Sixth violation for disobeying staff instructions. Continued defiance disrupts server management. [6th Offense]',
+                'reason' => 'Fourth violation for cheating or exploiting. Continued unfair advantage will result in extended removal. [4th Offense]',
             ],
             [
                 'type' => 'ban',
                 'duration_in_minutes' => BAN_DURATION_LONG_TERM,
-                'reason' => 'Repeated violation of staff instructions. Continued defiance disrupts server management. [Repeated Offense]',
+                'reason' => 'Repeated violation of cheating or exploiting policy. Continued unfair advantage will result in extended removal. [Repeated Offense]',
+            ],
+        ],
+    ],
+    8 => [
+        'title' => 'Follow Staff Instructions and do not evade Moderation',
+        'description' => 'Do not ignore or argue with moderation decisions in-game. Evading moderation actions (e.g., using alternate accounts) is strictly prohibited.',
+        'escalations' => [
+            [
+                'type' => 'mute',
+                'duration_in_minutes' => 10,
+                'reason' => 'Warning: Please follow staff instructions and do not evade moderation actions. Ignoring, arguing with or evading moderation decisions is not allowed. [1st Offense]',
+            ],
+            [
+                'type' => 'kick',
+                'duration_in_minutes' => 0,
+                'reason' => 'Second violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [2nd Offense]',
+
+            ],
+            [
+                'type' => 'ban',
+                'duration_in_minutes' => 60 * 2,
+                'reason' => 'Third violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [3rd Offense]',
+            ],
+            [
+                'type' => 'ban',
+                'duration_in_minutes' => 60 * 24,
+                'reason' => 'Fourth violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [4th Offense]',
+            ],
+            [
+                'type' => 'ban',
+                'duration_in_minutes' => 60 * 24 * 7,
+                'reason' => 'Fifth violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [5th Offense]',
+            ],
+            [
+                'type' => 'ban',
+                'duration_in_minutes' => 60 * 24 * 30,
+                'reason' => 'Sixth violation for ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [6th Offense]',
+            ],
+            [
+                'type' => 'ban',
+                'duration_in_minutes' => BAN_DURATION_LONG_TERM,
+                'reason' => 'Repeated violation of ignoring staff instructions or evading moderation. Continued disregard for moderation actions will result in extended removal. [Repeated Offense]',
             ],
         ],
     ],

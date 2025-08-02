@@ -60,9 +60,49 @@
                        class="w-32">
             </div>
         </div>
+
         <h2 class="text-2xl font-bold">
             Chat Logs
         </h2>
+
+        <!-- Filters Section -->
+        <div class="flex flex-col md:flex-row gap-4 mb-4">
+            <!-- Search Bar -->
+            <div class="flex-1">
+                <label for="search" class="block text-sm font-medium text-gray-300 mb-1">Search</label>
+                <input type="text"
+                       id="search"
+                       wire:model.live.debounce.300ms="search"
+                       placeholder="Search by character name, message, or type..."
+                       class="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+
+            <!-- Show Moderated Checkbox -->
+            <div class="flex items-end">
+                <label class="flex items-center space-x-2 text-gray-300">
+                    <input type="checkbox"
+                           wire:model.live="showModerated"
+                           class="w-4 h-4 text-blue-600 bg-slate-600 border-slate-500 rounded focus:ring-blue-500 focus:ring-2">
+                    <span class="text-sm">Show already moderated logs</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="text-sm text-gray-400">
+            @if(!empty($search) || $showModerated)
+                <span>
+                    Showing
+                    @if(!empty($search))
+                        results for "<strong>{{ $search }}</strong>"
+                    @endif
+                    @if($showModerated)
+                        @if(!empty($search)) and @endif
+                        <strong>including moderated logs</strong>
+                    @endif
+                </span>
+            @endif
+        </div>
 
         <x-table>
             <x-slot name="head">
@@ -81,13 +121,16 @@
                 <x-table.heading>
                     Received
                 </x-table.heading>
+                <x-table.heading>
+                    Status
+                </x-table.heading>
                 <x-table.heading class="text-right">
                     Actions
                 </x-table.heading>
             </x-slot>
 
             <x-slot name="body">
-                @foreach ($chatLogs as $chatLog)
+                @forelse ($chatLogs as $chatLog)
                 <x-table.row :even="$loop->even"
                              wire:key="chat-log-{{ $chatLog->id }}">
                     <x-table.cell class="w-0 pr-0">
@@ -118,7 +161,19 @@
                     <x-table.cell>
                         {{ $chatLog->created_at->diffForHumans() }}
                     </x-table.cell>
+                    <x-table.cell>
+                        @if($chatLog->moderated_at)
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Moderated
+                        </span>
+                        @else
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Pending
+                        </span>
+                        @endif
+                    </x-table.cell>
                     <x-table.cell class="flex gap-2 justify-end">
+                        @if(!$chatLog->moderated_at)
                         <!-- Sanction Button - Now links to new page -->
                         <x-primary-button href="{{ route('sanctions.create', $chatLog) }}"
                             target="_blank">
@@ -131,9 +186,33 @@
                                 wire:confirm="Are you sure you want to mark this chat log as safe?">
                             Mark Safe
                         </x-primary-button>
+                        @else
+                        <span class="text-gray-400 text-sm">
+                            Moderated {{ $chatLog->moderated_at->diffForHumans() }}
+                        </span>
+
+                        <!-- Undo Moderation Button -->
+                        <x-primary-button
+                                wire:click="undoModeration('{{ $chatLog->id }}')"
+                                wire:confirm="Are you sure you want to undo moderation for this chat log?">
+                            Undo Moderation
+                        </x-primary-button>
+                        @endif
                     </x-table.cell>
                 </x-table.row>
-                @endforeach
+                @empty
+                <x-table.row>
+                    <x-table.cell colspan="7" class="text-center text-gray-400 py-8">
+                        @if(!empty($search))
+                            No chat logs found matching your search criteria.
+                        @elseif($showModerated)
+                            No chat logs found.
+                        @else
+                            No unmoderated chat logs found.
+                        @endif
+                    </x-table.cell>
+                </x-table.row>
+                @endforelse
             </x-slot>
         </x-table>
 

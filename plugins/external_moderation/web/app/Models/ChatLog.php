@@ -22,6 +22,12 @@ class ChatLog extends Model
         'moderated_by',
     ];
 
+    protected $casts = [
+        'moderated_at' => 'datetime',
+        'flagged_at' => 'datetime',
+        'anonymized_at' => 'datetime',
+    ];
+
     public function isVoiceChat(): bool
     {
         return $this->chat_type === 'voice';
@@ -33,9 +39,6 @@ class ChatLog extends Model
     }
 
     /**
-     *
      * Relationships
-     *
      */
-
 }

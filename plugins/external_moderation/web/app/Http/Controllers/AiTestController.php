@@ -27,15 +27,9 @@ class AiTestController extends Controller
         ]);
 
         try {
-            $prompt = require app_path('Data/PromptCharacterModeration.php');
-
-            $response = AiService::chatCompletion(
-                $prompt['prompt'],
-                $prompt['schema'],
-                [
-                    'name' => $request->input('name'),
-                    'description' => $request->input('description', ''),
-                ]
+            $response = AiService::doCharacterModeration(
+                $request->input('name'),
+                $request->input('description', ''),
             );
 
             return response()->json($response);
@@ -60,16 +54,10 @@ class AiTestController extends Controller
         ]);
 
         try {
-            $prompt = require app_path('Data/PromptChatModeration.php');
-
-            $response = AiService::chatCompletion(
-                $prompt['prompt'],
-                $prompt['schema'],
-                [
-                    'message' => $request->input('message'),
-                    'chat_type' => $request->input('chat_type'),
-                    'rank' => $request->input('rank'),
-                ]
+            $response = AiService::doChatModeration(
+                $request->input('message'),
+                $request->input('chat_type'),
+                $request->input('rank'),
             );
 
             return response()->json($response);

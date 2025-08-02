@@ -50,4 +50,33 @@ class AiService
 
         return json_decode($content, true);
     }
+
+    public static function doCharacterModeration(string $name, string $description): array
+    {
+        $prompt = require app_path('Data/PromptCharacterModeration.php');
+
+        return self::chatCompletion(
+            $prompt['prompt'],
+            $prompt['schema'],
+            [
+                'name' => $name,
+                'description' => $description,
+            ]
+        );
+    }
+
+    public static function doChatModeration(string $message, string $chatType, string $rank): array
+    {
+        $prompt = require app_path('Data/PromptChatModeration.php');
+
+        return self::chatCompletion(
+            $prompt['prompt'],
+            $prompt['schema'],
+            [
+                'message' => $message,
+                'chat_type' => $chatType,
+                'rank' => $rank,
+            ]
+        );
+    }
 }

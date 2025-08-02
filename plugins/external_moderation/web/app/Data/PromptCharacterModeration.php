@@ -47,7 +47,8 @@ return [
       "reason_to_user": {
         "type": "string",
         "description": "Brief explanation to the user why their name and/or description was denied and changed",
-        "minLength": 10
+        "minLength": 10,
+        "pattern": "^[\\w\\s.,]+$"
       }
     },
     "required": ["classification", "replacement_name", "replacement_description", "reason_to_user"],
