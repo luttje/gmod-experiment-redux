@@ -53,7 +53,11 @@
                         {{ $sanction->created_at->diffForHumans() }}
                     </x-table.cell>
                     <x-table.cell>
-                        {{ $sanction->issuer->name }}
+                        @isset($sanction->issuer)
+                            {{ $sanction->issuer->name }}
+                        @else
+                            <span class="text-gray-400 italic">AI</span>
+                        @endisset
                     </x-table.cell>
                     <x-table.cell class="flex gap-2 justify-end">
                         @if ($sanction->expires_at->isFuture())

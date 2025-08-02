@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\ChatLogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SanctionController;
 use App\Livewire\ChatLogModerationPage;
 use App\Livewire\SanctionsOverviewPage;
 use App\Models\ChatLog;
@@ -21,21 +21,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/chat-logs', ChatLogModerationPage::class)->name('chat-logs-moderation');
-    Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions-overview');
+    Route::get('/chat-logs', ChatLogModerationPage::class)->name('chat-logs.moderation');
+    Route::get('/sanctions', SanctionsOverviewPage::class)->name('sanctions.overview');
+    Route::get('/sanctions/create/{chatLog}', [SanctionController::class, 'create'])->name('sanctions.create');
+    Route::post('/sanctions/{chatLog}', [SanctionController::class, 'store'])->name('sanctions.store');
 
     // Streams the given audio file to the browser
-    Route::get('/audio/{chatLog}', function(ChatLog $chatLog) {
+    Route::get('/audio/{chatLog}', function (ChatLog $chatLog) {
         $voicePath = realpath($chatLog->voice_chat_path);
 
-        if (!$voicePath) {
+        if (! $voicePath) {
             abort(404);
         }
 
         return response()->stream(function () use ($voicePath) {
             $stream = fopen($voicePath, 'r');
 
-            while (!feof($stream)) {
+            while (! feof($stream)) {
                 echo fread($stream, 1024);
             }
 

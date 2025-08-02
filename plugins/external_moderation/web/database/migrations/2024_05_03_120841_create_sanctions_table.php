@@ -27,6 +27,11 @@ return new class extends Migration
 
             $table->foreignId('issued_by')->nullable()->constrained('users');
 
+            // Used to track earlier violations or rule breaking
+            $table->string('rule_id')->nullable()->index(); // e.g., '1', '2', etc.
+            $table->integer('escalation_level')->nullable(); // 0, 1, 2, etc.
+            $table->foreignId('chat_log_id')->nullable()->constrained('chat_logs');
+
             $table->timestamps();
         });
     }

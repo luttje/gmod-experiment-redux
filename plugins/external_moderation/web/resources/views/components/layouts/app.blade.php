@@ -9,6 +9,13 @@
 
     <title>@isset($title){{ $title }}&nbsp;&bull;&nbsp;@endif{{ config('app.name') }}</title>
 
+    {{-- Let pages without Livewire request to load Alpine.js using with-alpine --}}
+    @isset($withAlpine)
+        <script>
+            window.withAlpineJS = true;
+        </script>
+    @endisset
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
@@ -41,12 +48,12 @@
                     </x-navigation-button>
                 </li>
                 <li>
-                    <x-navigation-button href="{{ route('chat-logs-moderation') }}">
+                    <x-navigation-button href="{{ route('chat-logs.moderation') }}">
                         Chat Logs
                     </x-navigation-button>
                 </li>
                 <li>
-                    <x-navigation-button href="{{ route('sanctions-overview') }}">
+                    <x-navigation-button href="{{ route('sanctions.overview') }}">
                         Sanctions
                     </x-navigation-button>
                 </li>
