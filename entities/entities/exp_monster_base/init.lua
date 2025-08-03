@@ -159,46 +159,53 @@ function ENT:Think()
 	end
 
 	-- Update target visibility and handle chasing logic
-	if IsValid(currentTarget) then
-		if not currentTarget:IsDoor() and not self:CanSeeTarget(currentTarget) then
-			self:OnTargetLost(currentTarget)
-			if self.targetingSystem.lostTargetCount >= 3 then
-				self:SetTargetEntity(nil)
-				currentTarget = nil
-			end
-		else
-			self.targetingSystem.lostTargetCount = 0
-			if not currentTarget:IsDoor() then
-				self:UpdateEnemyMemory(currentTarget, currentTarget:GetPos())
-			end
-		end
-
-		-- Handle immediate melee range attacks during chase
-		if IsValid(currentTarget) and self:GetSchedule() == self.expSchedules.Chase then
-			if self:IsTargetInMeleeRange(currentTarget) then
-				self:ClearSchedule()
-				self:StartAttackSchedule(currentTarget)
-			end
-		end
-
-		if IsValid(currentTarget) then
-			self:SpeakFromTypedVoiceSet("Chase", 2)
-		end
-	else
+	if (not IsValid(currentTarget)) then
 		-- No target - play idle sounds
 		self:SpeakFromTypedVoiceSet("Idle", 5)
+		return
+	end
+
+	if (not currentTarget:IsDoor() and not self:CanSeeTarget(currentTarget)) then
+		-- Can't see the target and not trying to go through a door, we will lose this target
+		self:OnTargetLost(currentTarget)
+
+		if (self.targetingSystem.lostTargetCount >= 3) then
+			self:SetTargetEntity(nil)
+			currentTarget = nil
+		end
+	else
+		-- We can see the target, updating our position memory, so we know where it last was.
+		self.targetingSystem.lostTargetCount = 0
+
+		if (not currentTarget:IsDoor()) then
+			self:UpdateEnemyMemory(currentTarget, currentTarget:GetPos())
+		end
+	end
+
+	-- Handle immediate melee range attacks during chase
+	if (self:GetSchedule() == self.expSchedules.Chase) then
+		if (self:IsTargetInMeleeRange(currentTarget)) then
+			self:ClearSchedule()
+			self:StartAttackSchedule(currentTarget)
+		end
+	end
+
+	if (IsValid(currentTarget)) then
+		self:SpeakFromTypedVoiceSet("Chase", 2)
 	end
 end
 
 function ENT:ShouldHibernate()
 	local hibernationRange = self:GetRangeSquared(1500)
+
 	for _, player in ipairs(player.GetAll()) do
-		if player:GetMoveType() ~= MOVETYPE_NOCLIP then
-			if self:GetPos():DistToSqr(player:GetPos()) < hibernationRange then
+		if (player:GetMoveType() ~= MOVETYPE_NOCLIP) then
+			if (self:GetPos():DistToSqr(player:GetPos()) < hibernationRange) then
 				return false
 			end
 		end
 	end
+
 	return true
 end
 
@@ -211,6 +218,38 @@ end
 --]]
 function ENT:GetRangeSquared(range)
 	return range ^ 2
+end
+
+-- Gets the closest point on an entity's bounding box
+function ENT:GetClosestPointOnEntity(entity)
+	local ourPos = self:GetPos()
+	local mins, maxs = entity:GetCollisionBounds()
+	local entityPos = entity:GetPos()
+
+	-- Calculate the closest point on the entity's bounding box to our position
+	local closestPoint = Vector(
+		math.Clamp(ourPos.x, entityPos.x + mins.x, entityPos.x + maxs.x),
+		math.Clamp(ourPos.y, entityPos.y + mins.y, entityPos.y + maxs.y),
+		math.Clamp(ourPos.z, entityPos.z + mins.z, entityPos.z + maxs.z)
+	)
+
+	return closestPoint
+end
+
+-- Gets the distance to closest point on entity
+function ENT:GetDistanceToEntity(entity)
+	if not IsValid(entity) then return math.huge end
+
+	local closestPoint = self:GetClosestPointOnEntity(entity)
+	return self:GetPos():Distance(closestPoint)
+end
+
+-- Geths the squared distance to closest point on entity
+function ENT:GetDistanceToEntitySqr(entity)
+	if not IsValid(entity) then return math.huge end
+
+	local closestPoint = self:GetClosestPointOnEntity(entity)
+	return self:GetPos():DistToSqr(closestPoint)
 end
 
 function ENT:AnimEventID(eventName)

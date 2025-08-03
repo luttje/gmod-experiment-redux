@@ -14,7 +14,7 @@ end
 
 function ENT:TakeItemInstance(itemInstance)
 	for i, item in ipairs(self.expInventory) do
-		if item == itemInstance then
+		if (item == itemInstance) then
 			table.remove(self.expInventory, i)
 			break
 		end
@@ -24,7 +24,7 @@ end
 function ENT:CountItem(itemUniqueID)
 	local count = 0
 	for _, item in ipairs(self.expInventory) do
-		if item.uniqueID == itemUniqueID then
+		if (item.uniqueID == itemUniqueID) then
 			count = count + 1
 		end
 	end

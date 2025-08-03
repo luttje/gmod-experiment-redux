@@ -17,12 +17,13 @@ end
 	These are used to track collision with entities during attacks.
 --]]
 function ENT:CreateAttackHandle(name, boneIndex, offset, handleSize)
-	if not boneIndex or boneIndex == -1 then
+	if (not boneIndex or boneIndex == -1) then
 		return
 	end
 
 	local handle = ents.Create("exp_attack_handle")
-	if not IsValid(handle) then
+
+	if (not IsValid(handle)) then
 		return
 	end
 
@@ -42,21 +43,24 @@ function ENT:CreateAttackHandle(name, boneIndex, offset, handleSize)
 end
 
 function ENT:ClearAttackHandles()
-	if self.expAttackHandles then
+	if (self.expAttackHandles) then
 		for name, handleData in pairs(self.expAttackHandles) do
-			if IsValid(handleData.entity) then
+			if (IsValid(handleData.entity)) then
 				handleData.entity:Remove()
 			end
 		end
 	end
+
 	self.expAttackHandles = {}
 end
 
 function ENT:StartAttackHandles(attackData)
-	if not self.expAttackHandles then return end
+	if (not self.expAttackHandles) then
+		return
+	end
 
 	for name, handleData in pairs(self.expAttackHandles) do
-		if IsValid(handleData.entity) then
+		if (IsValid(handleData.entity)) then
 			handleData.entity:StartAttack(attackData)
 		end
 	end
@@ -65,10 +69,12 @@ function ENT:StartAttackHandles(attackData)
 end
 
 function ENT:EndAttackHandles()
-	if not self.expAttackHandles then return end
+	if (not self.expAttackHandles) then
+		return
+	end
 
 	for name, handleData in pairs(self.expAttackHandles) do
-		if IsValid(handleData.entity) then
+		if (IsValid(handleData.entity)) then
 			handleData.entity:EndAttack()
 		end
 	end
@@ -80,7 +86,9 @@ end
 	Damage and Death
 --]]
 function ENT:OnTakeDamage(damageInfo)
-	if self.expIsInvincible then return end
+	if (self.expIsInvincible) then
+		return
+	end
 
 	local damage = damageInfo:GetDamage()
 	self:SetHealth(self:Health() - damage)
@@ -88,20 +96,20 @@ function ENT:OnTakeDamage(damageInfo)
 	local position = damageInfo:GetDamagePosition()
 	local force = damageInfo:GetDamageForce()
 
-	if not self.expDoesntBleed then
+	if (not self.expDoesntBleed) then
 		Schema.BloodEffect(self, position, 1, force)
 	end
 
 	local attacker = damageInfo:GetAttacker()
 	hook.Run("OnMonsterTakeDamage", self, damageInfo, attacker)
 
-	if self:Health() <= 0 then
+	if (self:Health() <= 0) then
 		self:HandleDeath()
 		return damage
 	end
 
 	-- Always target the attacker if they're valid, even if we have another target
-	if not self.expDoesntChase and IsValid(attacker) and self:IsValidTarget(attacker) then
+	if (not self.expDoesntChase and IsValid(attacker) and self:IsValidTarget(attacker)) then
 		self:SpeakFromTypedVoiceSet("Pain", 2)
 		self:SetTargetEntity(attacker)
 		self:StartSchedule(self.expSchedules.Chase)
@@ -117,10 +125,12 @@ function ENT:HandleDeath()
 
 	-- Handle corpse decay and inventory setup (keeping original logic)
 	local decayTime = ix.config.Get("corpseDecayTime", 60)
-	if decayTime > 0 then
+
+	if (decayTime > 0) then
 		local visualDecayTime = math.min(decayTime * .1, 10)
+
 		timer.Simple(decayTime - visualDecayTime, function()
-			if IsValid(corpse) then
+			if (IsValid(corpse)) then
 				Schema.DecayEntity(corpse, visualDecayTime)
 			end
 		end)
@@ -190,9 +200,10 @@ end
 	Door Interaction System
 --]]
 function ENT:HandleDoorAttack(door)
-	if door.expIsOpeningFromAttackUntil then
-		if door.expIsOpeningFromAttackUntil > CurTime() then
+	if (door.expIsOpeningFromAttackUntil) then
+		if (door.expIsOpeningFromAttackUntil > CurTime()) then
 			self:IgnoreTarget(door)
+
 			return
 		else
 			door.expIsOpeningFromAttackUntil = nil
@@ -200,32 +211,42 @@ function ENT:HandleDoorAttack(door)
 		end
 	end
 
-	if door:GetInternalVariable("m_bLocked") then
+	-- If the door is locked, the monster does damage until it opens
+	local doorOpened = false
+
+	if (door:GetInternalVariable("m_bLocked")) then
+		-- TODO: Make the health configurable per door or door type
 		door.expDoorHealth = door.expDoorHealth or 3
 		door.expDoorHealth = door.expDoorHealth - 1
 
-		if door.expDoorHealth > 0 then
-			return
+		if (door.expDoorHealth <= 0) then
+			door:Fire("Unlock")
+			doorOpened = true
 		end
-
-		door:Fire("Unlock")
+	else
+		doorOpened = true
 	end
 
-	if door:GetInternalVariable("m_eDoorState") == 0 then
+	if (doorOpened and door:GetInternalVariable("m_eDoorState") == 0) then
 		door:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
 		door.expIsOpeningFromAttackUntil = CurTime() + 2
+		-- Only ignore the door after we've successfully opened it
+		self:IgnoreTarget(door, 5)
 	end
 
-	self:IgnoreTarget(door)
+	-- Don't ignore the door if we haven't opened it yet - keep attacking!
 end
 
 hook.Add("AcceptInput", "expDontAllowDoorsToCloseWhenOpenedByMonsters",
 	function(entity, inputName, activator, caller, value)
-		if not entity:IsDoor() then return end
+		if (not entity:IsDoor()) then
+			return
+		end
 
 		local closing = inputName == "Close" or inputName == "Use"
-		if closing and entity.expIsOpeningFromAttackUntil then
-			if entity.expIsOpeningFromAttackUntil < CurTime() then
+
+		if (closing and entity.expIsOpeningFromAttackUntil) then
+			if (entity.expIsOpeningFromAttackUntil < CurTime()) then
 				entity.expIsOpeningFromAttackUntil = nil
 				entity.expDoorHealth = nil
 				return

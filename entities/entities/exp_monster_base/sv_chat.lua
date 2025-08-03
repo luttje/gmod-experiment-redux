@@ -4,13 +4,14 @@ function ENT:PrintChat(message, chatClass)
 	local isYelling = chatClass == true or chatClass == MONSTER_CHAT_YELL
 	local range = ix.config.Get("chatRange", 280) * (isYelling and 2 or 1)
 
-	if chatClass == MONSTER_CHAT_WHISPER then
+	if (chatClass == MONSTER_CHAT_WHISPER) then
 		range = range * 0.5
 	end
 
 	local receivers = {}
+
 	for _, entity in ipairs(ents.FindInSphere(self:GetPos(), range)) do
-		if entity:IsPlayer() then
+		if (entity:IsPlayer()) then
 			receivers[#receivers + 1] = entity
 		end
 	end
@@ -25,7 +26,7 @@ function ENT:AddChat(message, listeners, chatClass)
 	local isYelling = chatClass == true or chatClass == MONSTER_CHAT_YELL
 	local range = ix.config.Get("chatRange", 280) * (isYelling and 2 or 1)
 
-	if chatClass == MONSTER_CHAT_WHISPER then
+	if (chatClass == MONSTER_CHAT_WHISPER) then
 		range = range * 0.5
 	end
 

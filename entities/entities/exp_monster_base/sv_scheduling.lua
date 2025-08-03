@@ -7,25 +7,25 @@ function ENT:InitializeScheduleSystem()
 end
 
 function ENT:SelectSchedule()
-	if GetConVar("ai_disabled"):GetBool() or self:GetNPCState() == NPC_STATE_DEAD then
+	if (GetConVar("ai_disabled"):GetBool() or self:GetNPCState() == NPC_STATE_DEAD) then
 		return
 	end
 
-	if self.ShouldOverrideSelectSchedule and self:ShouldOverrideSelectSchedule() then
+	if (self.ShouldOverrideSelectSchedule and self:ShouldOverrideSelectSchedule()) then
 		return
 	end
 
 	-- Handle current target or find new one
 	local currentTarget = self.targetingSystem.currentTarget
 
-	if not self:IsValidTarget(currentTarget) then
+	if (not self:IsValidTarget(currentTarget)) then
 		-- Look for new target
 		local newTarget = self:FindBestTarget()
 		self:SetTargetEntity(newTarget)
 		currentTarget = newTarget
 	end
 
-	if IsValid(currentTarget) then
+	if (IsValid(currentTarget)) then
 		self:HandleTargetedBehavior(currentTarget)
 	else
 		self:StartDefaultSchedule()
@@ -33,13 +33,13 @@ function ENT:SelectSchedule()
 end
 
 function ENT:HandleTargetedBehavior(target)
-	local distance = self:GetPos():DistToSqr(target:GetPos())
+	local distance = self:GetDistanceToEntitySqr(target)
 	local meleeRange = self:GetRangeSquared(self:GetAttackMeleeRange())
 
-	if distance < meleeRange then
+	if (distance < meleeRange) then
 		self:StartAttackSchedule(target)
 	else
-		if self:GetSchedule() ~= self.expSchedules.Chase then
+		if (self:GetSchedule() ~= self.expSchedules.Chase) then
 			self:StartSchedule(self.expSchedules.Chase)
 		end
 	end
@@ -52,7 +52,7 @@ end
 function ENT:OnTaskComplete()
 	BaseClass.OnTaskComplete(self)
 
-	if self.CurrentTask and self.expAttackSchedule then
+	if (self.CurrentTask and self.expAttackSchedule) then
 		self:HandleAttackTaskComplete()
 	end
 end
@@ -64,7 +64,7 @@ function ENT:HandleAttackTaskComplete()
 end
 
 function ENT:ScheduleFinished()
-	if self.CurrentSchedule == self.expAttackSchedule then
+	if (self.CurrentSchedule == self.expAttackSchedule) then
 		self.expAttackSchedule = nil
 	end
 
@@ -73,41 +73,33 @@ end
 
 function ENT:OnTaskFailed(failCode, failReason)
 	-- Handle blocked routes
-	if failCode == FAIL_NO_ROUTE_BLOCKED then
+	if (failCode == FAIL_NO_ROUTE_BLOCKED) then
 		local position = self:GetPos()
+
 		self:SetPos(position + Vector(0, 0, 16))
 		Schema.MakeFlushToGround(self, position)
 
 		self.expRouteBlockedCount = (self.expRouteBlockedCount or 0) + 1
 
-		-- Try to break doors if we're blocked
-		if self.expRouteBlockedCount <= 2 then
-			local entities = ents.FindInSphere(self:GetPos(), self:GetAttackMeleeRange())
-			for _, entity in ipairs(entities) do
-				if entity:IsDoor() then
-					self:SpeakFromTypedVoiceSet("AttackHitDoor", nil, true)
-					self:HandleDoorAttack(entity)
-					return
-				end
-			end
-		end
-
 		-- Remove if stuck too long
-		if self.expRouteBlockedCount > 5 then
+		if (self.expRouteBlockedCount > 5) then
 			local owner = self:GetDTEntity(0)
+
 			ix.util.SchemaErrorNoHalt(
 				"Monster (owned by %s) is stuck, despawning",
 				IsValid(owner) and owner:Name() or "unknown"
 			)
+
 			self:Remove()
 		end
 		return
 	end
 
 	-- Handle no enemy
-	if failCode == FAIL_NO_ENEMY then
+	if (failCode == FAIL_NO_ENEMY) then
 		self:SetTargetEntity(nil)
 		self:StartDefaultSchedule()
+
 		return
 	end
 end
@@ -118,7 +110,10 @@ end
 
 function ENT:StartAttackSchedule(target)
 	local attackSchedule = self:GetAttackSchedule(target)
-	if not attackSchedule then return end
+
+	if (not attackSchedule) then
+		return
+	end
 
 	self.expAttackSchedule = attackSchedule
 	self:UpdateEnemyMemory(target, target:GetPos())
@@ -136,13 +131,15 @@ function ENT:OnScheduleStarted(schedule)
 end
 
 function ENT:OnDoingSchedule(schedule)
-	if not schedule.forceRetrigger then return end
-
-	if Schema.util.Throttle("RecalculatePath", schedule.forceRetrigger, self) then
+	if (not schedule.forceRetrigger) then
 		return
 	end
 
-	if not self:OnRetriggerSchedule(schedule) then
+	if (Schema.util.Throttle("RecalculatePath", schedule.forceRetrigger, self)) then
+		return
+	end
+
+	if (not self:OnRetriggerSchedule(schedule)) then
 		self:StartSchedule(schedule)
 	end
 end
