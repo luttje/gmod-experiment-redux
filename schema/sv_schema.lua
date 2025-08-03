@@ -655,9 +655,24 @@ function Schema.SearchPlayer(client, target)
 	return true
 end
 
+--- Makes an entity flush with the ground by tracing down a couple hundred units.
+--- @param entity Entity The entity.
+--- @param position Vector The position.
+--- @param normal? Vector The normal.
 function Schema.MakeFlushToGround(entity, position, normal)
-	local lowestPoint = entity:NearestPoint(position - (normal * 512))
-	entity:SetPos(position + (entity:GetPos() - lowestPoint))
+	-- If no normal is given, trace down towards the ground to get the normal.
+	if (not normal) then
+		local trace = {}
+		trace.start = position
+		trace.endpos = position - Vector(0, 0, 512)
+		trace.filter = entity
+
+		trace = util.TraceLine(trace)
+
+		normal = trace.HitNormal or vector_up
+	end
+
+	entity:SetPos(position + (entity:GetPos() - entity:NearestPoint(position - (normal * 512))))
 end
 
 function Schema.CanSeePosition(client, position, allowance, ignoreEnts)

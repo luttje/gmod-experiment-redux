@@ -21,12 +21,12 @@ if (not SERVER) then
 		self.expCharacterModel = self.expCharacterModel
 			or MONSTER_SCIENTIST_MODELS[math.random(#MONSTER_SCIENTIST_MODELS)]
 
-		local noHeadBoneTransform = nil
+		local headBoneTransform = nil
 
 		if (self.expHasNoHead or math.random() < 0.3) then
 			self.expHasNoHead = true
 
-			noHeadBoneTransform = {
+			headBoneTransform = {
 				["children"] = {
 				},
 				["self"] = {
@@ -37,15 +37,15 @@ if (not SERVER) then
 					["AimPartName"] = "",
 					["FollowPartUID"] = "",
 					["Bone"] = "head",
-					["ScaleChildren"] = false,
-					["UniqueID"] = "823c1901273f27ae76a6b9345b48d838e8368fc5e94d9c5d99d7c44ac2f6da74",
+					["ScaleChildren"] = true,
+					["UniqueID"] = pac.Hash(),
 					["MoveChildrenToOrigin"] = false,
 					["Position"] = Vector(0, 0, 0),
 					["AimPartUID"] = "",
 					["Angles"] = Angle(0, 0, 0),
 					["Hide"] = false,
 					["Name"] = "",
-					["Scale"] = Vector(1, 1, 1),
+					["Scale"] = Vector(0, 0, 0),
 					["EditorExpand"] = false,
 					["ClassName"] = "bone3",
 					["Size"] = 1,
@@ -53,7 +53,7 @@ if (not SERVER) then
 					["IsDisturbing"] = false,
 					["AngleOffset"] = Angle(0, 0, 0),
 					["EyeAngles"] = false,
-					["HideMesh"] = true,
+					["HideMesh"] = false,
 				},
 			}
 		end
@@ -63,7 +63,7 @@ if (not SERVER) then
 				["children"] = {
 					[1] = {
 						["children"] = {
-							[1] = noHeadBoneTransform
+							[1] = headBoneTransform
 						},
 						["self"] = {
 							["Skin"] = 0,
@@ -73,7 +73,7 @@ if (not SERVER) then
 							["IgnoreZ"] = false,
 							["AimPartUID"] = "",
 							["Materials"] = "models/experiment-redux/characters/guardian_scientist_sheet_bloody" ..
-							math.random(1, 3) .. ";;;;;;;;",
+								math.random(1, 3) .. ";;;;;;;;",
 							["Name"] = "replacement",
 							["LevelOfDetail"] = 0,
 							["NoTextureFiltering"] = false,
@@ -128,72 +128,119 @@ if (not SERVER) then
 end
 
 function ENT:Initialize()
-    BaseClass.Initialize(self)
+	BaseClass.Initialize(self)
 
-    self:SetModel("models/zombie/fast.mdl")
-    self:SetHealth(500)
+	self:SetModel("models/zombie/fast.mdl")
+	self:SetHealth(500)
 	self:SetMaxHealth(500)
 	self:Activate()
 end
 
 function ENT:SetupVoiceSounds()
-    self:SetTypedVoiceSet("Idle", {
-        "NPC_FastZombie.Idle"
-    })
-
-    self:SetTypedVoiceSet("Pain", {
-        "NPC_FastZombie.Pain"
-    })
-
-    self:SetTypedVoiceSet("Die", {
-        "NPC_FastZombie.Die"
-    })
-
-    self:SetTypedVoiceSet("Alert", {
-        "npc/fast_zombie/fz_scream1.wav"
-    })
-
-    self:SetTypedVoiceSet("Chase", {
-        -- "npc/fast_zombie/gurgle_loop1.wav",
-    })
-
-    self:SetTypedVoiceSet("Lost", {
-        "npc/fast_zombie/fz_alert_far1.wav"
-    })
-
-    self:SetTypedVoiceSet("Attack", {
-        "NPC_FastZombie.Attack"
-    })
-
-    self:SetTypedVoiceSet("AttackMiss", {
-        "NPC_FastZombie.AttackMiss"
-    })
-
-    self:SetTypedVoiceSet("AttackHit", {
-        "NPC_FastZombie.AttackHit"
+	self:SetTypedVoiceSet("Idle", {
+		"NPC_FastZombie.Idle"
 	})
 
-    self:SetTypedVoiceSet("AttackHitDoor", {
-        "NPC_BaseZombie.PoundDoor"
-    })
+	self:SetTypedVoiceSet("Pain", {
+		"NPC_FastZombie.Pain"
+	})
 
-    self:SetTypedVoiceSet("Victory", {
-        "npc/fast_zombie/leap1.wav"
-    })
+	self:SetTypedVoiceSet("Die", {
+		"NPC_FastZombie.Die"
+	})
 
-    self:SetTypedVoiceSet("FootstepLeft", {
-        "NPC_FastZombie.FootstepLeft"
-    })
+	self:SetTypedVoiceSet("Alert", {
+		"npc/fast_zombie/fz_scream1.wav"
+	})
 
-    self:SetTypedVoiceSet("FootstepRight", {
-        "NPC_FastZombie.FootstepRight"
-    })
+	self:SetTypedVoiceSet("Chase", {
+		-- "npc/fast_zombie/gurgle_loop1.wav",
+	})
 
-    self:SetTypedVoiceSet("FootstepFastLeft", {
-        "NPC_FastZombie.GallopLeft"
-    })
+	self:SetTypedVoiceSet("Lost", {
+		"npc/fast_zombie/fz_alert_far1.wav"
+	})
 
-    self:SetTypedVoiceSet("FootstepFastRight", {
-        "NPC_FastZombie.GallopRight"
-    })
+	self:SetTypedVoiceSet("Attack", {
+		"NPC_FastZombie.Attack"
+	})
+
+	self:SetTypedVoiceSet("AttackMiss", {
+		"NPC_FastZombie.AttackMiss"
+	})
+
+	self:SetTypedVoiceSet("AttackHit", {
+		"NPC_FastZombie.AttackHit"
+	})
+
+	self:SetTypedVoiceSet("AttackHitDoor", {
+		"NPC_BaseZombie.PoundDoor"
+	})
+
+	self:SetTypedVoiceSet("Victory", {
+		"npc/fast_zombie/leap1.wav"
+	})
+
+	self:SetTypedVoiceSet("FootstepLeft", {
+		"NPC_FastZombie.FootstepLeft"
+	})
+
+	self:SetTypedVoiceSet("FootstepRight", {
+		"NPC_FastZombie.FootstepRight"
+	})
+
+	self:SetTypedVoiceSet("FootstepFastLeft", {
+		"NPC_FastZombie.GallopLeft"
+	})
+
+	self:SetTypedVoiceSet("FootstepFastRight", {
+		"NPC_FastZombie.GallopRight"
+	})
+end
+
+local AE_FASTZOMBIE_GALLOP_LEFT = 51
+local AE_FASTZOMBIE_GALLOP_RIGHT = 52
+
+local AE_ZOMBIE_ATTACK_RIGHT = 55
+local AE_ZOMBIE_ATTACK_LEFT = 54
+
+local AE_ZOMBIE_STEP_LEFT = 58
+local AE_ZOMBIE_STEP_RIGHT = 59
+
+function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
+	local isFootstep = event == AE_ZOMBIE_STEP_RIGHT or event == AE_ZOMBIE_STEP_LEFT
+	local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+
+	if (isFootstep or isFastFootstep) then
+		return self:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
+	end
+
+	local isAttack = event == AE_ZOMBIE_ATTACK_RIGHT or event == AE_ZOMBIE_ATTACK_LEFT
+
+	if (isAttack) then
+		return self:HandleAnimEventAttack(event, eventTime, cycle, type, options)
+	end
+
+	-- print(self, "Unhandled animation event", event, eventTime, cycle, type, options)
+end
+
+function ENT:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
+	local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+	local footstepType = isFastFootstep and "FootstepFast" or "Footstep"
+	local footstepSide = (event == AE_ZOMBIE_STEP_RIGHT or event == AE_FASTZOMBIE_GALLOP_RIGHT) and "Right" or "Left"
+	local sound = footstepType .. footstepSide
+
+	if (self:HasTypedVoiceSet(sound)) then
+		self:SpeakFromTypedVoiceSet(sound)
+		return true
+	elseif (isFastFootstep) then
+		self:SpeakFromTypedVoiceSet("Footstep" .. footstepSide)
+		return true
+	end
+end
+
+function ENT:HandleAnimEventAttack(event, eventTime, cycle, type, options)
+	-- Only play the monster attack, we play attack sounds when the attack is performed
+	self:SpeakFromTypedVoiceSet("Attack", 5)
+	return true
 end

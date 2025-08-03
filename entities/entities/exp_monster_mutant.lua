@@ -79,7 +79,7 @@ if (not SERVER) then
 					["AimPartName"] = "",
 					["FollowPartUID"] = "",
 					["Bone"] = "head",
-					["ScaleChildren"] = false,
+					["ScaleChildren"] = true,
 					["UniqueID"] = pac.Hash(),
 					["MoveChildrenToOrigin"] = false,
 					["Position"] = Vector(0, 0, 0),
@@ -87,7 +87,7 @@ if (not SERVER) then
 					["Angles"] = Angle(0, 0, 0),
 					["Hide"] = false,
 					["Name"] = "",
-					["Scale"] = Vector(1, 1, 1),
+					["Scale"] = Vector(0, 0, 0),
 					["EditorExpand"] = false,
 					["ClassName"] = "bone3",
 					["Size"] = 1,
@@ -95,7 +95,7 @@ if (not SERVER) then
 					["IsDisturbing"] = false,
 					["AngleOffset"] = Angle(0, 0, 0),
 					["EyeAngles"] = false,
-					["HideMesh"] = true,
+					["HideMesh"] = false,
 				},
 			}
 		end
@@ -443,7 +443,7 @@ if (not SERVER) then
 							["IgnoreZ"] = false,
 							["AimPartUID"] = "",
 							["Materials"] = "models/experiment-redux/characters/guardian_scientist_sheet_bloody" ..
-							math.random(1, 3) .. ";;;;;;;;",
+								math.random(1, 3) .. ";;;;;;;;",
 							["Name"] = "replacement",
 							["LevelOfDetail"] = 0,
 							["NoTextureFiltering"] = false,
@@ -499,72 +499,133 @@ if (not SERVER) then
 end
 
 function ENT:Initialize()
-    BaseClass.Initialize(self)
+	BaseClass.Initialize(self)
 
-    self:SetModel("models/zombie/classic.mdl")
-    self:SetHealth(900)
+	self:SetModel("models/zombie/classic.mdl")
+	self:SetHealth(900)
 	self:SetMaxHealth(900)
 	self:Activate()
 end
 
 function ENT:SetupVoiceSounds()
-    self:SetTypedVoiceSet("Idle", {
-        "Zombie.Idle"
-    })
+	self:SetTypedVoiceSet("Idle", {
+		"Zombie.Idle"
+	})
 
-    self:SetTypedVoiceSet("Pain", {
-        "Zombie.Pain"
-    })
+	self:SetTypedVoiceSet("Pain", {
+		"Zombie.Pain"
+	})
 
-    self:SetTypedVoiceSet("Die", {
-        "Zombie.Die"
-    })
+	self:SetTypedVoiceSet("Die", {
+		"Zombie.Die"
+	})
 
-    self:SetTypedVoiceSet("Alert", {
-        "Zombie.Alert"
-    })
+	self:SetTypedVoiceSet("Alert", {
+		"Zombie.Alert"
+	})
 
-    self:SetTypedVoiceSet("Chase", {
-        -- "npc/zombie/moan_loop1.wav",
-    })
+	self:SetTypedVoiceSet("Chase", {
+		-- "npc/zombie/moan_loop1.wav",
+	})
 
-    self:SetTypedVoiceSet("Lost", {
-        -- "npc/zombie/zo_attack1.wav"
-    })
+	self:SetTypedVoiceSet("Lost", {
+		-- "npc/zombie/zo_attack1.wav"
+	})
 
-    self:SetTypedVoiceSet("Attack", {
-        "Zombie.Attack"
-    })
+	self:SetTypedVoiceSet("Attack", {
+		"Zombie.Attack"
+	})
 
-    self:SetTypedVoiceSet("AttackMiss", {
-        "Zombie.AttackMiss"
-    })
+	self:SetTypedVoiceSet("AttackMiss", {
+		"Zombie.AttackMiss"
+	})
 
-    self:SetTypedVoiceSet("AttackHit", {
-        "Zombie.AttackHit"
-    })
+	self:SetTypedVoiceSet("AttackHit", {
+		"Zombie.AttackHit"
+	})
 
-    self:SetTypedVoiceSet("AttackHitDoor", {
-        "NPC_BaseZombie.PoundDoor"
-    })
+	self:SetTypedVoiceSet("AttackHitDoor", {
+		"NPC_BaseZombie.PoundDoor"
+	})
 
-    self:SetTypedVoiceSet("Victory", {
-        -- "npc/fast_zombie/leap1.wav"
-    })
+	self:SetTypedVoiceSet("Victory", {
+		-- "npc/fast_zombie/leap1.wav"
+	})
 
-    self:SetTypedVoiceSet("FootstepLeft", {
-        "Zombie.ScuffLeft"
-    })
+	self:SetTypedVoiceSet("ScuffLeft", {
+		"Zombie.ScuffLeft"
+	})
 
-    self:SetTypedVoiceSet("FootstepRight", {
-        "Zombie.ScuffRight"
-    })
+	self:SetTypedVoiceSet("ScuffRight", {
+		"Zombie.ScuffRight"
+	})
 
-    self:SetTypedVoiceSet("FootstepFastLeft", {
-        "Zombie.FootstepLeft"
-    })
+	self:SetTypedVoiceSet("FootstepLeft", {
+		"Zombie.FootstepLeft"
+	})
 
-    self:SetTypedVoiceSet("FootstepFastRight", {
-        "Zombie.FootstepRight"
-    })
+	self:SetTypedVoiceSet("FootstepRight", {
+		"Zombie.FootstepRight"
+	})
+end
+
+local AE_ZOMBIE_SCUFF_LEFT = 66
+local AE_ZOMBIE_SCUFF_RIGHT = 67
+
+local AE_ZOMBIE_ATTACK_SCREAM = 65
+
+local AE_ZOMBIE_ATTACK_LEFT = 55
+local AE_ZOMBIE_ATTACK_RIGHT = 54
+
+local AE_ZOMBIE_ATTACK_BOTH = 68
+
+local AE_ZOMBIE_STEP_LEFT = 58
+local AE_ZOMBIE_STEP_RIGHT = 59
+
+function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
+	local isFootstep = event == AE_ZOMBIE_STEP_RIGHT or event == AE_ZOMBIE_STEP_LEFT
+
+	if (isFootstep) then
+		return self:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
+	end
+
+	if (event == AE_ZOMBIE_SCUFF_LEFT) then
+		self:SpeakFromTypedVoiceSet("ScuffLeft")
+		return true
+	elseif (event == AE_ZOMBIE_SCUFF_RIGHT) then
+		self:SpeakFromTypedVoiceSet("ScuffRight")
+		return true
+	end
+
+	local isAttack = event == AE_ZOMBIE_ATTACK_RIGHT
+		or event == AE_ZOMBIE_ATTACK_LEFT
+		or event == AE_ZOMBIE_ATTACK_BOTH
+
+	if (isAttack) then
+		return self:HandleAnimEventAttack(event, eventTime, cycle, type, options)
+	end
+
+	if (event == AE_ZOMBIE_ATTACK_SCREAM) then
+		self:SpeakFromTypedVoiceSet("Alert", 5)
+		return true
+	end
+
+	-- print(self, "Unhandled animation event", event, eventTime, cycle, type, options)
+end
+
+function ENT:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
+	local footstepType = "Footstep"
+	local footstepSide = event == AE_ZOMBIE_STEP_RIGHT and "Right" or "Left"
+	local sound = footstepType .. footstepSide
+
+	if (self:HasTypedVoiceSet(sound)) then
+		self:SpeakFromTypedVoiceSet(sound)
+		return true
+	end
+end
+
+function ENT:HandleAnimEventAttack(event, eventTime, cycle, type, options)
+	-- Only play the monster attack, we play attack sounds when the attack is performed
+	self:SpeakFromTypedVoiceSet("Attack", 5)
+	return true
 end

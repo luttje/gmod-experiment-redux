@@ -2,7 +2,7 @@ DEFINE_BASECLASS("base_ai")
 
 local RECENT_CORPSE_PAC_OUTFITS = RECENT_CORPSE_PAC_OUTFITS or {}
 
-local function AddRecntCorpsePACOutfit(entity, pacData)
+local function AddRecentCorpsePACOutfit(entity, pacData)
 	RECENT_CORPSE_PAC_OUTFITS[#RECENT_CORPSE_PAC_OUTFITS + 1] = {
 		entIndex = entity:EntIndex(),
 		pacData = pacData
@@ -15,7 +15,7 @@ local function AddRecntCorpsePACOutfit(entity, pacData)
 end
 
 hook.Add("NetworkEntityCreated", "expRestorePacOutfitOnCorpseEntities", function(entity)
-    local monsterCorpseIndex = entity:GetNetVar("monsterCorpse")
+	local monsterCorpseIndex = entity:GetNetVar("monsterCorpse")
 
 	local function setupCorpsePac()
 		if (not IsValid(entity)) then
@@ -80,9 +80,9 @@ function ENT:OnPopulateEntityInfo(container)
 	name:SetText(self:GetDisplayName())
 	name:SizeToContents()
 
-    local healthBar = container:Add("expMonsterHealth")
-    healthBar:SetHealth(self:Health())
-    healthBar:SetMaxHealth(self:GetMaxHealth())
+	local healthBar = container:Add("expMonsterHealth")
+	healthBar:SetHealth(self:Health())
+	healthBar:SetMaxHealth(self:GetMaxHealth())
 	healthBar:Dock(BOTTOM)
 	healthBar:SetWide(math.max(container:GetWide(), 200))
 end
@@ -110,12 +110,12 @@ function ENT:Think()
 		return
 	end
 
-    if (not isfunction(self.AttachPACPart)) then
-        pac.SetupENT(self)
-    end
+	if (not isfunction(self.AttachPACPart)) then
+		pac.SetupENT(self)
+	end
 
 	self.expSetupPAC = true
 	self:AttachPACPart(pacData)
 	self:SetPACDrawDistance(0) -- Always draw
-	AddRecntCorpsePACOutfit(self, pacData)
+	AddRecentCorpsePACOutfit(self, pacData)
 end

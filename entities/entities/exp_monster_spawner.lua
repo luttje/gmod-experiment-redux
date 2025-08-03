@@ -10,76 +10,77 @@ ENT.Spawnable = false
 ENT.AdminOnly = true
 
 if (not SERVER) then
-    return
+	return
 end
 
-local monsterSpawnerEnabledConVar = CreateConVar("exp_monster_spawner_enabled", "1", FCVAR_ARCHIVE, "Enable/disable the monster spawner")
+local monsterSpawnerEnabledConVar = CreateConVar("exp_monster_spawner_enabled", "1", FCVAR_ARCHIVE,
+	"Enable/disable the monster spawner")
 
 function ENT:KeyValue(key, value)
-    if (key == "monsterClasses") then
-        self.monsterClasses = string.Explode(",", value)
-    elseif (key == "monsterMax") then
-        self.monsterMax = tonumber(value)
-    elseif (key == "monsterSpawnDelay") then
-        self.monsterSpawnDelay = tonumber(value)
-    elseif (key == "monsterSpawnRadius") then
-        self.monsterSpawnRadius = tonumber(value)
-    end
+	if (key == "monsterClasses") then
+		self.monsterClasses = string.Explode(",", value)
+	elseif (key == "monsterMax") then
+		self.monsterMax = tonumber(value)
+	elseif (key == "monsterSpawnDelay") then
+		self.monsterSpawnDelay = tonumber(value)
+	elseif (key == "monsterSpawnRadius") then
+		self.monsterSpawnRadius = tonumber(value)
+	end
 end
 
 function ENT:Initialize()
-    self:SetModel("models/editor/scriptedsequence.mdl")
-    self:SetNoDraw(true)
+	self:SetModel("models/editor/scriptedsequence.mdl")
+	self:SetNoDraw(true)
 
-    self:SetMoveType(MOVETYPE_NONE)
-    self:SetSolid(SOLID_NONE)
+	self:SetMoveType(MOVETYPE_NONE)
+	self:SetSolid(SOLID_NONE)
 
 	self.monsterCount = 0
-    self.nextSpawnTime = CurTime()
+	self.nextSpawnTime = CurTime()
 end
 
 function ENT:Think()
-    if (not monsterSpawnerEnabledConVar:GetBool()) then
+	if (not monsterSpawnerEnabledConVar:GetBool()) then
 		self:NextThink(CurTime() + 5)
 		return true
-    end
+	end
 
-    if (self.nextSpawnTime > CurTime()) then
-        return
-    end
+	if (self.nextSpawnTime > CurTime()) then
+		return
+	end
 
-    if (self.monsterCount >= self.monsterMax) then
-        return
-    end
+	if (self.monsterCount >= self.monsterMax) then
+		return
+	end
 
-    self:SpawnMonster()
+	self:SpawnMonster()
 
 	self:NextThink(CurTime() + 1)
 	return true
 end
 
 function ENT:SpawnMonster()
-    local monsterClass = self.monsterClasses[math.random(1, #self.monsterClasses)]
-    local monster = ents.Create(monsterClass)
+	local monsterClass = self.monsterClasses[math.random(1, #self.monsterClasses)]
+	local monster = ents.Create(monsterClass)
 
-    if (not IsValid(monster)) then
-        return
-    end
+	if (not IsValid(monster)) then
+		return
+	end
 
-    local spawnPos = self:GetPos() + (VectorRand() * self.monsterSpawnRadius)
-    monster:SetPos(spawnPos)
-    monster:SetAngles(self:GetAngles() + Angle(0, math.random(0, 40), 0))
-    monster:CallOnRemove("exp_monster_spawner", function()
-        self.monsterCount = self.monsterCount - 1
-    end)
-    monster:Spawn()
-    monster:Activate()
+	local spawnPos = self:GetPos() + (VectorRand() * self.monsterSpawnRadius)
+	monster:SetPos(spawnPos)
+	monster:SetAngles(self:GetAngles() + Angle(0, math.random(0, 180), 0))
+	monster:CallOnRemove("exp_monster_spawner", function()
+		self.monsterCount = self.monsterCount - 1
+	end)
+	monster:Spawn()
+	monster:Activate()
 
-    self:SpawnEffect(monster)
+	self:SpawnEffect(monster)
 
-    self.monsterCount = self.monsterCount + 1
+	self.monsterCount = self.monsterCount + 1
 
-    self.nextSpawnTime = CurTime() + self.monsterSpawnDelay
+	self.nextSpawnTime = CurTime() + self.monsterSpawnDelay
 end
 
 local hitNormal = Vector(0, 0, 1)
@@ -104,7 +105,7 @@ function ENT:SpawnEffect(monster)
 		CHAN_AUTO,
 		0,
 		34 -- "EXPLOSION RING 3" DSP
-    )
+	)
 
 	for i = 1, 4 do
 		timer.Simple(i * .5, function()

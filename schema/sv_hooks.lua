@@ -263,9 +263,9 @@ function Schema:EntityTakeDamage(entity, damageInfo)
 		local inflictorClass = inflictor:GetClass()
 
 		if (inflictorClass == "ix_item"
-			or inflictorClass == "ix_money"
-			or inflictorClass == "ix_shipment"
-			or inflictorClass == "ix_container") then
+				or inflictorClass == "ix_money"
+				or inflictorClass == "ix_shipment"
+				or inflictorClass == "ix_container") then
 			damageInfo:SetDamage(0)
 			return
 		end
@@ -605,15 +605,15 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 	local characterInventory = character:GetInventory()
 	local width, height = characterInventory:GetSize()
 
-    local corpseInventoryType = "player:corpse:" .. width .. "x" .. height
+	local corpseInventoryType = "player:corpse:" .. width .. "x" .. height
 	ix.inventory.Register(corpseInventoryType, width, height)
 
 	ix.inventory.New(0, corpseInventoryType, function(inventory)
 		inventory.vars.isCorpse = true
 
-        if (not IsValid(entity)) then
+		if (not IsValid(entity)) then
 			local query = mysql:Delete("ix_inventories")
-				query:Where("inventory_id", inventory:GetID())
+			query:Where("inventory_id", inventory:GetID())
 			query:Execute()
 			return
 		end
@@ -629,7 +629,7 @@ function Schema:OnPlayerCorpseCreated(client, entity)
 				return
 			end
 
-			local ownerName = CLIENT and L"someone" or L("someone", client)
+			local ownerName = CLIENT and L "someone" or L("someone", client)
 
 			if (character) then
 				local ourCharacter = client:GetCharacter()
