@@ -506,7 +506,83 @@ function ENT:Initialize()
 	self:SetMaxHealth(900)
 	self:Activate()
 
-	self:SetAttackMeleeRange(48) -- Must be right up against the target, otherwise their hands wont reach the target
+	self:SetAttackMeleeRange(45) -- Must be right up against the target, otherwise their hands wont reach the target
+
+	-- Override target priorities if needed
+	self.customTargetPriorities = {
+		player = 100,
+		door = 30, -- Lower than default since mutants are slower
+		npc = 20
+	}
+end
+
+-- Override attack schedules for different behavior
+function ENT:SetupSchedules()
+	BaseClass.SetupSchedules(self)
+
+	-- Add a heavy attack for mutants
+	local heavyAttack = ai_schedule.New("expHeavyAttack")
+	heavyAttack:EngTask("TASK_STOP_MOVING", 0)
+	heavyAttack:EngTask("TASK_FACE_ENEMY", 0)
+	heavyAttack:EngTask("TASK_MELEE_ATTACK1", 0)
+	heavyAttack:EngTask("TASK_WAIT_FOR_MOVEMENT", 0)
+	heavyAttack:EngTask("TASK_WAIT", 1.0) -- Longer recovery
+	heavyAttack.expAttackData = {
+		range = self:GetAttackMeleeRange(),
+		damage = 25, -- More damage
+		damageType = DMG_SLASH,
+		force = 400, -- More knockback
+		interval = 1.5 -- Longer cooldown
+	}
+
+	self.expSchedules.Attacks[#self.expSchedules.Attacks + 1] = heavyAttack
+
+	self.expHeavyAttack = heavyAttack
+end
+
+-- Override target priority system for this monster type
+function ENT:GetTargetPriority(entity)
+	if self.customTargetPriorities then
+		if entity:IsPlayer() then
+			return self.customTargetPriorities.player or 100
+		elseif entity:IsDoor() then
+			return self.customTargetPriorities.door or 50
+		else
+			return self.customTargetPriorities.npc or 10
+		end
+	end
+
+	return BaseClass.GetTargetPriority(self, entity)
+end
+
+-- Example of overriding targeting behavior
+function ENT:IsValidTarget(entity)
+	-- Call base validation first
+	if not BaseClass.IsValidTarget(self, entity) then
+		return false
+	end
+
+	-- Add custom logic for mutants
+	if entity:IsPlayer() then
+		-- Mutants are more aggressive toward injured players
+		local healthRatio = entity:Health() / entity:GetMaxHealth()
+		if healthRatio < 0.5 then
+			-- Make sure we prioritize injured players
+			return true
+		end
+	end
+
+	return true
+end
+
+function ENT:GetAttackSchedule(target)
+	-- Mutants use heavy attacks on healthy players
+	if target:IsPlayer() and target:Health() > target:GetMaxHealth() * 0.7 then
+		return self.expHeavyAttack
+	end
+
+	-- Fall back to random attack
+	return BaseClass.GetAttackSchedule(self, target)
 end
 
 function ENT:SetupVoiceSounds()

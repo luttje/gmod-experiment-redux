@@ -104,7 +104,7 @@ function ENT:IsValidTarget(entity)
 	end
 
 	-- Use the monster's enemy detection logic
-	return self.ownerMonster:IsEnemyEntity(entity)
+	return self.ownerMonster:IsValidTarget(entity)
 end
 
 function ENT:StartTouch(entity)
@@ -115,7 +115,7 @@ function ENT:StartTouch(entity)
 	self.touchingEntities[entity] = true
 
 	-- If we're currently attacking, apply damage immediately
-	if (self.isAttacking and self.attackData and self.ownerMonster:IsEnemyEntity(entity)) then
+	if (self.isAttacking and self.attackData) then
 		self:ApplyDamageToEntity(entity)
 	end
 end
