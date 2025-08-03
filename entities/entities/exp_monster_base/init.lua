@@ -45,7 +45,7 @@ function ENT:Boot()
 	self:SetMaxYawSpeed(256)
 
 	if (self:GetAttackMeleeRange() == nil and self:GetAttackRange() == nil) then
-		self:SetAttackMeleeRange(60) -- Right up against the target
+		self:SetAttackMeleeRange(55) -- Must be right up against the target, otherwise their hands wont reach the target
 	end
 
 	if (self:GetSenseRange() == nil) then
@@ -70,6 +70,17 @@ function ENT:Boot()
 
 	self.expInventory = {}
 
+	-- Initialize attack handles (points of contact to do damage during attachs)
+	self.expAttackHandles = {}
+
+	-- TODO: Unneccesary?
+	-- -- Set up attack handles after a short delay to ensure bones are ready
+	timer.Simple(0.1, function()
+		if IsValid(self) then
+			self:SetupAttackHandles()
+		end
+	end)
+
 	-- Note on setting up node graphs:
 	-- You might want to use https:--steamcommunity.com/sharedfiles/filedetails/?id=2004023752 to setup node graphs for better pathfinding
 	-- To do that I suggest:
@@ -78,6 +89,117 @@ function ENT:Boot()
 	-- 3. Open the console and type "nav_edit 1" (this builds a navmesh)
 	-- 4. Wait until the navmesh is built (you'll see the map being restarted)
 	-- 5. Use the installed addon to generate the node graph from the navmesh
+end
+
+function ENT:AnimEventID(eventName)
+	return util.GetAnimEventIDByName(eventName)
+end
+
+-- Override this function in your monster subclasses to set up attack handles
+-- Example for typical biped monsters:
+function ENT:SetupAttackHandles()
+	-- Clear any existing handles
+	self:ClearAttackHandles()
+
+	-- Example setup for hands - override this in subclasses
+
+	-- Left hand
+	local leftHandBone = self:LookupBone("ValveBiped.Bip01_L_Hand")
+	if (leftHandBone) then
+		self:CreateAttackHandle("left_hand", leftHandBone, Vector(0, 0, 0), 8)
+	end
+
+	-- Right hand
+	local rightHandBone = self:LookupBone("ValveBiped.Bip01_R_Hand")
+	if (rightHandBone) then
+		self:CreateAttackHandle("right_hand", rightHandBone, Vector(0, 0, 0), 8)
+	end
+
+	-- For zombies, you might also want claws or fingertips:
+	-- self:CreateAttackHandle("left_claw", leftHandBone, Vector(8, 0, 0))
+	-- self:CreateAttackHandle("right_claw", rightHandBone, Vector(8, 0, 0))
+end
+
+-- Create an attack handle attached to a specific bone
+function ENT:CreateAttackHandle(name, boneIndex, offset, handleSize)
+	if not boneIndex or boneIndex == -1 then
+		print("Warning: Invalid bone index for attack handle:", name)
+		return
+	end
+
+	local handle = ents.Create("exp_attack_handle")
+	if not IsValid(handle) then
+		print("Error: Failed to create attack handle:", name)
+		return
+	end
+
+	handle:Spawn()
+	handle:SetOwnerMonster(self)
+
+	handle:SetSize(handleSize)
+
+	-- Attach to bone
+	handle:FollowBone(self, boneIndex)
+
+	-- Apply offset if provided
+	handle:SetLocalPos(offset or Vector(0, 0, 0))
+
+	-- Store reference
+	self.expAttackHandles[name] = {
+		entity = handle,
+		boneIndex = boneIndex,
+		offset = offset
+	}
+
+	return handle
+end
+
+-- Clear all attack handles
+function ENT:ClearAttackHandles()
+	if self.expAttackHandles then
+		for name, handleData in pairs(self.expAttackHandles) do
+			if IsValid(handleData.entity) then
+				handleData.entity:Remove()
+			end
+		end
+	end
+	self.expAttackHandles = {}
+end
+
+-- Get an attack handle by name
+function ENT:GetAttackHandle(name)
+	if self.expAttackHandles and self.expAttackHandles[name] then
+		return self.expAttackHandles[name].entity
+	end
+	return nil
+end
+
+-- Start an attack - activates all attack handles
+function ENT:StartAttackHandles(attackData)
+	if not self.expAttackHandles then return end
+
+	for name, handleData in pairs(self.expAttackHandles) do
+		if IsValid(handleData.entity) then
+			handleData.entity:StartAttack(attackData)
+		end
+	end
+
+	self.expAttackHandlesActive = true
+	self.expCurrentAttackData = attackData
+end
+
+-- End an attack - deactivates all attack handles
+function ENT:EndAttackHandles()
+	if not self.expAttackHandles then return end
+
+	for name, handleData in pairs(self.expAttackHandles) do
+		if IsValid(handleData.entity) then
+			handleData.entity:EndAttack()
+		end
+	end
+
+	self.expAttackHandlesActive = false
+	self.expCurrentAttackData = nil
 end
 
 --- Get the NPC's inventory
@@ -444,6 +566,20 @@ function ENT:OnTaskFailed(failCode, failReason)
 		-- Let's keep track of how often we do this, and if it's too often, we should probably despawn
 		self.expRouteBlockedCount = (self.expRouteBlockedCount or 0) + 1
 
+		-- The first couple times, we try to break open a door if its in front of the monster
+		if (self.expRouteBlockedCount <= 2) then
+			-- Try to break open a door if it's in range of the monster
+			local entities = ents.FindInSphere(self:GetPos(), self:GetAttackMeleeRange())
+
+			for _, entity in ipairs(entities) do
+				if (entity:IsDoor()) then
+					self:SpeakFromTypedVoiceSet("AttackHitDoor", nil, true)
+					self:HandleDoorAttack(entity)
+					return
+				end
+			end
+		end
+
 		if (self.expRouteBlockedCount > 5) then
 			local owner = self:GetDTEntity(0)
 
@@ -476,24 +612,15 @@ end
 	You should implement sounds based on animations
 	For example for zombies:
 
-	local AE_FASTZOMBIE_GALLOP_LEFT = 51
-	local AE_FASTZOMBIE_GALLOP_RIGHT = 52
-
-	local AE_ZOMBIE_ATTACK_RIGHT = 54
-	local AE_ZOMBIE_ATTACK_LEFT = 55
-
-	local AE_ZOMBIE_STEP_RIGHT = 58
-	local AE_ZOMBIE_STEP_LEFT = 59
-
 	function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
-		local isFootstep = event == AE_ZOMBIE_STEP_RIGHT or event == AE_ZOMBIE_STEP_LEFT
-		local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+		local isFootstep = event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT") or event == self:AnimEventID("AE_ZOMBIE_STEP_LEFT")
+		local isFastFootstep = event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT") or event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_LEFT")
 
 		if (isFootstep or isFastFootstep) then
 			return self:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
 		end
 
-		local isAttack = event == AE_ZOMBIE_ATTACK_RIGHT or event == AE_ZOMBIE_ATTACK_LEFT
+		local isAttack = event == self:AnimEventID("AE_ZOMBIE_ATTACK_RIGHT") or event == self:AnimEventID("AE_ZOMBIE_ATTACK_LEFT")
 
 		if (isAttack) then
 			return self:HandleAnimEventAttack(event, eventTime, cycle, type, options)
@@ -503,9 +630,9 @@ end
 	end
 
 	function ENT:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
-		local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+		local isFastFootstep = event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT") or event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_LEFT")
 		local footstepType = isFastFootstep and "FootstepFast" or "Footstep"
-		local footstepSide = (event == AE_ZOMBIE_STEP_RIGHT or event == AE_FASTZOMBIE_GALLOP_RIGHT) and "Right" or "Left"
+		local footstepSide = (event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT") or event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT")) and "Right" or "Left"
 		local sound = footstepType .. footstepSide
 
 		if (self:HasTypedVoiceSet(sound)) then
@@ -558,7 +685,6 @@ function ENT:SetupSchedules()
 		range = self:GetAttackMeleeRange(),
 		damage = 10,
 		damageType = DMG_SLASH,
-		interval = 1
 	}
 
 	self.expSchedules.Attacks[#self.expSchedules.Attacks + 1] = attackMelee1
@@ -580,81 +706,131 @@ function ENT:StartAttackSchedule(enemy)
 	self.expDesiredAttackEnemy = enemy
 	self:UpdateEnemyMemory(enemy, enemy:GetPos())
 	self:StartSchedule(attackSchedule)
+
+	self:StartAttackHandles(attackSchedule.expAttackData)
 end
+
+-- Old system where attack would inflict damage after the task was complete
+-- function ENT:HandleAttackTaskComplete()
+-- 	self.expRouteBlockedCount = nil
+
+-- 	-- Trace the range of the attack to see if we hit anything
+-- 	local attackData = self.expAttackSchedule.expAttackData
+
+-- 	if (Schema.util.Throttle("HandleAttackTaskComplete", attackData.interval or 0.5, self)) then
+-- 		return
+-- 	end
+
+-- 	local enemy = self.expDesiredAttackEnemy
+-- 	local directionToEnemy = (enemy:EyePos() - self:EyePos()):GetNormalized()
+
+-- 	-- Don't get stuck repeating this completed attack task
+-- 	self.expDesiredAttackEnemy = nil
+-- 	self.expAttackSchedule = nil
+
+-- 	-- If the direction is behind us, don't bother attacking
+-- 	if (self:GetForward():Dot(directionToEnemy) < 0) then
+-- 		self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
+-- 		return
+-- 	end
+
+-- 	if (not self:IsTargetInMeleeRange(enemy)) then
+-- 		local traceData = {}
+-- 		traceData.start = self:EyePos()
+-- 		traceData.endpos = self:EyePos() + (directionToEnemy * attackData.range * self:GetModelScale())
+-- 		traceData.filter = function(entity) return self:IsEnemyEntity(entity) end
+
+-- 		local trace = util.TraceLine(traceData)
+
+-- 		enemy = trace.Entity
+-- 	end
+
+-- 	if (not IsValid(enemy)) then
+-- 		self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
+-- 		return
+-- 	end
+
+-- 	if (enemy:IsDoor()) then
+-- 		self:SpeakFromTypedVoiceSet("AttackHitDoor", nil, true)
+
+-- 		if (enemy.expIsOpeningFromAttackUntil) then
+-- 			if (enemy.expIsOpeningFromAttackUntil > CurTime()) then
+-- 				self:AddEnemyOfNoInterest(enemy)
+-- 				return
+-- 			else
+-- 				enemy.expIsOpeningFromAttackUntil = nil
+-- 				enemy.expDoorHealth = nil
+-- 			end
+-- 		end
+
+-- 		if (enemy:GetInternalVariable("m_bLocked")) then
+-- 			enemy.expDoorHealth = enemy.expDoorHealth or 3
+-- 			enemy.expDoorHealth = enemy.expDoorHealth - 1
+
+-- 			if (enemy.expDoorHealth > 0) then
+-- 				return
+-- 			end
+
+-- 			enemy:Fire("Unlock")
+-- 		end
+
+-- 		if (enemy:GetInternalVariable("m_eDoorState") == 0) then
+-- 			enemy:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
+-- 			enemy.expIsOpeningFromAttackUntil = CurTime() + 2
+-- 		end
+
+-- 		self:AddEnemyOfNoInterest(enemy)
+-- 	else
+-- 		self:SpeakFromTypedVoiceSet("AttackHit", nil, true)
+-- 		enemy:TakeDamage(attackData.damage, self, self)
+-- 	end
+-- end
 
 function ENT:HandleAttackTaskComplete()
 	self.expRouteBlockedCount = nil
 
-	-- Trace the range of the attack to see if we hit anything
 	local attackData = self.expAttackSchedule.expAttackData
 
-	if (Schema.util.Throttle("HandleAttackTaskComplete", attackData.interval or 0.5, self)) then
-		return
-	end
-
-	local enemy = self.expDesiredAttackEnemy
-	local directionToEnemy = (enemy:EyePos() - self:EyePos()):GetNormalized()
+	self:EndAttackHandles()
 
 	-- Don't get stuck repeating this completed attack task
 	self.expDesiredAttackEnemy = nil
 	self.expAttackSchedule = nil
+end
 
-	-- If the direction is behind us, don't bother attacking
-	if (self:GetForward():Dot(directionToEnemy) < 0) then
-		self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
-		return
+-- Called from the attack handle when it hits a door
+function ENT:HandleDoorAttack(door)
+	if door.expIsOpeningFromAttackUntil then
+		if door.expIsOpeningFromAttackUntil > CurTime() then
+			self:AddEnemyOfNoInterest(door)
+			return
+		else
+			door.expIsOpeningFromAttackUntil = nil
+			door.expDoorHealth = nil
+		end
 	end
 
-	if (not self:IsTargetInMeleeRange(enemy)) then
-		local traceData = {}
-		traceData.start = self:EyePos()
-		traceData.endpos = self:EyePos() + (directionToEnemy * attackData.range * self:GetModelScale())
-		traceData.filter = function(entity) return self:IsEnemyEntity(entity) end
+	if door:GetInternalVariable("m_bLocked") then
+		door.expDoorHealth = door.expDoorHealth or 3
+		door.expDoorHealth = door.expDoorHealth - 1
 
-		local trace = util.TraceLine(traceData)
-
-		enemy = trace.Entity
-	end
-
-	if (not IsValid(enemy)) then
-		self:SpeakFromTypedVoiceSet("AttackMiss", 0.1)
-		return
-	end
-
-	if (enemy:IsDoor()) then
-		self:SpeakFromTypedVoiceSet("AttackHitDoor", nil, true)
-
-		if (enemy.expIsOpeningFromAttackUntil) then
-			if (enemy.expIsOpeningFromAttackUntil > CurTime()) then
-				self:AddEnemyOfNoInterest(enemy)
-				return
-			else
-				enemy.expIsOpeningFromAttackUntil = nil
-				enemy.expDoorHealth = nil
-			end
+		if door.expDoorHealth > 0 then
+			return
 		end
 
-		if (enemy:GetInternalVariable("m_bLocked")) then
-			enemy.expDoorHealth = enemy.expDoorHealth or 3
-			enemy.expDoorHealth = enemy.expDoorHealth - 1
-
-			if (enemy.expDoorHealth > 0) then
-				return
-			end
-
-			enemy:Fire("Unlock")
-		end
-
-		if (enemy:GetInternalVariable("m_eDoorState") == 0) then
-			enemy:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
-			enemy.expIsOpeningFromAttackUntil = CurTime() + 2
-		end
-
-		self:AddEnemyOfNoInterest(enemy)
-	else
-		self:SpeakFromTypedVoiceSet("AttackHit", nil, true)
-		enemy:TakeDamage(attackData.damage, self, self)
+		door:Fire("Unlock")
 	end
+
+	if door:GetInternalVariable("m_eDoorState") == 0 then
+		door:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
+		door.expIsOpeningFromAttackUntil = CurTime() + 2
+	end
+
+	self:AddEnemyOfNoInterest(door)
+end
+
+function ENT:OnRemove()
+	self:ClearAttackHandles()
 end
 
 --[[
@@ -918,7 +1094,7 @@ function ENT:OnTakeDamage(damageInfo)
 	-- end
 
 	if (not self.expDoesntBleed) then
-		Schema.BloodEffect(position, 1, self, force)
+		Schema.BloodEffect(self, position, 1, force)
 	end
 
 	local attacker = damageInfo:GetAttacker()

@@ -505,6 +505,8 @@ function ENT:Initialize()
 	self:SetHealth(900)
 	self:SetMaxHealth(900)
 	self:Activate()
+
+	self:SetAttackMeleeRange(48) -- Must be right up against the target, otherwise their hands wont reach the target
 end
 
 function ENT:SetupVoiceSounds()
@@ -569,43 +571,31 @@ function ENT:SetupVoiceSounds()
 	})
 end
 
-local AE_ZOMBIE_SCUFF_LEFT = 66
-local AE_ZOMBIE_SCUFF_RIGHT = 67
-
-local AE_ZOMBIE_ATTACK_SCREAM = 65
-
-local AE_ZOMBIE_ATTACK_LEFT = 55
-local AE_ZOMBIE_ATTACK_RIGHT = 54
-
-local AE_ZOMBIE_ATTACK_BOTH = 68
-
-local AE_ZOMBIE_STEP_LEFT = 58
-local AE_ZOMBIE_STEP_RIGHT = 59
-
 function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
-	local isFootstep = event == AE_ZOMBIE_STEP_RIGHT or event == AE_ZOMBIE_STEP_LEFT
+	local isFootstep = event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT") or
+		event == self:AnimEventID("AE_ZOMBIE_STEP_LEFT")
 
 	if (isFootstep) then
 		return self:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
 	end
 
-	if (event == AE_ZOMBIE_SCUFF_LEFT) then
+	if (event == self:AnimEventID("AE_ZOMBIE_SCUFF_LEFT")) then
 		self:SpeakFromTypedVoiceSet("ScuffLeft")
 		return true
-	elseif (event == AE_ZOMBIE_SCUFF_RIGHT) then
+	elseif (event == self:AnimEventID("AE_ZOMBIE_SCUFF_RIGHT")) then
 		self:SpeakFromTypedVoiceSet("ScuffRight")
 		return true
 	end
 
-	local isAttack = event == AE_ZOMBIE_ATTACK_RIGHT
-		or event == AE_ZOMBIE_ATTACK_LEFT
-		or event == AE_ZOMBIE_ATTACK_BOTH
+	local isAttack = event == self:AnimEventID("AE_ZOMBIE_ATTACK_RIGHT")
+		or event == self:AnimEventID("AE_ZOMBIE_ATTACK_LEFT")
+		or event == self:AnimEventID("AE_ZOMBIE_ATTACK_BOTH")
 
 	if (isAttack) then
 		return self:HandleAnimEventAttack(event, eventTime, cycle, type, options)
 	end
 
-	if (event == AE_ZOMBIE_ATTACK_SCREAM) then
+	if (event == self:AnimEventID("AE_ZOMBIE_ATTACK_SCREAM")) then
 		self:SpeakFromTypedVoiceSet("Alert", 5)
 		return true
 	end
@@ -615,7 +605,7 @@ end
 
 function ENT:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
 	local footstepType = "Footstep"
-	local footstepSide = event == AE_ZOMBIE_STEP_RIGHT and "Right" or "Left"
+	local footstepSide = event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT") and "Right" or "Left"
 	local sound = footstepType .. footstepSide
 
 	if (self:HasTypedVoiceSet(sound)) then

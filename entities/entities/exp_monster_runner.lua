@@ -134,6 +134,8 @@ function ENT:Initialize()
 	self:SetHealth(500)
 	self:SetMaxHealth(500)
 	self:Activate()
+
+	self:SetAttackMeleeRange(35) -- Must be right up against the target, otherwise their hands wont reach the target
 end
 
 function ENT:SetupVoiceSounds()
@@ -198,24 +200,18 @@ function ENT:SetupVoiceSounds()
 	})
 end
 
-local AE_FASTZOMBIE_GALLOP_LEFT = 51
-local AE_FASTZOMBIE_GALLOP_RIGHT = 52
-
-local AE_ZOMBIE_ATTACK_RIGHT = 55
-local AE_ZOMBIE_ATTACK_LEFT = 54
-
-local AE_ZOMBIE_STEP_LEFT = 58
-local AE_ZOMBIE_STEP_RIGHT = 59
-
 function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
-	local isFootstep = event == AE_ZOMBIE_STEP_RIGHT or event == AE_ZOMBIE_STEP_LEFT
-	local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+	local isFootstep = event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT") or
+		event == self:AnimEventID("AE_ZOMBIE_STEP_LEFT")
+	local isFastFootstep = event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT") or
+		event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_LEFT")
 
 	if (isFootstep or isFastFootstep) then
 		return self:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
 	end
 
-	local isAttack = event == AE_ZOMBIE_ATTACK_RIGHT or event == AE_ZOMBIE_ATTACK_LEFT
+	local isAttack = event == self:AnimEventID("AE_ZOMBIE_ATTACK_RIGHT") or
+		event == self:AnimEventID("AE_ZOMBIE_ATTACK_LEFT")
 
 	if (isAttack) then
 		return self:HandleAnimEventAttack(event, eventTime, cycle, type, options)
@@ -225,9 +221,12 @@ function ENT:HandleAnimEvent(event, eventTime, cycle, type, options)
 end
 
 function ENT:HandleAnimEventFootsteps(event, eventTime, cycle, type, options)
-	local isFastFootstep = event == AE_FASTZOMBIE_GALLOP_RIGHT or event == AE_FASTZOMBIE_GALLOP_LEFT
+	local isFastFootstep = event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT")
+		or event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_LEFT")
 	local footstepType = isFastFootstep and "FootstepFast" or "Footstep"
-	local footstepSide = (event == AE_ZOMBIE_STEP_RIGHT or event == AE_FASTZOMBIE_GALLOP_RIGHT) and "Right" or "Left"
+	local footstepSide = (event == self:AnimEventID("AE_ZOMBIE_STEP_RIGHT")
+			or event == self:AnimEventID("AE_FASTZOMBIE_GALLOP_RIGHT")) and
+		"Right" or "Left"
 	local sound = footstepType .. footstepSide
 
 	if (self:HasTypedVoiceSet(sound)) then
