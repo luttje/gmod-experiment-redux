@@ -45,6 +45,14 @@ if (SERVER) then
 	--- @param buffData? table
 	function Schema.buff.SetActive(client, buffIndex, activeUntil, buffData)
 		local buffTable = Schema.buff.Get(buffIndex)
+
+		if (not buffTable) then
+			ix.util.SchemaErrorNoHalt(
+				"Buff '" .. tostring(buffIndex) .. "' does not exist (player: " .. client:Name() .. ")\n"
+			)
+			return
+		end
+
 		local character = client:GetCharacter()
 		local buffs = character.expBuffs or {}
 		character.expBuffs = buffs
@@ -284,7 +292,7 @@ if (SERVER) then
 
 					if (buff.activeUntil < curTime) then
 						ix.util.SchemaErrorNoHaltWithStack("Buff " ..
-						buffTable.index .. " blocked expiring, but left the activeUntil time in the past!\n")
+							buffTable.index .. " blocked expiring, but left the activeUntil time in the past!\n")
 					end
 
 					Schema.buff.Network(client, buff.index, buff)
@@ -350,7 +358,7 @@ if (SERVER) then
 
 			if (buffTable.OnShouldExpire) then
 				local shouldExpire = buffTable:OnShouldExpire(client, buff) or
-				hook.Run("PlayerBuffShouldExpire", client, buffTable, buff)
+					hook.Run("PlayerBuffShouldExpire", client, buffTable, buff)
 
 				if (shouldExpire == true) then
 					buff.activeUntil = CurTime() - 1

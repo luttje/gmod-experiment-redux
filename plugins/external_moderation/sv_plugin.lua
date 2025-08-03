@@ -91,7 +91,8 @@ local function syncSanctions()
 		end
 	end, function(message)
 		-- Stop the spam during development
-		if (message == "Requests to local resources are not allowed") then
+		if (message == "Requests to local resources are not allowed"
+				or message == "Couldn't connect to server") then
 			PLUGIN.disabled = true
 		end
 

@@ -26,10 +26,10 @@ ITEM.functions.Deploy = {
 	OnRun = function(item)
 		local client = item.player
 
-        if (client:IsObjectLimited("broadcasters", item.maximum)) then
-            client:Notify("You can not place this as you have reached the maximum amount of this item!")
-            return false
-        end
+		if (client:IsObjectLimited("broadcasters", item.maximum)) then
+			client:Notify("You can not place this as you have reached the maximum amount of this item!")
+			return false
+		end
 
 		local success, message, trace = client:TryTraceInteractAtDistance()
 
@@ -48,17 +48,16 @@ ITEM.functions.Deploy = {
 		client:RegisterEntityToRemoveOnLeave(entity)
 		Schema.MakeFlushToGround(entity, trace.HitPos, trace.HitNormal)
 
-        item:Transfer(0, nil, nil, nil, false, true)
-
-        -- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
+		-- We don't want the instance to dissappear, because we want to attach it to the entity so the same item can later be picked up
 		-- For this reason we manually transfer the item to the world(0)
+		item:Transfer(0, nil, nil, nil, false, true)
 		return false
 	end,
 
 	OnCanRun = function(item)
-        local client = item.player
+		local client = item.player
 
-        -- Ensure it's in the player's inventory
+		-- Ensure it's in the player's inventory
 		return client and item.invID == client:GetCharacter():GetInventory():GetID()
 	end
 }
@@ -68,11 +67,11 @@ ITEM.functions.Toggle = {
 		local client = item.player
 		local success, message, trace = client:TryTraceInteractAtDistance()
 
-        if (not success) then
-            client:Notify(message)
+		if (not success) then
+			client:Notify(message)
 
-            return false
-        end
+			return false
+		end
 
 		local entity = trace.Entity
 
@@ -89,9 +88,9 @@ ITEM.functions.Toggle = {
 		local client = item.player
 		local success, message, trace = client:TryTraceInteractAtDistance()
 
-        if (not success) then
-            return false
-        end
+		if (not success) then
+			return false
+		end
 
 		local entity = trace.Entity
 

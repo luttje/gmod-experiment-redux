@@ -2,23 +2,25 @@ PLUGIN.name = "Experiment Stamina"
 PLUGIN.author = "Experiment Redux" -- Based on original system by Chessnut
 PLUGIN.description = "Adds a stamina system to limit running."
 
-ix.config.Add("staminaDrain", 2, "How much stamina to drain per tick (every quarter second). This is calculated before attribute reduction.", nil, {
-	data = {min = 0, max = 10, decimals = 2},
-	category = "attributes"
-})
+ix.config.Add("staminaDrain", 2,
+	"How much stamina to drain per tick (every quarter second). This is calculated before attribute reduction.", nil, {
+		data = { min = 0, max = 10, decimals = 2 },
+		category = "attributes"
+	})
 
 ix.config.Add("staminaRegeneration", 1.75, "How much stamina to regain per tick (every quarter second).", nil, {
-	data = {min = 0, max = 10, decimals = 2},
+	data = { min = 0, max = 10, decimals = 2 },
 	category = "attributes"
 })
 
-ix.config.Add("staminaCrouchRegeneration", 2, "How much stamina to regain per tick (every quarter second) while crouching.", nil, {
-	data = {min = 0, max = 10, decimals = 2},
-	category = "attributes"
-})
+ix.config.Add("staminaCrouchRegeneration", 2,
+	"How much stamina to regain per tick (every quarter second) while crouching.", nil, {
+		data = { min = 0, max = 10, decimals = 2 },
+		category = "attributes"
+	})
 
 ix.config.Add("punchStamina", 10, "How much stamina punches use up.", nil, {
-	data = {min = 0, max = 100},
+	data = { min = 0, max = 100 },
 	category = "attributes"
 })
 
@@ -41,16 +43,18 @@ local function calcStaminaChange(client)
 
 	local walkSpeed = ix.config.Get("walkSpeed")
 	local maxAttributes = ix.config.Get("maxAttributes", 100)
-	local offset
+	local offset = 0
 
 	if (client:KeyDown(IN_SPEED) and client:GetVelocity():LengthSqr() >= (walkSpeed * walkSpeed)) then
-        local staminaDrain = ix.config.Get("staminaDrain")
+		local staminaDrain = ix.config.Get("staminaDrain")
 		local maximumTraining = staminaDrain * 0.95
 
-        offset = -staminaDrain
+		offset = -staminaDrain
 			+ (math.min(character:GetAttribute("endurance", 0), maxAttributes) * maximumTraining / maxAttributes)
-	else
-		offset = client:Crouching() and ix.config.Get("staminaCrouchRegeneration", 2) or ix.config.Get("staminaRegeneration", 1.75)
+	elseif (client:IsRegeneratingStamina()) then
+		offset = client:Crouching()
+			and ix.config.Get("staminaCrouchRegeneration", 2)
+			or ix.config.Get("staminaRegeneration", 1.75)
 	end
 
 	offset = hook.Run("AdjustStaminaOffset", client, offset) or offset
@@ -83,6 +87,16 @@ local function calcStaminaChange(client)
 			end
 		end
 	end
+end
+
+local playerMeta = FindMetaTable("Player")
+
+function playerMeta:GetStamina()
+	return self:GetLocalVar("stamina", 0)
+end
+
+function playerMeta:IsRegeneratingStamina()
+	return self:GetLocalVar("stamina_regenerating", true)
 end
 
 if (SERVER) then
@@ -138,13 +152,19 @@ if (SERVER) then
 		damageInfo:ScaleDamage(damageScale)
 	end
 
-	local playerMeta = FindMetaTable("Player")
-
 	function playerMeta:RestoreStamina(amount)
 		local current = self:GetLocalVar("stamina", 0)
 		local value = math.Clamp(current + amount, 0, 100)
 
 		self:SetLocalVar("stamina", value)
+	end
+
+	function playerMeta:IsRegeneratingStamina()
+		return self:GetLocalVar("stamina_regenerating", true)
+	end
+
+	function playerMeta:SetRegeneratingStamina(state)
+		self:SetLocalVar("stamina_regenerating", state)
 	end
 
 	function playerMeta:ConsumeStamina(amount)
