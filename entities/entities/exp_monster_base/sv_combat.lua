@@ -199,11 +199,11 @@ end
 --[[
 	Door Interaction System
 --]]
+
 function ENT:HandleDoorAttack(door)
 	if (door.expIsOpeningFromAttackUntil) then
 		if (door.expIsOpeningFromAttackUntil > CurTime()) then
 			self:IgnoreTarget(door)
-
 			return
 		else
 			door.expIsOpeningFromAttackUntil = nil
@@ -230,8 +230,22 @@ function ENT:HandleDoorAttack(door)
 	if (doorOpened and door:GetInternalVariable("m_eDoorState") == 0) then
 		door:OpenDoorAwayFrom(self:EyePos() - (self:GetForward() * 5))
 		door.expIsOpeningFromAttackUntil = CurTime() + 2
-		-- Only ignore the door after we've successfully opened it
+
+		-- Ignore the door after we've successfully opened it
 		self:IgnoreTarget(door, 5)
+
+		-- Immediately resume chasing primary target if we have one
+		if (IsValid(self.targetingSystem.primaryTarget)) then
+			-- Switch back to primary target
+			self:SetTargetEntity(self.targetingSystem.primaryTarget)
+
+			-- Force immediate chase schedule if not in melee range
+			if (not self:IsTargetInMeleeRange(self.targetingSystem.primaryTarget)) then
+				self:StartSchedule(self.expSchedules.Chase)
+			else
+				self:StartAttackSchedule(self.targetingSystem.primaryTarget)
+			end
+		end
 	end
 
 	-- Don't ignore the door if we haven't opened it yet - keep attacking!

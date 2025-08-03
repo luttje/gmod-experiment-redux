@@ -48,41 +48,74 @@ function ENT:IsDoorObstacle(door)
 		return false
 	end
 
-	-- If we have a primary target, check if door is between us and target
-	if IsValid(self.targetingSystem.primaryTarget) then
+	-- If we have a primary target, check if door is actually blocking our path
+	if (IsValid(self.targetingSystem.primaryTarget)) then
 		local doorPos = door:GetPos()
 		local ourPos = self:GetPos()
 		local targetPos = self.targetingSystem.primaryTarget:GetPos()
 
-		local toDoor = (doorPos - ourPos):GetNormalized()
-		local toTarget = (targetPos - ourPos):GetNormalized()
-
-		-- If door is roughly in the direction of our target
-		if toDoor:Dot(toTarget) > 0.5 then
-			return true
+		-- Is the door actually between us and our target?
+		if (not self:IsDoorBlockingPath(door, ourPos, targetPos)) then
+			return false
 		end
 
-		-- Additional check: if we recently had line of sight to our primary target
-		-- but now we don't, and there's a door nearby, it's likely blocking us
-		if not self:CanSeeTarget(self.targetingSystem.primaryTarget) then
+		-- If we recently had line of sight to our primary target but now we don't,
+		-- and there's a door nearby blocking the path, target it
+		if (not self:CanSeeTarget(self.targetingSystem.primaryTarget)) then
 			-- Check if the door is between us and where we last saw the target
 			local lastKnownPos = self:GetEnemyLastKnownPos(self.targetingSystem.primaryTarget)
-			if lastKnownPos and lastKnownPos ~= vector_origin then
-				local toLastKnown = (lastKnownPos - ourPos):GetNormalized()
-				if toDoor:Dot(toLastKnown) > 0.4 then
+			if (lastKnownPos and lastKnownPos ~= vector_origin) then
+				if (self:IsDoorBlockingPath(door, ourPos, lastKnownPos)) then
 					return true
 				end
 			end
+
+			-- If no last known position, use current target position
+			return self:IsDoorBlockingPath(door, ourPos, targetPos)
 		end
-	else
-		-- If we don't have a primary target but we're close to a door, consider it an obstacle
-		-- This handles cases where we lost our primary target but should still break through
-		if (doorDistance < self:GetRangeSquared(self:GetAttackMeleeRange() * 1.5)) then
-			return true
-		end
+
+		return true
 	end
 
-	return false
+	-- If we don't have a primary target, only consider very close doors as obstacles
+	return doorDistance < self:GetRangeSquared(self:GetAttackMeleeRange() * 0.8)
+end
+
+function ENT:IsDoorBlockingPath(door, startPos, endPos)
+	local doorPos = door:GetPos()
+	local doorMins, doorMaxs = door:GetCollisionBounds()
+
+	-- Check if our path to target intersects with the door's bounding box
+	local trace = util.TraceLine({
+		start = startPos,
+		endpos = endPos,
+		filter = { self }
+	})
+
+	-- If the trace hits the door, it's definitely blocking
+	if (trace.Entity == door) then
+		return true
+	end
+
+	-- Additional geometric check: is the door's center close to our path line?
+	local pathDirection = (endPos - startPos):GetNormalized()
+	local toDoor = doorPos - startPos
+	local projectionLength = toDoor:Dot(pathDirection)
+
+	-- The door must be along our path (not behind us or past our target)
+	local pathLength = startPos:Distance(endPos)
+
+	if (projectionLength < 0 or projectionLength > pathLength) then
+		return false
+	end
+
+	-- Find the closest point on our path to the door
+	local closestPointOnPath = startPos + pathDirection * projectionLength
+	local distanceToDoor = doorPos:Distance(closestPointOnPath)
+
+	-- If the door is close to our path and within a reasonable range, it's blocking
+	local doorSize = math.max(doorMaxs.x - doorMins.x, doorMaxs.y - doorMins.y)
+	return distanceToDoor < (doorSize + 50) -- 50 units tolerance
 end
 
 function ENT:IsTargetInMeleeRange(target)
@@ -96,6 +129,7 @@ function ENT:IsTargetInMeleeRange(target)
 		local distToOrigin = self:GetPos():DistToSqr(target:GetPos())
 		local distToEyes = self:GetPos():DistToSqr(target:EyePos())
 		local closestDist = math.min(distToOrigin, distToEyes)
+
 		return closestDist < self:GetRangeSquared(self:GetAttackMeleeRange())
 	else
 		-- For other entities (doors, NPCs), use bounding box calculation
@@ -163,17 +197,29 @@ function ENT:FindBestTarget()
 		end
 	end
 
-	-- Special case: if we have a primary target but can't see them,
-	-- look for doors that might be blocking our path
+	-- For door targeting when we have a primary target
 	if (not IsValid(bestTarget) and IsValid(self.targetingSystem.primaryTarget)) then
 		if (not self:CanSeeTarget(self.targetingSystem.primaryTarget)) then
-			local nearbyDoors = ents.FindInSphere(ourPos, self:GetAttackMeleeRange())
+			-- Find the closest door that's actually blocking our path to the primary target
+			local closestDoor = nil
+			local closestDistance = math.huge
+
+			-- Only search for doors in a reasonable range
+			local nearbyDoors = ents.FindInSphere(ourPos, self:GetAttackMeleeRange() * 2)
 
 			for _, entity in pairs(nearbyDoors) do
 				if (entity:IsDoor() and self:IsValidTarget(entity)) then
-					bestTarget = entity
-					break
+					local distance = self:GetDistanceToEntitySqr(entity)
+					if distance < closestDistance then
+						closestDoor = entity
+						closestDistance = distance
+					end
 				end
+			end
+
+			-- Only target the closest door if it's actually blocking our path
+			if (IsValid(closestDoor)) then
+				bestTarget = closestDoor
 			end
 		end
 	end
@@ -201,7 +247,6 @@ function ENT:SetTargetEntity(target)
 			end
 		elseif (target:IsDoor() and self:IsDoorObstacle(target)) then
 			self.targetingSystem.obstacleTarget = target
-			-- Keep primary target if we have one
 		end
 
 		self:SetEnemy(target, true)
@@ -221,6 +266,27 @@ function ENT:SetTargetEntity(target)
 			self:OnTargetLost(oldTarget)
 		end
 	end
+end
+
+function ENT:ShouldResumeChasePrimaryTarget()
+	-- Check if we should resume chasing our primary target
+	if (not IsValid(self.targetingSystem.primaryTarget)) then
+		return false
+	end
+
+	-- If we can see our primary target and it's valid, we should chase it
+	if (self:CanSeeTarget(self.targetingSystem.primaryTarget) and
+			self:IsValidTarget(self.targetingSystem.primaryTarget)) then
+		return true
+	end
+
+	-- If our primary target is close but we can't see them (maybe behind another obstacle)
+	local distance = self:GetDistanceToEntitySqr(self.targetingSystem.primaryTarget)
+	if (distance < self:GetRangeSquared(self:GetSenseRange())) then
+		return true
+	end
+
+	return false
 end
 
 function ENT:OnTargetLost(target)

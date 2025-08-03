@@ -45,13 +45,15 @@ function ENT:Boot()
 	self:SetMaxYawSpeed(256)
 
 	-- Set default values
-	if not self:GetAttackMeleeRange() then
+	if (not self:GetAttackMeleeRange()) then
 		self:SetAttackMeleeRange(55)
 	end
-	if not self:GetSenseRange() then
+
+	if (not self:GetSenseRange()) then
 		self:SetSenseRange(512)
 	end
-	if not self:GetVoicePitch() then
+
+	if (not self:GetVoicePitch()) then
 		self:SetVoicePitch(100)
 	end
 
@@ -148,13 +150,32 @@ function ENT:Think()
 		end
 	end
 
+	-- Check if we should resume chasing primary target
+	-- This happens when we were targeting an obstacle (like a door) but should go back to the primary target
+	if (IsValid(self.targetingSystem.primaryTarget) and
+			IsValid(self.targetingSystem.currentTarget) and
+			self.targetingSystem.currentTarget ~= self.targetingSystem.primaryTarget) then
+		-- If current target is an obstacle and we should resume primary target
+		if (self.targetingSystem.currentTarget:IsDoor() and self:ShouldResumeChasePrimaryTarget()) then
+			self:SetTargetEntity(self.targetingSystem.primaryTarget)
+		end
+	end
+
 	-- Find targets if we don't have one
 	local currentTarget = self.targetingSystem.currentTarget
-	if not self:IsValidTarget(currentTarget) then
-		local newTarget = self:FindBestTarget()
-		if IsValid(newTarget) then
-			self:SetTargetEntity(newTarget)
-			currentTarget = newTarget
+	if (not self:IsValidTarget(currentTarget)) then
+		-- Try to resume primary target first
+		if (IsValid(self.targetingSystem.primaryTarget) and self:ShouldResumeChasePrimaryTarget()) then
+			self:SetTargetEntity(self.targetingSystem.primaryTarget)
+			currentTarget = self.targetingSystem.primaryTarget
+		else
+			-- Look for new target
+			local newTarget = self:FindBestTarget()
+
+			if (IsValid(newTarget)) then
+				self:SetTargetEntity(newTarget)
+				currentTarget = newTarget
+			end
 		end
 	end
 
@@ -170,8 +191,15 @@ function ENT:Think()
 		self:OnTargetLost(currentTarget)
 
 		if (self.targetingSystem.lostTargetCount >= 3) then
-			self:SetTargetEntity(nil)
-			currentTarget = nil
+			-- If we're losing our current target, try to resume primary target before giving up
+			if (IsValid(self.targetingSystem.primaryTarget) and
+					self.targetingSystem.primaryTarget ~= currentTarget and
+					self:ShouldResumeChasePrimaryTarget()) then
+				self:SetTargetEntity(self.targetingSystem.primaryTarget)
+			else
+				self:SetTargetEntity(nil)
+				currentTarget = nil
+			end
 		end
 	else
 		-- We can see the target, updating our position memory, so we know where it last was.
