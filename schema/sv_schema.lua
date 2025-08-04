@@ -136,12 +136,17 @@ end
 
 --- Use this to force an entity info tooltip to update.
 --- For example when a player is being tied up, you will want to update the tooltip to show its done.
---- @param client Player
+--- @param client? Player
 --- @param targetEntity? Entity
 function Schema.PlayerClearEntityInfoTooltip(client, targetEntity)
 	net.Start("expClearEntityInfoTooltip")
 	net.WriteEntity(targetEntity or Entity(0))
-	net.Send(client)
+
+	if (IsValid(client)) then
+		net.Send(client)
+	else
+		net.Broadcast()
+	end
 end
 
 function Schema.ImpactEffect(position, scale, withSound)

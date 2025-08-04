@@ -1,6 +1,8 @@
 LANGUAGE = {
 	schemaName = "Experiment Redux",
 
+	theBusiness = "The Business",
+
 	optAccessibilityFont = "Enable more readable font",
 	optdAccessibilityFont =
 	"Enables a more readable font for those who have trouble reading the default font.",
@@ -50,7 +52,7 @@ LANGUAGE = {
 	generator = "Generator",
 	generatorDesc = "A generator that produces energy.",
 	generatorHealth = "Health: %s",
-	generatorPower = "Power: %s",
+	generatorPower = "Power: ",
 
 	generatorRecharge = "Recharge",
 	generatorRecharged = "You have successfully recharged the generator with %d scrap.",

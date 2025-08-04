@@ -5,31 +5,32 @@ ENT.PopulateEntityInfo = true
 function ENT:OnPopulateEntityInfo(tooltip)
 	local ownerName, isOwner = self:GetOwnerName()
 	local name = tooltip:AddRow("name")
-    name:SetImportant()
+	name:SetImportant()
 
-    if (isOwner) then
-        name:SetText(L("generatorOwnerSelf"))
-    else
-        name:SetText(L("generatorOwnerName", ownerName))
-    end
+	if (isOwner) then
+		name:SetText(L("generatorOwnerSelf"))
+	else
+		name:SetText(L("generatorOwnerName", ownerName))
+	end
 
-    name:SizeToContents()
+	name:SizeToContents()
 
-    local itemTable = self:GetItemTable()
+	local itemTable = self:GetItemTable()
 
-    if (not itemTable) then
-        return
-    end
+	if (not itemTable) then
+		return
+	end
 
-    local powerBar = tooltip:Add("expGeneratorPower")
-    powerBar:SetPower(self:GetPower())
-    powerBar:SetMaxPower(itemTable.generator.power)
+	local powerBar = tooltip:Add("expProgressBar")
+	powerBar:SetValue(self:GetPower())
+	powerBar:SetMaxValue(itemTable.generator.power)
+	powerBar:SetPrefix(L("generatorPower"))
 	powerBar:Dock(BOTTOM)
 
-    local upgrades = self:GetUpgrades() or 0
+	local upgrades = self:GetUpgrades() or 0
 	local description = tooltip:AddRow("description")
-    description:SetText("Upgrades: " .. upgrades .. " / " .. #itemTable.generator.upgrades)
-    description:SizeToContents()
+	description:SetText("Upgrades: " .. upgrades .. " / " .. #itemTable.generator.upgrades)
+	description:SizeToContents()
 
 	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
 
@@ -51,10 +52,10 @@ function ENT:GetEntityMenu(client)
 	local characterID = self:GetOwnerID()
 
 	itemTable.entity = self
-    itemTable.player = client
+	itemTable.player = client
 
 	if (characterID and characterID == client:GetCharacter():GetID()) then
-        options[L("pickup")] = {
+		options[L("pickup")] = {
 			callback = function() end,
 			forceListEnd = true,
 		}
@@ -68,22 +69,22 @@ function ENT:GetEntityMenu(client)
 
 	local teleportEarnings = ix.config.Get("teleportGeneratorEarnings")
 
-    if (not teleportEarnings) then
-        local heldBolts = self:GetHeldBolts() or 0
+	if (not teleportEarnings) then
+		local heldBolts = self:GetHeldBolts() or 0
 
-        if (heldBolts > 0) then
-            options[L("withdraw", heldBolts)] = function() end
-        end
-    end
+		if (heldBolts > 0) then
+			options[L("withdraw", heldBolts)] = function() end
+		end
+	end
 
-    local power = self:GetPower()
+	local power = self:GetPower()
 
 	if (power < itemTable.generator.power) then
 		options[L("generatorRecharge")] = function() end
 	end
 
 	itemTable.player = nil
-    itemTable.entity = nil
+	itemTable.entity = nil
 
 	return options
 end
