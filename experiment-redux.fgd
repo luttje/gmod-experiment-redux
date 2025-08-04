@@ -1,7 +1,7 @@
-//==================================================================//
-//  Defines entities and available keyvalues for Experiment Redux:  //
-//          https://github.com/luttje/gmod-experiment-redux         //
-//==================================================================//
+//==========================================================================//
+//      Defines entities and available keyvalues for Experiment Redux:      //
+//          https://github.com/experiment-games/gmod-experiment-redux       //
+//==========================================================================//
 @include "base.fgd"
 
 @PointClass base(prop_static) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_monitor_static :

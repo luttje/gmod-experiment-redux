@@ -17,7 +17,7 @@
 2. Clone this repository into your `garrysmod/gamemodes` directory and name the directory `experiment-redux`:
 
     ```sh
-    git clone https://github.com/luttje/gmod-experiment-redux experiment-redux
+    git clone https://github.com/experiment-games/gmod-experiment-redux experiment-redux
     ```
 
 3. Ensure you have the Helix based installed [following the Helix documentation](https://docs.gethelix.co/manual/getting-started/).

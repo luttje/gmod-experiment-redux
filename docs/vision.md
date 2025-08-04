@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > This document outlines the vision we currently have for *Experiment Redux*. It is a living document and subject to change as the project evolves.
-> If you have any feedback or suggestions, please feel free to share them with us by [creating an issue or commenting on an existing one](https://github.com/luttje/gmod-experiment-redux/issues).
+> If you have any feedback or suggestions, please feel free to share them with us by [creating an issue or commenting on an existing one](https://github.com/experiment-games/gmod-experiment-redux/issues).
 
 In *Experiment Redux*, players enter a dystopian city marked by brutal competition and fragile alliances. Set in a grim, post-apocalyptic Eastern European city, they will grind for bolts to obtain top-tier weapons and armor, fend off vicious mutants, and navigate treacherous streets dominated by a ruthless AI nemesis. Their journey will demand survival, strategy, and perseverance.
 

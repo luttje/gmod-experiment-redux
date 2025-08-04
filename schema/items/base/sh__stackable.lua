@@ -128,7 +128,7 @@ ITEM.functions.split = {
 					if (inventory.GetReceivers) then
 						receivers = inventory:GetReceivers()
 					else
-						-- https://github.com/luttje/gmod-experiment-redux/issues/114
+						-- https://github.com/experiment-games/gmod-experiment-redux/issues/114
 						-- Shouldn't happen anymore, but leaving it here for a while just in case.
 						-- TODO: Remove after 10-7-2024
 						ix.util.SchemaError(

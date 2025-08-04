@@ -16,7 +16,7 @@ if (SERVER) then
 
 	net.Receive("expCashbackRequest", function(len, client)
 		local itemID = net.ReadUInt(32)
-        local character = client:GetCharacter()
+		local character = client:GetCharacter()
 		local inventory = character:GetInventory()
 		local item = inventory:GetItemByID(itemID)
 
@@ -37,13 +37,13 @@ if (SERVER) then
 
 		local price = math.ceil(item.price * PERK.returnFraction)
 
-        if (price < 1) then
-            client:Notify("This item is not worth anything!")
-            return
-        end
+		if (price < 1) then
+			client:Notify("This item is not worth anything!")
+			return
+		end
 
 		--[[
-		Issue: https://github.com/luttje/gmod-experiment-redux/issues/117
+		Issue: https://github.com/experiment-games/gmod-experiment-redux/issues/117
 
 		I feel like this may be caused by items with the same id existing. I'm not sure where this is
 		happening, but it may be the monster, or scavenging system. I'll investigate.
@@ -60,13 +60,13 @@ if (SERVER) then
 		--]]
 		if (not ix.item.instances[itemID]) then
 			ix.util.SchemaErrorNoHalt(
-                "(Debugging) Item instance not found for item ID "
-                .. tostring(itemID) .. "\n"
-                .. "User: " .. tostring(client) .. " (" .. tostring(client:SteamID()) .. ")\n"
-                .. "Item name: " .. tostring(item.name) .. "\n"
+				"(Debugging) Item instance not found for item ID "
+				.. tostring(itemID) .. "\n"
+				.. "User: " .. tostring(client) .. " (" .. tostring(client:SteamID()) .. ")\n"
+				.. "Item name: " .. tostring(item.name) .. "\n"
 				.. "Inventory: " .. tostring(inventory) .. "\n"
-            )
-            PrintTable(item)
+			)
+			PrintTable(item)
 
 			client:Notify("An error occurred trying to cashback this item. Please contact a developer.")
 
@@ -76,7 +76,7 @@ if (SERVER) then
 		inventory:Remove(itemID)
 		character:GiveMoney(price)
 
-        client:EmitSound("buttons/button19.wav", 55, 150 * math.Rand(0.8, 1.2))
+		client:EmitSound("buttons/button19.wav", 55, 150 * math.Rand(0.8, 1.2))
 
 		ix.log.Add(client, "playerCashbackPerk", price)
 	end)

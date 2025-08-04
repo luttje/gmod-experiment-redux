@@ -136,7 +136,7 @@ if (SERVER) then
 			OnPlayerClose = function(client)
 				if (not IsValid(activator) or not IsValid(client) or not inventory or not inventory.GetID) then
 					--[[
-					Issue: https://github.com/luttje/gmod-experiment-redux/issues/115
+					Issue: https://github.com/experiment-games/gmod-experiment-redux/issues/115
 					This seems to happen when not staring at the scavenging source for long enough (1) AND when closing it normally (2):
 
 					1.
