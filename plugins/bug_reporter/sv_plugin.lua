@@ -8,7 +8,6 @@ util.AddNetworkString("expBugReporterSubmit")
 util.AddNetworkString("expBugReporterResponse")
 util.AddNetworkString("expBugReporterOpen")
 
--- On loading the plugin we will get the API_KEY that we can use to authenticate with the Leaderboards API.
 function PLUGIN:OnLoaded()
 	local envFile = file.Read(PLUGIN.folder .. "/.env", "LUA")
 
@@ -127,7 +126,6 @@ function PLUGIN:CreateGitHubIssue(bugData, callback)
 		systemInfoFormatted
 	)
 
-	-- Prepare issue data
 	local issueData = {
 		title = (ISSUE_PREFIX or "") .. bugData.title,
 		body = body,
@@ -137,7 +135,6 @@ function PLUGIN:CreateGitHubIssue(bugData, callback)
 		}
 	}
 
-	-- Create the issue
 	local endpoint = string.format("/repos/%s/%s/issues", GITHUB_OWNER_NAME, GITHUB_REPO_NAME)
 	self:MakeGitHubRequest(endpoint, issueData, callback)
 end

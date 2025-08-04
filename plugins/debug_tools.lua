@@ -8,7 +8,7 @@ PLUGIN.alphaTestMessageInterval = 60 * 15
 ix.config.Add(
 	"alphaTestMessage",
 	"Welcome to Experiment Redux! You are part of the Beta Test. "
-	.. "Please report bugs @ https://experiment.games/issues "
+	.. "Please report bugs by sending /ReportBug in chat."
 	.. "\nThanks for your help and patience.",
 	"Message to display at an interval to signal that the server is being tested.",
 	nil,

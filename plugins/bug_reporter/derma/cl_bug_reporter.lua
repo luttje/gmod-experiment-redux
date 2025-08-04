@@ -1,25 +1,51 @@
 local PLUGIN = PLUGIN
 local PANEL = {}
 
+local STEPS_TEXT = "1. \n2. \n3. "
+
 function PANEL:Init()
 	self:SetWide(500)
-	self:SetTitle("Bug Reporter")
+	self:SetTitle("Report a Bug")
 	self:SetDraggable(true)
 
 	local infoLabel = self:Add("DLabel")
 	infoLabel:Dock(TOP)
 	infoLabel:DockMargin(5, 5, 5, 5)
-	infoLabel:SetText("Through this form you can submit a bug report directly to our GitHub repository. "
+	infoLabel:SetText(
+		"Through this form you can submit a bug report which will be sent to our GitHub repository. "
 		.. "Please provide as much detail as possible to help us resolve the issue quickly."
-		.. "\nNote that the bug reporter will include your SteamID and player name in the report."
-		.. "\nIf you wish to decide for yourself what information to include, report directly on GitHub at "
-		.. "https://github.com/experiment-games/gmod-experiment-redux/issues"
+		.. "\nNote that the bug reporter will include your SteamID, player name and other information in the report."
+		.. "\nIf you wish to decide for yourself what information to include, you can report directly on GitHub:"
 	)
 	infoLabel:SetWrap(true)
 	infoLabel:SetAutoStretchVertical(true)
 	infoLabel:SetTextColor(Color(150, 150, 150))
 	infoLabel:SizeToContents()
 	infoLabel:InvalidateLayout(true)
+
+	local githubButton = self:Add("DButton")
+	githubButton:Dock(TOP)
+	githubButton:DockMargin(5, 5, 5, 5)
+	githubButton:SetTall(25)
+	githubButton:SetText("Open GitHub Issues Page")
+	githubButton:SetTextColor(Color(255, 255, 255))
+	githubButton.Paint = function(self, w, h)
+		draw.RoundedBox(4, 0, 0, w, h, Color(33, 136, 33))
+
+		if (self:IsHovered()) then
+			draw.RoundedBox(4, 0, 0, w, h, Color(28, 115, 28))
+		end
+	end
+	githubButton.DoClick = function()
+		gui.OpenURL("https://github.com/experiment-games/gmod-experiment-redux/issues")
+	end
+
+	local headingLabel = self:Add("DLabel")
+	headingLabel:Dock(TOP)
+	headingLabel:DockMargin(5, 5, 5, 5)
+	headingLabel:SetText("Your Report")
+	headingLabel:SetFont("ixBigFont")
+	headingLabel:SizeToContents()
 
 	local titleLabel = self:Add("DLabel")
 	titleLabel:Dock(TOP)
@@ -61,7 +87,7 @@ function PANEL:Init()
 	self.StepsEntry:DockMargin(5, 10, 5, 0)
 	self.StepsEntry:SetTall(60)
 	self.StepsEntry:SetMultiline(true)
-	self.StepsEntry:SetText("1. \n2. \n3. ")
+	self.StepsEntry:SetText(STEPS_TEXT)
 
 	self.IncludeSysInfo = self:Add("DCheckBoxLabel")
 	self.IncludeSysInfo:Dock(TOP)
@@ -81,7 +107,7 @@ function PANEL:Init()
 	self.StatusLabel = self:Add("DLabel")
 	self.StatusLabel:Dock(TOP)
 	self.StatusLabel:DockMargin(5, 10, 5, 0)
-	self.StatusLabel:SetText("Ready to submit")
+	self.StatusLabel:SetText("")
 	self.StatusLabel:SetTextColor(Color(100, 100, 100))
 	self.StatusLabel:SizeToContents()
 
@@ -169,10 +195,10 @@ end
 function PANEL:ResetForm()
 	self.TitleEntry:SetValue("")
 	self.DescEntry:SetValue("")
-	self.StepsEntry:SetValue("")
-	self.IncludeSysInfo:SetValue(1)
+	self.StepsEntry:SetValue(STEPS_TEXT)
+	self.IncludeSysInfo:SetValue(true)
 	self.SubmitBtn:SetEnabled(true)
-	self.StatusLabel:SetText("Ready to submit")
+	self.StatusLabel:SetText("")
 	self.StatusLabel:SetTextColor(Color(100, 100, 100))
 end
 
