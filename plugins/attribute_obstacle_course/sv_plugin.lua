@@ -1,15 +1,16 @@
 local PLUGIN = PLUGIN
 
--- Obstacle course data structure
+util.AddNetworkString("expObstacleCourseUpdate")
+
 PLUGIN.obstacleCourses = PLUGIN.obstacleCourses or {}
 
--- Grace period before door opens
+--- Grace period before door opens
 local QUEUE_PERIOD_SECONDS = 10
 
--- How long the door stays open
+--- How long the door stays open
 local DOOR_OPEN_DURATION_SECONDS = 20
 
--- Minimum players required to start
+--- Minimum players required to start
 local MIN_PLAYERS = 1
 
 function PLUGIN:InitializeObstacleCourse(courseID)
@@ -49,6 +50,15 @@ function PLUGIN:IsObstacleCourseEmpty(courseID)
 	return #players == 0
 end
 
+--- Finds all start entities for this course and tell them to network
+function PLUGIN:NetworkCourseUpdate(courseID)
+	for _, ent in ipairs(ents.FindByClass("exp_obstacle_course_start")) do
+		if ent:GetCourseID() == courseID then
+			ent:NetworkCourseDataToAll(courseID)
+		end
+	end
+end
+
 --- Finds the exp_obstacle_course_start entity for a given course ID and
 --- checks its door target to find the door entity.
 --- Returns the door entity if found, or nil if not.
@@ -58,8 +68,8 @@ function PLUGIN:FindDoorForCourse(courseID)
 	local startEntity = ents.FindByClass("exp_obstacle_course_start")
 
 	for _, ent in ipairs(startEntity) do
-		if (ent:GetCourseID() == courseID and ent:GetDoorTarget()) then
-			return ents.FindByName(ent:GetDoorTarget())[1] -- Assuming doorTarget is a name of an entity
+		if (ent:GetCourseID() == courseID and ent:GetDoorTarget() ~= "") then
+			return ents.FindByName(ent:GetDoorTarget())[1]
 		end
 	end
 
@@ -114,9 +124,10 @@ function PLUGIN:StartGracePeriod(courseID)
 		end
 
 		if (#validWaitingPlayers >= MIN_PLAYERS and self:IsObstacleCourseEmpty(courseID)) then
-			print("Opening obstacle course door for course ID: " .. courseID)
 			self:OpenObstacleDoor(courseID)
 			courseData.isDoorOpen = true
+
+			self:NetworkCourseUpdate(courseID)
 
 			-- Notify waiting players
 			for _, client in ipairs(validWaitingPlayers) do
@@ -130,14 +141,14 @@ function PLUGIN:StartGracePeriod(courseID)
 
 			timer.Create(doorTimerName, DOOR_OPEN_DURATION_SECONDS, 1, function()
 				if (not self.obstacleCourses[courseID]) then
-					print("Obstacle course data not found for course ID: " .. courseID)
 					return
 				end
 
-				print("Closing obstacle course door for course ID: " .. courseID)
 				self:CloseObstacleDoor(courseID)
 				courseData.isDoorOpen = false
 				courseData.doorTimer = nil
+
+				self:NetworkCourseUpdate(courseID)
 			end)
 		end
 
@@ -152,6 +163,8 @@ function PLUGIN:AddPlayerToWaiting(client, courseID)
 	courseData.waitingPlayers[client] = {
 		joinedAt = CurTime(),
 	}
+
+	self:NetworkCourseUpdate(courseID)
 
 	-- Check if we should start grace period
 	local waitingCount = table.Count(courseData.waitingPlayers)
@@ -175,6 +188,8 @@ function PLUGIN:RemovePlayerFromWaiting(client, courseID)
 
 	local courseData = self.obstacleCourses[courseID]
 	courseData.waitingPlayers[client] = nil
+
+	self:NetworkCourseUpdate(courseID)
 
 	-- Cancel grace period if not enough players
 	local waitingCount = table.Count(courseData.waitingPlayers)
@@ -203,6 +218,8 @@ function PLUGIN:StartPlayerOnCourse(client, courseID)
 	}
 
 	courseData.isActive = true
+
+	self:NetworkCourseUpdate(courseID)
 end
 
 function PLUGIN:FinishPlayerOnCourse(client, courseID)
@@ -229,8 +246,9 @@ function PLUGIN:FinishPlayerOnCourse(client, courseID)
 		finishedAt = CurTime(),
 	}
 
-	-- Remove from active players
 	courseData.activePlayers[client] = nil
+
+	self:NetworkCourseUpdate(courseID)
 
 	-- Notify player of their performance
 	local timeString = string.NiceTime(math.ceil(finishTime))
@@ -245,7 +263,6 @@ function PLUGIN:FinishPlayerOnCourse(client, courseID)
 		character:UpdateAttrib("agility", 0.3)
 	end
 
-	-- Check if course is now empty
 	if (self:IsObstacleCourseEmpty(courseID)) then
 		courseData.isActive = false
 	end
@@ -261,6 +278,8 @@ function PLUGIN:DisqualifyPlayer(client, courseID, reason)
 	-- Remove from all lists
 	courseData.waitingPlayers[client] = nil
 	courseData.activePlayers[client] = nil
+
+	self:NetworkCourseUpdate(courseID)
 
 	client:Notify("You have been disqualified from the obstacle course: " .. (reason or "Unknown reason"))
 
@@ -281,6 +300,7 @@ function PLUGIN:CleanupObstacleCourse(courseID)
 	if (courseData.graceTimer) then
 		timer.Remove(courseData.graceTimer)
 	end
+
 	if (courseData.doorTimer) then
 		timer.Remove(courseData.doorTimer)
 	end
@@ -294,7 +314,8 @@ function PLUGIN:CleanupObstacleCourse(courseID)
 	courseData.isDoorOpen = false
 	courseData.isActive = false
 
-	-- Make sure door is closed
+	self:NetworkCourseUpdate(courseID)
+
 	self:CloseObstacleDoor(courseID)
 end
 
@@ -302,6 +323,8 @@ end
 function PLUGIN:PlayerDisconnected(client)
 	-- Remove from all obstacle courses
 	for courseID, courseData in pairs(self.obstacleCourses) do
+		local wasInCourse = courseData.waitingPlayers[client] or courseData.activePlayers[client]
+
 		courseData.waitingPlayers[client] = nil
 		courseData.activePlayers[client] = nil
 
@@ -310,6 +333,11 @@ function PLUGIN:PlayerDisconnected(client)
 			if (courseData.finishedPlayers[i].client == client) then
 				table.remove(courseData.finishedPlayers, i)
 			end
+		end
+
+		-- Network update if player was involved
+		if wasInCourse then
+			self:NetworkCourseUpdate(courseID)
 		end
 	end
 end

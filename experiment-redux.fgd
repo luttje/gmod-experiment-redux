@@ -88,3 +88,23 @@
 [
     courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this trigger is associated with"
 ]
+
+// Point entity to display obstacle course information on a 3D2D screen
+@PointClass base(Targetname, Angles) studioprop("models/props_phx/rt_screen.mdl") = exp_obstacle_course_screen :
+    "3D2D Screen displaying obstacle course race information"
+[
+    courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this screen displays information for"
+    screenWidth(integer) : "Screen Width" : 200 : "Width of the screen in units"
+    screenHeight(integer) : "Screen Height" : 150 : "Height of the screen in units"
+    screenScale(float) : "Screen Scale" : "0.1" : "Scale multiplier for the 3D2D display"
+]
+
+// Point entity representing a camera viewpoint for obstacle course screens
+@PointClass base(Angles) studioprop("models/editor/camera.mdl") = exp_obstacle_course_camera :
+    "Camera viewpoint for obstacle course screens"
+[
+    courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this camera monitors"
+    cameraName(string) : "Camera Name" : "Camera" : "Display name for this camera view"
+    targetName(target_destination) : "Look At Target" : "" : "Entity to point the camera towards (optional)"
+    fov(integer) : "Field of View" : 75 : "Camera field of view in degrees"
+]

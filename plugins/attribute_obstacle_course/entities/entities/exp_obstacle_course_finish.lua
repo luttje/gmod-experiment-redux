@@ -14,8 +14,6 @@ end
 
 function ENT:Initialize()
 	self:SetTrigger(true)
-	self:SetSolid(SOLID_TRIGGER)
-	self:SetNotSolid(false)
 end
 
 function ENT:KeyValue(key, value)
