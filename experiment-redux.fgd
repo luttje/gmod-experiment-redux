@@ -57,3 +57,33 @@
     "Entity that represents a spawn point for a target in the target practice attribute training"
 [
 ]
+
+// Brush entity to mark this area as a 'non-entity' area, such that items, belongings and corpses are removed from it.
+// This is to prevent doors or obstacles getting blocked.
+@SolidClass base(Trigger, Targetname) = exp_non_entity_area :
+    "Area where entities like items, belongings and corpses are removed from"
+[
+    teleportTarget(target_destination) : "Teleport Target" : "" : "Target to teleport entities to when they enter this area"
+]
+
+// Brush entity to mark a trigger that counts players wanting to start a certain obstacle course.
+@SolidClass base(Trigger, Targetname) = exp_obstacle_course_start :
+    "Trigger that counts players wanting to start a certain obstacle course"
+[
+    courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this trigger is associated with"
+]
+
+// Brush entity to mark a trigger that has a player finish a certain obstacle course.
+@SolidClass base(Trigger, Targetname) = exp_obstacle_course_finish :
+    "Trigger that has a player finish a certain obstacle course"
+[
+    courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this trigger is associated with"
+]
+
+// Brush entity to mark a trigger that has a player clear a certain obstacle course. Place this behind the finish.
+// Used to prevent players from coming through to the end the wrong way around.
+@SolidClass base(Trigger, Targetname) = exp_obstacle_course_clear :
+    "Trigger that has a player clear a certain obstacle course"
+[
+    courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this trigger is associated with"
+]
