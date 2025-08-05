@@ -71,6 +71,7 @@
     "Trigger that counts players wanting to start a certain obstacle course"
 [
     courseID(string) : "Obstacle Course ID" : "" : "ID of the obstacle course this trigger is associated with"
+    doorTarget(target_destination) : "Door Target" : "" : "Target to open the door to the obstacle course when a run starts"
 ]
 
 // Brush entity to mark a trigger that has a player finish a certain obstacle course.
