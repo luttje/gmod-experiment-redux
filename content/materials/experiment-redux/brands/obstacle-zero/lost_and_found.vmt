@@ -1,0 +1,8 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "experiment-redux/brands/obstacle-zero/lost_and_found"
+	"$translucent" "1"
+	"$decal" "1"
+	"$decalscale" "0.1"
+	"$vertexcolor" "1"
+}

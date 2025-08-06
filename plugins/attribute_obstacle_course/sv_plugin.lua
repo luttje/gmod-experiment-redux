@@ -241,6 +241,7 @@ function PLUGIN:AddPlayerToWaiting(client, courseID)
 	courseData.waitingPlayers[client] = {
 		joinedAt = CurTime(),
 	}
+	client.expObstacleCoursePvsEntities = ents.FindByClass("exp_obstacle_course_camera")
 
 	self:NetworkCourseUpdate(courseID)
 
@@ -266,6 +267,7 @@ function PLUGIN:RemovePlayerFromWaiting(client, courseID)
 
 	local courseData = self.obstacleCourses[courseID]
 	courseData.waitingPlayers[client] = nil
+	client.expObstacleCoursePvsEntities = nil
 
 	self:NetworkCourseUpdate(courseID)
 
@@ -294,6 +296,7 @@ function PLUGIN:StartPlayerOnCourse(client, courseID)
 	courseData.activePlayers[client] = {
 		startedAt = CurTime(),
 	}
+	client.expObstacleCoursePvsEntities = nil -- Clear PVS entities since they are now active
 
 	courseData.isActive = true
 
@@ -365,6 +368,8 @@ function PLUGIN:DisqualifyPlayer(client, courseID, reason)
 	courseData.waitingPlayers[client] = nil
 	courseData.activePlayers[client] = nil
 
+	client.expObstacleCoursePvsEntities = nil -- Clear PVS entities
+
 	self:NetworkCourseUpdate(courseID)
 
 	client:Notify("You have been disqualified from the obstacle course: " .. (reason or "Unknown reason"))
@@ -405,7 +410,6 @@ function PLUGIN:CleanupObstacleCourse(courseID)
 	self:CloseObstacleDoor(courseID)
 end
 
--- Hook for when players disconnect
 function PLUGIN:PlayerDisconnected(client)
 	-- Remove from all obstacle courses
 	for courseID, courseData in pairs(self.obstacleCourses) do
@@ -424,6 +428,20 @@ function PLUGIN:PlayerDisconnected(client)
 		-- Network update if player was involved
 		if wasInCourse then
 			self:NetworkCourseUpdate(courseID)
+		end
+	end
+end
+
+function PLUGIN:SetupPlayerVisibility(client, viewEntity)
+	-- Add all cameras for the courses the player is waiting for to PVS, such that they can see
+	-- everything the camera sees (like moving obstacles).
+	if (not client.expObstacleCoursePvsEntities) then
+		return
+	end
+
+	for _, ent in ipairs(client.expObstacleCoursePvsEntities) do
+		if (IsValid(ent)) then
+			AddOriginToPVS(ent:GetPos())
 		end
 	end
 end
