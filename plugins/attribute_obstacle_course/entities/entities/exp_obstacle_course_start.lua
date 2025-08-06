@@ -55,32 +55,36 @@ function ENT:EndTouch(entity)
 	end
 
 	local courseID = self:GetCourseID()
+	local courseData = PLUGIN.obstacleCourses[courseID]
 
-	-- Remove from waiting list
-	PLUGIN:RemovePlayerFromWaiting(entity, courseID)
+	if (not courseData) then
+		return
+	end
+
+	-- Only start the course for the player if they leave and are waiting
+	if (courseData.waitingPlayers[entity]) then
+		if (courseData.isDoorOpen) then
+			PLUGIN:StartPlayerOnCourse(entity, courseID)
+		else
+			-- If they left, remove them from waiting
+			PLUGIN:RemovePlayerFromWaiting(entity, courseID)
+		end
+	end
 
 	-- Stop tracking player
 	self.playersInTrigger[entity] = nil
 end
 
-function ENT:Touch(entity)
-	if (not entity:IsPlayer() or not self:GetCourseID()) then
+function ENT:NetworkCourseDataToPlayer(player, courseID)
+	if (not IsValid(player) or not courseID) then
 		return
 	end
 
-	local courseID = self:GetCourseID()
 	local courseData = PLUGIN.obstacleCourses[courseID]
 
-	if (courseData and courseData.isDoorOpen and courseData.waitingPlayers[entity]) then
-		PLUGIN:StartPlayerOnCourse(entity, courseID)
+	if (not courseData) then
+		return
 	end
-end
-
-function ENT:NetworkCourseDataToPlayer(player, courseID)
-	if not IsValid(player) or not courseID then return end
-
-	local courseData = PLUGIN.obstacleCourses[courseID]
-	if not courseData then return end
 
 	-- Convert course data to networkable format
 	local networkData = {
@@ -93,7 +97,7 @@ function ENT:NetworkCourseDataToPlayer(player, courseID)
 
 	-- Convert waiting players
 	for client, data in pairs(courseData.waitingPlayers) do
-		if IsValid(client) then
+		if (IsValid(client)) then
 			table.insert(networkData.waitingPlayers, {
 				name = client:Name(),
 				joinedAt = data.joinedAt
@@ -103,7 +107,7 @@ function ENT:NetworkCourseDataToPlayer(player, courseID)
 
 	-- Convert active players
 	for client, data in pairs(courseData.activePlayers) do
-		if IsValid(client) then
+		if (IsValid(client)) then
 			table.insert(networkData.activePlayers, {
 				name = client:Name(),
 				startedAt = data.startedAt
@@ -113,7 +117,7 @@ function ENT:NetworkCourseDataToPlayer(player, courseID)
 
 	-- Convert finished players
 	for _, data in ipairs(courseData.finishedPlayers) do
-		if IsValid(data.client) then
+		if (IsValid(data.client)) then
 			table.insert(networkData.finishedPlayers, {
 				name = data.client:Name(),
 				position = data.position,
@@ -133,7 +137,7 @@ end
 function ENT:NetworkCourseDataToAll(courseID)
 	-- Network to all players in this trigger
 	for player, _ in pairs(self.playersInTrigger) do
-		if IsValid(player) then
+		if (IsValid(player)) then
 			self:NetworkCourseDataToPlayer(player, courseID)
 		end
 	end

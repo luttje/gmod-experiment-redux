@@ -7,11 +7,71 @@ PLUGIN.obstacleCourses = PLUGIN.obstacleCourses or {}
 --- Grace period before door opens
 local QUEUE_PERIOD_SECONDS = 10
 
+--- How long the door takes to close fully
+local DOOR_CLOSE_DURATION_SECONDS = 10
+
 --- How long the door stays open
 local DOOR_OPEN_DURATION_SECONDS = 20
 
 --- Minimum players required to start
 local MIN_PLAYERS = 1
+
+--- Attribute reward functions for finishing the course
+local ATTRIBUTE_REWARDS = {
+	acrobatics = function(finishPosition, numPlayers)
+		local baseReward = 0.1
+		local increasePerPlayer = 0.05
+
+		return math.max(0.005,
+			(baseReward + increasePerPlayer * (numPlayers - 1)) * (1 - (finishPosition - 1) / numPlayers)
+		)
+	end,
+
+	agility = function(finishPosition, numPlayers)
+		local baseReward = 0.05
+		local increasePerPlayer = 0.04
+
+		return math.max(0.005,
+			(baseReward + increasePerPlayer * (numPlayers - 1)) * (1 - (finishPosition - 1) / numPlayers)
+		)
+	end,
+}
+
+concommand.Add("exp_list_attribute_rewards", function(client, command, arguments)
+	if (not client:IsAdmin()) then
+		return
+	end
+
+	local maxPlayers = tonumber(arguments[1]) or 10
+
+	if (maxPlayers < 1) then
+		print("Invalid number of players specified. Must be at least 1.")
+		return
+	end
+
+	local header = string.format("%-12s", "Players:")
+
+	for players = 1, maxPlayers do
+		header = header .. string.format("%6d", players)
+	end
+
+	print(header .. "\nPosition:")
+
+	for attrName, rewardFunc in pairs(ATTRIBUTE_REWARDS) do
+		print("\nAttribute: " .. attrName)
+
+		for pos = 1, maxPlayers do
+			local line = string.format("%-12d", pos)
+
+			for players = 1, maxPlayers do
+				local reward = rewardFunc(pos, players)
+				line = line .. string.format("%6.2f", reward)
+			end
+
+			print(line)
+		end
+	end
+end)
 
 function PLUGIN:InitializeObstacleCourse(courseID)
 	if (self.obstacleCourses[courseID]) then
@@ -47,13 +107,14 @@ end
 
 function PLUGIN:IsObstacleCourseEmpty(courseID)
 	local players = self:GetPlayersOnObstacleCourse(courseID)
+
 	return #players == 0
 end
 
 --- Finds all start entities for this course and tell them to network
 function PLUGIN:NetworkCourseUpdate(courseID)
 	for _, ent in ipairs(ents.FindByClass("exp_obstacle_course_start")) do
-		if ent:GetCourseID() == courseID then
+		if (ent:GetCourseID() == courseID) then
 			ent:NetworkCourseDataToAll(courseID)
 		end
 	end
@@ -145,6 +206,23 @@ function PLUGIN:StartGracePeriod(courseID)
 				end
 
 				self:CloseObstacleDoor(courseID)
+
+				-- Disqualify any waiting players who didn't enter, note that they can still slip under the door so we wait a bit
+				timer.Simple(DOOR_CLOSE_DURATION_SECONDS, function()
+					if (not self.obstacleCourses[courseID]) then
+						return
+					end
+
+					-- Disqualify all waiting players who didn't enter
+					local courseData = self.obstacleCourses[courseID]
+
+					for client, _ in pairs(courseData.waitingPlayers) do
+						if (IsValid(client)) then
+							PLUGIN:DisqualifyPlayer(client, courseID, "Did not enter before door closed")
+						end
+					end
+				end)
+
 				courseData.isDoorOpen = false
 				courseData.doorTimer = nil
 
@@ -255,12 +333,20 @@ function PLUGIN:FinishPlayerOnCourse(client, courseID)
 	client:Notify("You finished in position #" .. position .. " with a time of " .. timeString .. "!")
 
 	-- Update attributes
-	-- TODO: Balance
+	-- TODO: Balance this
 	local character = client:GetCharacter()
 
 	if (character) then
-		character:UpdateAttrib("acrobatics", 0.5)
-		character:UpdateAttrib("agility", 0.3)
+		for attribute, rewardFunc in pairs(ATTRIBUTE_REWARDS) do
+			local totalPlayers = #courseData.finishedPlayers + #courseData.activePlayers
+			local reward = rewardFunc(position, totalPlayers)
+			character:UpdateAttrib(attribute, reward)
+
+			client:Notify(
+				"You gained " .. math.Round(reward, 2) .. " " .. attribute
+				.. " for finishing the course in position #" .. position .. "/" .. totalPlayers .. "!"
+			)
+		end
 	end
 
 	if (self:IsObstacleCourseEmpty(courseID)) then

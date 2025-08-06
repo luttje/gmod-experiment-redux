@@ -41,16 +41,22 @@ if (SERVER) then
 else
 	function ENT:GetTargetEntity()
 		local targetName = self:GetTargetName()
-		if targetName == "" then return nil end
+
+		if (targetName == "") then
+			return nil
+		end
 
 		local targets = ents.FindByName(targetName)
+
 		return targets[1]
 	end
 
 	function ENT:GetViewAngles()
 		local target = self:GetTargetEntity()
-		if IsValid(target) then
+
+		if (IsValid(target)) then
 			local dir = (target:GetPos() - self:GetPos()):GetNormalized()
+
 			return dir:Angle()
 		else
 			return self:GetAngles()
