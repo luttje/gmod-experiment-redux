@@ -7,7 +7,6 @@ ITEM.shipmentSize = 3
 ITEM.model = "models/experiment-redux/boxing_bag.mdl"
 ITEM.width = 2
 ITEM.height = 2
-ITEM.noDrop = true
 ITEM.category = "Equipment"
 ITEM.description =
 "A heavy boxing bag that hangs from the ceiling. Perfect for training strength and stress relief. To use it, you need a pair of boxing gloves."

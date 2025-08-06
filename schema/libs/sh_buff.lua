@@ -74,6 +74,21 @@ if (SERVER) then
 			end
 		end
 
+		if (buffTable:ShouldStackOnDuplicate(client)) then
+			for _, activeBuff in ipairs(buffs) do
+				if (activeBuff.index == buffTable.index) then
+					buff = activeBuff
+					buff.activeUntil = buff.activeUntil + buffTable:GetDurationInSeconds(client)
+
+					break
+				end
+			end
+
+			if (buff) then
+				hook.Run("PlayerBuffStacked", client, buffTable, buff)
+			end
+		end
+
 		if (not buff) then
 			buff = Schema.buff.MakeActive(buffTable.index, activeUntil, buffData)
 			buffs[#buffs + 1] = buff

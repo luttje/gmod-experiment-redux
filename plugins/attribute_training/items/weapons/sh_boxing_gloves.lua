@@ -7,7 +7,6 @@ ITEM.height = 1
 ITEM.class = "exp_boxing_gloves"
 ITEM.weaponCategory = "melee"
 ITEM.description = "A pair of boxing gloves for stylish punching, perfect for training strength."
-ITEM.noBusiness = true
 ITEM.chanceToScavenge = Schema.RARITY_GIGA_RARE
 
 if (SERVER) then

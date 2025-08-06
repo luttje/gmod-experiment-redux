@@ -13,28 +13,29 @@
 --- @field persistThroughDeath? boolean
 --- @field attributeBoosts? table<string, number>
 --- @field resetOnDuplicate? boolean
+--- @field stackOnDuplicate? boolean
 local META = Schema.meta.buff or {}
 Schema.meta.buff = META
 
 META.__index = META
 
 function META:__tostring()
-    return "buff[" .. self.uniqueID .. "]"
+	return "buff[" .. self.uniqueID .. "]"
 end
 
 --- @param client Player
 --- @param buff ActiveBuff
 --- @return string
 function META:GetName(client, buff)
-    local stacks = buff.data and buff.data.stacks or 1
+	local stacks = buff.data and buff.data.stacks or 1
 
-    if (not stacks or stacks == 1) then
-        return self.name or "Unknown"
-    end
+	if (not stacks or stacks == 1) then
+		return self.name or "Unknown"
+	end
 
 	local stackedName = self.stackedName or (self.name .. " (x%d)")
 
-    return string.format(stackedName, stacks)
+	return string.format(stackedName, stacks)
 end
 
 --- @param client Player
@@ -55,9 +56,9 @@ end
 --- @param buff ActiveBuff
 --- @return Color
 function META:GetBackgroundColor(client, buff)
-    return self.backgroundColor or (
-        self:IsNegative(client, buff)
-        and Color(124, 48, 55, 255)
+	return self.backgroundColor or (
+		self:IsNegative(client, buff)
+		and Color(124, 48, 55, 255)
 		or Color(48, 93, 124, 255)
 	)
 end
@@ -73,27 +74,27 @@ end
 --- @param buff ActiveBuff
 --- @return string
 function META:GetDescription(client, buff)
-    return self.description or ""
+	return self.description or ""
 end
 
 --- @param client Player
 --- @return number
 function META:GetDurationInSeconds(client)
-    return self.durationInSeconds or 60
+	return self.durationInSeconds or 60
 end
 
 --- @param client Player
 --- @param buff ActiveBuff
 --- @return boolean
 function META:ShouldPersistThroughDeath(client, buff)
-    return self.persistThroughDeath or false
+	return self.persistThroughDeath or false
 end
 
 --- @param client Player
 --- @param buff ActiveBuff
 --- @return table<string, number>?
 function META:GetAttributeBoosts(client, buff)
-    return self.attributeBoosts
+	return self.attributeBoosts
 end
 
 --- @param client Player
@@ -103,15 +104,21 @@ function META:ShouldResetOnDuplicate(client)
 end
 
 --- @param client Player
+--- @return boolean
+function META:ShouldStackOnDuplicate(client)
+	return self.stackOnDuplicate or false
+end
+
+--- @param client Player
 --- @param buff ActiveBuff
 function META:OnSetup(client, buff)
-    local attributeBoosts = self:GetAttributeBoosts(client, buff)
+	local attributeBoosts = self:GetAttributeBoosts(client, buff)
 
-    if (attributeBoosts) then
-        local character = client:GetCharacter()
+	if (attributeBoosts) then
+		local character = client:GetCharacter()
 
 		for attribute, boostAmount in pairs(attributeBoosts) do
-			character:AddBoost("buff#"..self.uniqueID, attribute, boostAmount)
+			character:AddBoost("buff#" .. self.uniqueID, attribute, boostAmount)
 		end
 	end
 end
@@ -126,13 +133,13 @@ end
 --- @param client Player
 --- @param buff ActiveBuff
 function META:OnExpire(client, buff)
-    local attributeBoosts = self:GetAttributeBoosts(client, buff)
+	local attributeBoosts = self:GetAttributeBoosts(client, buff)
 
 	if (attributeBoosts) then
-        local character = client:GetCharacter()
+		local character = client:GetCharacter()
 
 		for attribute, boostAmount in pairs(attributeBoosts) do
-			character:RemoveBoost("buff#"..self.uniqueID, attribute)
+			character:RemoveBoost("buff#" .. self.uniqueID, attribute)
 		end
 	end
 end
@@ -152,9 +159,9 @@ function META:Stack(client, buff)
 	local maxStacks = self.maxStacks or 1
 	local currentStacks = self:GetStacks(client, buff)
 
-    if (currentStacks >= maxStacks) then
-        return
-    end
+	if (currentStacks >= maxStacks) then
+		return
+	end
 
 	buff.data = buff.data or {}
 	buff.data.stacks = math.min(currentStacks + 1, maxStacks)

@@ -6,21 +6,21 @@ util.AddNetworkString("expPlayNemesisSentences")
 PLUGIN.registeredSentences = {}
 
 function PLUGIN:RegisterSentence(uniqueID, sentence, parts)
-    self.registeredSentences[uniqueID] = {
-        sentence = sentence,
+	self.registeredSentences[uniqueID] = {
+		sentence = sentence,
 		parts = parts,
-    }
+	}
 
 	return uniqueID
 end
 
 PLUGIN:RegisterSentence(
-    "intro",
+	"intro",
 	"In this world, only the strongest survive. Prove your worth or perish.",
 	{
 		{ 2,   "In this world" },
 		{ 3,   "only the strongest survive." },
-		{ 1.5,   "Prove your worth" },
+		{ 1.5, "Prove your worth" },
 		{ 0.5, "or" },
 		{ 1,   "perish." },
 	}
@@ -39,14 +39,14 @@ PLUGIN:RegisterSentence(
 	"fight",
 	"Fight or face a fate worse than death.",
 	{
-		{ 1, "Fight" },
+		{ 1,   "Fight" },
 		{ 1.5, "or face a fate" },
-		{ 1, "worse than death." },
+		{ 1,   "worse than death." },
 	}
 )
 
 PLUGIN:RegisterSentence(
-    "arena",
+	"arena",
 	"In this arena, mercy is a weakness.",
 	{
 		{ 2, "In this arena" },
@@ -56,27 +56,27 @@ PLUGIN:RegisterSentence(
 )
 
 PLUGIN:RegisterSentence(
-    "downfall",
+	"downfall",
 	"I've orchestrated your downfall, %s, before you even knew it began.",
 	{
 		{ 1.85, "I've orchestrated your downfall" },
-		{ 1.5, "%s" },
-		{ 3, "before you even knew it began." },
+		{ 1.5,  "%s" },
+		{ 3,    "before you even knew it began." },
 	}
 )
 
 PLUGIN:RegisterSentence(
-    "pawns",
+	"pawns",
 	"You're nothing but pawns in my game...",
 	{
-		{ 2, "You're nothing but pawns" },
+		{ 2,   "You're nothing but pawns" },
 		{ 0.8, "in my!" },
-		{ 1, "gayme..." }, -- 'game' is pronounced too short, this is a workaround
+		{ 1,   "gayme..." }, -- 'game' is pronounced too short, this is a workaround
 	}
 )
 
 PLUGIN:RegisterSentence(
-    "sacrifice",
+	"sacrifice",
 	"Every sacrifice is a step towards victory.",
 	{
 		{ 3, "Each of you has something to lose." },
@@ -85,7 +85,7 @@ PLUGIN:RegisterSentence(
 )
 
 PLUGIN:RegisterSentence(
-    "alliance",
+	"alliance",
 	"Every alliance is temporary. Remember that.",
 	{
 		{ 2, "Every alliance is temporary." },
@@ -94,7 +94,7 @@ PLUGIN:RegisterSentence(
 )
 
 PLUGIN:RegisterSentence(
-    "escape",
+	"escape",
 	"You can't escape the game. Play, or die.",
 	{
 		{ 2, "You can't escape the gayme." },
@@ -103,7 +103,7 @@ PLUGIN:RegisterSentence(
 )
 
 PLUGIN:RegisterSentence(
-    "fight",
+	"fight",
 	"The fight is inevitable. Embrace the chaos.",
 	{
 		{ 2, "The fight is inevitable." },
@@ -117,15 +117,15 @@ PLUGIN.lockerRotStartTaunts = {
 		"locker_rot:1",
 		"Let's play a game. I've released the Locker Rot Virus into a test subject's locker. Find out if it's yours, and complete the task to save your items.",
 		{
-			{ 2, "Let's play a gayme." },
+			{ 2,  "Let's play a gayme." },
 			{ .8, "I've released" },
 			{ .8, "the Locker" },
 			{ .5, "Rot" },
-			{ 1, "Virus" },
-			{ 3, "into a test subject's locker." },
-			{ 4, "Go to your locker to find out if it's yours." },
+			{ 1,  "Virus" },
+			{ 3,  "into a test subject's locker." },
+			{ 4,  "Go to your locker to find out if it's yours." },
 		}
-    ),
+	),
 	PLUGIN:RegisterSentence(
 		"locker_rot:2",
 		"My Locker Rot Virus has been released into a locker. Better check if it's your locker that's infected.",
@@ -133,20 +133,20 @@ PLUGIN.lockerRotStartTaunts = {
 			{ .6, "My Locker" },
 			{ .5, "Rot" },
 			{ .8, "Virus" },
-			{ 3, "has been released into a locker." },
-			{ 4, "Better check if it's your locker that's infected." },
+			{ 3,  "has been released into a locker." },
+			{ 4,  "Better check if it's your locker that's infected." },
 		}
-    ),
+	),
 	PLUGIN:RegisterSentence(
 		"locker_rot:3",
 		"The Locker Rot Virus I've released will destroy items in a locker. You had better check if it's your locker that's infected.",
 		{
-			{ .6, "The Locker" },
-			{ .5, "Rot" },
-			{ .8, "Virus" },
+			{ .6,  "The Locker" },
+			{ .5,  "Rot" },
+			{ .8,  "Virus" },
 			{ 1.5, "I've released" },
-			{ 3, "will destroy items in a locker." },
-			{ 4, "You had better check if it's your locker that's infected." },
+			{ 3,   "will destroy items in a locker." },
+			{ 4,   "You had better check if it's your locker that's infected." },
 		}
 	),
 }
@@ -264,13 +264,29 @@ PLUGIN.lockerRotCompleteAntiVirusTaunt = {
 PLUGIN.metricTaunts = {}
 
 local function addMetricTaunt(metric, uniqueID)
-    if (not PLUGIN.metricTaunts[metric]) then
-        PLUGIN.metricTaunts[metric] = {}
-    end
+	if (not PLUGIN.metricTaunts[metric]) then
+		PLUGIN.metricTaunts[metric] = {}
+	end
 
-    PLUGIN.metricTaunts[metric][#PLUGIN.metricTaunts + 1] = uniqueID
+	PLUGIN.metricTaunts[metric][#PLUGIN.metricTaunts + 1] = uniqueID
 end
 
+-- This taunt is for when the player is too aggressive during a locker rot event and they get the rotbrand debuff.
+addMetricTaunt(
+	"Rotbrand",
+	PLUGIN:RegisterSentence(
+		"taunt:Rotbrand:1",
+		"%s, your aggression has led to your downfall. The Rotbrand will break your spirit.",
+		{
+			{ 3, "%s, your aggression has led to your downfall." },
+			{ 2, "The Rotbrand will break your spirit." },
+		}
+	)
+)
+
+--[[
+	Taunts for metrics
+--]]
 addMetricTaunt(
 	"Bolts Generated",
 	PLUGIN:RegisterSentence(
@@ -280,7 +296,7 @@ addMetricTaunt(
 			{ 3, "%s, your bolts are a testament to your greed." },
 			{ 2, "I'll make sure you pay for it." },
 		}
-    )
+	)
 )
 
 addMetricTaunt(
