@@ -7,8 +7,41 @@
           content="width=device-width, initial-scale=1.0">
     <title>Experiment Redux</title>
 
-    <link rel="stylesheet"
-          href="assets/style.css?bust=1714892748">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style type="text/tailwindcss">
+        @theme {
+            --color-brand: #A33426;
+            --font-display: 'Impact', 'Arial Black', sans-serif;
+        }
+
+        @font-face {
+            font-family: "LightsOut";
+            src: url('./assets/lightout.woff');
+        }
+
+        @font-face {
+            font-family: "RomanAntique";
+            src: url('./assets/RomanAntique.woff');
+        }
+
+        @font-face {
+            font-family: "RomanAntique";
+            src: url('./assets/RomanAntique-Italic.woff');
+            font-style: italic;
+        }
+
+        .lights-out {
+            font-family: "LightsOut", Impact, Arial Black, sans-serif;
+        }
+
+        .roman-antique {
+            font-family: "RomanAntique", Times, serif;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@ryangjchandler/alpine-tooltip@1.x.x/dist/cdn.min.js"
             defer></script>
@@ -32,49 +65,27 @@
           href="assets/favicon/favicon.ico">
 </head>
 
-<body>
-    <div class="wrapper logo">
-        <img src="assets/logo.png">
-    </div>
-    <div class="with-aside">
-        <aside>
-            <div>
-                <h2>BALANCING TOOL</h2>
-                <p>
-                    This tool is used to balance the game. It is used to calculate how long it will take for a player to buy a certain item, based on the player's income.
-                    It is designed to be used on a desktop device, as it requires a lot of screen space.
-                </p>
-                <p>
-                    Using the tool, we can make sure that players don't reach end-game content too quickly, but also that they don't have to grind for hours to get there.
-                </p>
-            </div>
-            <div class="my">
-                <h2>POWER OVER TIME</h2>
-                <p class="center my">
-                    <img src="assets/graph.png"
-                         class="max-content">
-                </p>
-                <p>
-                    The above graph intends to communicate the relationship between the player's power and time during an 'Epoch'.
-                    An 'Epoch' is single 'match' in the game, lasting between 20-30 days.
-                </p>
-                <p>
-                    We want to reward the player for enduring setbacks and challenges. Rewards should feel well-earned, but not impossible to achieve.
-                </p>
-            </div>
-        </aside>
-        <main>
-            <div id="parameters"
-                 x-data="{
+<body class="bg-black text-white font-[Verdana,Geneva,Tahoma,sans-serif] text-base m-0 p-4 min-h-screen"
+      x-data="{
                     epochDurationInDays: 22,
                     generatorOutputPerPayday: 100,
                     generatorIntervalInMinutes: 5,
                     averagePlaytimeInMinutes: 60,
 
+                    isLoading: true,
                     itemFilter: '',
                     items: [],
                     selectedItems: [],
                     categories: [],
+                    showResetConfirm: false,
+
+                    defaults: {
+                        epochDurationInDays: 22,
+                        generatorOutputPerPayday: 100,
+                        generatorIntervalInMinutes: 5,
+                        averagePlaytimeInMinutes: 60,
+                        selectedItems: []
+                    },
 
                     getGeneratorOutputPerHour() {
                         return 60 / this.generatorIntervalInMinutes * this.generatorOutputPerPayday;
@@ -84,9 +95,10 @@
                         return this.getGeneratorOutputPerHour() * (hours || 24);
                     },
 
-                    addItem(name, price, category = 'Miscellaneous') {
+                    addItem(name, shipmentSize, price, category = 'Miscellaneous') {
                         this.items.push({
                             name,
+                            shipmentSize,
                             price,
                             category
                         });
@@ -97,18 +109,22 @@
                     },
 
                     loadItemsFromJson() {
-                        // See ./tools/generate-items-json.sh for the script that generates this file
+                        this.isLoading = true;
+
                         fetch('assets/items.json')
                             .then(response => response.json())
                             .then(data => {
                                 for (const item of data) {
-                                    this.addItem(item.name, item.price, item.category);
-                                    this.selectedItems.push(this.items.length - 1);
+                                    this.addItem(item.name, item.shipmentSize, item.price, item.category);
 
                                     if (!this.categories.includes(item.category)) {
                                         this.categories.push(item.category);
                                     }
                                 }
+
+                                this.loadFromLocalStorage();
+
+                                this.isLoading = false;
                             });
                     },
 
@@ -155,173 +171,400 @@
                         }
 
                         return itemFilter === '' || item.name.toLowerCase().includes(itemFilter.toLowerCase()) || item.category.toLowerCase().includes(itemFilter.toLowerCase())
+                    },
+
+                    saveToLocalStorage() {
+                        if (this.isLoading) {
+                            return;
+                        }
+
+                        const data = {
+                            epochDurationInDays: this.epochDurationInDays,
+                            generatorOutputPerPayday: this.generatorOutputPerPayday,
+                            generatorIntervalInMinutes: this.generatorIntervalInMinutes,
+                            averagePlaytimeInMinutes: this.averagePlaytimeInMinutes,
+                            selectedItems: this.selectedItems,
+                            items: this.items
+                        };
+                        localStorage.setItem('balancingToolData', JSON.stringify(data));
+                    },
+
+                    loadFromLocalStorage() {
+                        const saved = localStorage.getItem('balancingToolData');
+                        if (saved) {
+                            const data = JSON.parse(saved);
+                            this.epochDurationInDays = data.epochDurationInDays || this.defaults.epochDurationInDays;
+                            this.generatorOutputPerPayday = data.generatorOutputPerPayday || this.defaults.generatorOutputPerPayday;
+                            this.generatorIntervalInMinutes = data.generatorIntervalInMinutes || this.defaults.generatorIntervalInMinutes;
+                            this.averagePlaytimeInMinutes = data.averagePlaytimeInMinutes || this.defaults.averagePlaytimeInMinutes;
+                            this.selectedItems = data.selectedItems || this.defaults.selectedItems;
+
+                            if (data.items && data.items.length === this.items.length) {
+                                data.items.forEach((savedItem, index) => {
+                                    if (this.items[index] && this.items[index].name === savedItem.name) {
+                                        this.items[index].price = savedItem.price;
+                                    }
+                                });
+                            }
+                        }
+                    },
+
+                    confirmReset() {
+                        this.showResetConfirm = true;
+                    },
+
+                    resetToDefaults() {
+                        this.epochDurationInDays = this.defaults.epochDurationInDays;
+                        this.generatorOutputPerPayday = this.defaults.generatorOutputPerPayday;
+                        this.generatorIntervalInMinutes = this.defaults.generatorIntervalInMinutes;
+                        this.averagePlaytimeInMinutes = this.defaults.averagePlaytimeInMinutes;
+                        this.selectedItems = [...this.defaults.selectedItems];
+
+                        this.items = [];
+                        this.categories = [];
+                        this.loadItemsFromJson();
+
+                        localStorage.removeItem('balancingToolData');
+                        this.showResetConfirm = false;
+                    },
+
+                    cancelReset() {
+                        this.showResetConfirm = false;
+                    },
+
+                    exportConfiguration() {
+                        const config = {
+                            parameters: {
+                                epochDurationInDays: this.epochDurationInDays,
+                                generatorOutputPerPayday: this.generatorOutputPerPayday,
+                                generatorIntervalInMinutes: this.generatorIntervalInMinutes,
+                                averagePlaytimeInMinutes: this.averagePlaytimeInMinutes
+                            },
+                            selectedItems: this.selectedItems,
+                            items: this.items.map(item => ({
+                                name: item.name,
+                                shipmentSize: parseInt(item.shipmentSize),
+                                price: parseInt(item.price),
+                                category: item.category
+                            }))
+                        };
+
+                        const dataStr = JSON.stringify(config, null, 2);
+                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+                        const exportFileDefaultName = 'balancing_tool_config.json';
+
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
                     }
                 }"
-                 x-init="loadItemsFromJson()">
-                <div>
-                    <h2>GLOBAL</h2>
-                    <div class="grid">
-                        <div class="parameter">
-                            <label for="epoch-duration">Epoch Duration (in days)</label>
-                            <div class="range">
+      x-init="loadItemsFromJson()"
+      x-effect="saveToLocalStorage()">
+    <div class="max-w-2xl mx-auto mb-4">
+        <img src="assets/logo.png"
+             alt="Logo"
+             class="w-full">
+    </div>
+
+    <div class="flex gap-4">
+        <aside class="flex-1">
+            <div class="mb-8">
+                <h2 class="text-brand text-3xl font-black lights-out mb-4">BALANCING TOOL</h2>
+                <p class="leading-6 mb-4">
+                    This tool is used to balance the game. It is used to calculate how long it will take for a player to buy a certain item, based on the player's income.
+                    It is designed to be used on a desktop device, as it requires a lot of screen space.
+                </p>
+                <p class="leading-6">
+                    Using the tool, we can make sure that players don't reach end-game content too quickly, but also that they don't have to grind for hours to get there.
+                </p>
+            </div>
+
+            <div class="my-8">
+                <h2 class="text-brand text-3xl font-black lights-out mb-4">POWER OVER TIME</h2>
+                <p class="text-center my-8">
+                    <img src="assets/graph.png"
+                         class="max-w-max mx-auto"
+                         alt="Power over time graph">
+                </p>
+                <p class="leading-6 mb-4">
+                    The above graph intends to communicate the relationship between the player's power and time during an 'Epoch'.
+                    An 'Epoch' is single 'match' in the game, lasting between 20-30 days.
+                </p>
+                <p class="leading-6">
+                    We want to reward the player for enduring setbacks and challenges. Rewards should feel well-earned, but not impossible to achieve.
+                </p>
+            </div>
+        </aside>
+
+        <main class="flex-3">
+            <div id="parameters">
+                <!-- Reset Confirmation Dialog -->
+                <div x-show="showResetConfirm"
+                     x-cloak
+                     x-transition.opacity
+                     class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                     @click.away="cancelReset()">
+                    <div class="bg-white text-black p-6 rounded-lg shadow-xl max-w-md mx-4">
+                        <h3 class="text-lg font-bold mb-4">Reset to Default Values</h3>
+                        <p class="mb-6">Are you sure you want to reset all parameters and item prices to their default values? This action cannot be undone.</p>
+                        <div class="flex justify-end gap-3">
+                            <button type="button"
+                                    @click="cancelReset()"
+                                    class="px-4 py-2 bg-gray-200 text-gray-800 hover:bg-gray-300">
+                                Cancel
+                            </button>
+                            <button type="button"
+                                    @click="resetToDefaults()"
+                                    class="px-4 py-2 bg-red-600 text-white hover:bg-red-700">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h2 class="text-brand text-3xl font-black lights-out mb-4">GLOBAL</h2>
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div class="flex gap-4 items-center text-sm">
+                            <label for="epoch-duration"
+                                   class="w-24 shrink-0">Epoch Duration (in days)</label>
+                            <div class="flex gap-4 items-center flex-1">
                                 <input type="range"
                                        id="epoch-duration"
                                        x-model="epochDurationInDays"
                                        min="10"
-                                       max="30">
+                                       max="30"
+                                       class="bg-white text-black flex-1">
                                 <input type="number"
                                        x-model="epochDurationInDays"
                                        min="10"
-                                       max="30">
+                                       max="30"
+                                       class="bg-white text-black w-16 p-2">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-s">
-                    <h2>INCOME</h2>
-                    <div class="grid">
-                        <div class="parameter">
-                            <label for="generator-output">Generator Bolts output</label>
-                            <div class="range">
+
+                <div class="mb-6">
+                    <h2 class="text-brand text-3xl font-black lights-out mb-4">INCOME</h2>
+                    <div class="grid grid-cols-1 gap-4 mb-6">
+                        <div class="flex gap-4 items-center text-sm">
+                            <label for="generator-output"
+                                   class="w-24 shrink-0">Generator Bolts output</label>
+                            <div class="flex gap-4 items-center flex-1">
                                 <input type="range"
                                        id="generator-output"
                                        x-model="generatorOutputPerPayday"
                                        min="50"
-                                       max="1000">
+                                       max="1000"
+                                       class="bg-white text-black flex-1">
                                 <input type="number"
                                        x-model="generatorOutputPerPayday"
                                        min="50"
-                                       max="1000">
+                                       max="1000"
+                                       class="bg-white text-black w-16 p-2">
                             </div>
                         </div>
-                        <div class="parameter">
-                            <label for="generator-interval">Generator Bolts interval (in minutes)</label>
-                            <div class="range">
+                        <div class="flex gap-4 items-center text-sm">
+                            <label for="generator-interval"
+                                   class="w-24 shrink-0">Generator Bolts interval (in minutes)</label>
+                            <div class="flex gap-4 items-center flex-1">
                                 <input type="range"
                                        id="generator-interval"
                                        x-model="generatorIntervalInMinutes"
                                        min="1"
-                                       max="60">
+                                       max="60"
+                                       class="bg-white text-black flex-1">
                                 <input type="number"
                                        x-model="generatorIntervalInMinutes"
                                        min="1"
-                                       max="60">
+                                       max="60"
+                                       class="bg-white text-black w-16 p-2">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="mt-s">
-                    <h2>ITEMS</h2>
-                    <div class="flex">
-                        <input type="text"
-                               x-model="itemFilter"
-                               placeholder="Filter items">
-                        <button type="button"
-                                x-on:click="selectedItems = []">Clear selection</button>
-                        <select x-model="itemFilter">
-                            <option value="">All categories</option>
-                            <option value="@">Selected</option>
-                            <template x-for="category in categories"
-                                      :key="category">
-                                <option x-text="category"></option>
-                            </template>
-                        </select>
-                        <button type="button"
-                                x-on:click="selectedItems = items.map((_, index) => itemMatchesFilter(items[index], itemFilter) ? index : -1).filter(index => index !== -1)">
-                            Select all visible
-                        </button>
+
+                <div class="mb-6"
+                     x-data="{ showFilters: false }">
+                    <h2 class="text-brand text-3xl font-black lights-out mb-4">ITEMS</h2>
+                    <button type="button"
+                            x-on:click="showFilters = !showFilters"
+                            class="px-4 py-2 bg-brand text-white cursor-pointer whitespace-nowrap">
+                        Toggle Filters
+                    </button>
+                    <div x-show="showFilters"
+                         x-cloak>
+                        <div class="flex gap-4 my-4 flex-wrap">
+                            <select x-model="itemFilter"
+                                    class="bg-white text-black p-2 flex-1">
+                                <option value="">All categories</option>
+                                <option value="@">Selected</option>
+                                <template x-for="category in categories"
+                                          :key="category">
+                                    <option x-text="category"></option>
+                                </template>
+                            </select>
+                            <button type="button"
+                                    x-on:click="selectedItems = items.map((_, index) => itemMatchesFilter(items[index], itemFilter) ? index : -1).filter(index => index !== -1)"
+                                    class="px-4 py-2 bg-brand text-white cursor-pointer whitespace-nowrap">
+                                Select all that match filter
+                            </button>
+                        </div>
+                        <div class="flex gap-4 mb-4 flex-wrap">
+                            <input type="text"
+                                   x-model="itemFilter"
+                                   placeholder="Filter items"
+                                   class="bg-white text-black flex-1 p-2 min-w-0">
+                            <button type="button"
+                                    x-on:click="selectedItems = []"
+                                    class="px-4 py-2 bg-brand text-white cursor-pointer whitespace-nowrap">
+                                Clear selection
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid h-300">
+
+                    <div class="grid grid-cols-1 mt-4 gap-4 max-h-128 overflow-auto">
                         <template x-for="(item, index) in items"
                                   :key="index">
-                            <div class="parameter bg-gray p"
+                            <div class="bg-white/10 p-4 flex justify-between items-center text-sm"
                                  x-show="itemMatchesFilter(item, itemFilter)">
-                                <input type="text"
-                                       x-model="item.name"
-                                       disabled
-                                       placeholder="Name">
-                                <input type="text"
-                                       x-model="item.category"
-                                       disabled
-                                       placeholder="Category">
-                                <input type="number"
-                                       x-model="item.price"
-                                       placeholder="Cost">
-                                <input type="checkbox"
-                                       class="w-fit"
-                                       x-model="selectedItems"
-                                       :value="index">
-                                <!-- <button type="button"
-                                        class="flex-1"
-                                        x-on:click="removeItem(index)">Remove</button> -->
+                                <div>
+                                    <div class="whitespace-nowrap font-bold">
+                                        <input type="number"
+                                               x-model="item.shipmentSize"
+                                               placeholder="Shipment Size"
+                                               class="bg-white text-black w-20 p-1">
+                                        <span x-text="item.name"></span>s
+                                    </div>
+                                </div>
+                                <div class="whitespace-nowrap flex items-center gap-2">
+                                    <span class="whitespace-nowrap">Shop Price:</span>
+                                    <input type="number"
+                                           x-model="item.price"
+                                           placeholder="Cost"
+                                           class="bg-white text-black w-20 p-1">
+                                    <input type="checkbox"
+                                           class="bg-white text-black w-auto"
+                                           x-model="selectedItems"
+                                           :value="index">
+                                </div>
                             </div>
                         </template>
-                    </div>
-                    <!-- <button type="button"
-                            x-on:click="addItem('', 100)">Add Item</button> -->
-                </div>
-                <div class="mt-s">
-                    <h2>SIMULATED PLAYTIME</h2>
-                    <div class="grid">
-                        <div class="parameter">
-                            <label for="averagePlaytimeInMinutes">Playtime (in average minutes per day)</label>
-                            <div class="range">
-                                <input type="range"
-                                       id="averagePlaytimeInMinutes"
-                                       x-model="averagePlaytimeInMinutes"
-                                       min="1"
-                                       max="3600">
-                                <input type="number"
-                                       x-model="averagePlaytimeInMinutes"
-                                       min="1"
-                                       max="3600">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-s">
-                    <h2>DURATIONS</h2>
-                    <div class="grid tight">
-                        <div class="duration bg-gray">
-                            <h3>Bolt income</h3>
-                            <span x-text="getGeneratorOutputPerHour().toFixed(0)"></span>
-                            <span>Every Hour</span>
-                        </div>
-                        <div class="duration bg-gray">
-                            <h3>Bolt income</h3>
-                            <span x-text="(averagePlaytimeInMinutes / 60 * getGeneratorOutputPerHour()).toFixed(0)"></span>
-                            <span>Every Day of playtime</span>
-                        </div>
-                        <div class="duration bg-gray">
-                            <h3>Bolts in total</h3>
-                            <span x-text="(getGeneratorOutputPerHour() * epochDurationInDays * 24).toFixed(0)"></span>
-                            <span>Bolts</span>
-                        </div>
-                    </div>
-                    <div class="grid tight mt-s">
-                        <div class="duration bg-gray">
-                            <h3>Cost of selected items</h3>
-                            <span x-text="priceOfAll(selectedItems.map(index => items[index])).toFixed(0)"></span>
-                            <span>Bolts</span>
-                        </div>
-                        <div class="duration bg-gray"
-                             @click="$tooltip(...getConversionTooltipArgs($refs.timeToBuySelectedItems, 'hours', 'days'))">
-                            <h3>Time to buy selected items</h3>
-                            <span x-ref="timeToBuySelectedItems"
-                                  x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerHour()).toFixed(1)"></span>
-                            <span>hours</span>
-                        </div>
-                        <div class="duration bg-gray"
-                             @click="$tooltip(...getConversionTooltipArgs($refs.playtimeToBuySelectedItems, 'days', 'hours'))">
-                            <h3>Playtime to buy selected items</h3>
-                            <span x-ref="playtimeToBuySelectedItems"
-                                  x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerDay(averagePlaytimeInMinutes / 60)).toFixed(1)"></span>
-                            <span>days</span>
-                        </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <div class="flex-2">
+            <div class="mb-6">
+                <h2 class="text-brand text-3xl font-black lights-out mb-4">HOW TO USE THIS TOOL</h2>
+                <p class="leading-6 mb-4">
+                    First leave the income parameters (bolt generator output and interval) at their default values.
+                    Then select the items you wonder how long it will take to buy from the shop and view the durations below.
+                </p>
+                <p class="leading-6 mb-4">
+                    You can set the amount of minutes a player plays on average per day in the 'Simulated Playtime' section.
+                    This will give you an idea of how long it will take to buy the selected items based on the generator output and interval.
+                </p>
+                <p class="leading-6 mb-4">
+                    Now that you have an idea of how long it will take to buy the items, you can either adjust the generator output, or change the price of the items.
+                    Doing this you can balance the time it takes to buy the items, so that it feels rewarding, but not too grindy.
+                </p>
+                <p class="leading-6 mb-4">
+                    Once you're happy with the configuration, you can export it using the 'Export Configuration' button.
+                    We'd really appreciate it if you share this configuration with us by replying <a href="https://github.com/experiment-games/gmod-experiment-redux/issues/81">here on GitHub</a>.
+                </p>
+
+                <!-- Control Buttons -->
+                <div class="flex justify-end gap-3 mb-4">
+                    <button type="button"
+                            @click="exportConfiguration()"
+                            class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
+                        Export Configuration
+                    </button>
+                    <button type="button"
+                            @click="confirmReset()"
+                            class="px-4 py-2 bg-red-600 text-white hover:bg-red-700 cursor-pointer">
+                        Reset to Defaults
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-brand text-3xl font-black lights-out mb-4">SIMULATED PLAYTIME</h2>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="flex gap-4 items-center text-sm">
+                        <label for="averagePlaytimeInMinutes"
+                               class="w-24 shrink-0">Playtime (in average minutes per day)</label>
+                        <div class="flex gap-4 items-center flex-1">
+                            <input type="range"
+                                   id="averagePlaytimeInMinutes"
+                                   x-model="averagePlaytimeInMinutes"
+                                   min="1"
+                                   max="3600"
+                                   class="bg-white text-black flex-1">
+                            <input type="number"
+                                   x-model="averagePlaytimeInMinutes"
+                                   min="1"
+                                   max="3600"
+                                   class="bg-white text-black w-16 p-2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-brand text-3xl font-black lights-out mb-4">DURATIONS</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="bg-white/10 p-4 flex flex-col">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolt income</h3>
+                        <span class="text-2xl flex-grow"
+                              x-text="getGeneratorOutputPerHour().toFixed(0)"></span>
+                        <span class="text-sm text-white/70">Every Hour</span>
+                    </div>
+                    <div class="bg-white/10 p-4 flex flex-col">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolt income</h3>
+                        <span class="text-2xl flex-grow"
+                              x-text="(averagePlaytimeInMinutes / 60 * getGeneratorOutputPerHour()).toFixed(0)"></span>
+                        <span class="text-sm text-white/70">Every Day of playtime</span>
+                    </div>
+                    <div class="bg-white/10 p-4 flex flex-col">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Bolts in total</h3>
+                        <span class="text-2xl flex-grow"
+                              x-text="(getGeneratorOutputPerHour() * epochDurationInDays * 24).toFixed(0)"></span>
+                        <span class="text-sm text-white/70">Bolts</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white/10 p-4 flex flex-col">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Cost of selected items</h3>
+                        <span class="text-2xl flex-grow"
+                              x-text="priceOfAll(selectedItems.map(index => items[index])).toFixed(0)"></span>
+                        <span class="text-sm text-white/70">Bolts</span>
+                    </div>
+                    <div class="bg-white/10 p-4 flex flex-col cursor-pointer"
+                         @click="$tooltip(...getConversionTooltipArgs($refs.timeToBuySelectedItems, 'hours', 'days'))">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Time to buy selected items</h3>
+                        <span class="text-2xl flex-grow"
+                              x-ref="timeToBuySelectedItems"
+                              x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerHour()).toFixed(1)"></span>
+                        <span class="text-sm text-white/70">hours</span>
+                    </div>
+                    <div class="bg-white/10 p-4 flex flex-col cursor-pointer"
+                         @click="$tooltip(...getConversionTooltipArgs($refs.playtimeToBuySelectedItems, 'days', 'hours'))">
+                        <h3 class="text-brand text-lg font-bold lights-out mb-2">Playtime to buy selected items</h3>
+                        <span class="text-2xl flex-grow"
+                              x-ref="playtimeToBuySelectedItems"
+                              x-text="(priceOfAll(selectedItems.map(index => items[index])) / getGeneratorOutputPerDay(averagePlaytimeInMinutes / 60)).toFixed(1)"></span>
+                        <span class="text-sm text-white/70">days</span>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 
