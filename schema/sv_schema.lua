@@ -37,6 +37,26 @@ Schema.dropMode = {
 	WITH_EQUIPPED_ARMOR = 8,
 }
 
+--- WORKAROUND: This is the default Helix implementation, except for bots we print to the console so we can see what they would be getting.
+--- Sends a notification to a specified recipient.
+-- @realm server
+-- @string message Message to notify
+-- @player[opt=nil] recipient Player to be notified
+function ix.util.Notify(message, recipient)
+	if (IsValid(recipient) and recipient:IsBot()) then
+		print("[Bot Notification] " .. message)
+	end
+
+	net.Start("ixNotify")
+	net.WriteString(message)
+
+	if (recipient == nil) then
+		net.Broadcast()
+	else
+		net.Send(recipient)
+	end
+end
+
 ix.log.AddType("playerHealed", function(client, ...)
 	local arg = { ... }
 	return Format("%s has healed %s for %d hp", client:Name(), arg[1], arg[2])

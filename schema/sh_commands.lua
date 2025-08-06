@@ -5,13 +5,13 @@ do
 
 	function COMMAND:OnRun(client)
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 96
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
 		local target = util.TraceLine(data).Entity
 
 		if (IsValid(target) and target:IsPlayer() and target:IsRestricted()) then
-			if (!client:IsRestricted()) then
+			if (! client:IsRestricted()) then
 				Schema.SearchPlayer(client, target)
 			else
 				return "@notNow"
@@ -20,6 +20,19 @@ do
 	end
 
 	ix.command.Add("CharSearch", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Create a new alliance."
+	COMMAND.arguments = { ix.type.string }
+
+	function COMMAND:OnRun(client, allianceName)
+		Schema.alliance.RequestCreate(client, allianceName)
+	end
+
+	ix.command.Add("AllianceCreate", COMMAND)
 end
 
 do
@@ -38,20 +51,20 @@ do
 		Schema.alliance.RequestInviteMember(client, target)
 	end
 
-	ix.command.Add("AllyInvite", COMMAND)
+	ix.command.Add("AllianceInvite", COMMAND)
 end
 
 do
 	local COMMAND = {}
 
 	COMMAND.description = "Kick a character out of your alliance."
-	COMMAND.arguments = {ix.type.character}
+	COMMAND.arguments = { ix.type.character }
 
 	function COMMAND:OnRun(client, target)
 		Schema.alliance.RequestKick(client, target)
 	end
 
-	ix.command.Add("AllyKick", COMMAND)
+	ix.command.Add("AllianceKick", COMMAND)
 end
 
 do
@@ -63,7 +76,7 @@ do
 		Schema.alliance.RequestLeave(client)
 	end
 
-	ix.command.Add("AllyLeave", COMMAND)
+	ix.command.Add("AllianceLeave", COMMAND)
 end
 
 do
@@ -77,9 +90,9 @@ do
 
 	function COMMAND:OnRun(client, bodyPart, amount)
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 96
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
 		local target = util.TraceLine(data).Entity
 
 		if (not IsValid(target) or not target:IsPlayer()) then
@@ -151,9 +164,9 @@ do
 
 	function COMMAND:OnRun(client, amount)
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 1000
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 1000
+		data.filter = client
 		local target = util.TraceLine(data).Entity
 
 		if (not IsValid(target)) then
@@ -227,9 +240,9 @@ do
 		end
 
 		local data = {}
-			data.start = client:GetShootPos()
-			data.endpos = data.start + client:GetAimVector() * 96
-			data.filter = client
+		data.start = client:GetShootPos()
+		data.endpos = data.start + client:GetAimVector() * 96
+		data.filter = client
 		local trace = util.TraceLine(data)
 
 		local angledTowardsPlayer = (client:GetPos() - trace.HitPos):Angle()
@@ -305,7 +318,8 @@ end
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Immediately removes all buffs of a certain type from yourself or the character you are looking at."
+	COMMAND.description =
+	"Immediately removes all buffs of a certain type from yourself or the character you are looking at."
 	COMMAND.arguments = {
 		ix.type.string,
 	}
@@ -331,7 +345,8 @@ do
 			return buffTable.uniqueID == buffUniqueID
 		end)
 
-		client:Notify("Removed " .. expiredCount .. " buffs of type '" .. buffUniqueID .. "' from " .. target:GetName() .. ".")
+		client:Notify("Removed " ..
+			expiredCount .. " buffs of type '" .. buffUniqueID .. "' from " .. target:GetName() .. ".")
 	end
 
 	ix.command.Add("CharBuffExpire", COMMAND)
@@ -369,7 +384,7 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, target, perkUniqueID)
-        local perkTable = Schema.perk.Get(perkUniqueID)
+		local perkTable = Schema.perk.Get(perkUniqueID)
 
 		if (not perkTable) then
 			client:Notify("Invalid Perk Unique ID!")
@@ -395,7 +410,7 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, target, perkUniqueID)
-        local perkTable = Schema.perk.Get(perkUniqueID)
+		local perkTable = Schema.perk.Get(perkUniqueID)
 
 		if (not perkTable) then
 			client:Notify("Invalid Perk Unique ID!")

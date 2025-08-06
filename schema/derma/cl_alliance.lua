@@ -23,48 +23,52 @@ function PANEL:Init()
 	self.message:DockMargin(8, 8, 8, 8)
 	self.message:Dock(FILL)
 	self.message:SetTextColor(color_white)
-    self.message:SetFont(BUTTON_FONT_SMALL)
+	self.message:SetFont(BUTTON_FONT_SMALL)
 
 	self.actions = self:Add("EditablePanel")
-    self.actions:Dock(RIGHT)
+	self.actions:Dock(RIGHT)
 end
 
 function PANEL:SetMessage(message, actions, noticeKey)
 	self.message:SetText(message)
 	self.message:SizeToContents()
 
-    if (type(actions) == "table") then
-        local actionsWidth = 0
+	local actionsWidth = 0
 
-        for i = #actions, 1, -1 do
-            local action = actions[i]
-            local button = self.actions:Add("expButton")
+	if (type(actions) == "table") then
+		for i = #actions, 1, -1 do
+			local action = actions[i]
+			local button = self.actions:Add("expButton")
 
-            button:Dock(RIGHT)
-            button:DockMargin(0, 0, 4, 0)
-            button:SetScale("small")
-            button:SetText(action.text)
-            button.DoClick = action.callback
+			button:Dock(RIGHT)
+			button:DockMargin(0, 0, 4, 0)
+			button:SetScale("small")
+			button:SetText(action.text)
+			button.DoClick = action.callback
 
 			actionsWidth = actionsWidth + 4 + button:GetWide()
-        end
+		end
+	else
+		self.actions:Clear()
+	end
 
-		self.actions:SetWide(actionsWidth)
-    elseif (actions == true) then
-        self.close = self.actions:Add("DImageButton")
-        self.close:SetSize(16, 16)
-        self.close:SetStretchToFit(false)
-        self.close:Dock(RIGHT)
-        self.close:SetImage("icon16/cross.png")
-        self.close.DoClick = function()
-            self:Remove()
-            table.remove(Schema.alliance.notices, noticeKey)
-			self:GetParent():Update()
-        end
-        self.close:SetVisible(true)
-    else
-        self.actions:Clear()
-    end
+	self.close = self.actions:Add("DImageButton")
+	self.close:SetSize(16, 16)
+	self.close:SetStretchToFit(false)
+	self.close:Dock(RIGHT)
+	self.close:DockMargin(4, 0, 0, 0)
+	self.close:SetImage("icon16/cross.png")
+	self.close.DoClick = function()
+		self:Remove()
+		table.remove(Schema.alliance.notices, noticeKey)
+		self:GetParent():Update()
+	end
+	self.close:SetVisible(true)
+	self.close:MoveToBack()
+
+	actionsWidth = actionsWidth + 4 + self.close:GetWide()
+
+	self.actions:SetWide(actionsWidth)
 end
 
 function PANEL:Paint(width, height)
@@ -85,32 +89,32 @@ function PANEL:AddNotice(message, actions, noticeKey)
 	actions = actions == nil and true or actions
 
 	local panel = self:Add("exp_AllianceNotice")
-    panel:Dock(TOP)
+	panel:Dock(TOP)
 	panel:SetMessage(message, actions, noticeKey)
 
 	return table.insert(self.notices, panel), panel
 end
 
 function PANEL:RemoveNotice(index)
-    local panel = self.notices[index]
+	local panel = self.notices[index]
 
-    if (IsValid(panel)) then
-        panel:Remove()
-    end
+	if (IsValid(panel)) then
+		panel:Remove()
+	end
 
-    table.remove(self.notices, index)
+	table.remove(self.notices, index)
 end
 
 function PANEL:Update()
-    self:Clear()
+	self:Clear()
 
 	local totalHeight = 0
 
-    for noticeKey, notice in ipairs(Schema.alliance.notices) do
-        local index, panel = self:AddNotice(notice.notice, notice.actions, noticeKey)
+	for noticeKey, notice in ipairs(Schema.alliance.notices) do
+		local index, panel = self:AddNotice(notice.notice, notice.actions, noticeKey)
 
 		totalHeight = totalHeight + 4 + panel:GetTall()
-    end
+	end
 
 	self:SetTall(totalHeight)
 end
@@ -121,26 +125,26 @@ vgui.Register("exp_AllianceNotices", PANEL, "EditablePanel")
 PANEL = {}
 
 function PANEL:Init()
-    self:SetTall(64)
+	self:SetTall(64)
 
 	self.inAlliance = self:Add("EditablePanel")
-    self.inAlliance:Dock(FILL)
+	self.inAlliance:Dock(FILL)
 
-    self.invite = self.inAlliance:Add("expButton")
-    self.invite:Dock(LEFT)
-    self.invite:SetText("Invite")
-    self.invite.DoClick = function()
-        local menu = DermaMenu()
+	self.invite = self.inAlliance:Add("expButton")
+	self.invite:Dock(LEFT)
+	self.invite:SetText("Invite")
+	self.invite.DoClick = function()
+		local menu = DermaMenu()
 
 		local option = menu:AddOption("Invite the character you are looking at", function()
-			ix.command.Send("AllyInvite")
-        end)
+			ix.command.Send("AllianceInvite")
+		end)
 		option:SetFont("ixMenuButtonFont")
 
 		-- option = menu:AddOption("Invite character by name", function()
-        --     -- TODO
-        -- end)
-        -- option:SetFont("ixMenuButtonFont")
+		--     -- TODO
+		-- end)
+		-- option:SetFont("ixMenuButtonFont")
 
 		menu:Open()
 	end
@@ -148,32 +152,30 @@ function PANEL:Init()
 	self.leave = self.inAlliance:Add("expButton")
 	self.leave:Dock(RIGHT)
 	self.leave:SetText("Leave Alliance")
-    self.leave.DoClick = function()
-        Derma_Query(
-            "Are you sure that you want to leave the alliance?",
-            "Leave the alliance.",
-            "Yes", function()
-                ix.command.Send("AllyLeave")
-            end,
-            "No", function() end
-        )
-    end
+	self.leave.DoClick = function()
+		Derma_Query(
+			"Are you sure that you want to leave the alliance?",
+			"Leave the alliance.",
+			"Yes", function()
+				ix.command.Send("AllianceLeave")
+			end,
+			"No", function() end
+		)
+	end
 
 	self.notInAlliance = self:Add("EditablePanel")
 	self.notInAlliance:Dock(FILL)
 
 	self.create = self.notInAlliance:Add("expButton")
 	self.create:Dock(RIGHT)
-	self.create:SetText("Create New Alliance (".. ix.currency.Get(ix.config.Get("allianceCost")) ..")")
+	self.create:SetText("Create New Alliance (" .. ix.currency.Get(ix.config.Get("allianceCost")) .. ")")
 	self.create.DoClick = function()
 		Derma_StringRequest(
-			"Create New Alliance (".. ix.currency.Get(ix.config.Get("allianceCost")) ..")",
+			"Create New Alliance (" .. ix.currency.Get(ix.config.Get("allianceCost")) .. ")",
 			"Enter the name of the alliance you want to create.",
 			"",
 			function(name)
-				net.Start("AllianceRequestCreate")
-				net.WriteString(name)
-				net.SendToServer()
+				ix.command.Send("AllianceCreate", name)
 			end
 		)
 	end
@@ -185,8 +187,8 @@ function PANEL:SetAlliance(alliance)
 	if (alliance) then
 		self.inAlliance:SetVisible(true)
 		self.notInAlliance:SetVisible(false)
-    else
-        self.inAlliance:SetVisible(false)
+	else
+		self.inAlliance:SetVisible(false)
 		self.notInAlliance:SetVisible(true)
 	end
 end
@@ -229,39 +231,39 @@ function PANEL:Init()
 	self.name:DockMargin(8, 8, 8, 8)
 	self.name:Dock(FILL)
 	self.name:SetTextColor(color_white)
-    self.name:SetFont("ixSmallBoldFont")
+	self.name:SetFont("ixSmallBoldFont")
 
-    self.rankButton = self:Add("DImageButton")
-    self.rankButton:SetSize(32, 32)
+	self.rankButton = self:Add("DImageButton")
+	self.rankButton:SetSize(32, 32)
 	self.rankButton:SetStretchToFit(false)
-    self.rankButton:Dock(RIGHT)
+	self.rankButton:Dock(RIGHT)
 	self.rankButton:SetZPos(1)
-    self.rankButton:SetHelixTooltip(function(tooltip)
+	self.rankButton:SetHelixTooltip(function(tooltip)
 		local name = tooltip:AddRow("name")
 		name:SetText("Set member rank")
 		name:SizeToContents()
 	end)
-    self.rankButton:SetImage("icon16/user_edit.png")
-    self.rankButton.DoClick = function()
-        local menu = DermaMenu()
+	self.rankButton:SetImage("icon16/user_edit.png")
+	self.rankButton.DoClick = function()
+		local menu = DermaMenu()
 
-        for rank, rankName in ipairs(RANKS) do
-            local option = menu:AddOption(rankName, function()
-                net.Start("AllianceRequestSetRank")
-                net.WriteEntity(self.client)
-                net.WriteUInt(rank, 8)
-                net.SendToServer()
-            end)
-            option:SetFont("ixMenuButtonFont")
-        end
+		for rank, rankName in ipairs(RANKS) do
+			local option = menu:AddOption(rankName, function()
+				net.Start("AllianceRequestSetRank")
+				net.WriteEntity(self.client)
+				net.WriteUInt(rank, 8)
+				net.SendToServer()
+			end)
+			option:SetFont("ixMenuButtonFont")
+		end
 
-        menu:Open()
-    end
+		menu:Open()
+	end
 
-    self.kickButton = self:Add("DImageButton")
-    self.kickButton:SetSize(32, 32)
-    self.kickButton:SetStretchToFit(false)
-    self.kickButton:Dock(RIGHT)
+	self.kickButton = self:Add("DImageButton")
+	self.kickButton:SetSize(32, 32)
+	self.kickButton:SetStretchToFit(false)
+	self.kickButton:Dock(RIGHT)
 	self.kickButton:SetZPos(0)
 	self.kickButton:SetHelixTooltip(function(tooltip)
 		local name = tooltip:AddRow("name")
@@ -299,9 +301,9 @@ function PANEL:SetMember(member)
 		end
 	end
 
-    if (IsValid(client)) then
-        self.client = client
-    end
+	if (IsValid(client)) then
+		self.client = client
+	end
 
 	if (client == LocalPlayer()) then
 		self.kickButton:SetVisible(false)
@@ -341,15 +343,15 @@ function PANEL:Init()
 end
 
 function PANEL:Update()
-    self:Clear()
+	self:Clear()
 
-    self.loading = self:Add("EditablePanel")
-    self.loading:Dock(FILL)
-    self.loading.Paint = function(self, width, height)
-        surface.SetDrawColor(color_white)
-        surface.SetMaterial(Material("icon16/hourglass.png"))
-        surface.DrawTexturedRectRotated(16, height * .5, 16, 16, RealTime() * 180)
-    end
+	self.loading = self:Add("EditablePanel")
+	self.loading:Dock(FILL)
+	self.loading.Paint = function(self, width, height)
+		surface.SetDrawColor(color_white)
+		surface.SetMaterial(Material("icon16/hourglass.png"))
+		surface.DrawTexturedRectRotated(16, height * .5, 16, 16, RealTime() * 180)
+	end
 
 	if (not self.alliance) then
 		return
@@ -361,13 +363,13 @@ function PANEL:Update()
 end
 
 function PANEL:SetMembers(members)
-    self:Clear()
+	self:Clear()
 
 	self.members = {}
 
 	for _, member in ipairs(members) do
 		local index, memberPanel = self:AddMember(member)
-        local id = index % 2 == 0 and 1 or 2
+		local id = index % 2 == 0 and 1 or 2
 
 		memberPanel:SetBackgroundPaintFunction(rowPaintFunctions[id])
 	end
@@ -377,24 +379,24 @@ net.Receive("AllianceUpdateMembers", function()
 	local members = net.ReadTable()
 	local panel = ix.gui.alliance
 
-    if (not IsValid(panel)) then
-        return
-    end
+	if (not IsValid(panel)) then
+		return
+	end
 
-    panel.members:SetMembers(members)
+	panel.members:SetMembers(members)
 end)
 
 net.Receive("AllianceRequestUpdateMembersDeclined", function()
 	local panel = ix.gui.alliance
 
-    if (not IsValid(panel)) then
-        return
-    end
+	if (not IsValid(panel)) then
+		return
+	end
 
-    timer.Simple(2.5, function()
-        if (not IsValid(panel)) then
-            return
-        end
+	timer.Simple(2.5, function()
+		if (not IsValid(panel)) then
+			return
+		end
 
 		panel.members:Update()
 	end)
@@ -405,17 +407,17 @@ function PANEL:SetAlliance(alliance)
 		return
 	end
 
-    self.alliance = alliance
+	self.alliance = alliance
 
 	self:Update()
 end
 
 function PANEL:AddMember(member)
-    local panel = self:Add("exp_AllianceMember")
-    panel:SetMember(member)
-    panel:Dock(TOP)
+	local panel = self:Add("exp_AllianceMember")
+	panel:SetMember(member)
+	panel:Dock(TOP)
 
-    return table.insert(self.members, panel), panel
+	return table.insert(self.members, panel), panel
 end
 
 vgui.Register("exp_AllianceMembers", PANEL, "DScrollPanel")
@@ -448,24 +450,25 @@ function PANEL:Init()
 	self.membersHeading:SetText("")
 
 	self.members = self:Add("exp_AllianceMembers")
-    self.members:Dock(FILL)
+	self.members:Dock(FILL)
 
 	self.nextThink = 0
 
-    self:Update()
+	self:Update()
 
 	ix.gui.alliance = self
 end
 
 function PANEL:Update(alliance)
 	if (alliance == false) then
-        alliance = nil
+		alliance = nil
 
 		Schema.alliance.notices = {}
-		self.notices:Update()
 	else
 		alliance = LocalPlayer():GetAlliance()
 	end
+
+	self.notices:Update()
 
 	if (not alliance) then
 		self.members:SetAlliance(nil)
@@ -480,13 +483,12 @@ function PANEL:Update(alliance)
 	self.title:SetVisible(true)
 	self.title:SetText("Alliance: '" .. alliance.name .. "'")
 	self.title:SetTextColor(derma.GetColor("Success", self))
-    self.title:SizeToContents()
+	self.title:SizeToContents()
 	self.actions:SetAlliance(alliance)
 	self.members:SetAlliance(alliance)
 	self.membersHeading:SetText("Members")
 	self.membersHeading:SizeToContents()
 	self.members:SetVisible(true)
-	self.notices:Update()
 end
 
 vgui.Register("exp_Alliance", PANEL, "EditablePanel")
@@ -517,7 +519,7 @@ net.Receive("AllianceMemberLeft", function()
 
 	local character = LocalPlayer():GetCharacter()
 
-    if (memberCharacterId == character:GetID()) then
+	if (memberCharacterId == character:GetID()) then
 		panel:Update(false)
 	else
 		panel:Update()

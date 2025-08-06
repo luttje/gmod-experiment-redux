@@ -5,8 +5,8 @@ net.Receive("AllianceMemberInvitation", function()
 	local allianceId = net.ReadUInt(32)
 	local allianceName = net.ReadString()
 
-    Schema.alliance.notices[#Schema.alliance.notices + 1] = {
-        notice = "You have been invited to join the alliance '" .. allianceName .. "'.",
+	Schema.alliance.notices[#Schema.alliance.notices + 1] = {
+		notice = "You have been invited to join the alliance '" .. allianceName .. "'.",
 		allianceId = allianceId,
 		actions = {
 			{
@@ -26,7 +26,7 @@ net.Receive("AllianceMemberInvitation", function()
 				end
 			}
 		}
-    }
+	}
 
 	if (IsValid(ix.gui.alliance)) then
 		ix.gui.alliance:Update()
@@ -34,14 +34,14 @@ net.Receive("AllianceMemberInvitation", function()
 end)
 
 net.Receive("AllianceInviteDeclined", function()
-    local allianceId = net.ReadUInt(32)
+	local allianceId = net.ReadUInt(32)
 
-    for k, v in ipairs(Schema.alliance.notices) do
-        if (v.allianceId == allianceId) then
-            table.remove(Schema.alliance.notices, k)
-            break
-        end
-    end
+	for k, v in ipairs(Schema.alliance.notices) do
+		if (v.allianceId == allianceId) then
+			table.remove(Schema.alliance.notices, k)
+			break
+		end
+	end
 
 	if (IsValid(ix.gui.alliance)) then
 		ix.gui.alliance:Update()
