@@ -11,7 +11,7 @@ net.Receive("AllianceMemberInvitation", function()
 		actions = {
 			{
 				text = "Accept",
-				callback = function()
+				callback = function(button, notice)
 					net.Start("AllianceRequestInviteAccept")
 					net.WriteUInt(allianceId, 32)
 					net.SendToServer()

@@ -90,11 +90,18 @@ function Schema.alliance.GetOnlineMembers(allianceId)
 	return members
 end
 
+--- Attempts to add an alliance member to the given alliance.
+--- @param allianceId number The ID of the alliance to add the member to.
+--- @param memberId number The ID of the character to add as a member.
+--- @param memberName string The name of the member to add.
+--- @param memberRank number The rank of the member to add.
+--- @param callback fun(success: boolean, reason: string?, alliance: table?) When the alliance is valid it will be passed as the third argument.
 function Schema.alliance.AddMember(allianceId, memberId, memberName, memberRank, callback)
 	return Schema.util.RunSingleWithinScope("AllianceModifyMembers", function(release)
 		local query
 
 		query = mysql:Select("exp_alliances")
+		query:Select("name")
 		query:Select("members")
 		query:Where("alliance_id", allianceId)
 		query:Callback(function(result)
@@ -104,7 +111,8 @@ function Schema.alliance.AddMember(allianceId, memberId, memberName, memberRank,
 				return
 			end
 
-			local members = util.JSONToTable(result[1].members) or {}
+			local alliance = result[1]
+			local members = util.JSONToTable(alliance.members) or {}
 
 			table.insert(members, {
 				id = memberId,
@@ -118,12 +126,12 @@ function Schema.alliance.AddMember(allianceId, memberId, memberName, memberRank,
 			query:Callback(function(result, status)
 				if (status == false) then
 					release()
-					callback(false, "Failed to add member.")
+					callback(false, "Failed to add member.", alliance)
 					return
 				end
 
 				release()
-				callback(true)
+				callback(true, nil, alliance)
 			end)
 			query:Execute()
 		end)
@@ -523,6 +531,7 @@ function Schema.alliance.RequestSendMembers(client)
 		end
 
 		net.Start("AllianceUpdateMembers")
+		net.WriteUInt(alliance.id, 32)
 		net.WriteTable(members)
 		net.Send(client)
 	end)
@@ -542,6 +551,7 @@ function Schema.alliance.RequestSendMembersToAlliance(allianceId)
 		end
 
 		net.Start("AllianceUpdateMembers")
+		net.WriteUInt(allianceId, 32)
 		net.WriteTable(members)
 		net.Send(onlineMembers)
 	end)
@@ -623,7 +633,7 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 
 	local canRun = Schema.alliance.AddMember(allianceId, client:GetCharacter():GetID(), client:GetCharacter():GetName(),
 		RANK_RCT,
-		function(success, reason)
+		function(success, reason, alliance)
 			if (not IsValid(client)) then
 				return
 			end
@@ -642,9 +652,10 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 					" has accepted your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.")
 			end
 
+			local allianceName = alliance.name
 			client:SetAlliance({
 				id = allianceId,
-				name = allianceName,
+				name = alliance.name,
 			})
 			client:SetAllianceRank(RANK_RCT)
 

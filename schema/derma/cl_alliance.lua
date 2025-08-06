@@ -30,6 +30,7 @@ function PANEL:Init()
 end
 
 function PANEL:SetMessage(message, actions, noticeKey)
+	self.noticeKey = noticeKey
 	self.message:SetText(message)
 	self.message:SizeToContents()
 
@@ -60,7 +61,7 @@ function PANEL:SetMessage(message, actions, noticeKey)
 	self.close:SetImage("icon16/cross.png")
 	self.close.DoClick = function()
 		self:Remove()
-		table.remove(Schema.alliance.notices, noticeKey)
+		table.remove(Schema.alliance.notices, self.noticeKey)
 		self:GetParent():Update()
 	end
 	self.close:SetVisible(true)
@@ -376,6 +377,7 @@ function PANEL:SetMembers(members)
 end
 
 net.Receive("AllianceUpdateMembers", function()
+	local allianceId = net.ReadUInt(32)
 	local members = net.ReadTable()
 	local panel = ix.gui.alliance
 
@@ -384,6 +386,19 @@ net.Receive("AllianceUpdateMembers", function()
 	end
 
 	panel.members:SetMembers(members)
+	panel:Update()
+
+	-- If we've been added to an alliance, remove the invite notice
+	for k, v in ipairs(Schema.alliance.notices) do
+		if (v.allianceId == allianceId) then
+			table.remove(Schema.alliance.notices, k)
+			break
+		end
+	end
+
+	if (IsValid(ix.gui.alliance)) then
+		ix.gui.alliance:Update()
+	end
 end)
 
 net.Receive("AllianceRequestUpdateMembersDeclined", function()

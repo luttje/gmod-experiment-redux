@@ -19,6 +19,7 @@ function META:SetAlliance(alliance)
 	local isValidAlliance = type(alliance) == "table" and alliance.id ~= nil and alliance.name ~= nil
 
 	if (alliance ~= nil and not isValidAlliance) then
+		PrintTable(alliance)
 		error("Alliance must be a table with an `id` and `name` property.")
 	end
 
@@ -49,38 +50,38 @@ function META:GetAlliance()
 end
 
 function META:QueueBoostRemove(boostID, attribID, delay)
-    local character = self:GetCharacter()
+	local character = self:GetCharacter()
 
-    if (not character) then
-        return
-    end
+	if (not character) then
+		return
+	end
 
-    local boostsToRemove = character:GetVar("boostsToRemove", {})
+	local boostsToRemove = character:GetVar("boostsToRemove", {})
 
-    boostsToRemove[boostID] = boostsToRemove[boostID] or {}
-    boostsToRemove[boostID][attribID] = CurTime() + delay
+	boostsToRemove[boostID] = boostsToRemove[boostID] or {}
+	boostsToRemove[boostID][attribID] = CurTime() + delay
 
-    character:SetVar("boostsToRemove", boostsToRemove)
+	character:SetVar("boostsToRemove", boostsToRemove)
 end
 
 function META:CheckQueuedBoostRemovals(character)
-    local boostsToRemove = character:GetVar("boostsToRemove", {})
-    local curTime = CurTime()
+	local boostsToRemove = character:GetVar("boostsToRemove", {})
+	local curTime = CurTime()
 
-    for boostID, attributes in pairs(boostsToRemove) do
-        for attribID, removeTime in pairs(attributes) do
-            if (curTime >= removeTime) then
-                character:RemoveBoost(boostID, attribID)
-                boostsToRemove[boostID][attribID] = nil
-            end
-        end
-    end
+	for boostID, attributes in pairs(boostsToRemove) do
+		for attribID, removeTime in pairs(attributes) do
+			if (curTime >= removeTime) then
+				character:RemoveBoost(boostID, attribID)
+				boostsToRemove[boostID][attribID] = nil
+			end
+		end
+	end
 
-    character:SetVar("boostsToRemove", boostsToRemove)
+	character:SetVar("boostsToRemove", boostsToRemove)
 end
 
 function META:RegisterEntityToRemoveOnLeave(entity)
-    local character = self:GetCharacter()
+	local character = self:GetCharacter()
 	local characterEntities = character:GetVar("charEnts") or {}
 	table.insert(characterEntities, entity)
 	character:SetVar("charEnts", characterEntities, true)
@@ -91,7 +92,7 @@ end
 --- @param delay number The delay in seconds
 --- @param onCancel function The function to call if the player moves before the delay is up
 function META:DoStandStillAction(callback, delay, onCancel)
-	local uniqueID = "expStandStill"..self:SteamID64()
+	local uniqueID = "expStandStill" .. self:SteamID64()
 	local startPos = self:GetPos()
 	local moveMargin = 4
 
@@ -134,7 +135,7 @@ end
 -- @number[opt=5] getUpGrace How much time in seconds to wait before the player is able to get back up manually. Set to
 -- the same number as `time` to disable getting up manually entirely
 function META:SetRagdolled(bState, time, getUpGrace)
-	if (!self:Alive()) then
+	if (! self:Alive()) then
 		return
 	end
 
@@ -155,7 +156,7 @@ function META:SetRagdolled(bState, time, getUpGrace)
 			self:SetLocalVar("blur", nil)
 			self:SetLocalVar("ragdoll", nil)
 
-			if (!entity.ixNoReset) then
+			if (! entity.ixNoReset) then
 				self:SetPos(entity:GetPos())
 			end
 
@@ -200,12 +201,12 @@ function META:SetRagdolled(bState, time, getUpGrace)
 					entity:DropToFloor()
 					self:SetPos(entity:GetPos() + Vector(0, 0, 16))
 
-					local positions = ix.util.FindEmptySpace(self, {entity, self})
+					local positions = ix.util.FindEmptySpace(self, { entity, self })
 
 					for _, v in ipairs(positions) do
 						self:SetPos(v)
 
-						if (!self:IsStuck()) then
+						if (! self:IsStuck()) then
 							return
 						end
 					end
@@ -271,7 +272,7 @@ function META:SetRagdolled(bState, time, getUpGrace)
 					self:SetPos(entity:GetPos())
 
 					if (velocity:Length2D() >= 8) then
-						if (!entity.ixPausing) then
+						if (! entity.ixPausing) then
 							self:SetAction()
 							entity.ixPausing = true
 						end
@@ -328,7 +329,7 @@ function META:CreateServerRagdoll(bDontSetPlayer)
 
 	entity:Spawn()
 
-	if (!bDontSetPlayer) then
+	if (! bDontSetPlayer) then
 		entity:SetNetVar("player", self)
 	end
 
