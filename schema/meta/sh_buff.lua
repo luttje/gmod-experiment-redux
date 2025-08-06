@@ -123,6 +123,20 @@ function META:OnSetup(client, buff)
 	end
 end
 
+--- Called when the buff is reset on the player. Override this to add custom behavior.
+--- @param client Player
+--- @param buff ActiveBuff
+function META:OnReset(client, buff)
+
+end
+
+--- Called when the buff is stacked on the player. Override this to add custom behavior.
+--- @param client Player
+--- @param buff ActiveBuff
+function META:OnStacked(client, buff)
+
+end
+
 --- @param client Player
 --- @param buff ActiveBuff
 --- @return boolean? # Return true to remove the buff

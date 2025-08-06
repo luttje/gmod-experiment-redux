@@ -42,6 +42,22 @@ function PLUGIN:GetLockerRotEvent()
 	return self.lockerRotEvent
 end
 
+function PLUGIN:IsLockerRotEventPlayer(client)
+	local lockerRotEvent = self:GetLockerRotEvent()
+
+	if (not lockerRotEvent) then
+		return false
+	end
+
+	local targetCharacter = lockerRotEvent.targetCharacter
+
+	if (not targetCharacter) then
+		return false
+	end
+
+	return targetCharacter == client:GetCharacter()
+end
+
 function PLUGIN:LockerRotThink()
 	local interval = ix.config.Get("nemesisAiLockerRotIntervalSeconds")
 
@@ -64,6 +80,10 @@ function PLUGIN:LockerRotThink()
 		local character = client:GetCharacter()
 
 		if (not character) then
+			continue
+		end
+
+		if (client:IsBot()) then
 			continue
 		end
 
@@ -501,6 +521,9 @@ function PLUGIN:SetUpIfNeeded(client)
 				return
 			end
 
+			local isSuccessful = false
+			hook.Run("PlayerLockerRotEnded", client, isSuccessful)
+
 			self:ClearLockerRotNetVar(client)
 			local removedItemCount = self:RemoveAllInfectedItems(character)
 			self.lockerRotEvent = nil
@@ -586,6 +609,9 @@ function PLUGIN:OnPlayerLockerOpened(client, lockers)
 			{ client }
 		)
 	end
+
+	local isSuccessful = true
+	hook.Run("PlayerLockerRotEnded", client, isSuccessful)
 
 	local randomTaunt = self.lockerRotCompleteAntiVirusTaunt[math.random(#self.lockerRotCompleteAntiVirusTaunt)]
 	self:PlayNemesisSentences(randomTaunt, nil, client:GetName())

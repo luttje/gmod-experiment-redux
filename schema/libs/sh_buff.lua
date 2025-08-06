@@ -70,6 +70,7 @@ if (SERVER) then
 			end
 
 			if (buff) then
+				buffTable:OnReset(client, buff)
 				hook.Run("PlayerBuffReset", client, buffTable, buff)
 			end
 		end
@@ -85,6 +86,7 @@ if (SERVER) then
 			end
 
 			if (buff) then
+				buffTable:OnStacked(client, buff)
 				hook.Run("PlayerBuffStacked", client, buffTable, buff)
 			end
 		end
