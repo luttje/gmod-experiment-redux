@@ -576,6 +576,21 @@ function Schema.alliance.RequestInviteMember(client, member)
 	end
 
 	member.expAllianceInvites = member.expAllianceInvites or {}
+
+	-- Only have one invite per alliance active at a time
+	if (member.expAllianceInvites[alliance.id]) then
+		client:Notify(member:Name() .. " has already been invited to this alliance!")
+		return
+	end
+
+	-- Prevent spamming invites by tracking already declined invites
+	member.expAllianceInvitesDeclined = member.expAllianceInvitesDeclined or {}
+
+	if (member.expAllianceInvitesDeclined[alliance.id]) then
+		client:Notify(member:Name() .. " has already declined an invite to this alliance!")
+		return
+	end
+
 	member.expAllianceInvites[alliance.id] = client
 
 	client:Notify("You have invited " .. member:Name() .. " to the '" .. alliance.name .. "' alliance.")
@@ -678,10 +693,15 @@ function Schema.alliance.RequestInviteDecline(client, allianceId)
 
 	if (IsValid(inviter)) then
 		inviter:Notify(client:Name() ..
-			" has declined your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance.")
+			" has declined your invitation to join the '" .. inviter:GetAlliance().name .. "' alliance. "
+			.. "You can invite them again after they rejoin the server."
+		)
 	end
 
 	client.expAllianceInvites[allianceId] = nil
+
+	client.expAllianceInvitesDeclined = client.expAllianceInvitesDeclined or {}
+	client.expAllianceInvitesDeclined[allianceId] = true
 
 	client:Notify("You have declined the invite to the alliance.")
 	net.Start("AllianceInviteDeclined")
