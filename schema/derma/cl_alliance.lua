@@ -12,6 +12,10 @@ local BUTTON_FONT = "ixMenuButtonFont"
 local BUTTON_FONT_SMALL = "ixGenericFont"
 local BUTTON_HEIGHT = 32
 
+local function getLocalRank()
+	return LocalPlayer():GetCharacter():GetData("rank", RANK_RECRUIT)
+end
+
 -- exp_AllianceNotice
 local PANEL = {}
 
@@ -142,10 +146,17 @@ function PANEL:Init()
 		end)
 		option:SetFont("ixMenuButtonFont")
 
-		-- option = menu:AddOption("Invite character by name", function()
-		--     -- TODO
-		-- end)
-		-- option:SetFont("ixMenuButtonFont")
+		option = menu:AddOption("Invite character by name", function()
+			Derma_StringRequest(
+				"Invite Character",
+				"Enter the name of the character you want to invite.",
+				"",
+				function(name)
+					ix.command.Send("AllianceInviteByName", name)
+				end
+			)
+		end)
+		option:SetFont("ixMenuButtonFont")
 
 		menu:Open()
 	end
@@ -250,10 +261,20 @@ function PANEL:Init()
 
 		for rank, rankName in ipairs(RANKS) do
 			local option = menu:AddOption(rankName, function()
-				net.Start("AllianceRequestSetRank")
-				net.WriteEntity(self.client)
-				net.WriteUInt(rank, 8)
-				net.SendToServer()
+				if (rank < RANK_LIEUTENANT or rank < getLocalRank()) then
+					ix.command.Send("AllianceSetRank", self.client:SteamID(), rank)
+					return
+				end
+
+				-- Warn the user if they are giving someone the ability to demote or kick them
+				Derma_Query(
+					"Are you sure you want to give this rank? They will be able to demote and kick you.",
+					"Confirm Rank Change",
+					"Yes", function()
+						ix.command.Send("AllianceSetRank", self.client:SteamID(), rank)
+					end,
+					"No", function() end
+				)
 			end)
 			option:SetFont("ixMenuButtonFont")
 		end
@@ -277,9 +298,7 @@ function PANEL:Init()
 			"Are you sure that you want to kick this member?",
 			"Kick member",
 			"Yes", function()
-				net.Start("AllianceRequestKick")
-				net.WriteEntity(self.client)
-				net.SendToServer()
+				ix.command.Send("AllianceKick", self.client:SteamID())
 			end,
 			"No", function() end
 		)
@@ -307,6 +326,14 @@ function PANEL:SetMember(member)
 	end
 
 	if (client == LocalPlayer()) then
+		self.kickButton:SetVisible(false)
+	end
+
+	local clientRank = getLocalRank()
+	local canSetRank = (clientRank >= RANK_LIEUTENANT and rankIsLower) or (clientRank == RANK_GENERAL)
+
+	if (not canSetRank) then
+		self.rankButton:SetVisible(false)
 		self.kickButton:SetVisible(false)
 	end
 

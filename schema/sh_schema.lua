@@ -50,24 +50,24 @@ Schema.RARITY_UNCOMMON = 15
 Schema.RARITY_COMMON = 45
 Schema.RARITY_VERY_COMMON = 60
 
-RANK_RCT = 0
-RANK_PVT = 1
-RANK_SGT = 2
-RANK_LT = 3
-RANK_CPT = 4
-RANK_MAJ = 5
-RANK_COL = 6
-RANK_GEN = 7
+RANK_RECRUIT = 0
+RANK_PRIVATE = 1
+RANK_SERGEANT = 2
+RANK_LIEUTENANT = 3
+RANK_CAPTAIN = 4
+RANK_MAJOR = 5
+RANK_COLONEL = 6
+RANK_GENERAL = 7
 
 RANKS = {
-	[RANK_RCT] = "Recruit",
-	[RANK_PVT] = "Private",
-	[RANK_SGT] = "Sergeant",
-	[RANK_LT] = "Lieutenant",
-	[RANK_CPT] = "Captain",
-	[RANK_MAJ] = "Major",
-	[RANK_COL] = "Colonel",
-	[RANK_GEN] = "General",
+	[RANK_RECRUIT] = "Recruit",
+	[RANK_PRIVATE] = "Private",
+	[RANK_SERGEANT] = "Sergeant",
+	[RANK_LIEUTENANT] = "Lieutenant",
+	[RANK_CAPTAIN] = "Captain",
+	[RANK_MAJOR] = "Major",
+	[RANK_COLONEL] = "Colonel",
+	[RANK_GENERAL] = "General",
 }
 
 ix.util.IncludeDir("meta")

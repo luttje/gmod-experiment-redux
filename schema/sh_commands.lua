@@ -40,11 +40,11 @@ do
 
 	COMMAND.description = "Invite the character you are looking at to your alliance."
 
-	function COMMAND:OnRun(client)
+	function COMMAND:OnRun(client, target)
 		local target = Schema.GetPlayer(client:GetEyeTraceNoCursor().Entity)
 
 		if (not target) then
-			client:Notify("You must look at a character!")
+			client:Notify("Invalid target, or not looking at a character!")
 			return
 		end
 
@@ -57,11 +57,55 @@ end
 do
 	local COMMAND = {}
 
+	COMMAND.description = "Invite the specified character to your alliance."
+	COMMAND.arguments = {
+		ix.type.player
+	}
+
+	function COMMAND:OnRun(client, target)
+		Schema.alliance.RequestInviteMember(client, target)
+	end
+
+	ix.command.Add("AllianceInviteByName", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
 	COMMAND.description = "Kick a character out of your alliance."
 	COMMAND.arguments = { ix.type.character }
 
 	function COMMAND:OnRun(client, target)
 		Schema.alliance.RequestKick(client, target)
+	end
+
+	ix.command.Add("AllianceKick", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Set the rank of a member in your alliance."
+	COMMAND.arguments = {
+		ix.type.player,
+		ix.type.number
+	}
+
+	function COMMAND:OnRun(client, member, rank)
+		Schema.alliance.RequestSetRank(client, member, rank)
+	end
+
+	ix.command.Add("AllianceSetRank", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Kick a member from your alliance."
+	COMMAND.arguments = { ix.type.player }
+
+	function COMMAND:OnRun(client, member)
+		Schema.alliance.RequestKick(client, member)
 	end
 
 	ix.command.Add("AllianceKick", COMMAND)

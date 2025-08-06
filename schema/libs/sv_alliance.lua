@@ -7,8 +7,6 @@ util.AddNetworkString("AllianceRequestUpdateMembers")
 util.AddNetworkString("AllianceRequestUpdateMembersDeclined")
 util.AddNetworkString("AllianceForceUpdate")
 util.AddNetworkString("AllianceUpdateMembers")
-util.AddNetworkString("AllianceRequestSetRank")
-util.AddNetworkString("AllianceRequestKick")
 
 Schema.alliance = Schema.alliance or {}
 
@@ -42,7 +40,7 @@ end)
 function Schema.alliance.Create(client, allianceName, callback)
 	local character = client:GetCharacter()
 	local ownerId = character:GetID()
-	local rank = RANK_GEN
+	local rank = RANK_GENERAL
 	local query
 
 	local members = {
@@ -408,12 +406,6 @@ function Schema.alliance.RequestKick(client, member)
 	end
 end
 
-net.Receive("AllianceRequestKick", function(len, client)
-	local member = net.ReadEntity()
-
-	Schema.alliance.RequestKick(client, member)
-end)
-
 function Schema.alliance.RequestSetRank(client, member, rank)
 	if (Schema.util.Throttle("RequestSetRank", 5, client)) then
 		client:Notify("Please wait before trying to change a member's rank.")
@@ -429,14 +421,14 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 		return
 	end
 
-	if (not rank or rank < RANK_RCT or rank > RANK_GEN) then
+	if (not rank or rank < RANK_RECRUIT or rank > RANK_GENERAL) then
 		client:Notify("You entered an invalid rank!")
 		return
 	end
 
 	local clientRank = client:GetAllianceRank()
 	local rankIsLower = rank < member:GetAllianceRank()
-	local canSetRank = (clientRank >= RANK_LT and rankIsLower) or (clientRank == RANK_GEN)
+	local canSetRank = (clientRank >= RANK_LIEUTENANT and rankIsLower) or (clientRank == RANK_GENERAL)
 
 	if (not canSetRank) then
 		client:Notify("You cannot set this rank!")
@@ -444,7 +436,7 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 	end
 
 	-- If the leader tries to demote themselves, reject it
-	if (clientRank == RANK_GEN and member == client) then
+	if (clientRank == RANK_GENERAL and member == client) then
 		client:Notify("You cannot demote yourself!")
 		return
 	end
@@ -479,13 +471,6 @@ function Schema.alliance.RequestSetRank(client, member, rank)
 		client:Notify("Somebody is already modifying the alliance members. Please wait a moment and try again.")
 	end
 end
-
-net.Receive("AllianceRequestSetRank", function(len, client)
-	local member = net.ReadEntity()
-	local rank = net.ReadUInt(8)
-
-	Schema.alliance.RequestSetRank(client, member, rank)
-end)
 
 function Schema.alliance.GetAllMembers(allianceId, callback)
 	-- TODO: Cache this data in memory instead of doing a query every time
@@ -632,7 +617,7 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 	end
 
 	local canRun = Schema.alliance.AddMember(allianceId, client:GetCharacter():GetID(), client:GetCharacter():GetName(),
-		RANK_RCT,
+		RANK_RECRUIT,
 		function(success, reason, alliance)
 			if (not IsValid(client)) then
 				return
@@ -657,7 +642,7 @@ function Schema.alliance.RequestInviteAccept(client, allianceId)
 				id = allianceId,
 				name = alliance.name,
 			})
-			client:SetAllianceRank(RANK_RCT)
+			client:SetAllianceRank(RANK_RECRUIT)
 
 			client:Notify("You have joined the '" .. allianceName .. "' alliance.")
 			ix.log.Add(client, "allianceJoined", allianceName)
