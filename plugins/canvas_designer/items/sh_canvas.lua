@@ -27,22 +27,22 @@ local MAX_ELEMENTS = 10
 local GRID_SIZE = 20
 
 -- Spritesheet constants
-local SPRITE_SIZE = 64
+local SPRITE_SIZE = 128
 
 -- Available sprite types with their spritesheet positions and categories
 local SPRITE_TYPES = {
-	{ name = "Rectangle",   icon = { 0, 0 },  category = "shapes",  keywords = "square box rect" },
-	{ name = "Circle",      icon = { 1, 0 },  category = "shapes",  keywords = "round ball" },
-	{ name = "Triangle",    icon = { 2, 0 },  category = "shapes",  keywords = "tri point" },
-	{ name = "Diamond",     icon = { 3, 0 },  category = "shapes",  keywords = "rhombus gem" },
-	{ name = "Star",        icon = { 4, 0 },  category = "shapes",  keywords = "asterisk rating" },
-	{ name = "Heart",       icon = { 5, 0 },  category = "shapes",  keywords = "love like" },
-	{ name = "Arrow",       icon = { 6, 0 },  category = "arrows",  keywords = "direction right east" },
-	{ name = "Cross",       icon = { 12, 0 }, category = "symbols", keywords = "x delete remove" },
-	{ name = "Check",       icon = { 13, 0 }, category = "symbols", keywords = "tick yes confirm ok" },
-	{ name = "Lightning",   icon = { 14, 0 }, category = "symbols", keywords = "zap electric shock" },
-	{ name = "Question",    icon = { 15, 0 }, category = "symbols", keywords = "help unknown ask" },
-	{ name = "Exclamation", icon = { 16, 0 }, category = "symbols", keywords = "alert warning caution" },
+	{ name = "Rectangle",   icon = { 0, 0 }, category = "shapes",  keywords = "square box rect" },
+	{ name = "Circle",      icon = { 1, 0 }, category = "shapes",  keywords = "round ball" },
+	{ name = "Triangle",    icon = { 2, 0 }, category = "shapes",  keywords = "tri point" },
+	{ name = "Diamond",     icon = { 3, 0 }, category = "shapes",  keywords = "rhombus gem" },
+	{ name = "Star",        icon = { 4, 0 }, category = "shapes",  keywords = "asterisk rating" },
+	{ name = "Heart",       icon = { 5, 0 }, category = "shapes",  keywords = "love like" },
+	{ name = "Arrow",       icon = { 1, 1 }, category = "arrows",  keywords = "direction right east" },
+	{ name = "Cross",       icon = { 2, 1 }, category = "symbols", keywords = "x delete remove" },
+	{ name = "Check",       icon = { 3, 1 }, category = "symbols", keywords = "tick yes confirm ok" },
+	{ name = "Lightning",   icon = { 4, 1 }, category = "symbols", keywords = "zap electric shock" },
+	{ name = "Question",    icon = { 5, 1 }, category = "symbols", keywords = "help unknown ask" },
+	{ name = "Exclamation", icon = { 6, 1 }, category = "symbols", keywords = "alert warning caution" },
 }
 
 -- Theme colors
@@ -62,6 +62,10 @@ local THEME = {
 	underline = Color(255, 255, 255),
 }
 
+function ITEM:GetName()
+	return self:GetData("design", {}).name or (CLIENT and L(self.name) or self.name)
+end
+
 if (SERVER) then
 	util.AddNetworkString("expCanvasDesigner")
 	util.AddNetworkString("expCanvasSave")
@@ -73,6 +77,7 @@ if (SERVER) then
 		local itemID = net.ReadUInt(32)
 		local canvasWidth = net.ReadUInt(CANVAS_WIDTH_BITS)
 		local canvasHeight = net.ReadUInt(CANVAS_HEIGHT_BITS)
+		local name = net.ReadString()
 		local jsonData = net.ReadString()
 		local item = ix.item.instances[itemID]
 
@@ -120,7 +125,8 @@ if (SERVER) then
 		item:SetData("design", {
 			width = canvasWidth,
 			height = canvasHeight,
-			data = jsonData
+			data = jsonData,
+			name = name,
 		})
 		client:Notify("Canvas design saved!")
 	end)
@@ -166,6 +172,7 @@ elseif (CLIENT) then
 
 		obj.canvasWidth = designData.width or CANVAS_DEFAULT_WIDTH
 		obj.canvasHeight = designData.height or CANVAS_DEFAULT_HEIGHT
+		obj.name = designData.name or "Unnamed Canvas"
 
 		if (designData) then
 			obj:LoadDesign(designData.data)
@@ -191,6 +198,10 @@ elseif (CLIENT) then
 		return util.TableToJSON(self.elements)
 	end
 
+	function CanvasDesigner:OnElementsChanged()
+		-- This can be overridden to handle element changes
+	end
+
 	function CanvasDesigner:AddElement(spriteType, x, y)
 		if #self.elements >= MAX_ELEMENTS then
 			return false
@@ -210,14 +221,31 @@ elseif (CLIENT) then
 		}
 
 		table.insert(self.elements, element)
-		self.selectedElement = #self.elements
+		self:SelectElement(#self.elements)
+
+		self:OnElementsChanged()
+
 		return true
 	end
 
-	function CanvasDesigner:DeleteSelected()
-		if self.selectedElement and self.elements[self.selectedElement] then
-			table.remove(self.elements, self.selectedElement)
+	function CanvasDesigner:SelectElement(index)
+		if (not index or index < 1 or index > #self.elements) then
 			self.selectedElement = nil
+		else
+			self.selectedElement = index
+		end
+
+		self:OnElementsChanged()
+	end
+
+	function CanvasDesigner:GetSelectedElementIndex()
+		return self.selectedElement
+	end
+
+	function CanvasDesigner:DeleteSelected()
+		if (self.selectedElement and self.elements[self.selectedElement]) then
+			table.remove(self.elements, self.selectedElement)
+			self:SelectElement(nil)
 		end
 	end
 
@@ -229,11 +257,12 @@ elseif (CLIENT) then
 			local halfSizeX = sizeX * .5
 			local halfSizeY = sizeY * .5
 
-			if x >= element.x - halfSizeX and x <= element.x + halfSizeX and
-				y >= element.y - halfSizeY and y <= element.y + halfSizeY then
+			if (x >= element.x - halfSizeX and x <= element.x + halfSizeX and
+					y >= element.y - halfSizeY and y <= element.y + halfSizeY) then
 				return i
 			end
 		end
+
 		return nil
 	end
 
@@ -279,7 +308,7 @@ elseif (CLIENT) then
 			)
 
 			-- Draw selection outline
-			if self.selectedElement == i then
+			if (self:GetSelectedElementIndex() == i) then
 				surface.SetDrawColor(THEME.primary.r, THEME.primary.g, THEME.primary.b, 255)
 				surface.DrawOutlinedRect(drawX - 3, drawY - 3, sizeX + 6, sizeY + 6, 2)
 			end
@@ -344,6 +373,7 @@ elseif (CLIENT) then
 			local count = #canvas.elements
 			countLabel:SetText("Elements: " .. count .. "/" .. MAX_ELEMENTS)
 			countLabel:SetTextColor(count >= MAX_ELEMENTS and THEME.danger or THEME.success)
+			countLabel:SizeToContents()
 		end
 
 		-- Delete button
@@ -352,7 +382,7 @@ elseif (CLIENT) then
 		deleteBtn:Dock(RIGHT)
 		deleteBtn:DockMargin(0, 10, 15, 10)
 		deleteBtn.DoClick = function()
-			if canvas.selectedElement then
+			if (canvas:GetSelectedElementIndex()) then
 				canvas:DeleteSelected()
 				updateElementCount()
 			end
@@ -367,31 +397,65 @@ elseif (CLIENT) then
 			if #canvas.elements > 0 then
 				Derma_Query("Are you sure you want to clear the entire canvas?", "Clear Canvas", "Yes", function()
 					canvas.elements = {}
-					canvas.selectedElement = nil
-					updateElementCount()
+					canvas:SelectElement(nil)
 				end, "No")
 			end
 		end
 
 		-- When DELETE is pressed, clear the selected element
 		function frame:OnKeyCodePressed(keyCode)
-			if (keyCode == KEY_DELETE and canvas.selectedElement) then
+			if (keyCode == KEY_DELETE and canvas:GetSelectedElementIndex()) then
 				canvas:DeleteSelected()
 				updateElementCount()
 			end
 		end
 
-		-- Properties panel
-		local propPanel = vgui.Create("EditablePanel", container)
-		propPanel:SetWide(350)
-		propPanel:Dock(RIGHT)
-		propPanel:DockMargin(8, 0, 0, 0)
+		-- Side panel for elements list and properties
+		local sidePanel = vgui.Create("EditablePanel", container)
+		sidePanel:SetWide(350)
+		sidePanel:Dock(RIGHT)
+		sidePanel:DockMargin(8, 0, 0, 0)
 
-		propPanel.Paint = function(self, w, h)
+		sidePanel.Paint = function(self, w, h)
 			draw.RoundedBox(4, 0, 0, w, h, THEME.panel)
 		end
 
-		local propTitle = vgui.Create("DLabel", propPanel)
+		-- Elements list
+		local elementsList = vgui.Create("DTree", sidePanel)
+		elementsList:Dock(TOP)
+		elementsList:SetTall(100)
+		elementsList:DockMargin(10, 10, 10, 0)
+		elementsList.OnMouseReleased = function(node)
+			-- Deselect if we click outside any ndoe
+			canvas:SelectElement(nil)
+		end
+
+		CanvasDesigner.OnElementsChanged = function()
+			elementsList:Clear()
+
+			for i, element in ipairs(canvas.elements) do
+				local node = elementsList:AddNode(element.type .. " #" .. i)
+				node:SetIcon("icon16/application_view_list.png")
+				node:SetExpanded(false)
+
+				if (canvas:GetSelectedElementIndex() == i) then
+					node:SetSelected(true)
+				end
+
+				node.DoClick = function()
+					canvas:SelectElement(i)
+				end
+			end
+
+			updateElementCount()
+		end
+		CanvasDesigner:OnElementsChanged()
+
+		-- Properties panel
+		local propPanel = vgui.Create("DScrollPanel", sidePanel)
+		propPanel:Dock(FILL)
+
+		local propTitle = propPanel:Add("DLabel")
 		propTitle:SetText("Properties")
 		propTitle:SetTextColor(THEME.text)
 		propTitle:SetFont("ixBigFont")
@@ -399,7 +463,7 @@ elseif (CLIENT) then
 		propTitle:DockMargin(15, 15, 15, 10)
 		propTitle:SizeToContents()
 
-		local canvasPropTitle = vgui.Create("DLabel", propPanel)
+		local canvasPropTitle = propPanel:Add("DLabel")
 		canvasPropTitle:SetText("Canvas Properties")
 		canvasPropTitle:SetTextColor(THEME.text)
 		canvasPropTitle:SetFont("ixMediumFont")
@@ -407,8 +471,35 @@ elseif (CLIENT) then
 		canvasPropTitle:DockMargin(15, 15, 15, 10)
 		canvasPropTitle:SizeToContents()
 
+		-- Name control
+		local nameContainer = propPanel:Add("EditablePanel")
+		nameContainer:Dock(TOP)
+		nameContainer:SetTall(28)
+
+		local nameLabel = vgui.Create("DLabel", nameContainer)
+		nameLabel:SetText("Canvas Name")
+		nameLabel:SetTextColor(THEME.text)
+		nameLabel:SetFont("ixSmallBoldFont")
+		nameLabel:Dock(LEFT)
+		nameLabel:DockMargin(10, 10, 10, 5)
+		nameLabel:SizeToContents()
+
+		local nameEntry = vgui.Create("DTextEntry", nameContainer)
+		nameEntry:Dock(FILL)
+		nameEntry:DockMargin(10, 10, 10, 0)
+		nameEntry:SetValue(canvas.name)
+		nameEntry.OnChange = function(self)
+			local newName = self:GetValue()
+
+			if (newName and newName ~= "") then
+				canvas.name = newName
+			else
+				self:SetValue(canvas.name)
+			end
+		end
+
 		-- Canvas size control
-		local canvasWidthContainer = vgui.Create("EditablePanel", propPanel)
+		local canvasWidthContainer = propPanel:Add("EditablePanel")
 		canvasWidthContainer:Dock(TOP)
 		canvasWidthContainer:SetTall(28)
 
@@ -425,7 +516,7 @@ elseif (CLIENT) then
 		canvasWidthEntry:DockMargin(10, 10, 10, 0)
 		canvasWidthEntry:SetNumeric(true)
 		canvasWidthEntry:SetValue(tostring(canvas.canvasWidth))
-		canvasWidthEntry.OnEnter = function(self)
+		canvasWidthEntry.OnChange = function(self)
 			local newWidth = tonumber(self:GetValue())
 
 			if (newWidth and newWidth > CANVAS_MINIMUM_WIDTH and newWidth <= CANVAS_MAX_WIDTH) then
@@ -438,7 +529,7 @@ elseif (CLIENT) then
 
 		canvasWidthContainer:InvalidateLayout(true)
 
-		local canvasHeightContainer = vgui.Create("EditablePanel", propPanel)
+		local canvasHeightContainer = propPanel:Add("EditablePanel")
 		canvasHeightContainer:Dock(TOP)
 		canvasHeightContainer:SetTall(28)
 
@@ -455,7 +546,7 @@ elseif (CLIENT) then
 		canvasHeightEntry:DockMargin(10, 10, 10, 0)
 		canvasHeightEntry:SetNumeric(true)
 		canvasHeightEntry:SetValue(tostring(canvas.canvasHeight))
-		canvasHeightEntry.OnEnter = function(self)
+		canvasHeightEntry.OnChange = function(self)
 			local newHeight = tonumber(self:GetValue())
 
 			if (newHeight and newHeight > CANVAS_MINIMUM_HEIGHT and newHeight <= CANVAS_MAX_HEIGHT) then
@@ -468,7 +559,7 @@ elseif (CLIENT) then
 
 		canvasHeightContainer:InvalidateLayout(true)
 
-		local selectedPropTitle = vgui.Create("DLabel", propPanel)
+		local selectedPropTitle = propPanel:Add("DLabel")
 		selectedPropTitle:SetText("Selected Element Properties")
 		selectedPropTitle:SetTextColor(THEME.text)
 		selectedPropTitle:SetFont("ixMediumFont")
@@ -477,7 +568,7 @@ elseif (CLIENT) then
 		selectedPropTitle:SizeToContents()
 
 		-- Scale control
-		local scaleContainer = vgui.Create("EditablePanel", propPanel)
+		local scaleContainer = propPanel:Add("EditablePanel")
 		scaleContainer:SetTall(160)
 		scaleContainer:Dock(TOP)
 		scaleContainer:DockMargin(10, 5, 10, 8)
@@ -499,8 +590,8 @@ elseif (CLIENT) then
 		scaleXSlider:SetDecimals(1)
 		scaleXSlider:SetValue(1.0)
 		scaleXSlider.OnValueChanged = function(self, value)
-			if (canvas.selectedElement and canvas.elements[canvas.selectedElement]) then
-				canvas.elements[canvas.selectedElement].scaleX = value
+			if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+				canvas.elements[canvas:GetSelectedElementIndex()].scaleX = value
 			end
 		end
 		scaleXSlider.Label:SetVisible(false)
@@ -522,14 +613,14 @@ elseif (CLIENT) then
 		scaleYSlider:SetDecimals(1)
 		scaleYSlider:SetValue(1.0)
 		scaleYSlider.OnValueChanged = function(self, value)
-			if (canvas.selectedElement and canvas.elements[canvas.selectedElement]) then
-				canvas.elements[canvas.selectedElement].scaleY = value
+			if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+				canvas.elements[canvas:GetSelectedElementIndex()].scaleY = value
 			end
 		end
 		scaleYSlider.Label:SetVisible(false)
 
 		-- Color control
-		local colorContainer = vgui.Create("EditablePanel", propPanel)
+		local colorContainer = propPanel:Add("EditablePanel")
 		colorContainer:SetTall(200)
 		colorContainer:Dock(TOP)
 		colorContainer:DockMargin(10, 0, 10, 8)
@@ -550,8 +641,8 @@ elseif (CLIENT) then
 		colorMixer:SetWangs(true)
 		colorMixer:SetColor(Color(255, 255, 255, 255))
 		colorMixer.ValueChanged = function(self, color)
-			if canvas.selectedElement and canvas.elements[canvas.selectedElement] then
-				local element = canvas.elements[canvas.selectedElement]
+			if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+				local element = canvas.elements[canvas:GetSelectedElementIndex()]
 				element.color = { r = color.r, g = color.g, b = color.b, a = color.a }
 			end
 		end
@@ -738,17 +829,17 @@ elseif (CLIENT) then
 
 		-- Mouse handling for canvas
 		canvasPanel.OnMousePressed = function(self, keyCode)
-			if keyCode == MOUSE_LEFT then
+			if (keyCode == MOUSE_LEFT) then
 				local mx, my = self:CursorPos()
 				local canvasX = mx - canvas.canvasOffsetX
 				local canvasY = my - canvas.canvasOffsetY
 				local canvasWidth, canvasHeight = canvas:GetSize()
 
-				if canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight then
+				if (canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight) then
 					local elementIndex = canvas:GetElementAt(canvasX, canvasY)
 
-					if elementIndex then
-						canvas.selectedElement = elementIndex
+					if (elementIndex) then
+						canvas:SelectElement(elementIndex)
 						canvas.isDragging = true
 						canvas.dragStartX = mx
 						canvas.dragStartY = my
@@ -761,30 +852,34 @@ elseif (CLIENT) then
 						scaleYSlider:SetValue(element.scaleY)
 						colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
 					else
-						canvas.selectedElement = nil
+						canvas:SelectElement(nil)
 					end
 				end
 			end
 		end
 
 		canvasPanel.OnMouseReleased = function(self, keyCode)
-			if keyCode == MOUSE_LEFT then
+			if (keyCode == MOUSE_LEFT) then
 				canvas.isDragging = false
 			end
 		end
 
 		local lastThink = 0
 		canvasPanel.Think = function(self)
-			if CurTime() - lastThink < 0.01 then return end
+			if (CurTime() - lastThink < 0.01) then
+				return
+			end
+
 			lastThink = CurTime()
 
-			if canvas.isDragging and canvas.selectedElement then
+			if (canvas.isDragging and canvas:GetSelectedElementIndex()) then
 				local mx, my = self:CursorPos()
 				local deltaX = mx - canvas.dragStartX
 				local deltaY = my - canvas.dragStartY
 
-				local element = canvas.elements[canvas.selectedElement]
+				local element = canvas.elements[canvas:GetSelectedElementIndex()]
 				local canvasWidth, canvasHeight = canvas:GetSize()
+
 				element.x = math.Clamp(canvas.elementStartX + deltaX, 0, canvasWidth)
 				element.y = math.Clamp(canvas.elementStartY + deltaY, 0, canvasHeight)
 			end
@@ -807,6 +902,7 @@ elseif (CLIENT) then
 			net.WriteUInt(item:GetID(), 32)
 			net.WriteUInt(canvasWidth, CANVAS_WIDTH_BITS)
 			net.WriteUInt(canvasHeight, CANVAS_HEIGHT_BITS)
+			net.WriteString(canvas.name)
 			net.WriteString(jsonData)
 			net.SendToServer()
 			frame:Close()
@@ -895,6 +991,8 @@ ITEM.functions.Design = {
 			net.WriteUInt(item:GetID(), 32)
 			net.Send(item.player)
 		end
+
+		-- Don't lose item
 		return false
 	end,
 	OnCanRun = function(item)
@@ -912,6 +1010,8 @@ ITEM.functions.View = {
 			net.WriteUInt(item:GetID(), 32)
 			net.Send(item.player)
 		end
+
+		-- Don't lose item
 		return false
 	end,
 	OnCanRun = function(item)
