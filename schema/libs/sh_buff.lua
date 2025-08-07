@@ -481,6 +481,10 @@ else
 			end
 		end
 
+		local expiryTime = tooltip:Add("expExpiryTime")
+		expiryTime:SetExpiryTime(buff.activeUntil)
+		expiryTime:Dock(BOTTOM)
+
 		tooltip:SizeToContents()
 	end
 

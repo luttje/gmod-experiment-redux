@@ -1,7 +1,7 @@
 local PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(20)
+	self:SetTall(26)
 	self:SetMouseInputEnabled(true)
 	self:SetKeyboardInputEnabled(true)
 	self.value = 0
@@ -70,8 +70,15 @@ function PANEL:Paint(w, h)
 	end
 
 	draw.SimpleTextOutlined(
-		prefix .. value .. " / " .. maxValue, "ixSmallFont", 4, h / 2, color_white,
-		TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, color_black
+		prefix .. value .. " / " .. maxValue,
+		"ixSmallFont",
+		4,
+		h * .5,
+		color_white,
+		TEXT_ALIGN_LEFT,
+		TEXT_ALIGN_CENTER,
+		1,
+		color_black
 	)
 end
 
