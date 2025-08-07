@@ -1,10 +1,15 @@
 local PLUGIN = PLUGIN
 
+--- After what time in seconds to force start the event, if the victim to Locker Rot doesnt open and close their locker.
+PLUGIN.lockerRotForceStartTime = 25
+
 --- How many minutes does a player have to have their character created before they can be targeted by the Nemesis AI?
 PLUGIN.characterLockerRotGraceMinutes = 60 * 2 -- 2 hours
 
 --- How many minutes does a player have to be playing this session before they can be targeted by the Nemesis AI?
 PLUGIN.sessionLockerRotGraceMinutes = 60 * 10 -- 10 minutes
+
+PLUGIN.DISCONNECT_PENALTY_WARNING_KEY = "Locker Rot Virus"
 
 local RANK_1 = 1
 local RANK_2 = 2
@@ -325,11 +330,16 @@ function PLUGIN:StartLockerRotEvent(targetCharacter, lockerRotEvent)
 		targetCharacter:SetData("nemesisLockerRotGraceEndsAt",
 			os.time() + ix.config.Get("nemesisAiLockerRotGraceSeconds"))
 
+
 		-- We don't want players to disconnect now, since that would result in them losing their items if they have the locker rot.
-		Schema.SetDisconnectPenaltyActive(nil, true, "Locker Rot Virus")
+		Schema.SetDisconnectPenaltyActive(nil, true, self.DISCONNECT_PENALTY_WARNING_KEY)
+		SetNetVar("locker_rot_event", {
+			phaseKey = PLUGIN.PHASES.START.key,
+			forceStartTime = CurTime() + self.lockerRotForceStartTime,
+		})
 
 		-- Force the event to start if the target doesn't close their locker before the time is up
-		timer.Simple(25, function()
+		timer.Simple(self.lockerRotForceStartTime, function()
 			local client = targetCharacter and targetCharacter:GetPlayer() or nil
 
 			if (not self.lockerRotEvent or not IsValid(client)) then
@@ -359,6 +369,7 @@ function PLUGIN:OnCharacterDisconnect(client, character)
 		.. "Their items have been lost to the void."
 	)
 
+	SetNetVar("locker_rot_event", nil)
 	self.lockerRotEvent = nil
 end
 
@@ -449,9 +460,15 @@ function PLUGIN:SetUpIfNeeded(client)
 	)
 
 	local allExceptClient = Schema.util.AllPlayersExcept(client)
-	Schema.SetDisconnectPenaltyActive(allExceptClient, false, "Locker Rot Virus")
+	Schema.SetDisconnectPenaltyActive(allExceptClient, false, self.DISCONNECT_PENALTY_WARNING_KEY)
+	Schema.SetDisconnectPenaltyActive(client, true, self.DISCONNECT_PENALTY_WARNING_KEY)
 
-	client:SetLocalVar("lockerRotAntiVirusRevealTime", CurTime() + revealDelay)
+	local reavelCureLockerAt = CurTime() + revealDelay
+	client:SetLocalVar("lockerRotAntiVirusRevealTime", reavelCureLockerAt)
+	SetNetVar("locker_rot_event", {
+		phaseKey = PLUGIN.PHASES.WAITING_FOR_ANTIVIRUS.key,
+		reveilTime = reavelCureLockerAt,
+	})
 
 	local function getCharacterIfLockerRotStillActive()
 		if (not self.lockerRotEvent) then
@@ -480,15 +497,22 @@ function PLUGIN:SetUpIfNeeded(client)
 			return
 		end
 
+		local characterName = character:GetName()
 		local randomTaunt = lockerRot.taunts[math.random(#lockerRot.taunts)]
 
 		self:SetTarget(client)
 
-		self:PlayNemesisSentences(randomTaunt, nil, character:GetName())
+		self:PlayNemesisSentences(randomTaunt, nil, characterName)
+
+		SetNetVar("locker_rot_event", {
+			phaseKey = PLUGIN.PHASES.WAITING_FOR_ANTIVIRUS.key,
+			target = characterName,
+			reveilTime = reavelCureLockerAt,
+		})
 
 		ix.chat.Send(nil,
 			"nemesis_ai_locker_rot",
-			character:GetName(),
+			characterName,
 			false,
 			Schema.util.AllPlayersExcept(client),
 			{
@@ -506,6 +530,8 @@ function PLUGIN:SetUpIfNeeded(client)
 			return
 		end
 
+		local characterName = character:GetName()
+
 		-- Tell the target where the anti-virus is and how long they have to get there
 		local secondsToComplete = ix.config.Get("nemesisAiLockerRotTaskSeconds")
 
@@ -517,6 +543,12 @@ function PLUGIN:SetUpIfNeeded(client)
 
 		client:SetLocalVar("lockerRotAntiVirusPosition", antiVirusLockerPosition)
 		client:SetLocalVar("lockerRotAntiVirusTime", CurTime() + secondsToComplete)
+
+		SetNetVar("locker_rot_event", {
+			phaseKey = PLUGIN.PHASES.ANTIVIRUS_REVEALED.key,
+			target = characterName,
+			finishTime = CurTime() + secondsToComplete,
+		})
 
 		ix.chat.Send(
 			nil,
@@ -544,6 +576,7 @@ function PLUGIN:SetUpIfNeeded(client)
 			self:ClearLockerRotNetVar(client)
 			local removedItemCount = self:RemoveAllInfectedItems(character)
 			self.lockerRotEvent = nil
+			SetNetVar("locker_rot_event", nil)
 
 			local randomTaunt = self.lockerRotFailedTaunts[math.random(#self.lockerRotFailedTaunts)]
 			self:PlayNemesisSentences(randomTaunt, nil, character:GetName())
@@ -564,6 +597,9 @@ end
 -- Once the locker is closed, take a second, then inform all players that the target has been infected.
 -- Setting the target and taunting based on their metric score.
 function PLUGIN:OnPlayerLockerClosed(client, lockers)
+	-- Unset the disconnect warning, it will be reset if the player has the locker rot event.
+	Schema.SetDisconnectPenaltyActive(client, false, self.DISCONNECT_PENALTY_WARNING_KEY)
+
 	self:SetUpIfNeeded(client)
 end
 
@@ -633,6 +669,7 @@ function PLUGIN:OnPlayerLockerOpened(client, lockers)
 	local randomTaunt = self.lockerRotCompleteAntiVirusTaunt[math.random(#self.lockerRotCompleteAntiVirusTaunt)]
 	self:PlayNemesisSentences(randomTaunt, nil, client:GetName())
 
+	SetNetVar("locker_rot_event", nil)
 	self.lockerRotEvent = nil
 end
 
@@ -679,6 +716,7 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageinfo)
 
 	hook.Run("PlayerLockerRotKilled", client, attacker)
 
+	SetNetVar("locker_rot_event", nil)
 	self.lockerRotEvent = nil
 end
 
