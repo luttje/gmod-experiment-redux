@@ -616,8 +616,9 @@ function Schema:PostDrawHUD()
 		local paddingY = 4
 		local y = borderThickness
 		local largestWidth = 0
+		local alpha = 100
 
-		surface.SetDrawColor(255, 0, 0, 200)
+		surface.SetDrawColor(255, 0, 0, alpha)
 		surface.DrawOutlinedRect(0, 0, scrW, scrH, borderThickness)
 
 		-- Show the reasonText + all reasons underneath it
@@ -640,7 +641,7 @@ function Schema:PostDrawHUD()
 				y,
 				largestWidth,
 				boxHeight,
-				Color(255, 0, 0, 200),
+				Color(255, 0, 0, alpha),
 				false, false, true, true
 			)
 
