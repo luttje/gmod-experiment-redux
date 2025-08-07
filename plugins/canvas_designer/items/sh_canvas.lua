@@ -1,0 +1,868 @@
+local PLUGIN = PLUGIN
+local ITEM = ITEM
+
+ITEM.name = "Design Canvas"
+ITEM.price = 25
+ITEM.shipmentSize = 10
+ITEM.noBusiness = true -- Disabled for now
+ITEM.model = "models/props_lab/clipboard.mdl"
+ITEM.width = 1
+ITEM.height = 1
+ITEM.category = "Art"
+ITEM.description =
+"A blank canvas for creating custom logos and drawings. Use it to design artwork that can be shared with other players."
+
+-- Canvas constants
+local CANVAS_DEFAULT_WIDTH = 400
+local CANVAS_DEFAULT_HEIGHT = 400
+local CANVAS_MINIMUM_WIDTH = 100
+local CANVAS_MINIMUM_HEIGHT = 100
+local MAX_ELEMENTS = 10
+local GRID_SIZE = 20
+
+-- Spritesheet constants
+local SPRITE_SIZE = 64
+
+-- Available sprite types with their spritesheet positions and categories
+local SPRITE_TYPES = {
+	{ name = "Rectangle",   icon = { 0, 0 },  category = "shapes",  keywords = "square box rect" },
+	{ name = "Circle",      icon = { 1, 0 },  category = "shapes",  keywords = "round ball" },
+	{ name = "Triangle",    icon = { 2, 0 },  category = "shapes",  keywords = "tri point" },
+	{ name = "Diamond",     icon = { 3, 0 },  category = "shapes",  keywords = "rhombus gem" },
+	{ name = "Star",        icon = { 4, 0 },  category = "shapes",  keywords = "asterisk rating" },
+	{ name = "Heart",       icon = { 5, 0 },  category = "shapes",  keywords = "love like" },
+	{ name = "Arrow",       icon = { 6, 0 },  category = "arrows",  keywords = "direction right east" },
+	{ name = "Cross",       icon = { 12, 0 }, category = "symbols", keywords = "x delete remove" },
+	{ name = "Check",       icon = { 13, 0 }, category = "symbols", keywords = "tick yes confirm ok" },
+	{ name = "Lightning",   icon = { 14, 0 }, category = "symbols", keywords = "zap electric shock" },
+	{ name = "Question",    icon = { 15, 0 }, category = "symbols", keywords = "help unknown ask" },
+	{ name = "Exclamation", icon = { 16, 0 }, category = "symbols", keywords = "alert warning caution" },
+}
+
+-- Theme colors
+local THEME = {
+	background = Color(45, 45, 48),
+	surface = Color(60, 60, 65),
+	panel = Color(55, 55, 60),
+	primary = Color(0, 122, 255),
+	secondary = Color(88, 166, 255),
+	success = Color(40, 167, 69),
+	warning = Color(255, 193, 7),
+	danger = Color(220, 53, 69),
+	text = Color(240, 240, 240),
+	textSecondary = Color(180, 180, 180),
+	border = Color(80, 80, 85),
+	hover = Color(70, 70, 75),
+	underline = Color(255, 255, 255),
+}
+
+if (SERVER) then
+	util.AddNetworkString("expCanvasDesigner")
+	util.AddNetworkString("expCanvasSave")
+	util.AddNetworkString("expCanvasView")
+
+	resource.AddFile("materials/experiment-redux/canvas_designer_spritesheet.png")
+
+	net.Receive("expCanvasSave", function(length, client)
+		local itemID = net.ReadUInt(32)
+		local jsonData = net.ReadString()
+		local item = ix.item.instances[itemID]
+
+		if (not item or item:GetOwner() ~= client) then
+			client:Notify("You do not own this Canvas!")
+			return
+		end
+
+		-- Validate JSON data
+		local success, data = pcall(util.JSONToTable, jsonData)
+		if not success or not data then
+			client:Notify("Invalid canvas data!")
+			return
+		end
+
+		-- Validate element count and structure
+		if #data > MAX_ELEMENTS then
+			client:Notify("Too many elements on canvas!")
+			return
+		end
+
+		-- Basic validation of each element
+		for _, element in ipairs(data) do
+			if type(element) ~= "table" or
+				not element.type or
+				not element.spriteX or
+				not element.spriteY or
+				not element.x or
+				not element.y or
+				not element.scale or
+				not element.color then
+				client:Notify("Invalid canvas element data!")
+				return
+			end
+		end
+
+		item:SetData("design", jsonData)
+		client:Notify("Canvas design saved!")
+	end)
+elseif (CLIENT) then
+	-- Cache the spritesheet material
+	local spritesheetMat = Material("experiment-redux/canvas_designer_spritesheet.png")
+
+	function ITEM:PopulateTooltip(tooltip)
+		local designData = self:GetData("design")
+
+		if (designData and designData ~= "[]" and designData ~= "") then
+			local panel = tooltip:AddRowAfter("name", "design_status")
+			panel:SetBackgroundColor(THEME.success)
+			panel:SetText("Contains Custom Design")
+			panel:SizeToContents()
+		else
+			local panel = tooltip:AddRowAfter("name", "design_status")
+			panel:SetBackgroundColor(THEME.warning)
+			panel:SetText("Blank Canvas")
+			panel:SizeToContents()
+		end
+	end
+
+	-- Canvas designer class
+	local CanvasDesigner = {}
+	CanvasDesigner.__index = CanvasDesigner
+
+	function CanvasDesigner:New(item)
+		local obj = setmetatable({}, self)
+		obj.item = item
+		obj.elements = {}
+		obj.selectedElement = nil
+		obj.isDragging = false
+		obj.dragStartX = 0
+		obj.dragStartY = 0
+		obj.elementStartX = 0
+		obj.elementStartY = 0
+		obj.canvasOffsetX = 0
+		obj.canvasOffsetY = 0
+		obj.canvasWidth = CANVAS_DEFAULT_WIDTH
+		obj.canvasHeight = CANVAS_DEFAULT_HEIGHT
+
+		-- Load existing design
+		local designData = item:GetData("design", "[]")
+
+		if (designData and designData ~= "" and designData ~= "[]") then
+			obj:LoadDesign(designData)
+		end
+
+		return obj
+	end
+
+	function CanvasDesigner:GetSize()
+		return self.canvasWidth, self.canvasHeight
+	end
+
+	function CanvasDesigner:LoadDesign(jsonData)
+		local success, data = pcall(util.JSONToTable, jsonData)
+		if success and data then
+			self.elements = data
+		else
+			self.elements = {}
+		end
+	end
+
+	function CanvasDesigner:SaveDesign()
+		return util.TableToJSON(self.elements)
+	end
+
+	function CanvasDesigner:AddElement(spriteType, x, y)
+		if #self.elements >= MAX_ELEMENTS then
+			return false
+		end
+
+		local element = {
+			id = os.time() .. math.random(1000, 9999),
+			type = spriteType.name,
+			spriteX = spriteType.icon[1],
+			spriteY = spriteType.icon[2],
+			x = x or 100,
+			y = y or 100,
+			scale = 1.0,
+			rotation = 0,
+			color = { r = 0, g = 0, b = 0, a = 255 }
+		}
+
+		table.insert(self.elements, element)
+		self.selectedElement = #self.elements
+		return true
+	end
+
+	function CanvasDesigner:DeleteSelected()
+		if self.selectedElement and self.elements[self.selectedElement] then
+			table.remove(self.elements, self.selectedElement)
+			self.selectedElement = nil
+		end
+	end
+
+	function CanvasDesigner:GetElementAt(x, y)
+		for i = #self.elements, 1, -1 do
+			local element = self.elements[i]
+			local size = SPRITE_SIZE * element.scale
+			local halfSize = size * .5
+
+			if x >= element.x - halfSize and x <= element.x + halfSize and
+				y >= element.y - halfSize and y <= element.y + halfSize then
+				return i
+			end
+		end
+		return nil
+	end
+
+	function CanvasDesigner:DrawGrid(x, y, w, h)
+		surface.SetDrawColor(THEME.border.r, THEME.border.g, THEME.border.b, 50)
+
+		for i = 0, w, GRID_SIZE do
+			surface.DrawLine(x + i, y, x + i, y + h)
+		end
+
+		for i = 0, h, GRID_SIZE do
+			surface.DrawLine(x, y + i, x + w, y + i)
+		end
+	end
+
+	function CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid)
+		-- Draw background
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawRect(x, y, w, h)
+
+		if (not withoutGrid) then
+			-- Draw grid
+			self:DrawGrid(x, y, w, h)
+		end
+
+		-- Draw elements
+		for i, element in ipairs(self.elements) do
+			local drawX = x + element.x - (SPRITE_SIZE * element.scale) * .5
+			local drawY = y + element.y - (SPRITE_SIZE * element.scale) * .5
+			local size = SPRITE_SIZE * element.scale
+
+			surface.SetDrawColor(element.color.r, element.color.g, element.color.b, element.color.a)
+			surface.SetMaterial(spritesheetMat)
+
+			Schema.draw.DrawSpritesheetMaterial(
+				spritesheetMat,
+				drawX, drawY,
+				size, size,
+				element.spriteX, element.spriteY,
+				SPRITE_SIZE, SPRITE_SIZE,
+				false
+			)
+
+			-- Draw selection outline
+			if self.selectedElement == i then
+				surface.SetDrawColor(THEME.primary.r, THEME.primary.g, THEME.primary.b, 255)
+				surface.DrawOutlinedRect(drawX - 3, drawY - 3, size + 6, size + 6, 2)
+			end
+		end
+	end
+
+	local function CreateStyledButton(parent, text, color)
+		local btn = vgui.Create("DButton", parent)
+		btn:SetText("")
+		btn.Paint = function(self, w, h)
+			local bgColor = color or THEME.primary
+			if self:IsHovered() then
+				bgColor = Color(math.min(bgColor.r + 20, 255), math.min(bgColor.g + 20, 255),
+					math.min(bgColor.b + 20, 255))
+			end
+			if self:IsDown() then
+				bgColor = Color(math.max(bgColor.r - 20, 0), math.max(bgColor.g - 20, 0), math.max(bgColor.b - 20, 0))
+			end
+
+			draw.RoundedBox(4, 0, 0, w, h, bgColor)
+
+			surface.SetTextColor(255, 255, 255, 255)
+			surface.SetFont("ixSmallBoldFont")
+			local tw, th = surface.GetTextSize(text)
+			surface.SetTextPos(w * .5 - tw * .5, h * .5 - th * .5)
+			surface.DrawText(text)
+		end
+		return btn
+	end
+
+	local function openCanvasDesigner(item)
+		local frame = vgui.Create("expFrame")
+		frame:SetTitle("Canvas Designer - " .. item.name)
+		frame:SetSize(1000, 800)
+		frame:Center()
+		frame:MakePopup()
+		frame:SetDeleteOnClose(true)
+
+		local canvas = CanvasDesigner:New(item)
+
+		-- Main container
+		local container = vgui.Create("EditablePanel", frame)
+		container:Dock(FILL)
+		container:DockMargin(8, 8, 8, 8)
+
+		-- Top toolbar
+		local topbar = vgui.Create("EditablePanel", container)
+		topbar:SetTall(50)
+		topbar:Dock(TOP)
+		topbar:DockMargin(0, 0, 0, 8)
+
+		-- Element count
+		local countLabel = vgui.Create("DLabel", topbar)
+		countLabel:SetText("Elements: 0/" .. MAX_ELEMENTS)
+		countLabel:SetTextColor(THEME.text)
+		countLabel:SetFont("ixSmallBoldFont")
+		countLabel:Dock(LEFT)
+		countLabel:DockMargin(15, 0, 0, 0)
+		countLabel:SizeToContents()
+
+		local function updateElementCount()
+			local count = #canvas.elements
+			countLabel:SetText("Elements: " .. count .. "/" .. MAX_ELEMENTS)
+			countLabel:SetTextColor(count >= MAX_ELEMENTS and THEME.danger or THEME.success)
+		end
+
+		-- Delete button
+		local deleteBtn = CreateStyledButton(topbar, "Delete Selected", THEME.danger)
+		deleteBtn:SetSize(120, 30)
+		deleteBtn:Dock(RIGHT)
+		deleteBtn:DockMargin(0, 10, 15, 10)
+		deleteBtn.DoClick = function()
+			if canvas.selectedElement then
+				canvas:DeleteSelected()
+				updateElementCount()
+			end
+		end
+
+		-- Clear all button
+		local clearBtn = CreateStyledButton(topbar, "Clear All", THEME.warning)
+		clearBtn:SetSize(100, 30)
+		clearBtn:Dock(RIGHT)
+		clearBtn:DockMargin(0, 10, 8, 10)
+		clearBtn.DoClick = function()
+			if #canvas.elements > 0 then
+				Derma_Query("Are you sure you want to clear the entire canvas?", "Clear Canvas", "Yes", function()
+					canvas.elements = {}
+					canvas.selectedElement = nil
+					updateElementCount()
+				end, "No")
+			end
+		end
+
+		-- When DELETE is pressed, clear the selected element
+		function frame:OnKeyCodePressed(keyCode)
+			if (keyCode == KEY_DELETE and canvas.selectedElement) then
+				canvas:DeleteSelected()
+				updateElementCount()
+			end
+		end
+
+		-- Properties panel
+		local propPanel = vgui.Create("EditablePanel", container)
+		propPanel:SetWide(350)
+		propPanel:Dock(RIGHT)
+		propPanel:DockMargin(8, 0, 0, 0)
+
+		propPanel.Paint = function(self, w, h)
+			draw.RoundedBox(4, 0, 0, w, h, THEME.panel)
+		end
+
+		local propTitle = vgui.Create("DLabel", propPanel)
+		propTitle:SetText("Properties")
+		propTitle:SetTextColor(THEME.text)
+		propTitle:SetFont("ixBigFont")
+		propTitle:Dock(TOP)
+		propTitle:DockMargin(15, 15, 15, 10)
+		propTitle:SizeToContents()
+
+		local canvasPropTitle = vgui.Create("DLabel", propPanel)
+		canvasPropTitle:SetText("Canvas Properties")
+		canvasPropTitle:SetTextColor(THEME.text)
+		canvasPropTitle:SetFont("ixMediumFont")
+		canvasPropTitle:Dock(TOP)
+		canvasPropTitle:DockMargin(15, 15, 15, 10)
+		canvasPropTitle:SizeToContents()
+
+		-- Canvas size control
+		local canvasWidthContainer = vgui.Create("EditablePanel", propPanel)
+		canvasWidthContainer:Dock(TOP)
+		canvasWidthContainer:SetTall(28)
+
+		local canvasWidthLabel = vgui.Create("DLabel", canvasWidthContainer)
+		canvasWidthLabel:SetText("Canvas Width")
+		canvasWidthLabel:SetTextColor(THEME.text)
+		canvasWidthLabel:SetFont("ixSmallBoldFont")
+		canvasWidthLabel:Dock(LEFT)
+		canvasWidthLabel:DockMargin(10, 10, 10, 5)
+		canvasWidthLabel:SizeToContents()
+
+		local canvasWidthEntry = vgui.Create("DTextEntry", canvasWidthContainer)
+		canvasWidthEntry:Dock(FILL)
+		canvasWidthEntry:DockMargin(10, 10, 10, 0)
+		canvasWidthEntry:SetNumeric(true)
+		canvasWidthEntry:SetValue(tostring(canvas.canvasWidth))
+		canvasWidthEntry.OnEnter = function(self)
+			local newWidth = tonumber(self:GetValue())
+
+			if (newWidth and newWidth > CANVAS_MINIMUM_WIDTH) then
+				canvas.canvasWidth = newWidth
+				canvasWidthEntry:SetValue(tostring(newWidth))
+			else
+				self:SetValue(tostring(canvas.canvasWidth))
+			end
+		end
+
+		canvasWidthContainer:InvalidateLayout(true)
+
+		local canvasHeightContainer = vgui.Create("EditablePanel", propPanel)
+		canvasHeightContainer:Dock(TOP)
+		canvasHeightContainer:SetTall(28)
+
+		local canvasHeightLabel = vgui.Create("DLabel", canvasHeightContainer)
+		canvasHeightLabel:SetText("Canvas Height")
+		canvasHeightLabel:SetTextColor(THEME.text)
+		canvasHeightLabel:SetFont("ixSmallBoldFont")
+		canvasHeightLabel:Dock(LEFT)
+		canvasHeightLabel:DockMargin(10, 10, 10, 5)
+		canvasHeightLabel:SizeToContents()
+
+		local canvasHeightEntry = vgui.Create("DTextEntry", canvasHeightContainer)
+		canvasHeightEntry:Dock(FILL)
+		canvasHeightEntry:DockMargin(10, 10, 10, 0)
+		canvasHeightEntry:SetNumeric(true)
+		canvasHeightEntry:SetValue(tostring(canvas.canvasHeight))
+		canvasHeightEntry.OnEnter = function(self)
+			local newHeight = tonumber(self:GetValue())
+
+			if (newHeight and newHeight > CANVAS_MINIMUM_HEIGHT) then
+				canvas.canvasHeight = newHeight
+				canvasHeightEntry:SetValue(tostring(newHeight))
+			else
+				self:SetValue(tostring(canvas.canvasHeight))
+			end
+		end
+
+		canvasHeightContainer:InvalidateLayout(true)
+
+		local selectedPropTitle = vgui.Create("DLabel", propPanel)
+		selectedPropTitle:SetText("Selected Element Properties")
+		selectedPropTitle:SetTextColor(THEME.text)
+		selectedPropTitle:SetFont("ixMediumFont")
+		selectedPropTitle:Dock(TOP)
+		selectedPropTitle:DockMargin(15, 15, 15, 10)
+		selectedPropTitle:SizeToContents()
+
+		-- Scale control
+		local scaleContainer = vgui.Create("EditablePanel", propPanel)
+		scaleContainer:SetTall(70)
+		scaleContainer:Dock(TOP)
+		scaleContainer:DockMargin(10, 5, 10, 8)
+
+		local scaleLabel = vgui.Create("DLabel", scaleContainer)
+		scaleLabel:SetText("Scale")
+		scaleLabel:SetTextColor(THEME.text)
+		scaleLabel:SetFont("ixSmallBoldFont")
+		scaleLabel:Dock(TOP)
+		scaleLabel:DockMargin(10, 10, 10, 5)
+		scaleLabel:SizeToContents()
+
+		local scaleSlider = vgui.Create("DNumSlider", scaleContainer)
+		scaleSlider:Dock(TOP)
+		scaleSlider:DockMargin(10, 0, 10, 10)
+		scaleSlider:SetSize(180, 20)
+		scaleSlider:SetMin(0.1)
+		scaleSlider:SetMax(15.0)
+		scaleSlider:SetDecimals(1)
+		scaleSlider:SetValue(1.0)
+		scaleSlider.OnValueChanged = function(self, value)
+			if (canvas.selectedElement and canvas.elements[canvas.selectedElement]) then
+				canvas.elements[canvas.selectedElement].scale = value
+			end
+		end
+		scaleSlider.Label:SetVisible(false)
+
+		-- Color control
+		local colorContainer = vgui.Create("EditablePanel", propPanel)
+		colorContainer:SetTall(200)
+		colorContainer:Dock(TOP)
+		colorContainer:DockMargin(10, 0, 10, 8)
+
+		local colorLabel = vgui.Create("DLabel", colorContainer)
+		colorLabel:SetText("Color")
+		colorLabel:SetTextColor(THEME.text)
+		colorLabel:SetFont("ixSmallBoldFont")
+		colorLabel:Dock(TOP)
+		colorLabel:DockMargin(10, 10, 10, 5)
+		colorLabel:SizeToContents()
+
+		local colorMixer = vgui.Create("DColorMixer", colorContainer)
+		colorMixer:Dock(TOP)
+		colorMixer:DockMargin(10, 0, 10, 10)
+		colorMixer:SetPalette(false)
+		colorMixer:SetAlphaBar(true)
+		colorMixer:SetWangs(true)
+		colorMixer:SetColor(Color(255, 255, 255, 255))
+		colorMixer.ValueChanged = function(self, color)
+			if canvas.selectedElement and canvas.elements[canvas.selectedElement] then
+				local element = canvas.elements[canvas.selectedElement]
+				element.color = { r = color.r, g = color.g, b = color.b, a = color.a }
+			end
+		end
+
+		-- Canvas panel
+		local canvasPanel = vgui.Create("EditablePanel", container)
+		canvasPanel:Dock(FILL)
+		canvasPanel:DockMargin(0, 0, 0, 8)
+		canvasPanel.Paint = function(self, w, h)
+			local canvasWidth, canvasHeight = canvas:GetSize()
+
+			canvas.canvasOffsetX = (w - canvasWidth) * .5
+			canvas.canvasOffsetY = (h - canvasHeight) * .5
+
+			canvas:DrawCanvas(canvas.canvasOffsetX, canvas.canvasOffsetY, canvasWidth, canvasHeight)
+		end
+
+		-- Asset Browser
+		local assetBrowser = vgui.Create("EditablePanel", container)
+		assetBrowser:SetTall(200)
+		assetBrowser:Dock(BOTTOM)
+
+		-- Search header
+		local searchHeader = vgui.Create("EditablePanel", assetBrowser)
+		searchHeader:SetTall(40)
+		searchHeader:Dock(TOP)
+
+		local searchLabel = vgui.Create("DLabel", searchHeader)
+		searchLabel:SetText("Asset Browser")
+		searchLabel:SetTextColor(THEME.text)
+		searchLabel:SetFont("ixSmallBoldFont")
+		searchLabel:Dock(LEFT)
+		searchLabel:DockMargin(15, 0, 15, 0)
+		searchLabel:SizeToContents()
+
+		local searchBox = vgui.Create("DTextEntry", searchHeader)
+		searchBox:SetPlaceholderText("Search assets...")
+		searchBox:Dock(FILL)
+		searchBox:DockMargin(0, 8, 15, 8)
+
+		-- Category tabs
+		local categoryTabs = vgui.Create("DPropertySheet", assetBrowser)
+		categoryTabs:Dock(FILL)
+		categoryTabs:DockMargin(8, 0, 8, 8)
+
+		categoryTabs.Paint = function(self, w, h)
+			draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 0))
+		end
+
+		-- Get unique categories
+		local categories = { "all", "shapes", "arrows", "symbols" }
+
+		-- Create asset grid function
+		local function createAssetGrid(parent, filterCategory, searchTerm)
+			local scrollPanel = vgui.Create("DScrollPanel", parent)
+			scrollPanel:Dock(FILL)
+
+			local iconLayout = vgui.Create("DIconLayout", scrollPanel)
+			iconLayout:Dock(TOP)
+			iconLayout:SetSpaceY(8)
+			iconLayout:SetSpaceX(8)
+			iconLayout:DockMargin(8, 8, 8, 8)
+
+			for _, spriteType in ipairs(SPRITE_TYPES) do
+				local shouldShow = (filterCategory == "all" or spriteType.category == filterCategory)
+
+				if (searchTerm and searchTerm ~= "") then
+					local searchLower = string.lower(searchTerm)
+					local nameMatch = string.find(string.lower(spriteType.name), searchLower)
+					local keywordMatch = string.find(string.lower(spriteType.keywords or ""), searchLower)
+					local categoryMatch = string.find(string.lower(spriteType.category), searchLower)
+
+					shouldShow = shouldShow and (nameMatch or keywordMatch or categoryMatch)
+				end
+
+				if (not shouldShow) then
+					continue
+				end
+
+				local assetBtn = vgui.Create("EditablePanel", iconLayout)
+				assetBtn:SetSize(80, 80)
+				assetBtn.Paint = function(self, w, h)
+					local bgColor = THEME.panel
+
+					if (self:IsHovered()) then
+						bgColor = THEME.hover
+					end
+
+					draw.RoundedBox(6, 0, 0, w, h, bgColor)
+
+					-- Draw sprite
+					surface.SetDrawColor(255, 255, 255, 255)
+					surface.SetMaterial(spritesheetMat)
+
+					local iconSize = 40
+					local iconX = w * .5 - iconSize * .5
+					local iconY = 8
+
+					Schema.draw.DrawSpritesheetMaterial(
+						spritesheetMat,
+						iconX, iconY,
+						iconSize, iconSize,
+						spriteType.icon[1], spriteType.icon[2],
+						SPRITE_SIZE, SPRITE_SIZE,
+						false
+					)
+
+					-- Draw name
+					surface.SetTextColor(THEME.text.r, THEME.text.g, THEME.text.b, 255)
+					surface.SetFont("DermaDefault")
+
+					local text = spriteType.name
+					local tw, th = surface.GetTextSize(text)
+
+					if (tw > w - 4) then
+						while (tw > w - 10 and #text > 0) do
+							text = string.sub(text, 1, #text - 1)
+							tw, th = surface.GetTextSize(text .. "...")
+						end
+
+						text = text .. "..."
+					end
+
+					surface.SetTextPos(w * .5 - tw * .5, h - th - 4)
+					surface.DrawText(text)
+
+					assetBtn.OnMousePressed = function(self, keyCode)
+						if (keyCode == MOUSE_LEFT) then
+							local canvasWidth, canvasHeight = canvas:GetSize()
+							if (canvas:AddElement(spriteType, canvasWidth * .5, canvasHeight * .5)) then
+								updateElementCount()
+							else
+								LocalPlayer():Notify("Maximum elements reached!")
+							end
+						end
+					end
+				end
+			end
+
+			return iconLayout
+		end
+
+		local categoryPanels = {}
+
+		-- Create tabs for each category
+		for _, category in ipairs(categories) do
+			local panel = vgui.Create("EditablePanel")
+
+			local grid = createAssetGrid(panel, category, "")
+			categoryPanels[category] = { panel = panel, grid = grid }
+
+			local sheet = categoryTabs:AddSheet(string.upper(category), panel, "icon16/folder.png")
+			sheet.Tab.Paint = function(self, w, h)
+				local bgColor = THEME.panel
+
+				if (self:IsHovered() or self:IsActive()) then
+					bgColor = THEME.primary
+				end
+
+				draw.RoundedBox(4, 0, 0, w, h, bgColor)
+
+				if (self:IsActive()) then
+					draw.RoundedBox(4, 4, h - 6, w - 8, 2, THEME.underline)
+				end
+			end
+		end
+
+		-- Search functionality
+		searchBox.OnChange = function(self)
+			local searchTerm = self:GetValue()
+			for category, data in pairs(categoryPanels) do
+				-- Clear the entire panel and recreate everything
+				data.panel:Clear()
+				data.grid = createAssetGrid(data.panel, category, searchTerm)
+				categoryPanels[category].grid = data.grid
+			end
+		end
+
+		-- Mouse handling for canvas
+		canvasPanel.OnMousePressed = function(self, keyCode)
+			if keyCode == MOUSE_LEFT then
+				local mx, my = self:CursorPos()
+				local canvasX = mx - canvas.canvasOffsetX
+				local canvasY = my - canvas.canvasOffsetY
+				local canvasWidth, canvasHeight = canvas:GetSize()
+
+				if canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight then
+					local elementIndex = canvas:GetElementAt(canvasX, canvasY)
+
+					if elementIndex then
+						canvas.selectedElement = elementIndex
+						canvas.isDragging = true
+						canvas.dragStartX = mx
+						canvas.dragStartY = my
+						canvas.elementStartX = canvas.elements[elementIndex].x
+						canvas.elementStartY = canvas.elements[elementIndex].y
+
+						-- Update property controls
+						local element = canvas.elements[elementIndex]
+						scaleSlider:SetValue(element.scale)
+						colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
+					else
+						canvas.selectedElement = nil
+					end
+				end
+			end
+		end
+
+		canvasPanel.OnMouseReleased = function(self, keyCode)
+			if keyCode == MOUSE_LEFT then
+				canvas.isDragging = false
+			end
+		end
+
+		local lastThink = 0
+		canvasPanel.Think = function(self)
+			if CurTime() - lastThink < 0.01 then return end
+			lastThink = CurTime()
+
+			if canvas.isDragging and canvas.selectedElement then
+				local mx, my = self:CursorPos()
+				local deltaX = mx - canvas.dragStartX
+				local deltaY = my - canvas.dragStartY
+
+				local element = canvas.elements[canvas.selectedElement]
+				local canvasWidth, canvasHeight = canvas:GetSize()
+				element.x = math.Clamp(canvas.elementStartX + deltaX, 0, canvasWidth)
+				element.y = math.Clamp(canvas.elementStartY + deltaY, 0, canvasHeight)
+			end
+		end
+
+		-- Bottom action buttons
+		local bottomPanel = vgui.Create("EditablePanel", frame)
+		bottomPanel:SetTall(50)
+		bottomPanel:Dock(BOTTOM)
+		bottomPanel:DockMargin(8, 0, 8, 8)
+
+		local saveButton = CreateStyledButton(bottomPanel, "Save Design", THEME.success)
+		saveButton:SetSize(120, 30)
+		saveButton:Dock(RIGHT)
+		saveButton:DockMargin(0, 10, 15, 10)
+		saveButton.DoClick = function()
+			local jsonData = canvas:SaveDesign()
+			net.Start("expCanvasSave")
+			net.WriteUInt(item:GetID(), 32)
+			net.WriteString(jsonData)
+			net.SendToServer()
+			frame:Close()
+		end
+
+		local cancelButton = CreateStyledButton(bottomPanel, "Cancel", THEME.textSecondary)
+		cancelButton:SetSize(100, 30)
+		cancelButton:Dock(RIGHT)
+		cancelButton:DockMargin(0, 10, 8, 10)
+		cancelButton.DoClick = function()
+			frame:Close()
+		end
+
+		updateElementCount()
+	end
+
+	local function ViewCanvasDesign(item)
+		local designData = item:GetData("design")
+		if (not designData or designData == "" or designData == "[]") then
+			LocalPlayer():Notify("This canvas is blank!")
+			return
+		end
+
+		local frame = vgui.Create("expFrame")
+		frame:SetTitle("Viewing Canvas - " .. item.name)
+		frame:SetSize(700, 550)
+		frame:Center()
+		frame:MakePopup()
+		frame:SetDeleteOnClose(true)
+
+		local canvas = CanvasDesigner:New(item)
+
+		local viewerPanel = vgui.Create("EditablePanel", frame)
+		viewerPanel:Dock(FILL)
+		viewerPanel:DockMargin(10, 10, 10, 55)
+		viewerPanel.Paint = function(self, w, h)
+			local canvasWidth, canvasHeight = canvas:GetSize()
+			local offsetX = (w - canvasWidth) * .5
+			local offsetY = (h - canvasHeight) * .5
+			canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight, true)
+		end
+
+		local bottomPanel = vgui.Create("EditablePanel", frame)
+		bottomPanel:SetTall(45)
+		bottomPanel:Dock(BOTTOM)
+		bottomPanel:DockMargin(8, 0, 8, 8)
+
+		local closeButton = CreateStyledButton(bottomPanel, "Close", THEME.primary)
+		closeButton:SetSize(100, 25)
+		closeButton:Dock(RIGHT)
+		closeButton:DockMargin(0, 10, 15, 10)
+		closeButton.DoClick = function()
+			frame:Close()
+		end
+	end
+
+	net.Receive("expCanvasDesigner", function()
+		local itemID = net.ReadUInt(32)
+		local item = ix.item.instances[itemID]
+
+		if (item) then
+			if (IsValid(ix.gui.menu)) then
+				ix.gui.menu:Remove()
+			end
+
+			openCanvasDesigner(item)
+		end
+	end)
+
+	net.Receive("expCanvasView", function()
+		local itemID = net.ReadUInt(32)
+		local item = ix.item.instances[itemID]
+
+		if (item) then
+			if (IsValid(ix.gui.menu)) then
+				ix.gui.menu:Remove()
+			end
+
+			ViewCanvasDesign(item)
+		end
+	end)
+end
+
+ITEM.functions.Design = {
+	name = "Design Canvas",
+	tip = "Open the canvas designer to create artwork.",
+	icon = "icon16/palette.png",
+	OnRun = function(item)
+		if (SERVER) then
+			net.Start("expCanvasDesigner")
+			net.WriteUInt(item:GetID(), 32)
+			net.Send(item.player)
+		end
+		return false
+	end,
+	OnCanRun = function(item)
+		return item.player:GetCharacter() and item.invID == item.player:GetCharacter():GetInventory():GetID()
+	end
+}
+
+ITEM.functions.View = {
+	name = "View Design",
+	tip = "View the artwork on this canvas.",
+	icon = "icon16/zoom.png",
+	OnRun = function(item)
+		if (SERVER) then
+			net.Start("expCanvasView")
+			net.WriteUInt(item:GetID(), 32)
+			net.Send(item.player)
+		end
+		return false
+	end,
+	OnCanRun = function(item)
+		local designData = item:GetData("design")
+		return designData and designData ~= "" and designData ~= "[]"
+	end
+}
