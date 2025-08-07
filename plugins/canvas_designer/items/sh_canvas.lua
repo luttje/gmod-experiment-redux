@@ -37,13 +37,31 @@ local SPRITE_TYPES = {
 	{ name = "Diamond",     icon = { 3, 0 }, category = "shapes",  keywords = "rhombus gem" },
 	{ name = "Star",        icon = { 4, 0 }, category = "shapes",  keywords = "asterisk rating" },
 	{ name = "Heart",       icon = { 5, 0 }, category = "shapes",  keywords = "love like" },
-	{ name = "Arrow",       icon = { 1, 1 }, category = "arrows",  keywords = "direction right east" },
+	{ name = "Arrow",       icon = { 0, 1 }, category = "arrows",  keywords = "direction right east" },
+	{ name = "Chevron",     icon = { 1, 1 }, category = "arrows",  keywords = "direction right east" },
 	{ name = "Cross",       icon = { 2, 1 }, category = "symbols", keywords = "x delete remove" },
 	{ name = "Check",       icon = { 3, 1 }, category = "symbols", keywords = "tick yes confirm ok" },
 	{ name = "Lightning",   icon = { 4, 1 }, category = "symbols", keywords = "zap electric shock" },
 	{ name = "Question",    icon = { 5, 1 }, category = "symbols", keywords = "help unknown ask" },
 	{ name = "Exclamation", icon = { 6, 1 }, category = "symbols", keywords = "alert warning caution" },
+
+	-- Premium
+	{ name = "Skull",       icon = { 0, 7 }, category = "colored", keywords = "death danger",         defaultColor = color_white, premiumKey = "sprites_colored" },
+	{ name = "Nanobot",     icon = { 1, 7 }, category = "colored", keywords = "robot technology",     defaultColor = color_white, premiumKey = "sprites_colored" },
 }
+
+local SHAPE_CATEGORIES = { "all" }
+
+for _, sprite in ipairs(SPRITE_TYPES) do
+	if (not table.HasValue(SHAPE_CATEGORIES, sprite.category)) then
+		table.insert(SHAPE_CATEGORIES, sprite.category)
+	end
+end
+
+local SPRITES_BY_NAME = {}
+for _, sprite in ipairs(SPRITE_TYPES) do
+	SPRITES_BY_NAME[sprite.name] = sprite
+end
 
 -- Theme colors
 local THEME = {
@@ -106,6 +124,8 @@ if (SERVER) then
 			return
 		end
 
+		local premiumPackages = client:GetCharacterNetVar("premiumPackages", {})
+
 		-- Basic validation of each element
 		for _, element in ipairs(data) do
 			if (type(element) ~= "table") or
@@ -118,6 +138,15 @@ if (SERVER) then
 				not element.scaleY or
 				not element.color then
 				client:Notify("Invalid canvas element data!")
+				return
+			end
+
+			-- Check if the sprite is premium and if the player has access
+			local spriteType = SPRITES_BY_NAME[element.type]
+			local isUnlocked = not spriteType.premiumKey or premiumPackages[spriteType.premiumKey]
+
+			if (not isUnlocked) then
+				client:Notify("You do not have access to the sprite: " .. element.type)
 				return
 			end
 		end
@@ -203,7 +232,7 @@ elseif (CLIENT) then
 	end
 
 	function CanvasDesigner:AddElement(spriteType, x, y)
-		if #self.elements >= MAX_ELEMENTS then
+		if (#self.elements >= MAX_ELEMENTS) then
 			return false
 		end
 
@@ -217,7 +246,7 @@ elseif (CLIENT) then
 			scaleX = 1.0,
 			scaleY = 1.0,
 			rotation = 0,
-			color = { r = 0, g = 0, b = 0, a = 255 }
+			color = spriteType.defaultColor or { r = 0, g = 0, b = 0, a = 255 }
 		}
 
 		table.insert(self.elements, element)
@@ -304,7 +333,8 @@ elseif (CLIENT) then
 				sizeX, sizeY,
 				element.spriteX, element.spriteY,
 				SPRITE_SIZE, SPRITE_SIZE,
-				false
+				false,
+				element.rotation
 			)
 
 			-- Draw selection outline
@@ -341,7 +371,7 @@ elseif (CLIENT) then
 
 	local function openCanvasDesigner(item)
 		local frame = vgui.Create("expFrame")
-		frame:SetTitle("Canvas Designer - " .. item.name)
+		frame:SetTitle("Canvas Designer - " .. item:GetName())
 		frame:SetSize(1000, 800)
 		frame:Center()
 		frame:MakePopup()
@@ -619,6 +649,35 @@ elseif (CLIENT) then
 		end
 		scaleYSlider.Label:SetVisible(false)
 
+		-- Rotation control
+		local rotationContainer = propPanel:Add("EditablePanel")
+		rotationContainer:SetTall(100)
+		rotationContainer:Dock(TOP)
+		rotationContainer:DockMargin(10, 0, 10, 8)
+
+		local rotationLabel = vgui.Create("DLabel", rotationContainer)
+		rotationLabel:SetText("Rotation")
+		rotationLabel:SetTextColor(THEME.text)
+		rotationLabel:SetFont("ixSmallBoldFont")
+		rotationLabel:Dock(TOP)
+		rotationLabel:DockMargin(10, 10, 10, 5)
+		rotationLabel:SizeToContents()
+
+		local rotationSlider = vgui.Create("DNumSlider", rotationContainer)
+		rotationSlider:Dock(TOP)
+		rotationSlider:DockMargin(10, 0, 10, 10)
+		rotationSlider:SetSize(180, 20)
+		rotationSlider:SetMin(0)
+		rotationSlider:SetMax(360)
+		rotationSlider:SetDecimals(0)
+		rotationSlider:SetValue(0)
+		rotationSlider.OnValueChanged = function(self, value)
+			if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+				canvas.elements[canvas:GetSelectedElementIndex()].rotation = value
+			end
+		end
+		rotationSlider.Label:SetVisible(false)
+
 		-- Color control
 		local colorContainer = propPanel:Add("EditablePanel")
 		colorContainer:SetTall(200)
@@ -698,9 +757,6 @@ elseif (CLIENT) then
 			draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 0))
 		end
 
-		-- Get unique categories
-		local categories = { "all", "shapes", "arrows", "symbols" }
-
 		-- Create asset grid function
 		local function createAssetGrid(parent, filterCategory, searchTerm)
 			local scrollPanel = vgui.Create("DScrollPanel", parent)
@@ -712,8 +768,11 @@ elseif (CLIENT) then
 			iconLayout:SetSpaceX(8)
 			iconLayout:DockMargin(8, 8, 8, 8)
 
+			local premiumPackages = LocalPlayer():GetCharacterNetVar("premiumPackages", {})
+
 			for _, spriteType in ipairs(SPRITE_TYPES) do
 				local shouldShow = (filterCategory == "all" or spriteType.category == filterCategory)
+				local isUnlocked = not spriteType.premiumKey or premiumPackages[spriteType.premiumKey]
 
 				if (searchTerm and searchTerm ~= "") then
 					local searchLower = string.lower(searchTerm)
@@ -737,10 +796,10 @@ elseif (CLIENT) then
 						bgColor = THEME.hover
 					end
 
-					draw.RoundedBox(6, 0, 0, w, h, bgColor)
+					draw.RoundedBox(6, 0, 0, w, h, ColorAlpha(bgColor, isUnlocked and 255 or 100))
 
 					-- Draw sprite
-					surface.SetDrawColor(255, 255, 255, 255)
+					surface.SetDrawColor(255, 255, 255, isUnlocked and 255 or 100)
 					surface.SetMaterial(spritesheetMat)
 
 					local iconSize = 40
@@ -775,14 +834,32 @@ elseif (CLIENT) then
 					surface.SetTextPos(w * .5 - tw * .5, h - th - 4)
 					surface.DrawText(text)
 
-					assetBtn.OnMousePressed = function(self, keyCode)
-						if (keyCode == MOUSE_LEFT) then
-							local canvasWidth, canvasHeight = canvas:GetSize()
-							if (canvas:AddElement(spriteType, canvasWidth * .5, canvasHeight * .5)) then
-								updateElementCount()
-							else
-								LocalPlayer():Notify("Maximum elements reached!")
-							end
+					-- If the sprite is premium and we don't have that key in premiumPackages, draw a lock icon
+					if (not isUnlocked) then
+						surface.SetDrawColor(255, 255, 255, 200)
+						surface.SetMaterial(Material("icon16/lock.png"))
+						surface.DrawTexturedRect(w - 20, h - 20, 16, 16)
+					end
+				end
+
+				assetBtn.OnMousePressed = function(self, keyCode)
+					if (not isUnlocked) then
+						Derma_Query(
+							"You do not have access to this premium asset.\nSupport us by purchasing it from our store!",
+							"Premium Asset",
+							"OK",
+							function() end
+						)
+						return
+					end
+
+					if (keyCode == MOUSE_LEFT) then
+						local canvasWidth, canvasHeight = canvas:GetSize()
+
+						if (canvas:AddElement(spriteType, canvasWidth * .5, canvasHeight * .5)) then
+							updateElementCount()
+						else
+							LocalPlayer():Notify("Maximum elements reached!")
 						end
 					end
 				end
@@ -794,7 +871,7 @@ elseif (CLIENT) then
 		local categoryPanels = {}
 
 		-- Create tabs for each category
-		for _, category in ipairs(categories) do
+		for _, category in ipairs(SHAPE_CATEGORIES) do
 			local panel = vgui.Create("EditablePanel")
 
 			local grid = createAssetGrid(panel, category, "")
@@ -850,6 +927,7 @@ elseif (CLIENT) then
 						local element = canvas.elements[elementIndex]
 						scaleXSlider:SetValue(element.scaleX)
 						scaleYSlider:SetValue(element.scaleY)
+						rotationSlider:SetValue(element.rotation)
 						colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
 					else
 						canvas:SelectElement(nil)
@@ -905,7 +983,6 @@ elseif (CLIENT) then
 			net.WriteString(canvas.name)
 			net.WriteString(jsonData)
 			net.SendToServer()
-			frame:Close()
 		end
 
 		local cancelButton = CreateStyledButton(bottomPanel, "Cancel", THEME.textSecondary)
@@ -928,7 +1005,7 @@ elseif (CLIENT) then
 		end
 
 		local frame = vgui.Create("expFrame")
-		frame:SetTitle("Viewing Canvas - " .. item.name)
+		frame:SetTitle("Viewing Canvas - " .. item:GetName())
 		frame:SetSize(500, 400)
 		frame:Center()
 		frame:MakePopup()

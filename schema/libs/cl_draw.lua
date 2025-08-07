@@ -46,7 +46,10 @@ end
 --- @param partW number The width of each part in the spritesheet.
 --- @param partH number The height of each part in the spritesheet.
 --- @param mirror? boolean Whether to mirror the spritesheet part.
-function Schema.draw.DrawSpritesheetMaterial(spritesheet, x, y, w, h, partX, partY, partW, partH, mirror)
+--- @param rotation? number Rotation angle in degrees (default: 0).
+function Schema.draw.DrawSpritesheetMaterial(spritesheet, x, y, w, h, partX, partY, partW, partH, mirror, rotation)
+	rotation = rotation or 0
+
 	local spritesheetWidth, spritesheetHeight = spritesheet:Width(), spritesheet:Height()
 	local spriteX, spriteY = spritesheetWidth / partW, spritesheetHeight / partH
 	local u = partX / spriteX
@@ -59,7 +62,49 @@ function Schema.draw.DrawSpritesheetMaterial(spritesheet, x, y, w, h, partX, par
 	end
 
 	surface.SetMaterial(spritesheet)
-	surface.DrawTexturedRectUV(x, y, w, h, u, v, u2, v2)
+
+	if (rotation ~= 0) then
+		-- Calculate the center point for rotation
+		local centerX = x + w / 2
+		local centerY = y + h / 2
+
+		-- Convert rotation to radians
+		local rad = math.rad(rotation)
+		local cos_r = math.cos(rad)
+		local sin_r = math.sin(rad)
+
+		-- Calculate half dimensions
+		local halfW = w / 2
+		local halfH = h / 2
+
+		-- Define the four corners relative to center (before rotation)
+		local corners = {
+			{ x = -halfW, y = -halfH }, -- Top-left
+			{ x = halfW,  y = -halfH }, -- Top-right
+			{ x = halfW,  y = halfH }, -- Bottom-right
+			{ x = -halfW, y = halfH } -- Bottom-left
+		}
+
+		-- Rotate each corner and translate to final position
+		local poly = {}
+		for i = 1, 4 do
+			local corner = corners[i]
+			local rotX = corner.x * cos_r - corner.y * sin_r
+			local rotY = corner.x * sin_r + corner.y * cos_r
+
+			poly[i] = {
+				x = centerX + rotX,
+				y = centerY + rotY,
+				u = i == 1 and u or (i == 2 and u2 or (i == 3 and u2 or u)),
+				v = i == 1 and v or (i == 2 and v or (i == 3 and v2 or v2))
+			}
+		end
+
+		surface.DrawPoly(poly)
+	else
+		-- No rotation, draw normally
+		surface.DrawTexturedRectUV(x, y, w, h, u, v, u2, v2)
+	end
 end
 
 --- Draws a label and value on screen
