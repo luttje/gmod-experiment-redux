@@ -9,6 +9,8 @@ PLUGIN.characterLockerRotGraceMinutes = 60 * 2 -- 2 hours
 --- How many minutes does a player have to be playing this session before they can be targeted by the Nemesis AI?
 PLUGIN.sessionLockerRotGraceMinutes = 60 * 10 -- 10 minutes
 
+PLUGIN.DISCONNECT_PENALTY_WARNING_KEY = "Locker Rot Virus"
+
 local RANK_1 = 1
 local RANK_2 = 2
 local RANK_3 = 3
@@ -330,7 +332,7 @@ function PLUGIN:StartLockerRotEvent(targetCharacter, lockerRotEvent)
 
 
 		-- We don't want players to disconnect now, since that would result in them losing their items if they have the locker rot.
-		Schema.SetDisconnectPenaltyActive(nil, true, "Locker Rot Virus")
+		Schema.SetDisconnectPenaltyActive(nil, true, self.DISCONNECT_PENALTY_WARNING_KEY)
 		SetNetVar("locker_rot_event", {
 			phaseKey = PLUGIN.PHASES.START.key,
 			forceStartTime = CurTime() + self.lockerRotForceStartTime,
@@ -458,7 +460,8 @@ function PLUGIN:SetUpIfNeeded(client)
 	)
 
 	local allExceptClient = Schema.util.AllPlayersExcept(client)
-	Schema.SetDisconnectPenaltyActive(allExceptClient, false, "Locker Rot Virus")
+	Schema.SetDisconnectPenaltyActive(allExceptClient, false, self.DISCONNECT_PENALTY_WARNING_KEY)
+	Schema.SetDisconnectPenaltyActive(client, true, self.DISCONNECT_PENALTY_WARNING_KEY)
 
 	local reavelCureLockerAt = CurTime() + revealDelay
 	client:SetLocalVar("lockerRotAntiVirusRevealTime", reavelCureLockerAt)
@@ -527,6 +530,8 @@ function PLUGIN:SetUpIfNeeded(client)
 			return
 		end
 
+		local characterName = character:GetName()
+
 		-- Tell the target where the anti-virus is and how long they have to get there
 		local secondsToComplete = ix.config.Get("nemesisAiLockerRotTaskSeconds")
 
@@ -592,6 +597,9 @@ end
 -- Once the locker is closed, take a second, then inform all players that the target has been infected.
 -- Setting the target and taunting based on their metric score.
 function PLUGIN:OnPlayerLockerClosed(client, lockers)
+	-- Unset the disconnect warning, it will be reset if the player has the locker rot event.
+	Schema.SetDisconnectPenaltyActive(client, false, self.DISCONNECT_PENALTY_WARNING_KEY)
+
 	self:SetUpIfNeeded(client)
 end
 

@@ -107,7 +107,18 @@ function PLUGIN:OnStoragePanelSetup(panel, storageInventoryPanel, localInventory
 end
 
 function PLUGIN:PostDrawHUD()
-	local scrW, scrH = ScrW(), ScrH()
+	if (IsValid(self.lockerRotInfoPanel)) then
+		local phaseInfo = GetNetVar("locker_rot_event")
 
-	-- Manual paint to easy wrap
+		if (phaseInfo or TEST_LOCKER_ROT_PANEL) then
+			self.lockerRotInfoPanel:PaintManual()
+		end
+
+		return
+	end
+
+	local panel = vgui.Create("expLockerRotEventPanel")
+	self.lockerRotInfoPanel = panel
+	panel:SetPaintedManually(true)
+	panel:SetPos(ScrW() - panel:GetWide(), 20)
 end

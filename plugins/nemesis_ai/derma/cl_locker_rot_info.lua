@@ -323,15 +323,3 @@ function PANEL:Think()
 end
 
 vgui.Register("expLockerRotEventPanel", PANEL, "DSizeToContents")
-
-concommand.Add("test_locker_rot", function()
-	if (IsValid(TEST_LOCKER_ROT_PANEL_REFERENCE)) then
-		TEST_LOCKER_ROT_PANEL_REFERENCE:Remove()
-	end
-
-	local frame = vgui.Create("expLockerRotEventPanel")
-	TEST_LOCKER_ROT_PANEL_REFERENCE = frame
-
-	frame:SetPos(ScrW() - frame:GetWide(), 0)
-	frame:MakePopup()
-end)
