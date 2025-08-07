@@ -111,6 +111,7 @@ function PLUGIN:PostDrawHUD()
 		local phaseInfo = GetNetVar("locker_rot_event")
 
 		if (phaseInfo or TEST_LOCKER_ROT_PANEL) then
+			self.lockerRotInfoPanel:SetPos(ScrW() - self.lockerRotInfoPanel:GetWide(), 20)
 			self.lockerRotInfoPanel:PaintManual()
 		end
 
@@ -120,5 +121,4 @@ function PLUGIN:PostDrawHUD()
 	local panel = vgui.Create("expLockerRotEventPanel")
 	self.lockerRotInfoPanel = panel
 	panel:SetPaintedManually(true)
-	panel:SetPos(ScrW() - panel:GetWide(), 20)
 end
