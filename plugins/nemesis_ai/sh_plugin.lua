@@ -5,9 +5,75 @@ PLUGIN.author = "Experiment Redux"
 PLUGIN.description =
 "An AI that communicates through giant screens in the city. Implements the 'Locker Rot Virus' bounty system."
 
+PLUGIN.PHASES = {
+	START = {
+		order = 1,
+		text = "Check your locker! It might be infected with the Locker Rot Virus.",
+		timeRemaining = function(stageData)
+			local forceStartTime = stageData.forceStartTime
+			local timeRemaining = forceStartTime - CurTime()
+
+			return string.NiceTime(math.max(1, math.ceil(timeRemaining)))
+		end
+	},
+	WAITING_FOR_ANTIVIRUS = {
+		order = 2,
+		inactiveText =
+		"The victim must take valuable items from their locker. An anti-virus locker will be revealed soon.",
+		text = function(stageData)
+			local client = LocalPlayer()
+			local lockerRotAntiVirusRevealTime = client:GetCharacterNetVar("lockerRotAntiVirusRevealTime")
+
+			if (not lockerRotAntiVirusRevealTime) then
+				return string.format(
+					"'%s' must take valuable rotting items from their locker. This is your chance to hinder them!",
+					stageData.target or "The victim"
+				)
+			end
+
+			return
+			"Your locker is infected with the Locker Rot Virus! Take the rotting items out and prepare to find the anti-virus locker."
+		end,
+		timeRemaining = function(stageData)
+			local reveilTime = stageData.reveilTime
+			local timeRemaining = reveilTime - CurTime()
+
+			return string.NiceTime(math.max(1, math.ceil(timeRemaining)))
+		end
+	},
+	ANTIVIRUS_REVEALED = {
+		order = 3,
+		inactiveText = "The anti-virus locker will be revealed. The victim must reach it before time runs out.",
+		text = function(stageData)
+			local client = LocalPlayer()
+			local lockerRotAntiVirusReachTime = client:GetCharacterNetVar("lockerRotAntiVirusTime")
+
+			if (not lockerRotAntiVirusReachTime) then
+				return string.format(
+					"'%s' is heading for a locker with the anti-virus. You can stop them by slaying them!",
+					stageData.target
+				)
+			end
+
+			return "The anti-virus locker has been revealed! You can now find it and cure your items."
+		end,
+		timeRemaining = function(stageData)
+			local finishTime = stageData.finishTime
+			local timeRemaining = finishTime - CurTime()
+
+			return string.NiceTime(math.max(1, math.ceil(timeRemaining)))
+		end
+	},
+}
+
+for key, value in pairs(PLUGIN.PHASES) do
+	PLUGIN.PHASES[key].key = key
+end
+
 ix.util.Include("sh_commands.lua")
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
+ix.util.Include("cl_hooks.lua")
 
 ix.util.Include("cl_monitors.lua")
 ix.util.Include("sv_monitors.lua")
@@ -143,9 +209,9 @@ ix.config.Add("nemesisAiEnabled", true, "Whether or not the Nemesis AI is enable
 
 ix.config.Add("nemesisAiLockerRotIntervalSeconds", 60 * 60,
 	"The interval in seconds that the Nemesis AI will check for bounties.", nil, {
-	data = { min = 1, max = 86400 },
-	category = "nemesis_ai"
-})
+		data = { min = 1, max = 86400 },
+		category = "nemesis_ai"
+	})
 
 ix.config.Add("nemesisAiLockerRotTaskSeconds", 60 * 10, "How long a player has to complete the Locker Rot task.", nil, {
 	data = { min = 1, max = 86400 },
@@ -154,9 +220,9 @@ ix.config.Add("nemesisAiLockerRotTaskSeconds", 60 * 10, "How long a player has t
 
 ix.config.Add("nemesisAiLockerRotGraceSeconds", 60 * 60 * 24, "How many hours before a player can be targeted again.",
 	nil, {
-	data = { min = 1, max = 86400 },
-	category = "nemesis_ai"
-})
+		data = { min = 1, max = 86400 },
+		category = "nemesis_ai"
+	})
 
 ix.lang.AddTable("english", {
 	nemesis_ai = "Nemesis AI",
