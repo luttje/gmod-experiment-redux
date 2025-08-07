@@ -23,14 +23,17 @@ function BUFF:OnSetup(client, buff)
 		return
 	end
 
-	client:Notify("Deserters Demise Debuff is active! Disconnecting will cause you to drop all your belongings!")
+	Schema.SetDisconnectPenaltyActive(client, true, "Deserter's Demise Debuff", true)
 end
 
 function BUFF:OnExpire(client, buff)
 	if (client:GetNetVar("tied")) then
+		-- Don't expired when tied, just reset the buff. Players can break free from being tied to avoid this.
 		buff.activeUntil = CurTime() + self.durationInSeconds
 		return false
 	end
+
+	Schema.SetDisconnectPenaltyActive(nil, false, "Deserter's Demise Debuff")
 end
 
 function BUFF.hooks:PostEntityTakeDamage(victim, damageInfo, tookDamage)

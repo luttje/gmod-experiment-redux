@@ -460,11 +460,13 @@ function PLUGIN:Think()
 	end)
 end
 
--- Query the metrics so it can be used to figure out who's leading in what.
--- Can fail if the server hasn't loaded fully yet.
+--- Query the metrics so it can be used to figure out who's leading in what.
+--- Can fail if the server hasn't loaded fully yet.
+--- @param callback fun(table) Callback to call with the top characters for each metric.
+--- @return boolean # True if the query was executed, false if the plugin is disabled or the dependant tables are not created.
 function PLUGIN:GetTopCharacters(callback)
 	if (self.disabled or not self.hasDependantTables) then
-		return
+		return false
 	end
 
 	local query = [[
@@ -501,6 +503,8 @@ function PLUGIN:GetTopCharacters(callback)
 
 		callback(metricInfo)
 	end)
+
+	return true
 end
 
 function PLUGIN:PostJson(endpoint, data, onSuccess, onFailure)

@@ -328,6 +328,54 @@ end
 do
 	local COMMAND = {}
 
+	COMMAND.description = "Gives the specified item to someone's locker inventory."
+	COMMAND.arguments = {
+		ix.type.character,
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, item, amount)
+		local lockerInventory = target:GetLockerInventory()
+
+		if (not lockerInventory) then
+			client:Notify("This character does not have a locker inventory! Have they opened a locker before?")
+			return
+		end
+
+		local uniqueID = item:lower()
+
+		if (! ix.item.list[uniqueID]) then
+			for k, v in SortedPairs(ix.item.list) do
+				if (ix.util.StringMatches(v.name, uniqueID)) then
+					uniqueID = k
+
+					break
+				end
+			end
+		end
+
+		amount = amount or 1
+		local bSuccess, error = lockerInventory:Add(uniqueID, amount)
+
+		if (bSuccess) then
+			target:GetPlayer():NotifyLocalized("itemCreated")
+
+			if (target ~= client:GetCharacter()) then
+				return "@itemCreated"
+			end
+		else
+			return "@" .. tostring(error)
+		end
+	end
+
+	ix.command.Add("CharGiveItemLocker", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
 	COMMAND.description = "Applies a buff to yourself or the character you are looking at."
 	COMMAND.arguments = {
 		ix.type.string,

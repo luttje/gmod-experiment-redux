@@ -2,6 +2,7 @@ util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
 util.AddNetworkString("expClearEntityInfoTooltip")
 util.AddNetworkString("expAmmoUnequip")
+util.AddNetworkString("expDisconnectPenalty")
 
 resource.AddFile("materials/experiment-redux/symbol_background.vmt")
 resource.AddFile("materials/experiment-redux/logo.png")
@@ -166,6 +167,38 @@ function Schema.PlayerClearEntityInfoTooltip(client, targetEntity)
 		net.Send(client)
 	else
 		net.Broadcast()
+	end
+end
+
+--- Sets a disconnect penalty warning active for a player, set of players or all players. Provide a reason to show to the player.
+--- On the client, reasons stack. So deactivating one will not remove the other ones.
+---
+--- This does not implement the penalty itself, it only shows a warning to the player.
+---
+--- Note only players with a character loaded will receive the penalty warning.
+--- @param playerOrPlayers Player|table|nil If nil, sets it for all players. Otherwise the player or players to set the penalty for.
+--- @param isActive boolean If true, sets the penalty active, otherwise deactivates it.
+--- @param reason string The reason for the disconnect penalty, shown to the player.
+--- @param isCertain? boolean (Only when isActive is true) If true, the penalty will mention all items will be lost, otherwise it will mention 'possibly some items'.
+function Schema.SetDisconnectPenaltyActive(playerOrPlayers, isActive, reason, isCertain)
+	if (not playerOrPlayers) then
+		playerOrPlayers = player.GetAll()
+	elseif (not istable(playerOrPlayers)) then
+		playerOrPlayers = { playerOrPlayers }
+	end
+
+	net.Start("expDisconnectPenalty")
+	net.WriteBool(isActive)
+	net.WriteString(reason)
+
+	if (isActive) then
+		net.WriteBool(isCertain or false)
+	end
+
+	for _, player in ipairs(playerOrPlayers) do
+		if (IsValid(player) and player:GetCharacter()) then
+			net.Send(player)
+		end
 	end
 end
 

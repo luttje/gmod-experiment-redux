@@ -577,16 +577,84 @@ end
 
 function Schema:PostDrawHUD()
 	local curTime = CurTime()
+	local scrW, scrH = ScrW(), ScrH()
 
 	if (self.stunEffects) then
 		for k, stunEffect in pairs(self.stunEffects) do
 			local alpha = math.Clamp((255 / stunEffect.duration) * (stunEffect.endAt - curTime), 0, 255)
 
 			if (alpha ~= 0) then
-				draw.RoundedBox(0, 0, 0, ScrW(), ScrH(), Color(255, 255, 255, alpha))
+				draw.RoundedBox(0, 0, 0, scrW, scrH, Color(255, 255, 255, alpha))
 			else
 				table.remove(self.stunEffects, k)
 			end
+		end
+	end
+
+	-- Warn the user clearly if disconnecting (possibly) results in losing items
+	if (#Schema.disconnectPenaltiesActive > 0) then
+		local anyCertainAll = false
+		local reasonTexts = {}
+
+		if (anyCertainAll) then
+			reasonTexts[1] = L("disconnectPenaltyAllItems")
+		else
+			reasonTexts[1] = L("disconnectPenalty")
+		end
+
+		-- Disabled since it looks ugly and is unclear with current leading text
+		-- for _, reasonInfo in ipairs(Schema.disconnectPenaltiesActive) do
+		-- 	if (reasonInfo.isCertain) then
+		-- 		anyCertainAll = true
+		-- 	end
+
+		-- 	reasonTexts[#reasonTexts + 1] = reasonInfo.reason
+		-- end
+
+		local borderThickness = 4
+		local paddingX = 8
+		local paddingY = 4
+		local y = borderThickness
+		local largestWidth = 0
+
+		surface.SetDrawColor(255, 0, 0, 200)
+		surface.DrawOutlinedRect(0, 0, scrW, scrH, borderThickness)
+
+		-- Show the reasonText + all reasons underneath it
+		for i, reasonText in ipairs(reasonTexts) do
+			local textWidth, textHeight = Schema.GetCachedTextSize(
+				"ixSmallFont",
+				reasonText
+			)
+
+			local boxWidth = textWidth + (paddingX * 2)
+			local boxHeight = textHeight + (paddingY * 2)
+
+			if (boxWidth > largestWidth) then
+				largestWidth = boxWidth
+			end
+
+			draw.RoundedBoxEx(
+				8,
+				(scrW * .5) - (largestWidth * .5),
+				y,
+				largestWidth,
+				boxHeight,
+				Color(255, 0, 0, 200),
+				false, false, true, true
+			)
+
+			draw.SimpleText(
+				reasonText,
+				"ixSmallFont",
+				scrW * .5,
+				y + paddingY,
+				color_white,
+				TEXT_ALIGN_CENTER,
+				TEXT_ALIGN_TOP
+			)
+
+			y = y + boxHeight
 		end
 	end
 end

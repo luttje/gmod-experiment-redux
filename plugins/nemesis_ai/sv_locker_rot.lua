@@ -83,22 +83,22 @@ function PLUGIN:LockerRotThink()
 			continue
 		end
 
-		if (client:IsBot()) then
+		if (not DEBUG_LOCKER_ROT and client:IsBot()) then
 			continue
 		end
 
 		-- Developers are excluded from locker rot events
-		if (client:IsSuperAdmin() and not DEBUG_LOCKER_ROT) then
+		if (not DEBUG_LOCKER_ROT and client:IsSuperAdmin()) then
 			continue
 		end
 
 		-- Make sure all players have played for at least a couple hours on their characters
-		if (character:GetCreateTime() + self.characterLockerRotGraceMinutes > os.time() and not DEBUG_LOCKER_ROT) then
+		if (not DEBUG_LOCKER_ROT and character:GetCreateTime() + self.characterLockerRotGraceMinutes > os.time()) then
 			continue
 		end
 
 		-- Make sure they've played for at least 10 minutes (so they have a chance to load into the server)
-		if (client.expLastCharacterLoadedAt + self.sessionLockerRotGraceMinutes > CurTime() and not DEBUG_LOCKER_ROT) then
+		if (not DEBUG_LOCKER_ROT and client.expLastCharacterLoadedAt + self.sessionLockerRotGraceMinutes > CurTime()) then
 			continue
 		end
 
@@ -110,7 +110,7 @@ function PLUGIN:LockerRotThink()
 			character:SetData("nemesisLockerRotGraceEndsAt", lockerRotGraceEndsAt)
 		end
 
-		if (lockerRotGraceEndsAt and not DEBUG_LOCKER_ROT) then
+		if (not DEBUG_LOCKER_ROT and lockerRotGraceEndsAt) then
 			continue
 		end
 
@@ -149,6 +149,24 @@ function PLUGIN:LockerRotThink()
 		self:StartLockerRotEvent(randomCharacter, lockerRotEvent)
 
 		return
+	end
+
+	-- Skip the leaderboard and pick a random online character to infect their locker for testing
+	if (DEBUG_LOCKER_ROT) then
+		local randomClient = table.Random(onlineCharactersByID)
+
+		if (randomClient) then
+			local targetCharacter = randomClient:GetCharacter()
+			self:StartLockerRotEvent(targetCharacter, {
+				targetCharacter = targetCharacter,
+				value = nil,
+				metricName = nil,
+				taunts = self.metricTaunts["Rotbrand"],
+				rank = 1,
+			})
+
+			return
+		end
 	end
 
 	-- We try to find the player that has the highest rank of all the metrics, and infect their locker.
@@ -308,11 +326,7 @@ function PLUGIN:StartLockerRotEvent(targetCharacter, lockerRotEvent)
 			os.time() + ix.config.Get("nemesisAiLockerRotGraceSeconds"))
 
 		-- We don't want players to disconnect now, since that would result in them losing their items if they have the locker rot.
-		ix.chat.Send(nil,
-			"nemesis_ai_locker_rot_warning",
-			"Disconnecting now will result in you losing items from your locker if it has been infected by 'Locker Rot'. "
-			.. "Go check if you have it in your locker and see if you can save your items!"
-		)
+		Schema.SetDisconnectPenaltyActive(nil, true, "Locker Rot Virus")
 
 		-- Force the event to start if the target doesn't close their locker before the time is up
 		timer.Simple(25, function()
@@ -433,6 +447,9 @@ function PLUGIN:SetUpIfNeeded(client)
 		false,
 		{ client }
 	)
+
+	local allExceptClient = Schema.util.AllPlayersExcept(client)
+	Schema.SetDisconnectPenaltyActive(allExceptClient, false, "Locker Rot Virus")
 
 	client:SetLocalVar("lockerRotAntiVirusRevealTime", CurTime() + revealDelay)
 
@@ -675,4 +692,26 @@ function PLUGIN:ShouldPlayerDeathDropItem(client, item, dropModeIsRandom)
 	item:SetData("lockerRot", nil)
 
 	return true
+end
+
+function PLUGIN:PlayerSpawn(client)
+	-- Remove rot from any items that are infected with locker rot and in the player's inventory.
+	-- (happens when testing the locker rot event during development)
+	local character = client:GetCharacter()
+
+	if (not character) then
+		return
+	end
+
+	local inventory = character:GetInventory()
+
+	for _, item in pairs(inventory:GetItems()) do
+		if (item:GetData("lockerRot")) then
+			ix.util.SchemaPrint(
+				"Removing locker rot from item " .. item.uniqueID
+				.. " in inventory of " .. character:GetName()
+			)
+			item:SetData("lockerRot", nil)
+		end
+	end
 end

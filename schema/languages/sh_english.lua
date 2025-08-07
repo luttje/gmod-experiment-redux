@@ -18,6 +18,9 @@ LANGUAGE = {
 	pickupProtector = "Pick Up Door Protector",
 	pickupProtectorNotAllowed = "Cannot pick up the door protector because you are not the owner of the door.",
 
+	disconnectPenaltyAllItems = "Disconnecting now will result in you losing all your inventory items.",
+	disconnectPenalty = "Disconnecting now will result in you possibly losing some of your inventory items.",
+
 	achievements = "Achievements",
 	alliance = "Alliance",
 	alliances = "Alliances",
