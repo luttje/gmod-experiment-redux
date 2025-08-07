@@ -17,6 +17,12 @@ local CANVAS_DEFAULT_WIDTH = 400
 local CANVAS_DEFAULT_HEIGHT = 400
 local CANVAS_MINIMUM_WIDTH = 100
 local CANVAS_MINIMUM_HEIGHT = 100
+local CANVAS_MAX_WIDTH = 800
+local CANVAS_MAX_HEIGHT = 800
+
+local CANVAS_WIDTH_BITS = 10  -- Max 1023
+local CANVAS_HEIGHT_BITS = 10 -- Max 1023
+
 local MAX_ELEMENTS = 10
 local GRID_SIZE = 20
 
@@ -65,6 +71,8 @@ if (SERVER) then
 
 	net.Receive("expCanvasSave", function(length, client)
 		local itemID = net.ReadUInt(32)
+		local canvasWidth = net.ReadUInt(CANVAS_WIDTH_BITS)
+		local canvasHeight = net.ReadUInt(CANVAS_HEIGHT_BITS)
 		local jsonData = net.ReadString()
 		local item = ix.item.instances[itemID]
 
@@ -75,33 +83,45 @@ if (SERVER) then
 
 		-- Validate JSON data
 		local success, data = pcall(util.JSONToTable, jsonData)
-		if not success or not data then
+		if (not success or not data) then
 			client:Notify("Invalid canvas data!")
 			return
 		end
 
 		-- Validate element count and structure
-		if #data > MAX_ELEMENTS then
+		if (#data > MAX_ELEMENTS) then
 			client:Notify("Too many elements on canvas!")
+			return
+		end
+
+		-- Validate canvas dimensions
+		if (canvasWidth < CANVAS_MINIMUM_WIDTH or canvasWidth > CANVAS_MAX_WIDTH or
+				canvasHeight < CANVAS_MINIMUM_HEIGHT or canvasHeight > CANVAS_MAX_HEIGHT) then
+			client:Notify("Invalid canvas dimensions!")
 			return
 		end
 
 		-- Basic validation of each element
 		for _, element in ipairs(data) do
-			if type(element) ~= "table" or
+			if (type(element) ~= "table") or
 				not element.type or
 				not element.spriteX or
 				not element.spriteY or
 				not element.x or
 				not element.y or
-				not element.scale or
+				not element.scaleX or
+				not element.scaleY or
 				not element.color then
 				client:Notify("Invalid canvas element data!")
 				return
 			end
 		end
 
-		item:SetData("design", jsonData)
+		item:SetData("design", {
+			width = canvasWidth,
+			height = canvasHeight,
+			data = jsonData
+		})
 		client:Notify("Canvas design saved!")
 	end)
 elseif (CLIENT) then
@@ -111,7 +131,7 @@ elseif (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)
 		local designData = self:GetData("design")
 
-		if (designData and designData ~= "[]" and designData ~= "") then
+		if (designData) then
 			local panel = tooltip:AddRowAfter("name", "design_status")
 			panel:SetBackgroundColor(THEME.success)
 			panel:SetText("Contains Custom Design")
@@ -140,14 +160,15 @@ elseif (CLIENT) then
 		obj.elementStartY = 0
 		obj.canvasOffsetX = 0
 		obj.canvasOffsetY = 0
-		obj.canvasWidth = CANVAS_DEFAULT_WIDTH
-		obj.canvasHeight = CANVAS_DEFAULT_HEIGHT
 
 		-- Load existing design
-		local designData = item:GetData("design", "[]")
+		local designData = item:GetData("design", {})
 
-		if (designData and designData ~= "" and designData ~= "[]") then
-			obj:LoadDesign(designData)
+		obj.canvasWidth = designData.width or CANVAS_DEFAULT_WIDTH
+		obj.canvasHeight = designData.height or CANVAS_DEFAULT_HEIGHT
+
+		if (designData) then
+			obj:LoadDesign(designData.data)
 		end
 
 		return obj
@@ -182,7 +203,8 @@ elseif (CLIENT) then
 			spriteY = spriteType.icon[2],
 			x = x or 100,
 			y = y or 100,
-			scale = 1.0,
+			scaleX = 1.0,
+			scaleY = 1.0,
 			rotation = 0,
 			color = { r = 0, g = 0, b = 0, a = 255 }
 		}
@@ -202,11 +224,13 @@ elseif (CLIENT) then
 	function CanvasDesigner:GetElementAt(x, y)
 		for i = #self.elements, 1, -1 do
 			local element = self.elements[i]
-			local size = SPRITE_SIZE * element.scale
-			local halfSize = size * .5
+			local sizeX = SPRITE_SIZE * element.scaleX
+			local sizeY = SPRITE_SIZE * element.scaleY
+			local halfSizeX = sizeX * .5
+			local halfSizeY = sizeY * .5
 
-			if x >= element.x - halfSize and x <= element.x + halfSize and
-				y >= element.y - halfSize and y <= element.y + halfSize then
+			if x >= element.x - halfSizeX and x <= element.x + halfSizeX and
+				y >= element.y - halfSizeY and y <= element.y + halfSizeY then
 				return i
 			end
 		end
@@ -237,9 +261,10 @@ elseif (CLIENT) then
 
 		-- Draw elements
 		for i, element in ipairs(self.elements) do
-			local drawX = x + element.x - (SPRITE_SIZE * element.scale) * .5
-			local drawY = y + element.y - (SPRITE_SIZE * element.scale) * .5
-			local size = SPRITE_SIZE * element.scale
+			local drawX = x + element.x - (SPRITE_SIZE * element.scaleX) * .5
+			local drawY = y + element.y - (SPRITE_SIZE * element.scaleY) * .5
+			local sizeX = SPRITE_SIZE * element.scaleX
+			local sizeY = SPRITE_SIZE * element.scaleY
 
 			surface.SetDrawColor(element.color.r, element.color.g, element.color.b, element.color.a)
 			surface.SetMaterial(spritesheetMat)
@@ -247,7 +272,7 @@ elseif (CLIENT) then
 			Schema.draw.DrawSpritesheetMaterial(
 				spritesheetMat,
 				drawX, drawY,
-				size, size,
+				sizeX, sizeY,
 				element.spriteX, element.spriteY,
 				SPRITE_SIZE, SPRITE_SIZE,
 				false
@@ -256,7 +281,7 @@ elseif (CLIENT) then
 			-- Draw selection outline
 			if self.selectedElement == i then
 				surface.SetDrawColor(THEME.primary.r, THEME.primary.g, THEME.primary.b, 255)
-				surface.DrawOutlinedRect(drawX - 3, drawY - 3, size + 6, size + 6, 2)
+				surface.DrawOutlinedRect(drawX - 3, drawY - 3, sizeX + 6, sizeY + 6, 2)
 			end
 		end
 	end
@@ -403,7 +428,7 @@ elseif (CLIENT) then
 		canvasWidthEntry.OnEnter = function(self)
 			local newWidth = tonumber(self:GetValue())
 
-			if (newWidth and newWidth > CANVAS_MINIMUM_WIDTH) then
+			if (newWidth and newWidth > CANVAS_MINIMUM_WIDTH and newWidth <= CANVAS_MAX_WIDTH) then
 				canvas.canvasWidth = newWidth
 				canvasWidthEntry:SetValue(tostring(newWidth))
 			else
@@ -433,7 +458,7 @@ elseif (CLIENT) then
 		canvasHeightEntry.OnEnter = function(self)
 			local newHeight = tonumber(self:GetValue())
 
-			if (newHeight and newHeight > CANVAS_MINIMUM_HEIGHT) then
+			if (newHeight and newHeight > CANVAS_MINIMUM_HEIGHT and newHeight <= CANVAS_MAX_HEIGHT) then
 				canvas.canvasHeight = newHeight
 				canvasHeightEntry:SetValue(tostring(newHeight))
 			else
@@ -453,32 +478,55 @@ elseif (CLIENT) then
 
 		-- Scale control
 		local scaleContainer = vgui.Create("EditablePanel", propPanel)
-		scaleContainer:SetTall(70)
+		scaleContainer:SetTall(160)
 		scaleContainer:Dock(TOP)
 		scaleContainer:DockMargin(10, 5, 10, 8)
 
-		local scaleLabel = vgui.Create("DLabel", scaleContainer)
-		scaleLabel:SetText("Scale")
-		scaleLabel:SetTextColor(THEME.text)
-		scaleLabel:SetFont("ixSmallBoldFont")
-		scaleLabel:Dock(TOP)
-		scaleLabel:DockMargin(10, 10, 10, 5)
-		scaleLabel:SizeToContents()
+		local scaleXLabel = vgui.Create("DLabel", scaleContainer)
+		scaleXLabel:SetText("Scale X")
+		scaleXLabel:SetTextColor(THEME.text)
+		scaleXLabel:SetFont("ixSmallBoldFont")
+		scaleXLabel:Dock(TOP)
+		scaleXLabel:DockMargin(10, 10, 10, 5)
+		scaleXLabel:SizeToContents()
 
-		local scaleSlider = vgui.Create("DNumSlider", scaleContainer)
-		scaleSlider:Dock(TOP)
-		scaleSlider:DockMargin(10, 0, 10, 10)
-		scaleSlider:SetSize(180, 20)
-		scaleSlider:SetMin(0.1)
-		scaleSlider:SetMax(15.0)
-		scaleSlider:SetDecimals(1)
-		scaleSlider:SetValue(1.0)
-		scaleSlider.OnValueChanged = function(self, value)
+		local scaleXSlider = vgui.Create("DNumSlider", scaleContainer)
+		scaleXSlider:Dock(TOP)
+		scaleXSlider:DockMargin(10, 0, 10, 10)
+		scaleXSlider:SetSize(180, 20)
+		scaleXSlider:SetMin(0.1)
+		scaleXSlider:SetMax(15.0)
+		scaleXSlider:SetDecimals(1)
+		scaleXSlider:SetValue(1.0)
+		scaleXSlider.OnValueChanged = function(self, value)
 			if (canvas.selectedElement and canvas.elements[canvas.selectedElement]) then
-				canvas.elements[canvas.selectedElement].scale = value
+				canvas.elements[canvas.selectedElement].scaleX = value
 			end
 		end
-		scaleSlider.Label:SetVisible(false)
+		scaleXSlider.Label:SetVisible(false)
+
+		local scaleYLabel = vgui.Create("DLabel", scaleContainer)
+		scaleYLabel:SetText("Scale Y")
+		scaleYLabel:SetTextColor(THEME.text)
+		scaleYLabel:SetFont("ixSmallBoldFont")
+		scaleYLabel:Dock(TOP)
+		scaleYLabel:DockMargin(10, 10, 10, 5)
+		scaleYLabel:SizeToContents()
+
+		local scaleYSlider = vgui.Create("DNumSlider", scaleContainer)
+		scaleYSlider:Dock(TOP)
+		scaleYSlider:DockMargin(10, 0, 10, 10)
+		scaleYSlider:SetSize(180, 20)
+		scaleYSlider:SetMin(0.1)
+		scaleYSlider:SetMax(15.0)
+		scaleYSlider:SetDecimals(1)
+		scaleYSlider:SetValue(1.0)
+		scaleYSlider.OnValueChanged = function(self, value)
+			if (canvas.selectedElement and canvas.elements[canvas.selectedElement]) then
+				canvas.elements[canvas.selectedElement].scaleY = value
+			end
+		end
+		scaleYSlider.Label:SetVisible(false)
 
 		-- Color control
 		local colorContainer = vgui.Create("EditablePanel", propPanel)
@@ -508,9 +556,13 @@ elseif (CLIENT) then
 			end
 		end
 
-		-- Canvas panel
-		local canvasPanel = vgui.Create("EditablePanel", container)
-		canvasPanel:Dock(FILL)
+		-- Canvas panel and parent
+		local canvasPanelParent = vgui.Create("expDualScrollPanel", container)
+		canvasPanelParent:Dock(FILL)
+
+		local canvasPanel = vgui.Create("EditablePanel")
+		canvasPanelParent:AddItem(canvasPanel)
+		canvasPanel:Dock(TOP)
 		canvasPanel:DockMargin(0, 0, 0, 8)
 		canvasPanel.Paint = function(self, w, h)
 			local canvasWidth, canvasHeight = canvas:GetSize()
@@ -519,6 +571,8 @@ elseif (CLIENT) then
 			canvas.canvasOffsetY = (h - canvasHeight) * .5
 
 			canvas:DrawCanvas(canvas.canvasOffsetX, canvas.canvasOffsetY, canvasWidth, canvasHeight)
+
+			self:SetSize(canvasWidth, canvasHeight)
 		end
 
 		-- Asset Browser
@@ -703,7 +757,8 @@ elseif (CLIENT) then
 
 						-- Update property controls
 						local element = canvas.elements[elementIndex]
-						scaleSlider:SetValue(element.scale)
+						scaleXSlider:SetValue(element.scaleX)
+						scaleYSlider:SetValue(element.scaleY)
 						colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
 					else
 						canvas.selectedElement = nil
@@ -746,9 +801,12 @@ elseif (CLIENT) then
 		saveButton:Dock(RIGHT)
 		saveButton:DockMargin(0, 10, 15, 10)
 		saveButton.DoClick = function()
+			local canvasWidth, canvasHeight = canvas:GetSize()
 			local jsonData = canvas:SaveDesign()
 			net.Start("expCanvasSave")
 			net.WriteUInt(item:GetID(), 32)
+			net.WriteUInt(canvasWidth, CANVAS_WIDTH_BITS)
+			net.WriteUInt(canvasHeight, CANVAS_HEIGHT_BITS)
 			net.WriteString(jsonData)
 			net.SendToServer()
 			frame:Close()
@@ -767,41 +825,36 @@ elseif (CLIENT) then
 
 	local function ViewCanvasDesign(item)
 		local designData = item:GetData("design")
-		if (not designData or designData == "" or designData == "[]") then
+
+		if (not designData) then
 			LocalPlayer():Notify("This canvas is blank!")
 			return
 		end
 
 		local frame = vgui.Create("expFrame")
 		frame:SetTitle("Viewing Canvas - " .. item.name)
-		frame:SetSize(700, 550)
+		frame:SetSize(500, 400)
 		frame:Center()
 		frame:MakePopup()
 		frame:SetDeleteOnClose(true)
 
 		local canvas = CanvasDesigner:New(item)
 
-		local viewerPanel = vgui.Create("EditablePanel", frame)
-		viewerPanel:Dock(FILL)
-		viewerPanel:DockMargin(10, 10, 10, 55)
+		local viewerPanelParent = vgui.Create("expDualScrollPanel", frame)
+		viewerPanelParent:Dock(FILL)
+
+		local viewerPanel = vgui.Create("EditablePanel")
+		viewerPanelParent:AddItem(viewerPanel)
+		viewerPanel:Dock(TOP)
+		viewerPanel:DockMargin(8, 8, 8, 8)
 		viewerPanel.Paint = function(self, w, h)
 			local canvasWidth, canvasHeight = canvas:GetSize()
 			local offsetX = (w - canvasWidth) * .5
 			local offsetY = (h - canvasHeight) * .5
+
 			canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight, true)
-		end
 
-		local bottomPanel = vgui.Create("EditablePanel", frame)
-		bottomPanel:SetTall(45)
-		bottomPanel:Dock(BOTTOM)
-		bottomPanel:DockMargin(8, 0, 8, 8)
-
-		local closeButton = CreateStyledButton(bottomPanel, "Close", THEME.primary)
-		closeButton:SetSize(100, 25)
-		closeButton:Dock(RIGHT)
-		closeButton:DockMargin(0, 10, 15, 10)
-		closeButton.DoClick = function()
-			frame:Close()
+			self:SetSize(canvasWidth, canvasHeight)
 		end
 	end
 
@@ -863,6 +916,6 @@ ITEM.functions.View = {
 	end,
 	OnCanRun = function(item)
 		local designData = item:GetData("design")
-		return designData and designData ~= "" and designData ~= "[]"
+		return designData
 	end
 }
