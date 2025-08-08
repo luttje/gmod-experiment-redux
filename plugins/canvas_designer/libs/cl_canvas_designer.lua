@@ -127,17 +127,16 @@ function PLUGIN.CanvasDesigner:DrawGrid(x, y, w, h)
 	end
 end
 
-function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid)
-	-- Draw background
-	surface.SetDrawColor(255, 255, 255, 255)
-	surface.DrawRect(x, y, w, h)
+function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackground)
+	if (not withoutBackground) then
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawRect(x, y, w, h)
+	end
 
 	if (not withoutGrid) then
-		-- Draw grid
 		self:DrawGrid(x, y, w, h)
 	end
 
-	-- Draw elements
 	for i, element in ipairs(self.elements) do
 		local spriteType = PLUGIN.SPRITES_BY_TYPE[element.type]
 
@@ -152,7 +151,6 @@ function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid)
 		local sizeY = spriteType.icon.size * element.scaleY
 
 		surface.SetDrawColor(element.color.r, element.color.g, element.color.b, element.color.a)
-
 		Schema.draw.DrawSpritesheetMaterial(
 			spriteType.icon.material,
 			drawX, drawY,
@@ -164,7 +162,7 @@ function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid)
 		)
 
 		-- Draw selection outline
-		if (self:GetSelectedElementIndex() == i) then
+		if (not withoutGrid and self:GetSelectedElementIndex() == i) then
 			surface.SetDrawColor(PLUGIN.THEME.primary.r, PLUGIN.THEME.primary.g, PLUGIN.THEME.primary.b, 255)
 			surface.DrawOutlinedRect(drawX - 3, drawY - 3, sizeX + 6, sizeY + 6, 2)
 		end

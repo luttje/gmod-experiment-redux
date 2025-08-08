@@ -5,9 +5,14 @@ util.AddNetworkString("expCanvasSave")
 util.AddNetworkString("expCanvasCopySelector")
 util.AddNetworkString("expCanvasCopy")
 util.AddNetworkString("expCanvasView")
+util.AddNetworkString("expSprayCanDesignSelector")
+util.AddNetworkString("expSprayCanLoadDesign")
+util.AddNetworkString("expSprayCanClearDesign")
 
 resource.AddFile("materials/experiment-redux/designer/basic_spritesheet.png")
 resource.AddFile("materials/experiment-redux/designer/colored_spritesheet.png")
+resource.AddFile("materials/models/spraycan3.vmt")
+resource.AddFile("models/sprayca2.mdl")
 
 function PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
 	if (not item or item:GetOwner() ~= client) then
@@ -107,4 +112,54 @@ net.Receive("expCanvasCopy", function(length, client)
 		name = name,
 	})
 	client:Notify("Canvas design copied successfully!")
+end)
+
+-- Handle loading design into spray can
+net.Receive("expSprayCanLoadDesign", function(length, client)
+	local itemID = net.ReadUInt(32)
+	local canvasWidth = net.ReadUInt(PLUGIN.CANVAS_WIDTH_BITS)
+	local canvasHeight = net.ReadUInt(PLUGIN.CANVAS_HEIGHT_BITS)
+	local name = net.ReadString()
+	local jsonData = net.ReadString()
+
+	local item = ix.item.instances[itemID]
+	if (not item) then
+		return
+	end
+
+	local isValid = PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
+
+	if (not isValid) then
+		return
+	end
+
+	-- Set the design data on the spray can
+	item:SetData("design", {
+		width = canvasWidth,
+		height = canvasHeight,
+		name = name,
+		data = jsonData
+	})
+
+	client:Notify("Design loaded into spray can!")
+end)
+
+-- Handle clearing design from spray can
+net.Receive("expSprayCanClearDesign", function(length, client)
+	local itemID = net.ReadUInt(32)
+
+	local item = ix.item.instances[itemID]
+	if (not item) then
+		return
+	end
+
+	if (item:GetOwner() ~= client) then
+		client:Notify("You do not own this Spray Can!")
+		return
+	end
+
+	-- Clear the design data from the spray can
+	item:SetData("design", nil)
+
+	client:Notify("Spray can design cleared!")
 end)

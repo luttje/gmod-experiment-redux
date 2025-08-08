@@ -34,8 +34,8 @@ if (CLIENT) then
 	end
 end
 
--- The _ here is to order at the top of the menu
-ITEM.functions._Edit = {
+-- The A here is to order at the top of the menu
+ITEM.functions.AEdit = {
 	name = "Edit Canvas",
 	tip = "Open the canvas designer to create artwork.",
 	icon = "icon16/palette.png",

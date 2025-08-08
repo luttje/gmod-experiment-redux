@@ -73,9 +73,27 @@ net.Receive("expCanvasView", function()
 			ix.gui.menu:Remove()
 		end
 
-		-- expCanvasViewer
-
 		local viewerFrame = vgui.Create("expCanvasViewer")
 		viewerFrame:SetCanvasItem(item)
 	end
+end)
+
+net.Receive("expSprayCanDesignSelector", function()
+	local itemID = net.ReadUInt(32)
+
+	local character = LocalPlayer():GetCharacter()
+	if (not character) then return end
+
+	local inventory = character:GetInventory()
+	if (not inventory) then return end
+
+	local item = ix.item.instances[itemID]
+	if (not item) then return end
+
+	if (IsValid(ix.gui.menu)) then
+		ix.gui.menu:Remove()
+	end
+
+	local designSelector = vgui.Create("expSprayCanDesignSelector")
+	designSelector:SetTargetItem(item)
 end)

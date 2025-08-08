@@ -8,6 +8,8 @@ PLUGIN.description =
 ix.util.Include("cl_plugin.lua")
 ix.util.Include("sv_plugin.lua")
 
+PLUGIN.CANVAS_ITEM_ID = "canvas"
+
 -- Canvas constants
 PLUGIN.CANVAS_DEFAULT_WIDTH = 400
 PLUGIN.CANVAS_DEFAULT_HEIGHT = 400
