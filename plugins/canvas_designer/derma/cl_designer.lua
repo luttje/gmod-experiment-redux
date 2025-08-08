@@ -65,8 +65,9 @@ function PANEL:CreateToolbarButtons()
 	self.deleteBtn:Dock(RIGHT)
 	self.deleteBtn:DockMargin(0, 10, 15, 10)
 	self.deleteBtn.DoClick = function()
-		if (self:GetCanvas():GetSelectedElementIndex()) then
-			self:GetCanvas():DeleteSelected()
+		local canvas = self:GetCanvas()
+		if (canvas:GetSelectedElementIndex()) then
+			canvas:DeleteSelected()
 			self:UpdateElementCount()
 		end
 	end
@@ -77,10 +78,11 @@ function PANEL:CreateToolbarButtons()
 	self.clearBtn:Dock(RIGHT)
 	self.clearBtn:DockMargin(0, 10, 8, 10)
 	self.clearBtn.DoClick = function()
-		if (#self:GetCanvas().elements > 0) then
+		local canvas = self:GetCanvas()
+		if (#canvas.elements > 0) then
 			Derma_Query("Are you sure you want to clear the entire canvas?", "Clear Canvas", "Yes", function()
-				self:GetCanvas().elements = {}
-				self:GetCanvas():SelectElement(nil)
+				canvas.elements = {}
+				canvas:SelectElement(nil)
 			end, "No")
 		end
 	end
@@ -144,6 +146,7 @@ function PANEL:CreateCanvasProperties()
 end
 
 function PANEL:CreateNameControl()
+	local canvas = self:GetCanvas()
 	local nameContainer = self.propPanel:Add("EditablePanel")
 	nameContainer:Dock(TOP)
 	nameContainer:SetTall(28)
@@ -159,14 +162,14 @@ function PANEL:CreateNameControl()
 	self.nameEntry = vgui.Create("DTextEntry", nameContainer)
 	self.nameEntry:Dock(FILL)
 	self.nameEntry:DockMargin(10, 10, 10, 0)
-	self.nameEntry:SetValue(self:GetCanvas().name)
+	self.nameEntry:SetValue(canvas.name)
 	self.nameEntry.OnChange = function(self_entry)
 		local newName = self_entry:GetValue()
 
 		if (newName and newName ~= "") then
-			self:GetCanvas().name = newName
+			canvas.name = newName
 		else
-			self_entry:SetValue(self:GetCanvas().name)
+			self_entry:SetValue(canvas.name)
 		end
 	end
 end
@@ -177,6 +180,7 @@ function PANEL:CreateCanvasSizeControls()
 end
 
 function PANEL:CreateCanvasWidthControl()
+	local canvas = self:GetCanvas()
 	local canvasWidthContainer = self.propPanel:Add("EditablePanel")
 	canvasWidthContainer:Dock(TOP)
 	canvasWidthContainer:SetTall(28)
@@ -193,15 +197,15 @@ function PANEL:CreateCanvasWidthControl()
 	self.canvasWidthEntry:Dock(FILL)
 	self.canvasWidthEntry:DockMargin(10, 10, 10, 0)
 	self.canvasWidthEntry:SetNumeric(true)
-	self.canvasWidthEntry:SetValue(tostring(self:GetCanvas().canvasWidth))
+	self.canvasWidthEntry:SetValue(tostring(canvas.canvasWidth))
 	self.canvasWidthEntry.OnChange = function(self_entry)
 		local newWidth = tonumber(self_entry:GetValue())
 
 		if (newWidth and newWidth > PLUGIN.CANVAS_MINIMUM_WIDTH and newWidth <= PLUGIN.CANVAS_MAX_WIDTH) then
-			self:GetCanvas().canvasWidth = newWidth
+			canvas.canvasWidth = newWidth
 			self.canvasWidthEntry:SetValue(tostring(newWidth))
 		else
-			self_entry:SetValue(tostring(self:GetCanvas().canvasWidth))
+			self_entry:SetValue(tostring(canvas.canvasWidth))
 		end
 	end
 
@@ -209,6 +213,7 @@ function PANEL:CreateCanvasWidthControl()
 end
 
 function PANEL:CreateCanvasHeightControl()
+	local canvas = self:GetCanvas()
 	local canvasHeightContainer = self.propPanel:Add("EditablePanel")
 	canvasHeightContainer:Dock(TOP)
 	canvasHeightContainer:SetTall(28)
@@ -225,15 +230,15 @@ function PANEL:CreateCanvasHeightControl()
 	self.canvasHeightEntry:Dock(FILL)
 	self.canvasHeightEntry:DockMargin(10, 10, 10, 0)
 	self.canvasHeightEntry:SetNumeric(true)
-	self.canvasHeightEntry:SetValue(tostring(self:GetCanvas().canvasHeight))
+	self.canvasHeightEntry:SetValue(tostring(canvas.canvasHeight))
 	self.canvasHeightEntry.OnChange = function(self_entry)
 		local newHeight = tonumber(self_entry:GetValue())
 
 		if (newHeight and newHeight > PLUGIN.CANVAS_MINIMUM_HEIGHT and newHeight <= PLUGIN.CANVAS_MAX_HEIGHT) then
-			self:GetCanvas().canvasHeight = newHeight
+			canvas.canvasHeight = newHeight
 			self.canvasHeightEntry:SetValue(tostring(newHeight))
 		else
-			self_entry:SetValue(tostring(self:GetCanvas().canvasHeight))
+			self_entry:SetValue(tostring(canvas.canvasHeight))
 		end
 	end
 
@@ -278,8 +283,9 @@ function PANEL:CreateScaleControls()
 	self.scaleXSlider:SetDecimals(1)
 	self.scaleXSlider:SetValue(1.0)
 	self.scaleXSlider.OnValueChanged = function(self_slider, value)
-		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
-			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].scaleX = value
+		local canvas = self:GetCanvas()
+		if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+			canvas.elements[canvas:GetSelectedElementIndex()].scaleX = value
 		end
 	end
 	self.scaleXSlider.Label:SetVisible(false)
@@ -302,8 +308,9 @@ function PANEL:CreateScaleControls()
 	self.scaleYSlider:SetDecimals(1)
 	self.scaleYSlider:SetValue(1.0)
 	self.scaleYSlider.OnValueChanged = function(self_slider, value)
-		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
-			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].scaleY = value
+		local canvas = self:GetCanvas()
+		if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+			canvas.elements[canvas:GetSelectedElementIndex()].scaleY = value
 		end
 	end
 	self.scaleYSlider.Label:SetVisible(false)
@@ -332,8 +339,9 @@ function PANEL:CreateRotationControl()
 	self.rotationSlider:SetDecimals(0)
 	self.rotationSlider:SetValue(0)
 	self.rotationSlider.OnValueChanged = function(self_slider, value)
-		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
-			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].rotation = value
+		local canvas = self:GetCanvas()
+		if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+			canvas.elements[canvas:GetSelectedElementIndex()].rotation = value
 		end
 	end
 	self.rotationSlider.Label:SetVisible(false)
@@ -361,8 +369,9 @@ function PANEL:CreateColorControl()
 	self.colorMixer:SetWangs(true)
 	self.colorMixer:SetColor(Color(255, 255, 255, 255))
 	self.colorMixer.ValueChanged = function(self_mixer, color)
-		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
-			local element = self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]
+		local canvas = self:GetCanvas()
+		if (canvas:GetSelectedElementIndex() and canvas.elements[canvas:GetSelectedElementIndex()]) then
+			local element = canvas.elements[canvas:GetSelectedElementIndex()]
 			element.color = { r = color.r, g = color.g, b = color.b, a = color.a }
 		end
 	end
@@ -377,11 +386,12 @@ function PANEL:CreateCanvasPanel()
 	self.canvasPanel:Dock(TOP)
 	self.canvasPanel:DockMargin(0, 0, 0, 8)
 	self.canvasPanel.Paint = function(panel, w, h)
-		local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+		local canvas = self:GetCanvas()
+		local canvasWidth, canvasHeight = canvas:GetSize()
 		local offsetX = (w - canvasWidth) * 0.5
 		local offsetY = (h - canvasHeight) * 0.5
 
-		self:GetCanvas():DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
+		canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
 
 		panel:SetSize(canvasWidth, canvasHeight)
 	end
@@ -455,6 +465,7 @@ function PANEL:CreateAssetCategoryTabs()
 end
 
 function PANEL:CreateAssetGrid(parent, filterCategory, searchTerm)
+	local canvas = self:GetCanvas()
 	local scrollPanel = vgui.Create("DScrollPanel", parent)
 	scrollPanel:Dock(FILL)
 
@@ -550,9 +561,9 @@ function PANEL:CreateAssetGrid(parent, filterCategory, searchTerm)
 			end
 
 			if (keyCode == MOUSE_LEFT) then
-				local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+				local canvasWidth, canvasHeight = canvas:GetSize()
 
-				if (self:GetCanvas():AddElement(spriteType, canvasWidth * 0.5, canvasHeight * 0.5)) then
+				if (canvas:AddElement(spriteType, canvasWidth * 0.5, canvasHeight * 0.5)) then
 					self:UpdateElementCount()
 				else
 					LocalPlayer():Notify("Maximum elements reached!")
@@ -574,18 +585,19 @@ function PANEL:CreateBottomPanel()
 end
 
 function PANEL:CreateBottomButtons()
+	local canvas = self:GetCanvas()
 	self.saveButton = PLUGIN:CreateStyledButton(self.bottomPanel, "Save Design", PLUGIN.THEME.success)
 	self.saveButton:SetSize(120, 30)
 	self.saveButton:Dock(RIGHT)
 	self.saveButton:DockMargin(0, 10, 15, 10)
 	self.saveButton.DoClick = function()
-		local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
-		local jsonData = self:GetCanvas():SaveDesign()
+		local canvasWidth, canvasHeight = canvas:GetSize()
+		local jsonData = canvas:SaveDesign()
 		net.Start("expCanvasSave")
 		net.WriteUInt(self:GetItem():GetID(), 32)
 		net.WriteUInt(canvasWidth, PLUGIN.CANVAS_WIDTH_BITS)
 		net.WriteUInt(canvasHeight, PLUGIN.CANVAS_HEIGHT_BITS)
-		net.WriteString(self:GetCanvas().name)
+		net.WriteString(canvas.name)
 		net.WriteString(jsonData)
 		net.SendToServer()
 	end
@@ -605,20 +617,77 @@ function PANEL:SetupEventHandlers()
 end
 
 function PANEL:SetupElementsChangedCallback()
+	local canvas = self:GetCanvas()
 	PLUGIN.CanvasDesigner.OnElementsChanged = function()
 		self.elementsList:Clear()
 
-		for i, element in ipairs(self:GetCanvas().elements) do
+		for i = #canvas.elements, 1, -1 do
+			local element = canvas.elements[i]
 			local node = self.elementsList:AddNode(element.type .. " #" .. i)
 			node:SetIcon("icon16/application_view_list.png")
 			node:SetExpanded(false)
 
-			if (self:GetCanvas():GetSelectedElementIndex() == i) then
+			if (canvas:GetSelectedElementIndex() == i) then
 				node:SetSelected(true)
 			end
 
 			node.DoClick = function()
-				self:GetCanvas():SelectElement(i)
+				canvas:SelectElement(i)
+			end
+
+			-- Add right-click context menu
+			node.DoRightClick = function()
+				local menu = DermaMenu()
+
+				-- Move Up option
+				local moveUpOption = menu:AddOption("Move Up", function()
+					self:MoveElement(i, i + 1)
+				end)
+				moveUpOption:SetIcon("icon16/arrow_up.png")
+				if (i == #canvas.elements) then
+					moveUpOption:SetEnabled(false)
+				end
+
+				-- Move Down option
+				local moveDownOption = menu:AddOption("Move Down", function()
+					self:MoveElement(i, i - 1)
+				end)
+				moveDownOption:SetIcon("icon16/arrow_down.png")
+				if (i == 1) then
+					moveDownOption:SetEnabled(false)
+				end
+
+				menu:AddSpacer()
+
+				-- Move to Top option
+				local moveTopOption = menu:AddOption("Move to Top", function()
+					self:MoveElement(i, #canvas.elements)
+				end)
+				moveTopOption:SetIcon("icon16/arrow_up.png")
+				if (i == #canvas.elements) then
+					moveTopOption:SetEnabled(false)
+				end
+
+				-- Move to Bottom option
+				local moveBottomOption = menu:AddOption("Move to Bottom", function()
+					self:MoveElement(i, 1)
+				end)
+				moveBottomOption:SetIcon("icon16/arrow_down.png")
+				if (i == 1) then
+					moveBottomOption:SetEnabled(false)
+				end
+
+				menu:AddSpacer()
+
+				-- Delete option
+				local deleteOption = menu:AddOption("Delete Element", function()
+					canvas:SelectElement(i)
+					canvas:DeleteSelected()
+					self:UpdateElementCount()
+				end)
+				deleteOption:SetIcon("icon16/delete.png")
+
+				menu:Open()
 			end
 		end
 
@@ -627,10 +696,61 @@ function PANEL:SetupElementsChangedCallback()
 	PLUGIN.CanvasDesigner:OnElementsChanged()
 end
 
+function PANEL:MoveElement(fromIndex, toIndex)
+	local canvas = self:GetCanvas()
+	local elements = canvas.elements
+	local elementCount = #elements
+
+	-- Validate indices
+	if (fromIndex < 1 or fromIndex > elementCount or toIndex < 1 or toIndex > elementCount) then
+		return
+	end
+
+	-- Don't move if already at target position
+	if (fromIndex == toIndex) then
+		return
+	end
+
+	-- Store the currently selected element index
+	local selectedIndex = canvas:GetSelectedElementIndex()
+	local newSelectedIndex = selectedIndex
+
+	-- Remove the element from its current position
+	local element = table.remove(elements, fromIndex)
+
+	-- Insert it at the new position
+	table.insert(elements, toIndex, element)
+
+	-- Update the selected element index if necessary
+	if (selectedIndex) then
+		if (selectedIndex == fromIndex) then
+			-- The selected element was moved
+			newSelectedIndex = toIndex
+		elseif (fromIndex < selectedIndex and toIndex >= selectedIndex) then
+			-- Element moved from before to after/at selected position
+			newSelectedIndex = selectedIndex - 1
+		elseif (fromIndex > selectedIndex and toIndex <= selectedIndex) then
+			-- Element moved from after to before/at selected position
+			newSelectedIndex = selectedIndex + 1
+		end
+	end
+
+	-- Update the canvas selection
+	if (newSelectedIndex ~= selectedIndex) then
+		canvas:SelectElement(newSelectedIndex)
+	end
+
+	-- Trigger the elements changed callback to refresh the tree
+	if (PLUGIN.CanvasDesigner.OnElementsChanged) then
+		PLUGIN.CanvasDesigner:OnElementsChanged()
+	end
+end
+
 function PANEL:SetupKeyboardHandling()
 	function self:OnKeyCodePressed(keyCode)
-		if (keyCode == KEY_DELETE and self:GetCanvas():GetSelectedElementIndex()) then
-			self:GetCanvas():DeleteSelected()
+		local canvas = self:GetCanvas()
+		if (keyCode == KEY_DELETE and canvas:GetSelectedElementIndex()) then
+			canvas:DeleteSelected()
 			self:UpdateElementCount()
 		end
 	end
@@ -639,30 +759,31 @@ end
 function PANEL:SetupCanvasMouseHandling()
 	self.canvasPanel.OnMousePressed = function(panel, keyCode)
 		if (keyCode == MOUSE_LEFT) then
+			local canvas = self:GetCanvas()
 			local mx, my = panel:CursorPos()
-			local canvasX = mx - self:GetCanvas().canvasOffsetX
-			local canvasY = my - self:GetCanvas().canvasOffsetY
-			local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+			local canvasX = mx - canvas.canvasOffsetX
+			local canvasY = my - canvas.canvasOffsetY
+			local canvasWidth, canvasHeight = canvas:GetSize()
 
 			if (canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight) then
-				local elementIndex = self:GetCanvas():GetElementAt(canvasX, canvasY)
+				local elementIndex = canvas:GetElementAt(canvasX, canvasY)
 
 				if (elementIndex) then
-					self:GetCanvas():SelectElement(elementIndex)
-					self:GetCanvas().isDragging = true
-					self:GetCanvas().dragStartX = mx
-					self:GetCanvas().dragStartY = my
-					self:GetCanvas().elementStartX = self:GetCanvas().elements[elementIndex].x
-					self:GetCanvas().elementStartY = self:GetCanvas().elements[elementIndex].y
+					canvas:SelectElement(elementIndex)
+					canvas.isDragging = true
+					canvas.dragStartX = mx
+					canvas.dragStartY = my
+					canvas.elementStartX = canvas.elements[elementIndex].x
+					canvas.elementStartY = canvas.elements[elementIndex].y
 
 					-- Update property controls
-					local element = self:GetCanvas().elements[elementIndex]
+					local element = canvas.elements[elementIndex]
 					self.scaleXSlider:SetValue(element.scaleX)
 					self.scaleYSlider:SetValue(element.scaleY)
 					self.rotationSlider:SetValue(element.rotation)
 					self.colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
 				else
-					self:GetCanvas():SelectElement(nil)
+					canvas:SelectElement(nil)
 				end
 			end
 		end
@@ -681,17 +802,18 @@ function PANEL:SetupCanvasMouseHandling()
 		end
 
 		self.lastThink = CurTime()
+		local canvas = self:GetCanvas()
 
-		if (self:GetCanvas().isDragging and self:GetCanvas():GetSelectedElementIndex()) then
+		if (canvas.isDragging and canvas:GetSelectedElementIndex()) then
 			local mx, my = panel:CursorPos()
-			local deltaX = mx - self:GetCanvas().dragStartX
-			local deltaY = my - self:GetCanvas().dragStartY
+			local deltaX = mx - canvas.dragStartX
+			local deltaY = my - canvas.dragStartY
 
-			local element = self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]
-			local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+			local element = canvas.elements[canvas:GetSelectedElementIndex()]
+			local canvasWidth, canvasHeight = canvas:GetSize()
 
-			element.x = math.Clamp(self:GetCanvas().elementStartX + deltaX, 0, canvasWidth)
-			element.y = math.Clamp(self:GetCanvas().elementStartY + deltaY, 0, canvasHeight)
+			element.x = math.Clamp(canvas.elementStartX + deltaX, 0, canvasWidth)
+			element.y = math.Clamp(canvas.elementStartY + deltaY, 0, canvasHeight)
 		end
 	end
 end
