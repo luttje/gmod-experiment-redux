@@ -127,7 +127,78 @@ function PLUGIN.CanvasDesigner:DrawGrid(x, y, w, h)
 	end
 end
 
-function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackground)
+function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackground, compositeAlpha)
+	-- If we need composite alpha, use a render target
+	if (compositeAlpha and compositeAlpha < 1) then
+		local rtName = "CanvasComposite_" .. (self.item and self.item:GetID() or "temp")
+		local rtSize = math.max(w, h, 512) -- Ensure minimum size
+		rtSize = math.min(rtSize, 2048) -- Cap at reasonable max
+
+		local rt = GetRenderTarget(rtName, rtSize, rtSize)
+
+		-- Render to our RT first
+		render.PushRenderTarget(rt)
+		render.Clear(0, 0, 0, 0, true, true) -- Clear with transparent
+
+		cam.Start2D()
+
+		-- Draw everything to the RT at 0,0 with full opacity
+		self:DrawCanvasInternal(0, 0, w, h, withoutGrid, withoutBackground)
+
+		cam.End2D()
+
+		render.PopRenderTarget()
+
+		-- Now draw the RT with alpha
+		-- Create material if needed
+		if not self.rtMaterial then
+			self.rtMaterial = CreateMaterial(rtName .. "_mat", "UnlitGeneric", {
+				["$basetexture"] = rtName,
+				["$translucent"] = 1,
+				["$vertexalpha"] = 1,
+				["$vertexcolor"] = 1,
+			})
+		end
+
+		-- Draw the composite with alpha
+		surface.SetMaterial(self.rtMaterial)
+		surface.SetDrawColor(255, 255, 255, compositeAlpha * 255)
+		surface.DrawTexturedRect(x, y, w, h)
+	else
+		-- Create a stencil mask for clipping
+		render.ClearStencil()
+		render.SetStencilEnable(true)
+
+		-- Write to stencil buffer
+		render.SetStencilWriteMask(1)
+		render.SetStencilTestMask(1)
+		render.SetStencilReferenceValue(1)
+		render.SetStencilCompareFunction(STENCIL_ALWAYS)
+		render.SetStencilPassOperation(STENCIL_REPLACE)
+		render.SetStencilFailOperation(STENCIL_KEEP)
+		render.SetStencilZFailOperation(STENCIL_KEEP)
+
+		-- Draw the clipping rectangle to stencil
+		render.OverrideDepthEnable(true, false)
+		render.OverrideColorWriteEnable(true, false) -- Don't write to color buffer
+		surface.SetDrawColor(255, 255, 255, 255)
+		surface.DrawRect(x, y, w, h)
+		render.OverrideColorWriteEnable(false, true) -- Re-enable color writing
+		render.OverrideDepthEnable(false, true)
+
+		-- Now only draw where stencil = 1
+		render.SetStencilCompareFunction(STENCIL_EQUAL)
+		render.SetStencilPassOperation(STENCIL_KEEP)
+
+		-- Normal drawing without composite alpha
+		self:DrawCanvasInternal(x, y, w, h, withoutGrid, withoutBackground)
+
+		render.SetStencilEnable(false)
+	end
+end
+
+-- Separated internal drawing logic
+function PLUGIN.CanvasDesigner:DrawCanvasInternal(x, y, w, h, withoutGrid, withoutBackground)
 	if (not withoutBackground) then
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.DrawRect(x, y, w, h)
@@ -163,7 +234,12 @@ function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackgr
 
 		-- Draw selection outline
 		if (not withoutGrid and self:GetSelectedElementIndex() == i) then
-			surface.SetDrawColor(PLUGIN.THEME.primary.r, PLUGIN.THEME.primary.g, PLUGIN.THEME.primary.b, 255)
+			surface.SetDrawColor(
+				PLUGIN.THEME.primary.r,
+				PLUGIN.THEME.primary.g,
+				PLUGIN.THEME.primary.b,
+				255
+			)
 			surface.DrawOutlinedRect(drawX - 3, drawY - 3, sizeX + 6, sizeY + 6, 2)
 		end
 	end

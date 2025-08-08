@@ -112,3 +112,49 @@ PLUGIN.THEME = {
 	hover = Color(70, 70, 75),
 	underline = Color(255, 255, 255),
 }
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove all graffiti and other art expressions in the world."
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, name)
+		local worldCanvases = ents.FindByClass("exp_world_canvas_viewer")
+
+		for _, canvas in ipairs(worldCanvases) do
+			canvas:Remove()
+		end
+
+		client:Notify("All world canvases have been removed.")
+	end
+
+	ix.command.Add("WorldCanvasRemoveAll", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Remove a graffiti or other art expressions in the world near where you are looking."
+	COMMAND.arguments = {
+		bit.bor(ix.type.number, ix.type.optional),
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, range)
+		local trace = client:GetEyeTrace()
+		local entities = ents.FindInSphere(trace.HitPos, range or 100)
+		local removeCount = 0
+
+		for _, entity in ipairs(entities) do
+			if (IsValid(entity) and entity:GetClass() == "exp_world_canvas_viewer") then
+				entity:Remove()
+				removeCount = removeCount + 1
+			end
+		end
+
+		client:Notify("Removed " .. removeCount .. " world canvases near where you are looking.")
+	end
+
+	ix.command.Add("WorldCanvasRemove", COMMAND)
+end

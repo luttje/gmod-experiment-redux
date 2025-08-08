@@ -79,6 +79,12 @@ else
 	function ENT:Initialize()
 		self.canvasDesigner = nil
 		self.lastCanvasData = ""
+
+		-- Set the render bounds so this keeps drawing for a player up until the canvas edges are off screen
+		self:SetRenderBounds(
+			Vector(-SCREEN_WIDTH / 2, -SCREEN_HEIGHT / 2, 0),
+			Vector(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0)
+		)
 	end
 
 	function ENT:Think()
@@ -108,7 +114,10 @@ else
 			end,
 			GetName = function(self)
 				return canvasData.name or "Canvas"
-			end
+			end,
+			GetID = function(self)
+				return self.itemID or 0
+			end,
 		}
 
 		-- Create canvas designer instance
@@ -160,34 +169,7 @@ else
 			local offsetX = -drawWidth / 2
 			local offsetY = -drawHeight / 2
 
-			-- Create a stencil mask for clipping
-			render.ClearStencil()
-			render.SetStencilEnable(true)
-
-			-- Write to stencil buffer
-			render.SetStencilWriteMask(1)
-			render.SetStencilTestMask(1)
-			render.SetStencilReferenceValue(1)
-			render.SetStencilCompareFunction(STENCIL_ALWAYS)
-			render.SetStencilPassOperation(STENCIL_REPLACE)
-			render.SetStencilFailOperation(STENCIL_KEEP)
-			render.SetStencilZFailOperation(STENCIL_KEEP)
-
-			-- Draw the clipping rectangle to stencil
-			render.OverrideDepthEnable(true, false)
-			render.OverrideColorWriteEnable(true, false) -- Don't write to color buffer
-			surface.SetDrawColor(255, 255, 255, 255)
-			surface.DrawRect(offsetX, offsetY, drawWidth, drawHeight)
-			render.OverrideColorWriteEnable(false, true) -- Re-enable color writing
-			render.OverrideDepthEnable(false, true)
-
-			-- Now only draw where stencil = 1
-			render.SetStencilCompareFunction(STENCIL_EQUAL)
-			render.SetStencilPassOperation(STENCIL_KEEP)
-
-			self.canvasDesigner:DrawCanvas(offsetX, offsetY, drawWidth, drawHeight, true, true)
-
-			render.SetStencilEnable(false)
+			self.canvasDesigner:DrawCanvas(offsetX, offsetY, drawWidth, drawHeight, true, true, 0.6)
 		end
 
 		cam.End3D2D()
