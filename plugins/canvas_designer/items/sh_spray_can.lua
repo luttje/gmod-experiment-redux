@@ -10,13 +10,16 @@ ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Art"
 ITEM.description = "A spray can filled with vibrant paint. Use it to create graffiti art on surfaces."
+ITEM.maxUses = 10 -- Maximum uses before it runs out
 
 -- Add name function to show loaded design
 function ITEM:GetName()
 	local designData = self:GetData("design")
-	if designData and designData.name then
+
+	if (designData and designData.name) then
 		return self.name .. " (" .. designData.name .. ")"
 	end
+
 	return CLIENT and L(self.name) or self.name
 end
 
@@ -24,10 +27,11 @@ end
 if (CLIENT) then
 	function ITEM:PopulateTooltip(tooltip)
 		local designData = self:GetData("design")
+
 		if (designData) then
 			local panel = tooltip:AddRowAfter("name", "design_status")
 			panel:SetBackgroundColor(PLUGIN.THEME.success)
-			panel:SetText("Contains Design: " .. (designData.name or "Unnamed"))
+			panel:SetText("Design: " .. (designData.name or "Unnamed"))
 			panel:SizeToContents()
 		else
 			local panel = tooltip:AddRowAfter("name", "design_status")
@@ -35,6 +39,14 @@ if (CLIENT) then
 			panel:SetText("No Design Loaded")
 			panel:SizeToContents()
 		end
+
+		local usesUsed = self:GetData("uses_used", 0)
+		local usesLeft = self.maxUses - usesUsed
+
+		local panel = tooltip:AddRowAfter("design_status", "uses_status")
+		panel:SetBackgroundColor(PLUGIN.THEME.primary)
+		panel:SetText("Uses Left: " .. usesLeft)
+		panel:SizeToContents()
 	end
 end
 
@@ -75,6 +87,7 @@ ITEM.functions.SpawnInWorld = {
 
 			-- Check distance - must be within 256 units
 			local hitDistance = trace.StartPos:Distance(trace.HitPos)
+
 			if (hitDistance > 256) then
 				player:Notify("You're too far from the wall! Get closer.")
 				return false
@@ -145,21 +158,15 @@ ITEM.functions.SpawnInWorld = {
 
 			-- All validation passed, create the entity
 			local entity = ents.Create("exp_world_canvas_viewer")
+			entity:SetPos(spawnPos)
+			entity:SetAngles(angles)
+			entity:Spawn()
 
-			if (IsValid(entity)) then
-				entity:SetPos(spawnPos)
-				entity:SetAngles(angles)
-				entity:Spawn()
+			entity:SetCanvasFromItem(item:GetID())
 
-				-- Set the canvas data from this item
-				if entity.SetCanvasFromItem then
-					entity:SetCanvasFromItem(item:GetID())
-				end
+			item:SetData("uses_used", (item:GetData("uses_used", 0) or 0) + 1)
 
-				player:Notify("Graffiti sprayed!")
-			else
-				player:Notify("Failed to spray graffiti!")
-			end
+			player:Notify("Graffiti sprayed!")
 		end
 
 		-- Don't lose item
