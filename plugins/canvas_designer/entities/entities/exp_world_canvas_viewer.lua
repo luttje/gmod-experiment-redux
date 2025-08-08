@@ -13,14 +13,43 @@ ENT.AdminOnly = true
 ENT.ShowPlayerInteraction = false -- Disabled interaction
 ENT.RenderGroup = RENDERGROUP_BOTH
 
+local TIME_TO_DECAY = 60 * 60 * 3
+
 -- Network variables for canvas data
 function ENT:SetupDataTables()
 	self:NetworkVar("String", 1, "CanvasName")
 	self:NetworkVar("Float", 0, "CanvasScale")
+	self:NetworkVar("Float", 1, "CreationTime")
+	self:NetworkVar("Float", 2, "MaxAlpha")
 end
 
 function ENT:GetCanvasData()
 	return self:GetNetVar("data")
+end
+
+function ENT:GetCurrentAlpha()
+	local creationTime = self:GetCreationTime()
+	local maxAlpha = self:GetMaxAlpha()
+
+	if (creationTime == 0) then
+		return maxAlpha -- Fallback if creation time not set
+	end
+
+	local elapsed = CurTime() - creationTime
+	local decayProgress = math.Clamp(elapsed / TIME_TO_DECAY, 0, 1)
+
+	-- Linear decay from maxAlpha to 0
+	return maxAlpha * (1 - decayProgress)
+end
+
+function ENT:ShouldDecay()
+	local creationTime = self:GetCreationTime()
+	if (creationTime == 0) then
+		return false
+	end
+
+	local elapsed = CurTime() - creationTime
+	return elapsed >= TIME_TO_DECAY
 end
 
 if (SERVER) then
@@ -33,17 +62,13 @@ if (SERVER) then
 		-- Default settings
 		self:SetCanvasScale(1.0)
 		self:SetCanvasName("Graffiti Canvas")
-
-		-- Make it small and transparent for debugging
-		self:SetModelScale(0.1)
-		self:SetColor(Color(255, 0, 0, 100)) -- Semi-transparent red cube
+		self:SetCreationTime(CurTime())
+		self:SetMaxAlpha(0.6) -- Default max alpha
 	end
 
 	function ENT:SetCanvasData(data)
 		self:SetNetVar("data", data)
 	end
-
-	-- No Use function - removed interaction
 
 	-- Set canvas data from an item
 	function ENT:SetCanvasFromItem(itemID)
@@ -68,9 +93,37 @@ if (SERVER) then
 	end
 
 	function ENT:Think()
-		-- Minimal thinking for graffiti
-		self:NextThink(CurTime() + 5) -- Less frequent updates
+		-- Check if graffiti should decay and be removed
+		if (self:ShouldDecay()) then
+			self:Remove()
+			return
+		end
+
+		-- Update thinking frequency based on decay progress
+		local creationTime = self:GetCreationTime()
+
+		if (creationTime > 0) then
+			local elapsed = CurTime() - creationTime
+			local decayProgress = elapsed / TIME_TO_DECAY
+
+			-- Think more frequently as decay progresses for smoother transitions
+			local thinkInterval = math.Clamp(5 - (decayProgress * 4), 0.5, 5)
+			self:NextThink(CurTime() + thinkInterval)
+		else
+			self:NextThink(CurTime() + 5) -- Default interval
+		end
+
 		return true
+	end
+
+	-- Function to set custom max alpha (useful for different graffiti types)
+	function ENT:SetMaxAlpha(alpha)
+		self:SetNetVar("MaxAlpha", math.Clamp(alpha, 0, 1))
+	end
+
+	-- Function to reset decay timer (if needed)
+	function ENT:ResetDecayTimer()
+		self:SetCreationTime(CurTime())
 	end
 else
 	local SCREEN_WIDTH = 512
@@ -129,6 +182,14 @@ else
 	end
 
 	function ENT:DrawCanvas3D2D()
+		-- Get current alpha based on decay
+		local currentAlpha = self:GetCurrentAlpha()
+
+		-- Don't draw if completely transparent
+		if (currentAlpha <= 0) then
+			return
+		end
+
 		if (not self.canvasDesigner) then
 			local pos = self:GetPos()
 			local ang = self:GetAngles()
@@ -136,7 +197,8 @@ else
 			local screenAng = Angle(ang.p, ang.y, ang.r + 90)
 
 			cam.Start3D2D(screenPos, screenAng, 0.1)
-			draw.SimpleText("NO CANVAS DATA", "DermaLarge", 0, 0, Color(255, 0, 0), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			local textColor = Color(255, 0, 0, currentAlpha * 255)
+			draw.SimpleText("NO CANVAS DATA", "DermaLarge", 0, 0, textColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			cam.End3D2D()
 			return
 		end
@@ -169,7 +231,7 @@ else
 			local offsetX = -drawWidth / 2
 			local offsetY = -drawHeight / 2
 
-			self.canvasDesigner:DrawCanvas(offsetX, offsetY, drawWidth, drawHeight, true, true, 0.6)
+			self.canvasDesigner:DrawCanvas(offsetX, offsetY, drawWidth, drawHeight, true, true, currentAlpha)
 		end
 
 		cam.End3D2D()

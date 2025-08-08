@@ -55,31 +55,25 @@ if (SERVER) then
 		end
 
 		local limitedObjects = character:GetVar("limitedObjects", {})
-		local invalidObjects = {}
 
 		for objectType, objects in pairs(limitedObjects) do
-			for k, object in ipairs(objects) do
-				if (not IsValid(object)) then
-					invalidObjects[#invalidObjects + 1] = {
-						type = objectType,
-						index = k
-					}
+			for i = #objects, 1, -1 do
+				if (not IsValid(objects[i])) then
+					table.remove(objects, i)
 				end
 			end
-		end
 
-		for _, data in ipairs(invalidObjects) do
-			table.remove(limitedObjects[data.type], data.index)
+			if (#objects == 0) then
+				limitedObjects[objectType] = nil
+			end
 		end
 
 		character:SetVar("limitedObjects", limitedObjects)
 	end
 
-	hook.Add("PlayerSecondElapsed", "expPruneInvalidObjects", function(client)
-		client:PruneInvalidObjects()
-	end)
-
 	function META:AddLimitedObject(objectType, object)
+		self:PruneInvalidObjects()
+
 		local character = self:GetCharacter()
 		local limitedObjects = character:GetVar("limitedObjects", {})
 		local objects = limitedObjects[objectType] or {}
@@ -97,6 +91,8 @@ function META:IsObjectLimited(objectType, limit)
 	if (not character) then
 		return false
 	end
+
+	self:PruneInvalidObjects()
 
 	local limitedObjects = character:GetVar("limitedObjects", {})
 	local objects = limitedObjects[objectType] or {}

@@ -11,6 +11,7 @@ ITEM.height = 1
 ITEM.category = "Art"
 ITEM.description = "A spray can filled with vibrant paint. Use it to create graffiti art on surfaces."
 ITEM.maxUses = 10 -- Maximum uses before it runs out
+ITEM.maximumGraffiti = 10
 
 -- Add name function to show loaded design
 function ITEM:GetName()
@@ -76,12 +77,12 @@ ITEM.functions.SpawnInWorld = {
 	icon = "icon16/paintbrush.png",
 	OnRun = function(item)
 		if (SERVER) then
-			local player = item.player
-			local trace = player:GetEyeTrace()
+			local client = item.player
+			local trace = client:GetEyeTrace()
 
 			-- Make sure we hit something and it's not too far
 			if (not trace.Hit) then
-				player:Notify("You need to aim at a wall!")
+				client:Notify("You need to aim at a wall!")
 				return false
 			end
 
@@ -89,14 +90,20 @@ ITEM.functions.SpawnInWorld = {
 			local hitDistance = trace.StartPos:Distance(trace.HitPos)
 
 			if (hitDistance > 256) then
-				player:Notify("You're too far from the wall! Get closer.")
+				client:Notify("You're too far from the wall! Get closer.")
+				return false
+			end
+
+			if (client:IsObjectLimited("graffiti", item.maximumGraffiti)) then
+				client:Notify(
+					"You can not spray graffiti as you have reached the maximum amount of graffiti in the world!")
 				return false
 			end
 
 			-- Position the graffiti on the surface
 			local spawnPos = trace.HitPos + trace.HitNormal * 2
 			local surfaceNormal = trace.HitNormal
-			local playerPos = player:GetPos()
+			local playerPos = client:GetPos()
 
 			-- Start with surface normal to make graffiti flush with any surface
 			local angles = surfaceNormal:Angle()
@@ -146,12 +153,12 @@ ITEM.functions.SpawnInWorld = {
 				local cornerTrace = util.TraceLine({
 					start = startPos,
 					endpos = endPos,
-					filter = player
+					filter = client
 				})
 
 				-- Check if we hit something at this corner
 				if (not cornerTrace.Hit) then
-					player:Notify("Cannot place graffiti where it wouldn't fit the surface!")
+					client:Notify("Cannot place graffiti where it wouldn't fit the surface!")
 					return false
 				end
 			end
@@ -164,9 +171,12 @@ ITEM.functions.SpawnInWorld = {
 
 			entity:SetCanvasFromItem(item:GetID())
 
+			client:AddLimitedObject("graffiti", entity)
+			client:RegisterEntityToRemoveOnLeave(entity)
+
 			item:SetData("uses_used", (item:GetData("uses_used", 0) or 0) + 1)
 
-			player:Notify("Graffiti sprayed!")
+			client:Notify("Graffiti sprayed!")
 		end
 
 		-- Don't lose item
