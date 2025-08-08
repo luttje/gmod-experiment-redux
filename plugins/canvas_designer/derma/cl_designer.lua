@@ -385,15 +385,22 @@ function PANEL:CreateCanvasPanel()
 	self.canvasPanelParent:AddItem(self.canvasPanel)
 	self.canvasPanel:Dock(TOP)
 	self.canvasPanel:DockMargin(0, 0, 0, 8)
+
+	-- Set initial size to ensure proper layout
+	local canvas = self:GetCanvas()
+	local canvasWidth, canvasHeight = canvas:GetSize()
+	self.canvasPanel:SetSize(canvasWidth + 100, canvasHeight + 100) -- Add padding for centering
+
 	self.canvasPanel.Paint = function(panel, w, h)
 		local canvas = self:GetCanvas()
 		local canvasWidth, canvasHeight = canvas:GetSize()
 		local offsetX = (w - canvasWidth) * 0.5
 		local offsetY = (h - canvasHeight) * 0.5
 
-		canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
+		-- Store the offset for mouse handling
+		canvas:SetDrawOffset(offsetX, offsetY)
 
-		panel:SetSize(canvasWidth, canvasHeight)
+		canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
 	end
 
 	self:SetupCanvasMouseHandling()
@@ -761,13 +768,22 @@ function PANEL:SetupCanvasMouseHandling()
 		if (keyCode == MOUSE_LEFT) then
 			local canvas = self:GetCanvas()
 			local mx, my = panel:CursorPos()
-			local canvasX = mx - canvas.canvasOffsetX
-			local canvasY = my - canvas.canvasOffsetY
+			local panelW, panelH = panel:GetSize()
 			local canvasWidth, canvasHeight = canvas:GetSize()
 
-			if (canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight) then
-				local elementIndex = canvas:GetElementAt(canvasX, canvasY)
+			-- Calculate and set the offset for GetElementAt to use
+			local offsetX = (panelW - canvasWidth) * 0.5
+			local offsetY = (panelH - canvasHeight) * 0.5
+			canvas:SetDrawOffset(offsetX, offsetY)
 
+			-- Let GetElementAt handle the coordinate conversion
+			local elementIndex = canvas:GetElementAt(mx, my)
+
+			-- Also check if we're within canvas bounds manually for debugging
+			local canvasX = mx - offsetX
+			local canvasY = my - offsetY
+
+			if (canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight) then
 				if (elementIndex) then
 					canvas:SelectElement(elementIndex)
 					canvas.isDragging = true
@@ -810,10 +826,9 @@ function PANEL:SetupCanvasMouseHandling()
 			local deltaY = my - canvas.dragStartY
 
 			local element = canvas.elements[canvas:GetSelectedElementIndex()]
-			local canvasWidth, canvasHeight = canvas:GetSize()
 
-			element.x = math.Clamp(canvas.elementStartX + deltaX, 0, canvasWidth)
-			element.y = math.Clamp(canvas.elementStartY + deltaY, 0, canvasHeight)
+			element.x = canvas.elementStartX + deltaX
+			element.y = canvas.elementStartY + deltaY
 		end
 	end
 end

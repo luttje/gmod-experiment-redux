@@ -97,7 +97,16 @@ function PLUGIN.CanvasDesigner:DeleteSelected()
 	end
 end
 
+function PLUGIN.CanvasDesigner:SetDrawOffset(offsetX, offsetY)
+	self.currentDrawOffsetX = offsetX or 0
+	self.currentDrawOffsetY = offsetY or 0
+end
+
 function PLUGIN.CanvasDesigner:GetElementAt(x, y)
+	-- Adjust coordinates to account for drawing offset
+	local adjustedX = x - (self.currentDrawOffsetX or 0)
+	local adjustedY = y - (self.currentDrawOffsetY or 0)
+
 	for i = #self.elements, 1, -1 do
 		local element = self.elements[i]
 		local spriteType = PLUGIN.SPRITES_BY_TYPE[element.type]
@@ -106,8 +115,8 @@ function PLUGIN.CanvasDesigner:GetElementAt(x, y)
 		local halfSizeX = sizeX * .5
 		local halfSizeY = sizeY * .5
 
-		if (x >= element.x - halfSizeX and x <= element.x + halfSizeX and
-				y >= element.y - halfSizeY and y <= element.y + halfSizeY) then
+		if (adjustedX >= element.x - halfSizeX and adjustedX <= element.x + halfSizeX and
+				adjustedY >= element.y - halfSizeY and adjustedY <= element.y + halfSizeY) then
 			return i
 		end
 	end
