@@ -2,7 +2,7 @@ local PLUGIN = PLUGIN
 
 AddCSLuaFile()
 
-ENT.Base = "anim"
+ENT.Base = "base_anim"
 ENT.PrintName = "Obstacle Course Screen"
 ENT.Author = "Experiment Redux"
 ENT.Spawnable = false

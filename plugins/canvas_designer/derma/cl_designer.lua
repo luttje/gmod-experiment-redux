@@ -1,0 +1,718 @@
+local PLUGIN = PLUGIN
+local PANEL = {}
+
+AccessorFunc(PANEL, "canvas", "Canvas")
+AccessorFunc(PANEL, "item", "Item")
+
+function PANEL:Init()
+	self:SetDeleteOnClose(true)
+	self:MakePopup()
+end
+
+function PANEL:Setup(item)
+	self:SetItem(item)
+	self:SetTitle("Canvas Designer - " .. item:GetName())
+	self:SetSize(1000, 800)
+	self:Center()
+
+	local canvas = PLUGIN.CanvasDesigner:New(item)
+	self:SetCanvas(canvas)
+
+	self:CreateLayout()
+	self:SetupEventHandlers()
+	self:UpdateElementCount()
+end
+
+function PANEL:CreateLayout()
+	self:CreateMainContainer()
+	self:CreateTopToolbar()
+	self:CreateSidePanel()
+	self:CreateCanvasPanel()
+	self:CreateAssetBrowser()
+	self:CreateBottomPanel()
+end
+
+function PANEL:CreateMainContainer()
+	self.container = vgui.Create("EditablePanel", self)
+	self.container:Dock(FILL)
+	self.container:DockMargin(8, 8, 8, 8)
+end
+
+function PANEL:CreateTopToolbar()
+	self.topbar = vgui.Create("EditablePanel", self.container)
+	self.topbar:SetTall(50)
+	self.topbar:Dock(TOP)
+	self.topbar:DockMargin(0, 0, 0, 8)
+
+	self:CreateElementCounter()
+	self:CreateToolbarButtons()
+end
+
+function PANEL:CreateElementCounter()
+	self.countLabel = vgui.Create("DLabel", self.topbar)
+	self.countLabel:SetText("Elements: 0/" .. PLUGIN.MAX_ELEMENTS)
+	self.countLabel:SetTextColor(PLUGIN.THEME.text)
+	self.countLabel:SetFont("ixSmallBoldFont")
+	self.countLabel:Dock(LEFT)
+	self.countLabel:DockMargin(15, 0, 0, 0)
+	self.countLabel:SizeToContents()
+end
+
+function PANEL:CreateToolbarButtons()
+	-- Delete button
+	self.deleteBtn = PLUGIN:CreateStyledButton(self.topbar, "Delete Selected", PLUGIN.THEME.danger)
+	self.deleteBtn:SetSize(120, 30)
+	self.deleteBtn:Dock(RIGHT)
+	self.deleteBtn:DockMargin(0, 10, 15, 10)
+	self.deleteBtn.DoClick = function()
+		if (self:GetCanvas():GetSelectedElementIndex()) then
+			self:GetCanvas():DeleteSelected()
+			self:UpdateElementCount()
+		end
+	end
+
+	-- Clear all button
+	self.clearBtn = PLUGIN:CreateStyledButton(self.topbar, "Clear All", PLUGIN.THEME.warning)
+	self.clearBtn:SetSize(100, 30)
+	self.clearBtn:Dock(RIGHT)
+	self.clearBtn:DockMargin(0, 10, 8, 10)
+	self.clearBtn.DoClick = function()
+		if (#self:GetCanvas().elements > 0) then
+			Derma_Query("Are you sure you want to clear the entire canvas?", "Clear Canvas", "Yes", function()
+				self:GetCanvas().elements = {}
+				self:GetCanvas():SelectElement(nil)
+			end, "No")
+		end
+	end
+end
+
+function PANEL:CreateSidePanel()
+	self.sidePanel = vgui.Create("EditablePanel", self.container)
+	self.sidePanel:SetWide(350)
+	self.sidePanel:Dock(RIGHT)
+	self.sidePanel:DockMargin(8, 0, 0, 0)
+
+	self.sidePanel.Paint = function(self, w, h)
+		draw.RoundedBox(4, 0, 0, w, h, PLUGIN.THEME.panel)
+	end
+
+	self:CreateElementsList()
+	self:CreatePropertiesPanel()
+end
+
+function PANEL:CreateElementsList()
+	self.elementsList = vgui.Create("DTree", self.sidePanel)
+	self.elementsList:Dock(TOP)
+	self.elementsList:SetTall(100)
+	self.elementsList:DockMargin(10, 10, 10, 0)
+	self.elementsList.OnMouseReleased = function(node)
+		-- Deselect if we click outside any node
+		self:GetCanvas():SelectElement(nil)
+	end
+end
+
+function PANEL:CreatePropertiesPanel()
+	self.propPanel = vgui.Create("DScrollPanel", self.sidePanel)
+	self.propPanel:Dock(FILL)
+
+	self:CreatePropertiesTitle()
+	self:CreateCanvasProperties()
+	self:CreateSelectedElementProperties()
+end
+
+function PANEL:CreatePropertiesTitle()
+	local propTitle = self.propPanel:Add("DLabel")
+	propTitle:SetText("Properties")
+	propTitle:SetTextColor(PLUGIN.THEME.text)
+	propTitle:SetFont("ixBigFont")
+	propTitle:Dock(TOP)
+	propTitle:DockMargin(15, 15, 15, 10)
+	propTitle:SizeToContents()
+end
+
+function PANEL:CreateCanvasProperties()
+	local canvasPropTitle = self.propPanel:Add("DLabel")
+	canvasPropTitle:SetText("Canvas Properties")
+	canvasPropTitle:SetTextColor(PLUGIN.THEME.text)
+	canvasPropTitle:SetFont("ixMediumFont")
+	canvasPropTitle:Dock(TOP)
+	canvasPropTitle:DockMargin(15, 15, 15, 10)
+	canvasPropTitle:SizeToContents()
+
+	self:CreateNameControl()
+	self:CreateCanvasSizeControls()
+end
+
+function PANEL:CreateNameControl()
+	local nameContainer = self.propPanel:Add("EditablePanel")
+	nameContainer:Dock(TOP)
+	nameContainer:SetTall(28)
+
+	local nameLabel = vgui.Create("DLabel", nameContainer)
+	nameLabel:SetText("Canvas Name")
+	nameLabel:SetTextColor(PLUGIN.THEME.text)
+	nameLabel:SetFont("ixSmallBoldFont")
+	nameLabel:Dock(LEFT)
+	nameLabel:DockMargin(10, 10, 10, 5)
+	nameLabel:SizeToContents()
+
+	self.nameEntry = vgui.Create("DTextEntry", nameContainer)
+	self.nameEntry:Dock(FILL)
+	self.nameEntry:DockMargin(10, 10, 10, 0)
+	self.nameEntry:SetValue(self:GetCanvas().name)
+	self.nameEntry.OnChange = function(self_entry)
+		local newName = self_entry:GetValue()
+
+		if (newName and newName ~= "") then
+			self:GetCanvas().name = newName
+		else
+			self_entry:SetValue(self:GetCanvas().name)
+		end
+	end
+end
+
+function PANEL:CreateCanvasSizeControls()
+	self:CreateCanvasWidthControl()
+	self:CreateCanvasHeightControl()
+end
+
+function PANEL:CreateCanvasWidthControl()
+	local canvasWidthContainer = self.propPanel:Add("EditablePanel")
+	canvasWidthContainer:Dock(TOP)
+	canvasWidthContainer:SetTall(28)
+
+	local canvasWidthLabel = vgui.Create("DLabel", canvasWidthContainer)
+	canvasWidthLabel:SetText("Canvas Width")
+	canvasWidthLabel:SetTextColor(PLUGIN.THEME.text)
+	canvasWidthLabel:SetFont("ixSmallBoldFont")
+	canvasWidthLabel:Dock(LEFT)
+	canvasWidthLabel:DockMargin(10, 10, 10, 5)
+	canvasWidthLabel:SizeToContents()
+
+	self.canvasWidthEntry = vgui.Create("DTextEntry", canvasWidthContainer)
+	self.canvasWidthEntry:Dock(FILL)
+	self.canvasWidthEntry:DockMargin(10, 10, 10, 0)
+	self.canvasWidthEntry:SetNumeric(true)
+	self.canvasWidthEntry:SetValue(tostring(self:GetCanvas().canvasWidth))
+	self.canvasWidthEntry.OnChange = function(self_entry)
+		local newWidth = tonumber(self_entry:GetValue())
+
+		if (newWidth and newWidth > PLUGIN.CANVAS_MINIMUM_WIDTH and newWidth <= PLUGIN.CANVAS_MAX_WIDTH) then
+			self:GetCanvas().canvasWidth = newWidth
+			self.canvasWidthEntry:SetValue(tostring(newWidth))
+		else
+			self_entry:SetValue(tostring(self:GetCanvas().canvasWidth))
+		end
+	end
+
+	canvasWidthContainer:InvalidateLayout(true)
+end
+
+function PANEL:CreateCanvasHeightControl()
+	local canvasHeightContainer = self.propPanel:Add("EditablePanel")
+	canvasHeightContainer:Dock(TOP)
+	canvasHeightContainer:SetTall(28)
+
+	local canvasHeightLabel = vgui.Create("DLabel", canvasHeightContainer)
+	canvasHeightLabel:SetText("Canvas Height")
+	canvasHeightLabel:SetTextColor(PLUGIN.THEME.text)
+	canvasHeightLabel:SetFont("ixSmallBoldFont")
+	canvasHeightLabel:Dock(LEFT)
+	canvasHeightLabel:DockMargin(10, 10, 10, 5)
+	canvasHeightLabel:SizeToContents()
+
+	self.canvasHeightEntry = vgui.Create("DTextEntry", canvasHeightContainer)
+	self.canvasHeightEntry:Dock(FILL)
+	self.canvasHeightEntry:DockMargin(10, 10, 10, 0)
+	self.canvasHeightEntry:SetNumeric(true)
+	self.canvasHeightEntry:SetValue(tostring(self:GetCanvas().canvasHeight))
+	self.canvasHeightEntry.OnChange = function(self_entry)
+		local newHeight = tonumber(self_entry:GetValue())
+
+		if (newHeight and newHeight > PLUGIN.CANVAS_MINIMUM_HEIGHT and newHeight <= PLUGIN.CANVAS_MAX_HEIGHT) then
+			self:GetCanvas().canvasHeight = newHeight
+			self.canvasHeightEntry:SetValue(tostring(newHeight))
+		else
+			self_entry:SetValue(tostring(self:GetCanvas().canvasHeight))
+		end
+	end
+
+	canvasHeightContainer:InvalidateLayout(true)
+end
+
+function PANEL:CreateSelectedElementProperties()
+	local selectedPropTitle = self.propPanel:Add("DLabel")
+	selectedPropTitle:SetText("Selected Element Properties")
+	selectedPropTitle:SetTextColor(PLUGIN.THEME.text)
+	selectedPropTitle:SetFont("ixMediumFont")
+	selectedPropTitle:Dock(TOP)
+	selectedPropTitle:DockMargin(15, 15, 15, 10)
+	selectedPropTitle:SizeToContents()
+
+	self:CreateScaleControls()
+	self:CreateRotationControl()
+	self:CreateColorControl()
+end
+
+function PANEL:CreateScaleControls()
+	local scaleContainer = self.propPanel:Add("EditablePanel")
+	scaleContainer:SetTall(160)
+	scaleContainer:Dock(TOP)
+	scaleContainer:DockMargin(10, 5, 10, 8)
+
+	-- Scale X
+	local scaleXLabel = vgui.Create("DLabel", scaleContainer)
+	scaleXLabel:SetText("Scale X")
+	scaleXLabel:SetTextColor(PLUGIN.THEME.text)
+	scaleXLabel:SetFont("ixSmallBoldFont")
+	scaleXLabel:Dock(TOP)
+	scaleXLabel:DockMargin(10, 10, 10, 5)
+	scaleXLabel:SizeToContents()
+
+	self.scaleXSlider = vgui.Create("DNumSlider", scaleContainer)
+	self.scaleXSlider:Dock(TOP)
+	self.scaleXSlider:DockMargin(10, 0, 10, 10)
+	self.scaleXSlider:SetSize(180, 20)
+	self.scaleXSlider:SetMin(0.1)
+	self.scaleXSlider:SetMax(15.0)
+	self.scaleXSlider:SetDecimals(1)
+	self.scaleXSlider:SetValue(1.0)
+	self.scaleXSlider.OnValueChanged = function(self_slider, value)
+		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
+			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].scaleX = value
+		end
+	end
+	self.scaleXSlider.Label:SetVisible(false)
+
+	-- Scale Y
+	local scaleYLabel = vgui.Create("DLabel", scaleContainer)
+	scaleYLabel:SetText("Scale Y")
+	scaleYLabel:SetTextColor(PLUGIN.THEME.text)
+	scaleYLabel:SetFont("ixSmallBoldFont")
+	scaleYLabel:Dock(TOP)
+	scaleYLabel:DockMargin(10, 10, 10, 5)
+	scaleYLabel:SizeToContents()
+
+	self.scaleYSlider = vgui.Create("DNumSlider", scaleContainer)
+	self.scaleYSlider:Dock(TOP)
+	self.scaleYSlider:DockMargin(10, 0, 10, 10)
+	self.scaleYSlider:SetSize(180, 20)
+	self.scaleYSlider:SetMin(0.1)
+	self.scaleYSlider:SetMax(15.0)
+	self.scaleYSlider:SetDecimals(1)
+	self.scaleYSlider:SetValue(1.0)
+	self.scaleYSlider.OnValueChanged = function(self_slider, value)
+		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
+			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].scaleY = value
+		end
+	end
+	self.scaleYSlider.Label:SetVisible(false)
+end
+
+function PANEL:CreateRotationControl()
+	local rotationContainer = self.propPanel:Add("EditablePanel")
+	rotationContainer:SetTall(100)
+	rotationContainer:Dock(TOP)
+	rotationContainer:DockMargin(10, 0, 10, 8)
+
+	local rotationLabel = vgui.Create("DLabel", rotationContainer)
+	rotationLabel:SetText("Rotation")
+	rotationLabel:SetTextColor(PLUGIN.THEME.text)
+	rotationLabel:SetFont("ixSmallBoldFont")
+	rotationLabel:Dock(TOP)
+	rotationLabel:DockMargin(10, 10, 10, 5)
+	rotationLabel:SizeToContents()
+
+	self.rotationSlider = vgui.Create("DNumSlider", rotationContainer)
+	self.rotationSlider:Dock(TOP)
+	self.rotationSlider:DockMargin(10, 0, 10, 10)
+	self.rotationSlider:SetSize(180, 20)
+	self.rotationSlider:SetMin(0)
+	self.rotationSlider:SetMax(360)
+	self.rotationSlider:SetDecimals(0)
+	self.rotationSlider:SetValue(0)
+	self.rotationSlider.OnValueChanged = function(self_slider, value)
+		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
+			self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()].rotation = value
+		end
+	end
+	self.rotationSlider.Label:SetVisible(false)
+end
+
+function PANEL:CreateColorControl()
+	local colorContainer = self.propPanel:Add("EditablePanel")
+	colorContainer:SetTall(200)
+	colorContainer:Dock(TOP)
+	colorContainer:DockMargin(10, 0, 10, 8)
+
+	local colorLabel = vgui.Create("DLabel", colorContainer)
+	colorLabel:SetText("Color")
+	colorLabel:SetTextColor(PLUGIN.THEME.text)
+	colorLabel:SetFont("ixSmallBoldFont")
+	colorLabel:Dock(TOP)
+	colorLabel:DockMargin(10, 10, 10, 5)
+	colorLabel:SizeToContents()
+
+	self.colorMixer = vgui.Create("DColorMixer", colorContainer)
+	self.colorMixer:Dock(TOP)
+	self.colorMixer:DockMargin(10, 0, 10, 10)
+	self.colorMixer:SetPalette(false)
+	self.colorMixer:SetAlphaBar(true)
+	self.colorMixer:SetWangs(true)
+	self.colorMixer:SetColor(Color(255, 255, 255, 255))
+	self.colorMixer.ValueChanged = function(self_mixer, color)
+		if (self:GetCanvas():GetSelectedElementIndex() and self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]) then
+			local element = self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]
+			element.color = { r = color.r, g = color.g, b = color.b, a = color.a }
+		end
+	end
+end
+
+function PANEL:CreateCanvasPanel()
+	self.canvasPanelParent = vgui.Create("expDualScrollPanel", self.container)
+	self.canvasPanelParent:Dock(FILL)
+
+	self.canvasPanel = vgui.Create("EditablePanel")
+	self.canvasPanelParent:AddItem(self.canvasPanel)
+	self.canvasPanel:Dock(TOP)
+	self.canvasPanel:DockMargin(0, 0, 0, 8)
+	self.canvasPanel.Paint = function(panel, w, h)
+		local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+		local offsetX = (w - canvasWidth) * 0.5
+		local offsetY = (h - canvasHeight) * 0.5
+
+		self:GetCanvas():DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
+
+		panel:SetSize(canvasWidth, canvasHeight)
+	end
+
+	self:SetupCanvasMouseHandling()
+end
+
+function PANEL:CreateAssetBrowser()
+	self.assetBrowser = vgui.Create("EditablePanel", self.container)
+	self.assetBrowser:SetTall(200)
+	self.assetBrowser:Dock(BOTTOM)
+
+	self:CreateAssetSearchHeader()
+	self:CreateAssetCategoryTabs()
+end
+
+function PANEL:CreateAssetSearchHeader()
+	local searchHeader = vgui.Create("EditablePanel", self.assetBrowser)
+	searchHeader:SetTall(40)
+	searchHeader:Dock(TOP)
+
+	local searchLabel = vgui.Create("DLabel", searchHeader)
+	searchLabel:SetText("Asset Browser")
+	searchLabel:SetTextColor(PLUGIN.THEME.text)
+	searchLabel:SetFont("ixSmallBoldFont")
+	searchLabel:Dock(LEFT)
+	searchLabel:DockMargin(15, 0, 15, 0)
+	searchLabel:SizeToContents()
+
+	self.searchBox = vgui.Create("DTextEntry", searchHeader)
+	self.searchBox:SetPlaceholderText("Search assets...")
+	self.searchBox:Dock(FILL)
+	self.searchBox:DockMargin(0, 8, 15, 8)
+end
+
+function PANEL:CreateAssetCategoryTabs()
+	self.categoryTabs = vgui.Create("DPropertySheet", self.assetBrowser)
+	self.categoryTabs:Dock(FILL)
+	self.categoryTabs:DockMargin(8, 0, 8, 8)
+
+	self.categoryTabs.Paint = function(self, w, h)
+		draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 0))
+	end
+
+	self.categoryPanels = {}
+
+	-- Create tabs for each category
+	for _, category in ipairs(PLUGIN.SHAPE_CATEGORIES) do
+		local panel = vgui.Create("EditablePanel")
+
+		local grid = self:CreateAssetGrid(panel, category, "")
+		self.categoryPanels[category] = { panel = panel, grid = grid }
+
+		local sheet = self.categoryTabs:AddSheet(string.upper(category), panel, "icon16/folder.png")
+		sheet.Tab.Paint = function(tab, w, h)
+			local bgColor = PLUGIN.THEME.panel
+
+			if (tab:IsHovered() or tab:IsActive()) then
+				bgColor = PLUGIN.THEME.primary
+			end
+
+			draw.RoundedBox(4, 0, 0, w, h, bgColor)
+
+			if (tab:IsActive()) then
+				draw.RoundedBox(4, 4, h - 6, w - 8, 2, PLUGIN.THEME.underline)
+			end
+		end
+	end
+
+	self:SetupAssetSearch()
+end
+
+function PANEL:CreateAssetGrid(parent, filterCategory, searchTerm)
+	local scrollPanel = vgui.Create("DScrollPanel", parent)
+	scrollPanel:Dock(FILL)
+
+	local iconLayout = vgui.Create("DIconLayout", scrollPanel)
+	iconLayout:Dock(TOP)
+	iconLayout:SetSpaceY(8)
+	iconLayout:SetSpaceX(8)
+	iconLayout:DockMargin(8, 8, 8, 8)
+
+	-- lua_run P1:SetCharacterNetVar("premiumPackages", {sprites_colored=true})
+	local premiumPackages = LocalPlayer():GetCharacterNetVar("premiumPackages", {})
+
+	for _, spriteType in ipairs(PLUGIN.SPRITE_TYPES) do
+		local shouldShow = (filterCategory == "all" or spriteType.category == filterCategory)
+		local isUnlocked = not spriteType.premiumKey or premiumPackages[spriteType.premiumKey]
+
+		if (searchTerm and searchTerm ~= "") then
+			local searchLower = string.lower(searchTerm)
+			local nameMatch = string.find(string.lower(spriteType.name), searchLower)
+			local keywordMatch = string.find(string.lower(spriteType.keywords or ""), searchLower)
+			local categoryMatch = string.find(string.lower(spriteType.category), searchLower)
+
+			shouldShow = shouldShow and (nameMatch or keywordMatch or categoryMatch)
+		end
+
+		if (not shouldShow) then
+			continue
+		end
+
+		local assetBtn = vgui.Create("EditablePanel", iconLayout)
+		assetBtn:SetSize(80, 80)
+		assetBtn.Paint = function(panel, w, h)
+			local bgColor = PLUGIN.THEME.panel
+
+			if (panel:IsHovered()) then
+				bgColor = PLUGIN.THEME.hover
+			end
+
+			draw.RoundedBox(6, 0, 0, w, h, ColorAlpha(bgColor, isUnlocked and 255 or 100))
+
+			-- Draw sprite
+			surface.SetDrawColor(255, 255, 255, isUnlocked and 255 or 100)
+
+			local iconSize = 40
+			local iconX = w * 0.5 - iconSize * 0.5
+			local iconY = 8
+
+			Schema.draw.DrawSpritesheetMaterial(
+				spriteType.icon.material,
+				iconX, iconY,
+				iconSize, iconSize,
+				spriteType.icon.x, spriteType.icon.y,
+				spriteType.icon.size, spriteType.icon.size,
+				false
+			)
+
+			-- Draw name
+			surface.SetTextColor(PLUGIN.THEME.text.r, PLUGIN.THEME.text.g, PLUGIN.THEME.text.b, 255)
+			surface.SetFont("DermaDefault")
+
+			local text = spriteType.name
+			local tw, th = surface.GetTextSize(text)
+
+			if (tw > w - 4) then
+				while (tw > w - 10 and #text > 0) do
+					text = string.sub(text, 1, #text - 1)
+					tw, th = surface.GetTextSize(text .. "...")
+				end
+
+				text = text .. "..."
+			end
+
+			surface.SetTextPos(w * 0.5 - tw * 0.5, h - th - 4)
+			surface.DrawText(text)
+
+			-- If the sprite is premium and we don't have that key in premiumPackages, draw a lock icon
+			if (not isUnlocked) then
+				surface.SetDrawColor(255, 255, 255, 200)
+				surface.SetMaterial(Material("icon16/lock.png"))
+				surface.DrawTexturedRect(w - 20, h - 20, 16, 16)
+			end
+		end
+
+		assetBtn.OnMousePressed = function(panel, keyCode)
+			if (not isUnlocked) then
+				Derma_Query(
+					"You do not have access to this premium asset.\nSupport us by purchasing it from our store!",
+					"Premium Asset",
+					"OK",
+					function() end
+				)
+				return
+			end
+
+			if (keyCode == MOUSE_LEFT) then
+				local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+
+				if (self:GetCanvas():AddElement(spriteType, canvasWidth * 0.5, canvasHeight * 0.5)) then
+					self:UpdateElementCount()
+				else
+					LocalPlayer():Notify("Maximum elements reached!")
+				end
+			end
+		end
+	end
+
+	return iconLayout
+end
+
+function PANEL:CreateBottomPanel()
+	self.bottomPanel = vgui.Create("EditablePanel", self)
+	self.bottomPanel:SetTall(50)
+	self.bottomPanel:Dock(BOTTOM)
+	self.bottomPanel:DockMargin(8, 0, 8, 8)
+
+	self:CreateBottomButtons()
+end
+
+function PANEL:CreateBottomButtons()
+	self.saveButton = PLUGIN:CreateStyledButton(self.bottomPanel, "Save Design", PLUGIN.THEME.success)
+	self.saveButton:SetSize(120, 30)
+	self.saveButton:Dock(RIGHT)
+	self.saveButton:DockMargin(0, 10, 15, 10)
+	self.saveButton.DoClick = function()
+		local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+		local jsonData = self:GetCanvas():SaveDesign()
+		net.Start("expCanvasSave")
+		net.WriteUInt(self:GetItem():GetID(), 32)
+		net.WriteUInt(canvasWidth, PLUGIN.CANVAS_WIDTH_BITS)
+		net.WriteUInt(canvasHeight, PLUGIN.CANVAS_HEIGHT_BITS)
+		net.WriteString(self:GetCanvas().name)
+		net.WriteString(jsonData)
+		net.SendToServer()
+	end
+
+	self.cancelButton = PLUGIN:CreateStyledButton(self.bottomPanel, "Cancel", PLUGIN.THEME.textSecondary)
+	self.cancelButton:SetSize(100, 30)
+	self.cancelButton:Dock(RIGHT)
+	self.cancelButton:DockMargin(0, 10, 8, 10)
+	self.cancelButton.DoClick = function()
+		self:Close()
+	end
+end
+
+function PANEL:SetupEventHandlers()
+	self:SetupElementsChangedCallback()
+	self:SetupKeyboardHandling()
+end
+
+function PANEL:SetupElementsChangedCallback()
+	PLUGIN.CanvasDesigner.OnElementsChanged = function()
+		self.elementsList:Clear()
+
+		for i, element in ipairs(self:GetCanvas().elements) do
+			local node = self.elementsList:AddNode(element.type .. " #" .. i)
+			node:SetIcon("icon16/application_view_list.png")
+			node:SetExpanded(false)
+
+			if (self:GetCanvas():GetSelectedElementIndex() == i) then
+				node:SetSelected(true)
+			end
+
+			node.DoClick = function()
+				self:GetCanvas():SelectElement(i)
+			end
+		end
+
+		self:UpdateElementCount()
+	end
+	PLUGIN.CanvasDesigner:OnElementsChanged()
+end
+
+function PANEL:SetupKeyboardHandling()
+	function self:OnKeyCodePressed(keyCode)
+		if (keyCode == KEY_DELETE and self:GetCanvas():GetSelectedElementIndex()) then
+			self:GetCanvas():DeleteSelected()
+			self:UpdateElementCount()
+		end
+	end
+end
+
+function PANEL:SetupCanvasMouseHandling()
+	self.canvasPanel.OnMousePressed = function(panel, keyCode)
+		if (keyCode == MOUSE_LEFT) then
+			local mx, my = panel:CursorPos()
+			local canvasX = mx - self:GetCanvas().canvasOffsetX
+			local canvasY = my - self:GetCanvas().canvasOffsetY
+			local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+
+			if (canvasX >= 0 and canvasX <= canvasWidth and canvasY >= 0 and canvasY <= canvasHeight) then
+				local elementIndex = self:GetCanvas():GetElementAt(canvasX, canvasY)
+
+				if (elementIndex) then
+					self:GetCanvas():SelectElement(elementIndex)
+					self:GetCanvas().isDragging = true
+					self:GetCanvas().dragStartX = mx
+					self:GetCanvas().dragStartY = my
+					self:GetCanvas().elementStartX = self:GetCanvas().elements[elementIndex].x
+					self:GetCanvas().elementStartY = self:GetCanvas().elements[elementIndex].y
+
+					-- Update property controls
+					local element = self:GetCanvas().elements[elementIndex]
+					self.scaleXSlider:SetValue(element.scaleX)
+					self.scaleYSlider:SetValue(element.scaleY)
+					self.rotationSlider:SetValue(element.rotation)
+					self.colorMixer:SetColor(Color(element.color.r, element.color.g, element.color.b, element.color.a))
+				else
+					self:GetCanvas():SelectElement(nil)
+				end
+			end
+		end
+	end
+
+	self.canvasPanel.OnMouseReleased = function(panel, keyCode)
+		if (keyCode == MOUSE_LEFT) then
+			self:GetCanvas().isDragging = false
+		end
+	end
+
+	self.lastThink = 0
+	self.canvasPanel.Think = function(panel)
+		if (CurTime() - self.lastThink < 0.01) then
+			return
+		end
+
+		self.lastThink = CurTime()
+
+		if (self:GetCanvas().isDragging and self:GetCanvas():GetSelectedElementIndex()) then
+			local mx, my = panel:CursorPos()
+			local deltaX = mx - self:GetCanvas().dragStartX
+			local deltaY = my - self:GetCanvas().dragStartY
+
+			local element = self:GetCanvas().elements[self:GetCanvas():GetSelectedElementIndex()]
+			local canvasWidth, canvasHeight = self:GetCanvas():GetSize()
+
+			element.x = math.Clamp(self:GetCanvas().elementStartX + deltaX, 0, canvasWidth)
+			element.y = math.Clamp(self:GetCanvas().elementStartY + deltaY, 0, canvasHeight)
+		end
+	end
+end
+
+function PANEL:SetupAssetSearch()
+	self.searchBox.OnChange = function(searchBox)
+		local searchTerm = searchBox:GetValue()
+		for category, data in pairs(self.categoryPanels) do
+			-- Clear the entire panel and recreate everything
+			data.panel:Clear()
+			data.grid = self:CreateAssetGrid(data.panel, category, searchTerm)
+			self.categoryPanels[category].grid = data.grid
+		end
+	end
+end
+
+function PANEL:UpdateElementCount()
+	local count = #self:GetCanvas().elements
+	self.countLabel:SetText("Elements: " .. count .. "/" .. PLUGIN.MAX_ELEMENTS)
+	self.countLabel:SetTextColor(count >= PLUGIN.MAX_ELEMENTS and PLUGIN.THEME.danger or PLUGIN.THEME.success)
+	self.countLabel:SizeToContents()
+end
+
+vgui.Register("expCanvasDesigner", PANEL, "expFrame")
