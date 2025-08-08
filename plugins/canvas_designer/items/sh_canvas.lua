@@ -87,41 +87,36 @@ end
 if (SERVER) then
 	util.AddNetworkString("expCanvasDesigner")
 	util.AddNetworkString("expCanvasSave")
+	util.AddNetworkString("expCanvasCopySelector")
+	util.AddNetworkString("expCanvasCopy")
 	util.AddNetworkString("expCanvasView")
 
 	resource.AddFile("materials/experiment-redux/canvas_designer_spritesheet.png")
 
-	net.Receive("expCanvasSave", function(length, client)
-		local itemID = net.ReadUInt(32)
-		local canvasWidth = net.ReadUInt(CANVAS_WIDTH_BITS)
-		local canvasHeight = net.ReadUInt(CANVAS_HEIGHT_BITS)
-		local name = net.ReadString()
-		local jsonData = net.ReadString()
-		local item = ix.item.instances[itemID]
-
+	local function validateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
 		if (not item or item:GetOwner() ~= client) then
 			client:Notify("You do not own this Canvas!")
-			return
+			return false
 		end
 
 		-- Validate JSON data
 		local success, data = pcall(util.JSONToTable, jsonData)
 		if (not success or not data) then
 			client:Notify("Invalid canvas data!")
-			return
+			return false
 		end
 
 		-- Validate element count and structure
 		if (#data > MAX_ELEMENTS) then
 			client:Notify("Too many elements on canvas!")
-			return
+			return false
 		end
 
 		-- Validate canvas dimensions
 		if (canvasWidth < CANVAS_MINIMUM_WIDTH or canvasWidth > CANVAS_MAX_WIDTH or
 				canvasHeight < CANVAS_MINIMUM_HEIGHT or canvasHeight > CANVAS_MAX_HEIGHT) then
 			client:Notify("Invalid canvas dimensions!")
-			return
+			return false
 		end
 
 		local premiumPackages = client:GetCharacterNetVar("premiumPackages", {})
@@ -138,7 +133,7 @@ if (SERVER) then
 				not element.scaleY or
 				not element.color then
 				client:Notify("Invalid canvas element data!")
-				return
+				return false
 			end
 
 			-- Check if the sprite is premium and if the player has access
@@ -147,8 +142,25 @@ if (SERVER) then
 
 			if (not isUnlocked) then
 				client:Notify("You do not have access to the sprite: " .. element.type)
-				return
+				return false
 			end
+		end
+
+		return true
+	end
+
+	-- Handles the request to save a canvas design
+	net.Receive("expCanvasSave", function(length, client)
+		local itemID = net.ReadUInt(32)
+		local canvasWidth = net.ReadUInt(CANVAS_WIDTH_BITS)
+		local canvasHeight = net.ReadUInt(CANVAS_HEIGHT_BITS)
+		local name = net.ReadString()
+		local jsonData = net.ReadString()
+		local item = ix.item.instances[itemID]
+		local isValid = validateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
+
+		if (not isValid) then
+			return
 		end
 
 		item:SetData("design", {
@@ -158,6 +170,30 @@ if (SERVER) then
 			name = name,
 		})
 		client:Notify("Canvas design saved!")
+	end)
+
+	-- Handles the request to copy the canvas design of another item in inventory
+	net.Receive("expCanvasCopy", function(length, client)
+		local itemID = net.ReadUInt(32)
+		local canvasWidth = net.ReadUInt(CANVAS_WIDTH_BITS)
+		local canvasHeight = net.ReadUInt(CANVAS_HEIGHT_BITS)
+		local name = net.ReadString()
+		local jsonData = net.ReadString()
+		local item = ix.item.instances[itemID]
+		local isValid = validateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
+
+		if (not isValid) then
+			client:Notify("Invalid canvas design!")
+			return
+		end
+
+		item:SetData("design", {
+			width = canvasWidth,
+			height = canvasHeight,
+			data = jsonData,
+			name = name,
+		})
+		client:Notify("Canvas design copied successfully!")
 	end)
 elseif (CLIENT) then
 	-- Cache the spritesheet material
@@ -716,11 +752,10 @@ elseif (CLIENT) then
 		canvasPanel:DockMargin(0, 0, 0, 8)
 		canvasPanel.Paint = function(self, w, h)
 			local canvasWidth, canvasHeight = canvas:GetSize()
+			local offsetX = (w - canvasWidth) * .5
+			local offsetY = (h - canvasHeight) * .5
 
-			canvas.canvasOffsetX = (w - canvasWidth) * .5
-			canvas.canvasOffsetY = (h - canvasHeight) * .5
-
-			canvas:DrawCanvas(canvas.canvasOffsetX, canvas.canvasOffsetY, canvasWidth, canvasHeight)
+			canvas:DrawCanvas(offsetX, offsetY, canvasWidth, canvasHeight)
 
 			self:SetSize(canvasWidth, canvasHeight)
 		end
@@ -996,7 +1031,305 @@ elseif (CLIENT) then
 		updateElementCount()
 	end
 
-	local function ViewCanvasDesign(item)
+	local function openCanvasCopySelector(item)
+		local frame = vgui.Create("expFrame")
+		frame:SetTitle("Copy Canvas Design - " .. item:GetName())
+		frame:SetSize(800, 600)
+		frame:Center()
+		frame:MakePopup()
+		frame:SetDeleteOnClose(true)
+
+		-- Main container
+		local container = vgui.Create("EditablePanel", frame)
+		container:Dock(FILL)
+		container:DockMargin(8, 8, 8, 8)
+
+		-- Top panel for dropdown selection
+		local topPanel = vgui.Create("EditablePanel", container)
+		topPanel:SetTall(60)
+		topPanel:Dock(TOP)
+		topPanel:DockMargin(0, 0, 0, 8)
+		topPanel.Paint = function(self, w, h)
+			draw.RoundedBox(4, 0, 0, w, h, THEME.panel)
+		end
+
+		-- Dropdown label
+		local dropdownLabel = vgui.Create("DLabel", topPanel)
+		dropdownLabel:SetText("Select Canvas to Copy:")
+		dropdownLabel:SetTextColor(THEME.text)
+		dropdownLabel:SetFont("ixMediumFont")
+		dropdownLabel:Dock(LEFT)
+		dropdownLabel:DockMargin(15, 15, 15, 5)
+		dropdownLabel:SizeToContents()
+
+		-- Get all canvas items from inventory
+		local character = LocalPlayer():GetCharacter()
+		local inventory = character:GetInventory()
+		local canvasItems = {}
+
+		for _, inventoryItem in pairs(inventory:GetItems()) do
+			if (inventoryItem.uniqueID == item.uniqueID and inventoryItem:GetID() ~= item:GetID()) then
+				table.insert(canvasItems, inventoryItem)
+			end
+		end
+
+		-- Dropdown for canvas selection
+		local dropdown = vgui.Create("DComboBox", topPanel)
+		dropdown:SetTall(28)
+		dropdown:Dock(FILL)
+		dropdown:DockMargin(15, 10, 15, 0)
+		dropdown:SetValue("Select a canvas...")
+
+		-- Populate dropdown with canvas items
+		for i, canvasItem in ipairs(canvasItems) do
+			local designData = canvasItem:GetData("design", {})
+			local displayName = designData.name or ("Canvas #" .. canvasItem:GetID())
+			dropdown:AddChoice(displayName, canvasItem)
+		end
+
+		-- Main content area with two columns
+		local contentPanel = vgui.Create("EditablePanel", container)
+		contentPanel:Dock(FILL)
+
+		-- Left column - Current item's design
+		local leftColumn = vgui.Create("EditablePanel", contentPanel)
+		leftColumn:SetWide(frame:GetWide() * 0.5 - 8)
+		leftColumn:Dock(LEFT)
+		leftColumn:DockMargin(0, 0, 4, 0)
+
+		-- Left column header
+		local leftHeader = vgui.Create("EditablePanel", leftColumn)
+		leftHeader:SetTall(40)
+		leftHeader:Dock(TOP)
+		leftHeader:DockMargin(0, 0, 0, 8)
+		leftHeader.Paint = function(self, w, h)
+			draw.RoundedBox(4, 0, 0, w, h, THEME.panel)
+
+			-- Header text
+			surface.SetTextColor(THEME.text)
+			surface.SetFont("ixMediumFont")
+			local text = "Current Design"
+			local tw, th = surface.GetTextSize(text)
+			surface.SetTextPos(15, h * 0.5 - th * 0.5)
+			surface.DrawText(text)
+		end
+
+		-- Left canvas preview container
+		local leftPreviewParent = vgui.Create("expDualScrollPanel", leftColumn)
+		leftPreviewParent:Dock(FILL)
+
+		-- Current item canvas preview
+		local currentCanvas = nil
+		local currentDesign = item:GetData("design")
+		if currentDesign then
+			currentCanvas = CanvasDesigner:New(item)
+		end
+
+		local leftPreviewPanel = vgui.Create("EditablePanel")
+		leftPreviewParent:AddItem(leftPreviewPanel)
+		leftPreviewPanel:Dock(TOP)
+		leftPreviewPanel.Paint = function(self, w, h)
+			if (currentCanvas) then
+				local canvasWidth, canvasHeight = currentCanvas:GetSize()
+				local offsetX = (w - canvasWidth) * .5
+				local offsetY = (h - canvasHeight) * .5
+
+				currentCanvas:DrawCanvas(
+					offsetX,
+					offsetY,
+					canvasWidth,
+					canvasHeight
+				)
+
+				self:SetSize(canvasWidth, canvasHeight)
+				leftPreviewParent:InvalidateLayout()
+			else
+				-- Show message when no design exists
+				surface.SetTextColor(THEME.textSecondary)
+				surface.SetFont("ixMediumFont")
+
+				local text = "No design on this canvas"
+				local tw, th = surface.GetTextSize(text)
+
+				surface.SetTextPos(w * 0.5 - tw * 0.5, h * 0.5 - th * 0.5)
+				surface.DrawText(text)
+
+				self:SetSize(w, 100)
+			end
+		end
+
+		-- Right column - Selected canvas design
+		local rightColumn = vgui.Create("EditablePanel", contentPanel)
+		rightColumn:SetWide(frame:GetWide() * 0.5 - 8)
+		rightColumn:Dock(RIGHT)
+		rightColumn:DockMargin(4, 0, 0, 0)
+
+		-- Right column header
+		local rightHeader = vgui.Create("EditablePanel", rightColumn)
+		rightHeader:SetTall(40)
+		rightHeader:Dock(TOP)
+		rightHeader:DockMargin(0, 0, 0, 8)
+		rightHeader.Paint = function(self, w, h)
+			draw.RoundedBox(4, 0, 0, w, h, THEME.panel)
+
+			-- Header text
+			surface.SetTextColor(THEME.text)
+			surface.SetFont("ixMediumFont")
+			local text = "Design to Copy"
+			local tw, th = surface.GetTextSize(text)
+			surface.SetTextPos(15, h * 0.5 - th * 0.5)
+			surface.DrawText(text)
+		end
+
+		-- Right canvas preview container
+		local rightPreviewParent = vgui.Create("expDualScrollPanel", rightColumn)
+		rightPreviewParent:Dock(FILL)
+
+		-- Canvas viewer variables for selected canvas
+		local selectedCanvas = nil
+		local previewCanvas = nil
+
+		-- Right canvas preview panel
+		local rightPreviewPanel = vgui.Create("EditablePanel")
+		rightPreviewParent:AddItem(rightPreviewPanel)
+		rightPreviewPanel:Dock(TOP)
+		rightPreviewPanel.Paint = function(self, w, h)
+			if (previewCanvas) then
+				local canvasWidth, canvasHeight = previewCanvas:GetSize()
+				local offsetX = (w - canvasWidth) * .5
+				local offsetY = (h - canvasHeight) * .5
+
+				previewCanvas:DrawCanvas(
+					offsetX,
+					offsetY,
+					canvasWidth,
+					canvasHeight
+				)
+
+				self:SetSize(canvasWidth, canvasHeight)
+				rightPreviewParent:InvalidateLayout()
+			else
+				-- Show message when no canvas is selected
+				surface.SetTextColor(THEME.textSecondary)
+				surface.SetFont("ixMediumFont")
+
+				local text = "Select a canvas to copy"
+				local tw, th = surface.GetTextSize(text)
+
+				surface.SetTextPos(w * 0.5 - tw * 0.5, h * 0.5 - th * 0.5)
+				surface.DrawText(text)
+
+				self:SetSize(w, 100)
+			end
+		end
+
+		-- Handle dropdown selection
+		dropdown.OnSelect = function(self, index, value, data)
+			selectedCanvas = data
+			if selectedCanvas then
+				previewCanvas = CanvasDesigner:New(selectedCanvas)
+			else
+				previewCanvas = nil
+			end
+		end
+
+		-- Bottom button panel
+		local bottomPanel = vgui.Create("EditablePanel", container)
+		bottomPanel:SetTall(50)
+		bottomPanel:Dock(BOTTOM)
+
+		-- Copy button
+		local copyButton = CreateStyledButton(bottomPanel, "Copy Design", THEME.success)
+		copyButton:SetSize(120, 30)
+		copyButton:Dock(RIGHT)
+		copyButton:DockMargin(0, 10, 15, 10)
+		copyButton.DoClick = function()
+			if (not selectedCanvas) then
+				LocalPlayer():Notify("Please select a canvas to copy first!")
+				return
+			end
+
+			local selectedDesign = selectedCanvas:GetData("design")
+			if (not selectedDesign) then
+				LocalPlayer():Notify("Selected canvas has no design!")
+				return
+			end
+
+			-- Confirmation dialog before overwriting
+			local confirmFrame = vgui.Create("expFrame")
+			confirmFrame:SetTitle("Confirm Copy")
+			confirmFrame:SetSize(400, 150)
+			confirmFrame:Center()
+			confirmFrame:MakePopup()
+			confirmFrame:SetDeleteOnClose(true)
+
+			local confirmContainer = vgui.Create("EditablePanel", confirmFrame)
+			confirmContainer:Dock(FILL)
+			confirmContainer:DockMargin(15, 15, 15, 15)
+
+			local confirmLabel = vgui.Create("DLabel", confirmContainer)
+			confirmLabel:SetText("This will replace your current design with:")
+			confirmLabel:SetTextColor(THEME.text)
+			confirmLabel:SetFont("ixMediumFont")
+			confirmLabel:Dock(TOP)
+			confirmLabel:DockMargin(0, 0, 0, 5)
+
+			local designNameLabel = vgui.Create("DLabel", confirmContainer)
+			designNameLabel:SetText('"' .. (selectedDesign.name or "Unnamed Design") .. '"')
+			designNameLabel:SetTextColor(THEME.textHighlight)
+			designNameLabel:SetFont("ixMediumFont")
+			designNameLabel:Dock(TOP)
+			designNameLabel:DockMargin(0, 0, 0, 15)
+
+			local confirmButtons = vgui.Create("EditablePanel", confirmContainer)
+			confirmButtons:SetTall(30)
+			confirmButtons:Dock(BOTTOM)
+
+			local confirmYes = CreateStyledButton(confirmButtons, "Yes, Copy", THEME.success)
+			confirmYes:SetSize(100, 30)
+			confirmYes:Dock(RIGHT)
+			confirmYes:DockMargin(0, 0, 8, 0)
+			confirmYes.DoClick = function()
+				-- Send copy request to server
+				net.Start("expCanvasCopy")
+				net.WriteUInt(item:GetID(), 32)
+				net.WriteUInt(selectedDesign.width, CANVAS_WIDTH_BITS)
+				net.WriteUInt(selectedDesign.height, CANVAS_HEIGHT_BITS)
+				net.WriteString(selectedDesign.name)
+				net.WriteString(selectedDesign.data)
+				net.SendToServer()
+
+				confirmFrame:Close()
+				frame:Close()
+			end
+
+			local confirmNo = CreateStyledButton(confirmButtons, "Cancel", THEME.textSecondary)
+			confirmNo:SetSize(100, 30)
+			confirmNo:Dock(RIGHT)
+			confirmNo:DockMargin(0, 0, 8, 0)
+			confirmNo.DoClick = function()
+				confirmFrame:Close()
+			end
+		end
+
+		-- Cancel button
+		local cancelButton = CreateStyledButton(bottomPanel, "Cancel", THEME.textSecondary)
+		cancelButton:SetSize(100, 30)
+		cancelButton:Dock(RIGHT)
+		cancelButton:DockMargin(0, 10, 8, 10)
+		cancelButton.DoClick = function()
+			frame:Close()
+		end
+
+		-- Show message if no canvases available
+		if #canvasItems == 0 then
+			dropdown:SetEnabled(false)
+			dropdown:SetValue("No designed canvases found in inventory")
+			copyButton:SetEnabled(false)
+		end
+	end
+
+	local function viewCanvasDesign(item)
 		local designData = item:GetData("design")
 
 		if (not designData) then
@@ -1044,6 +1377,19 @@ elseif (CLIENT) then
 		end
 	end)
 
+	net.Receive("expCanvasCopySelector", function()
+		local itemID = net.ReadUInt(32)
+		local item = ix.item.instances[itemID]
+
+		if (item) then
+			if (IsValid(ix.gui.menu)) then
+				ix.gui.menu:Remove()
+			end
+
+			openCanvasCopySelector(item)
+		end
+	end)
+
 	net.Receive("expCanvasView", function()
 		local itemID = net.ReadUInt(32)
 		local item = ix.item.instances[itemID]
@@ -1053,18 +1399,38 @@ elseif (CLIENT) then
 				ix.gui.menu:Remove()
 			end
 
-			ViewCanvasDesign(item)
+			viewCanvasDesign(item)
 		end
 	end)
 end
 
-ITEM.functions.Design = {
-	name = "Design Canvas",
+-- The _ here is to order at the top of the menu
+ITEM.functions._Edit = {
+	name = "Edit Canvas",
 	tip = "Open the canvas designer to create artwork.",
 	icon = "icon16/palette.png",
 	OnRun = function(item)
 		if (SERVER) then
 			net.Start("expCanvasDesigner")
+			net.WriteUInt(item:GetID(), 32)
+			net.Send(item.player)
+		end
+
+		-- Don't lose item
+		return false
+	end,
+	OnCanRun = function(item)
+		return item.player:GetCharacter() and item.invID == item.player:GetCharacter():GetInventory():GetID()
+	end
+}
+
+ITEM.functions.Copy = {
+	name = "Copy Other Canvas",
+	tip = "Copies the design from another canvas.",
+	icon = "icon16/page_copy.png",
+	OnRun = function(item)
+		if (SERVER) then
+			net.Start("expCanvasCopySelector")
 			net.WriteUInt(item:GetID(), 32)
 			net.Send(item.player)
 		end
