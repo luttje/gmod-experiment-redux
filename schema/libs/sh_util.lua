@@ -18,19 +18,30 @@ end
 --- @param unit any
 --- @return unknown
 function Schema.util.UnitToCentimeters(unit)
-    return unit * 2.54
+	return unit * 2.54
 end
 
 --- Converts a time in seconds to a short nice time format (e.g: 2s, 1m, 1h)
 --- @param time number The time in seconds.
 --- @return string
 function Schema.util.GetNiceShortTime(time)
-    local text = string.NiceTime(time)
+	local text = string.NiceTime(time)
 
-    local parts = text:Split(" ")
-    local last = parts[#parts]
+	local parts = text:Split(" ")
+	local last = parts[#parts]
 
 	return parts[1] .. last:sub(1, 1):lower()
+end
+
+--- Encodes a string for use in an URL.
+--- @param inputString string The string to encode.
+--- @return string # The encoded string.
+function Schema.util.UrlEncode(inputString)
+	local result, _ = string.gsub(inputString, "([^%w%.%- ])", function(c)
+		return string.format("%%%02X", string.byte(c))
+	end):gsub(" ", "+")
+
+	return result
 end
 
 --- Creates a scope that allows only a single transaction to be active at a time.
@@ -85,7 +96,7 @@ function Schema.util.Throttle(scope, delay, entity)
 	local throttled = scopeTable[scope] > CurTime()
 
 	if (not throttled) then
-        scopeTable[scope] = CurTime() + delay
+		scopeTable[scope] = CurTime() + delay
 
 		return false
 	end
@@ -113,7 +124,8 @@ function Schema.util.ExpandBoundsToCube(boundsMin, boundsMax, relativePosition, 
 	local cube = {}
 
 	for _, corner in ipairs(corners) do
-		local relativeCornerPosition, relativeCornerAngles = LocalToWorld(corner, Angle(0, 0, 0), relativePosition, relativeAngles)
+		local relativeCornerPosition, relativeCornerAngles = LocalToWorld(corner, Angle(0, 0, 0), relativePosition,
+			relativeAngles)
 
 		table.insert(cube, relativeCornerPosition)
 	end
@@ -143,41 +155,41 @@ end
 --- Converts a .env file to a table.
 --- @param envFileContents string
 function Schema.util.EnvToTable(envFileContents)
-    local variables = {}
+	local variables = {}
 
-    for line in envFileContents:gmatch("[^\r\n]+") do
-        local key, value = line:match("([^=]+)=(.+)")
+	for line in envFileContents:gmatch("[^\r\n]+") do
+		local key, value = line:match("([^=]+)=(.+)")
 
-        if (key and value) then
-            -- Trim whitespace and quotes from the start and end of the value.
-            variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
-        end
-    end
+		if (key and value) then
+			-- Trim whitespace and quotes from the start and end of the value.
+			variables[key] = value:match("^%s*(.-)%s*$"):match("^\"(.-)\"$") or value
+		end
+	end
 
-    return variables
+	return variables
 end
 
 --- Gets the player's IP address and port as a table.
 --- @param clientOrAddress Player|string
 --- @return table
 function Schema.util.GetPlayerAddress(clientOrAddress)
-    local address = isstring(clientOrAddress) and clientOrAddress or clientOrAddress:IPAddress()
+	local address = isstring(clientOrAddress) and clientOrAddress or clientOrAddress:IPAddress()
 
-    if (address == "loopback") then
-        -- Helpful for testing locally
-        address = "127.0.0.1:27005"
-    end
+	if (address == "loopback") then
+		-- Helpful for testing locally
+		address = "127.0.0.1:27005"
+	end
 
-    local ip, port = address:match("([^:]+):(%d+)")
+	local ip, port = address:match("([^:]+):(%d+)")
 
-    return {
-        ip = ip,
-        port = tonumber(port)
-    }
+	return {
+		ip = ip,
+		port = tonumber(port)
+	}
 end
 
 function Schema.util.AllPlayersExcept(excludedClients)
-	excludedClients = istable(excludedClients) and excludedClients or {excludedClients}
+	excludedClients = istable(excludedClients) and excludedClients or { excludedClients }
 
 	local players = {}
 
@@ -200,14 +212,14 @@ function Schema.util.ForceConVars(conVarsToSet)
 	for conVarName, value in pairs(conVarsToSet) do
 		if (value.isServer and not SERVER) then
 			continue
-		elseif (!value.isServer and not CLIENT) then
+		elseif (! value.isServer and not CLIENT) then
 			continue
 		end
 
 		local conVar = GetConVar(conVarName)
 		value = value.value
 
-		if (!conVar) then
+		if (! conVar) then
 			ix.util.SchemaErrorNoHalt("ConVar " .. conVarName .. " does not exist in conVarsToSet.")
 			continue
 		end
@@ -225,17 +237,17 @@ function Schema.util.ForceConVars(conVarsToSet)
 end
 
 if (CLIENT) then
-    function Schema.util.RunInventoryAction(itemID, inventoryID, action, data)
-        net.Start("ixInventoryAction")
-        net.WriteString(action)
-        net.WriteUInt(itemID, 32)
-        net.WriteUInt(inventoryID, 32)
-        net.WriteTable(data or {})
-        net.SendToServer()
-    end
+	function Schema.util.RunInventoryAction(itemID, inventoryID, action, data)
+		net.Start("ixInventoryAction")
+		net.WriteString(action)
+		net.WriteUInt(itemID, 32)
+		net.WriteUInt(inventoryID, 32)
+		net.WriteTable(data or {})
+		net.SendToServer()
+	end
 
-    function Schema.util.LookupBinding(bind)
-        local binding = input.LookupBinding(bind)
+	function Schema.util.LookupBinding(bind)
+		local binding = input.LookupBinding(bind)
 
 		if (not binding) then
 			return nil
@@ -244,22 +256,22 @@ if (CLIENT) then
 		local translationKey = "bind_" .. binding:lower()
 		local name = L(translationKey)
 
-        return name ~= translationKey and name or binding:upper()
-    end
+		return name ~= translationKey and name or binding:upper()
+	end
 
-    --- Finds bindings surrounded by curly braces and replaces them with their actual key.
-    --- @param text string
+	--- Finds bindings surrounded by curly braces and replaces them with their actual key.
+	--- @param text string
 	--- @return string
-    function Schema.util.ReplaceBindings(text)
-        local replacement = text:gsub("{(.-)}", function(bind)
-            return Schema.util.LookupBinding(bind) or ("{" .. bind .. "}")
-        end)
+	function Schema.util.ReplaceBindings(text)
+		local replacement = text:gsub("{(.-)}", function(bind)
+			return Schema.util.LookupBinding(bind) or ("{" .. bind .. "}")
+		end)
 
-        return replacement
-    end
+		return replacement
+	end
 
-    --- Replaces all bindings in SWEP.Instructions
-    function Schema.util.FillWeaponBindings()
+	--- Replaces all bindings in SWEP.Instructions
+	function Schema.util.FillWeaponBindings()
 		local allWeapons = weapons.GetList()
 
 		for _, weapon in ipairs(allWeapons) do
@@ -275,49 +287,49 @@ if (CLIENT) then
 				:Replace("Reload", "{+reload}")
 
 			instructions = Schema.util.ReplaceBindings(instructions)
-            weapons.GetStored(weapon.ClassName).Instructions = instructions
+			weapons.GetStored(weapon.ClassName).Instructions = instructions
 
-            -- If the player has the weapon equipped, we update the weapon's instructions
+			-- If the player has the weapon equipped, we update the weapon's instructions
 			local weaponEntity = LocalPlayer():GetWeapon(weapon.ClassName)
 
 			if (IsValid(weaponEntity)) then
 				weaponEntity.Instructions = instructions
 			end
 		end
-    end
+	end
 
 	hook.Add("InitPostEntity", "expFillWeaponBindingsOnInitialize", Schema.util.FillWeaponBindings)
 	hook.Add("OnReloaded", "expFillWeaponBindingsOnReloaded", Schema.util.FillWeaponBindings)
 
-    --- Replaces a material texture with another texture for all models/ui that use it.
-    --- @param material IMaterial
-    --- @param replacement IMaterial
+	--- Replaces a material texture with another texture for all models/ui that use it.
+	--- @param material IMaterial
+	--- @param replacement IMaterial
 	--- @param keyValues? table|number
-    function Schema.util.ReplaceMaterialTexture(material, replacement, keyValues)
-        local replacementTexture = replacement:GetTexture("$basetexture")
+	function Schema.util.ReplaceMaterialTexture(material, replacement, keyValues)
+		local replacementTexture = replacement:GetTexture("$basetexture")
 
-        material:SetTexture("$basetexture", replacementTexture)
+		material:SetTexture("$basetexture", replacementTexture)
 
-        -- Since 'Material' also returns a number as the second return value, we want to make sure it's a table.
-        if (istable(keyValues)) then
-            for key, value in pairs(keyValues) do
-                local valueType = type(value)
-                if (valueType == "number") then
-                    material:SetFloat(key, value)
-                elseif (valueType == "VMatrix") then
-                    material:SetMatrix(key, value)
-                elseif (valueType == "string") then
-                    material:SetString(key, value)
-                elseif (valueType == "ITexture") then
-                    material:SetTexture(key, value)
-                elseif (valueType == "Vector") then
-                    material:SetVector(key, value)
-                else
-                    error("Invalid value type for keyValues: " .. valueType)
-                end
-            end
-        end
-    end
+		-- Since 'Material' also returns a number as the second return value, we want to make sure it's a table.
+		if (istable(keyValues)) then
+			for key, value in pairs(keyValues) do
+				local valueType = type(value)
+				if (valueType == "number") then
+					material:SetFloat(key, value)
+				elseif (valueType == "VMatrix") then
+					material:SetMatrix(key, value)
+				elseif (valueType == "string") then
+					material:SetString(key, value)
+				elseif (valueType == "ITexture") then
+					material:SetTexture(key, value)
+				elseif (valueType == "Vector") then
+					material:SetVector(key, value)
+				else
+					error("Invalid value type for keyValues: " .. valueType)
+				end
+			end
+		end
+	end
 
 	--- Returns the HTML of the requested HTML file.
 	--- Use tools/generate-html.sh to convert the HTML files in html/ to the cl_html.generated.lua file.

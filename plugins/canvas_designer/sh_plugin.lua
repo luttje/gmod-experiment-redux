@@ -73,24 +73,15 @@ function PLUGIN:RegisterSpriteType(spriteData)
 		ix.util.SchemaError("RegisterSpriteType: sprite type '" .. spriteData.type .. "' is already registered")
 	end
 
-	-- Create a copy of the sprite data to avoid external modifications
-	local sprite = {
-		type = spriteData.type,
-		name = spriteData.name,
-		icon = spriteData.icon,
-		category = spriteData.category,
-		keywords = spriteData.keywords or "",
-		defaultColor = spriteData.defaultColor,
-		premiumKey = spriteData.premiumKey
-	}
+	spriteData.keywords = spriteData.keywords or ""
 
-	table.insert(PLUGIN.SPRITE_TYPES, sprite)
+	table.insert(PLUGIN.SPRITE_TYPES, spriteData)
 
 	-- Add to lookup table
-	PLUGIN.SPRITES_BY_TYPE[sprite.type] = sprite
+	PLUGIN.SPRITES_BY_TYPE[spriteData.type] = spriteData
 
-	if (not table.HasValue(PLUGIN.SHAPE_CATEGORIES, sprite.category)) then
-		table.insert(PLUGIN.SHAPE_CATEGORIES, sprite.category)
+	if (not table.HasValue(PLUGIN.SHAPE_CATEGORIES, spriteData.category)) then
+		table.insert(PLUGIN.SHAPE_CATEGORIES, spriteData.category)
 	end
 end
 

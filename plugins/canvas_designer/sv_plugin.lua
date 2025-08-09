@@ -40,7 +40,7 @@ function PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, js
 		return false
 	end
 
-	local premiumPackages = client:GetCharacterNetVar("premiumPackages", {})
+	local premiumPackages = client:GetPremiumPackages()
 
 	-- Basic validation of each element
 	for _, element in ipairs(data) do

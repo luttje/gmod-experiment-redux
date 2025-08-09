@@ -558,6 +558,8 @@ do
 			"exp_alliances",
 			"exp_character_metrics",
 			"exp_metrics",
+
+			-- We explicitly do NOT delete `exp_premium` as that persists across epochs
 		}
 		local tablesWiped = 0
 

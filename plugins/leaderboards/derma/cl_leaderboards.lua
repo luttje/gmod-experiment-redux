@@ -18,11 +18,11 @@ function PANEL:Init()
 	self.htmlPanel:OpenURL(baseUrl .. "?in-game=true")
 end
 
-vgui.Register("ixLeaderboardMenu", PANEL, "EditablePanel")
+vgui.Register("expLeaderboardMenu", PANEL, "EditablePanel")
 
 -- Register the leaderboard menu button
-hook.Add("CreateMenuButtons", "ixLeaderboardMenu", function(tabs)
+hook.Add("CreateMenuButtons", "expLeaderboardMenu", function(tabs)
 	tabs["leaderboards"] = function(container)
-		container:Add("ixLeaderboardMenu")
+		container:Add("expLeaderboardMenu")
 	end
 end)

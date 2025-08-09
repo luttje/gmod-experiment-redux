@@ -482,8 +482,8 @@ function PANEL:CreateAssetGrid(parent, filterCategory, searchTerm)
 	iconLayout:SetSpaceX(8)
 	iconLayout:DockMargin(8, 8, 8, 8)
 
-	-- lua_run P1:SetCharacterNetVar("premiumPackages", {sprites_colored=true})
-	local premiumPackages = LocalPlayer():GetCharacterNetVar("premiumPackages", {})
+	-- lua_run P1:GivePremiumKey("sprites_colored")
+	local premiumPackages = LocalPlayer():GetPremiumPackages()
 
 	for _, spriteType in ipairs(PLUGIN.SPRITE_TYPES) do
 		local shouldShow = (filterCategory == "all" or spriteType.category == filterCategory)
