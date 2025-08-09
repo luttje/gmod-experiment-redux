@@ -113,14 +113,14 @@ end
 PLUGIN:RegisterPremiumPackage({
 	key = "sprites_colored",
 	name = "Colored Sprites Pack",
-	description = "Unlock premium colored sprites for your canvas designs including skulls, nanobots, and more!",
+	description = "Unlock 64 premium colored sprites for your canvas designs.",
 	image = Material("experiment-redux/premium/sprites_colored.png"),
 	price = 1.49,
 	currency = "EUR",
 	category = "Canvas Designer",
 	benefits = {
 		"Premium colored design elements",
-		"Exclusive design elements",
+		"64 Exclusive design elements",
 		"Enhanced creative options"
 	}
 })
