@@ -9,7 +9,8 @@ ITEM.model = "models/sprayca2.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.category = "Art"
-ITEM.description = "A spray can filled with vibrant paint. Use it to create graffiti art on surfaces."
+ITEM.description =
+"A spray can filled with vibrant paint. Use it to create graffiti art on surfaces. Only accepts square designs."
 ITEM.maxUses = 10 -- Maximum uses before it runs out
 ITEM.maximumGraffiti = 10
 
@@ -54,7 +55,7 @@ end
 -- Use Design function - loads a design from a canvas
 ITEM.functions.UseDesign = {
 	name = "Use Design",
-	tip = "Load a design from a canvas into this spray can.",
+	tip = "Load a square design from a canvas into this spray can.",
 	icon = "icon16/page_go.png",
 	OnRun = function(item)
 		if (SERVER) then
@@ -100,6 +101,30 @@ ITEM.functions.SpawnInWorld = {
 				return false
 			end
 
+			-- Get the canvas design data to determine actual size
+			local designData = item:GetData("design")
+			if (not designData) then
+				client:Notify("No design loaded in spray can!")
+				return false
+			end
+
+			-- Validate that the design is square
+			local canvasWidth = designData.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+			local canvasHeight = designData.height or PLUGIN.CANVAS_DEFAULT_HEIGHT
+
+			-- Because we use render targets when drawing compositeAlpha in DrawCanvas, we must be square so we can scale it up to a power of 2 easily
+			if (canvasWidth ~= canvasHeight) then
+				client:Notify("Error: Spray can contains non-square design!")
+				return false
+			end
+
+			-- Use actual canvas dimensions from design
+			local canvasSize = canvasWidth -- Since it's square, width = height
+
+			-- Scale factor for world graffiti (adjust this to make graffiti smaller/larger in world)
+			local worldScale = 0.2 -- This makes the graffiti 20% of the canvas design size
+			local worldCanvasSize = canvasSize * worldScale
+
 			-- Position the graffiti on the surface
 			local spawnPos = trace.HitPos + trace.HitNormal * 2
 			local surfaceNormal = trace.HitNormal
@@ -128,10 +153,8 @@ ITEM.functions.SpawnInWorld = {
 			-- Rotate around the surface normal to face toward player
 			angles:RotateAroundAxis(surfaceNormal, rotationAngle)
 
-			-- Validate surface at all 4 corners of the canvas
-			-- TODO: Get this from the canvas design
-			local canvasSize = 64
-			local halfSize = canvasSize * .5
+			-- Validate surface at all 4 corners of the square canvas
+			local halfSize = worldCanvasSize * 0.5
 
 			-- Get the four corner positions relative to the canvas center
 			local right = angles:Right()
@@ -167,6 +190,7 @@ ITEM.functions.SpawnInWorld = {
 			local entity = ents.Create("exp_world_canvas_viewer")
 			entity:SetPos(spawnPos)
 			entity:SetAngles(angles)
+			entity:SetCanvasScale(worldScale) -- Set the world scale
 			entity:Spawn()
 
 			entity:SetCanvasFromItem(item:GetID())

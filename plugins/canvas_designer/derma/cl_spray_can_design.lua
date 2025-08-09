@@ -4,7 +4,7 @@ local PANEL = {}
 AccessorFunc(PANEL, "targetItem", "TargetItem")
 
 function PANEL:Init()
-	self:SetTitle("Load Design into Spray Can")
+	self:SetTitle("Load Square Design into Spray Can")
 	self:SetSize(800, 600)
 	self:Center()
 	self:MakePopup()
@@ -18,7 +18,7 @@ end
 
 function PANEL:SetTargetItem(item)
 	self.targetItem = item
-	self:SetTitle("Load Design into Spray Can - " .. item:GetName())
+	self:SetTitle("Load Square Design into Spray Can - " .. item:GetName())
 	self:RefreshCanvasList()
 end
 
@@ -50,7 +50,7 @@ end
 function PANEL:CreateDropdownLabel()
 	-- Dropdown label
 	self.dropdownLabel = vgui.Create("DLabel", self.topPanel)
-	self.dropdownLabel:SetText("Select Canvas Design to Load:")
+	self.dropdownLabel:SetText("Select Square Canvas Design to Load:")
 	self.dropdownLabel:SetTextColor(PLUGIN.THEME.text)
 	self.dropdownLabel:SetFont("ixMediumFont")
 	self.dropdownLabel:Dock(LEFT)
@@ -61,10 +61,11 @@ end
 function PANEL:CreateCanvasDropdown()
 	-- Dropdown for canvas selection
 	self.canvasDropdown = vgui.Create("DComboBox", self.topPanel)
+	self.canvasDropdown:SetTextColor(PLUGIN.THEME.text)
 	self.canvasDropdown:SetTall(28)
 	self.canvasDropdown:Dock(FILL)
 	self.canvasDropdown:DockMargin(15, 10, 15, 0)
-	self.canvasDropdown:SetValue("Select a canvas design...")
+	self.canvasDropdown:SetValue("Select a square canvas design...")
 
 	self.canvasDropdown.OnSelect = function(dropdown, index, value, data)
 		self:OnCanvasSelected(data)
@@ -75,7 +76,7 @@ function PANEL:CreateContentPanel()
 	self.contentPanel = vgui.Create("EditablePanel", self.mainContainer)
 	self.contentPanel:Dock(FILL)
 
-	self:CreateColumnHeader(self.contentPanel, "Design to Load")
+	self:CreateColumnHeader(self.contentPanel, "Square Design to Load")
 	self:CreateSelectedDesignPreview()
 end
 
@@ -127,7 +128,7 @@ function PANEL:PaintSelectedDesignPreview(panel, width, height)
 		surface.SetTextColor(PLUGIN.THEME.textSecondary)
 		surface.SetFont("ixMediumFont")
 
-		local messageText = "Select a design to load"
+		local messageText = "Select a square design to load"
 		local textWidth, textHeight = surface.GetTextSize(messageText)
 
 		surface.SetTextPos(width * 0.5 - textWidth * 0.5, height * 0.5 - textHeight * 0.5)
@@ -184,7 +185,7 @@ end
 function PANEL:RefreshCanvasList()
 	if (not self.targetItem) then return end
 
-	-- Get all canvas items from inventory that have designs
+	-- Get all canvas items from inventory that have SQUARE designs
 	local character = LocalPlayer():GetCharacter()
 	local inventory = character:GetInventory()
 	local canvasItems = {}
@@ -194,25 +195,34 @@ function PANEL:RefreshCanvasList()
 		if (inventoryItem.uniqueID == PLUGIN.CANVAS_ITEM_ID) then
 			local designData = inventoryItem:GetData("design")
 			if (designData) then
-				table.insert(canvasItems, inventoryItem)
+				-- Check if the design is square
+				local width = designData.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+				local height = designData.height or PLUGIN.CANVAS_DEFAULT_HEIGHT
+
+				if (width == height) then
+					table.insert(canvasItems, inventoryItem)
+				end
 			end
 		end
 	end
 
 	self.canvasItems = canvasItems
 
-	-- Clear and populate dropdown with canvas items
+	-- Clear and populate dropdown with square canvas items only
 	self.canvasDropdown:Clear()
 	for i, canvasItem in ipairs(canvasItems) do
 		local designData = canvasItem:GetData("design", {})
 		local displayName = designData.name or ("Canvas #" .. canvasItem:GetID())
+		-- Add dimensions to show it's square
+		local size = designData.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+		displayName = displayName .. " (" .. size .. "x" .. size .. ")"
 		self.canvasDropdown:AddChoice(displayName, canvasItem)
 	end
 
 	-- Handle empty canvas list
 	if (#canvasItems == 0) then
 		self.canvasDropdown:SetEnabled(false)
-		self.canvasDropdown:SetValue("No designed canvases found in inventory")
+		self.canvasDropdown:SetValue("No square canvas designs found in inventory")
 		self.loadButton:SetEnabled(false)
 	end
 end
@@ -228,13 +238,22 @@ end
 
 function PANEL:OnLoadButtonClicked()
 	if (not self.selectedCanvasItem) then
-		LocalPlayer():Notify("Please select a canvas design to load first!")
+		LocalPlayer():Notify("Please select a square canvas design to load first!")
 		return
 	end
 
 	local selectedDesign = self.selectedCanvasItem:GetData("design")
 	if (not selectedDesign) then
 		LocalPlayer():Notify("Selected canvas has no design!")
+		return
+	end
+
+	-- Double-check that the design is square before loading
+	local width = selectedDesign.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+	local height = selectedDesign.height or PLUGIN.CANVAS_DEFAULT_HEIGHT
+
+	if (width ~= height) then
+		LocalPlayer():Notify("Error: Selected design is not square! Spray cans only accept square designs.")
 		return
 	end
 
@@ -287,7 +306,7 @@ function PANEL:ShowLoadConfirmation(selectedDesign)
 	-- Confirmation dialog before overwriting
 	local confirmationFrame = vgui.Create("expFrame")
 	confirmationFrame:SetTitle("Confirm Load")
-	confirmationFrame:SetSize(400, 150)
+	confirmationFrame:SetSize(400, 170)
 	confirmationFrame:Center()
 	confirmationFrame:MakePopup()
 	confirmationFrame:SetDeleteOnClose(true)
@@ -297,7 +316,7 @@ function PANEL:ShowLoadConfirmation(selectedDesign)
 	confirmationContainer:DockMargin(15, 15, 15, 15)
 
 	local confirmationLabel = vgui.Create("DLabel", confirmationContainer)
-	confirmationLabel:SetText("This will load the following design into your spray can:")
+	confirmationLabel:SetText("This will load the following square design into your spray can:")
 	confirmationLabel:SetTextColor(PLUGIN.THEME.text)
 	confirmationLabel:SetFont("ixMediumFont")
 	confirmationLabel:Dock(TOP)
@@ -308,7 +327,15 @@ function PANEL:ShowLoadConfirmation(selectedDesign)
 	designNameLabel:SetTextColor(PLUGIN.THEME.textHighlight)
 	designNameLabel:SetFont("ixMediumFont")
 	designNameLabel:Dock(TOP)
-	designNameLabel:DockMargin(0, 0, 0, 15)
+	designNameLabel:DockMargin(0, 0, 0, 5)
+
+	local sizeLabel = vgui.Create("DLabel", confirmationContainer)
+	local size = selectedDesign.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+	sizeLabel:SetText("Size: " .. size .. "x" .. size .. " (Square)")
+	sizeLabel:SetTextColor(PLUGIN.THEME.textSecondary)
+	sizeLabel:SetFont("ixSmallFont")
+	sizeLabel:Dock(TOP)
+	sizeLabel:DockMargin(0, 0, 0, 15)
 
 	local confirmationButtons = vgui.Create("EditablePanel", confirmationContainer)
 	confirmationButtons:SetTall(30)
@@ -333,6 +360,15 @@ function PANEL:ShowLoadConfirmation(selectedDesign)
 end
 
 function PANEL:ExecuteLoad(selectedDesign)
+	-- Final validation before sending to server
+	local width = selectedDesign.width or PLUGIN.CANVAS_DEFAULT_WIDTH
+	local height = selectedDesign.height or PLUGIN.CANVAS_DEFAULT_HEIGHT
+
+	if (width ~= height) then
+		LocalPlayer():Notify("Error: Design is not square! Cannot load into spray can.")
+		return
+	end
+
 	-- Send load request to server
 	net.Start("expSprayCanLoadDesign")
 	net.WriteUInt(self.targetItem:GetID(), 32)

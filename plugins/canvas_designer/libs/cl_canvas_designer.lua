@@ -136,12 +136,22 @@ function PLUGIN.CanvasDesigner:DrawGrid(x, y, w, h)
 	end
 end
 
+--- Draws a canvas. If drawn with compositeAlpha it will render the whole canvas to a RT and then
+--- uniformly apply the alpha to the final output.
+--- When passing compositeAlpha the width MUST equal the height. This is because we draw to a RT
+--- which must be a power of two, thus for cheap operations we use a fixed size.
+--- @param x number
+--- @param y number
+--- @param w number
+--- @param h number
+--- @param withoutGrid boolean
+--- @param withoutBackground boolean
+--- @param compositeAlpha number
 function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackground, compositeAlpha)
 	-- If we need composite alpha, use a render target
 	if (compositeAlpha and compositeAlpha < 1) then
-		local rtName = "CanvasComposite_" .. (self.item and self.item:GetID() or "temp")
-		local rtSize = math.max(w, h, 512) -- Ensure minimum size
-		rtSize = math.min(rtSize, 2048) -- Cap at reasonable max
+		local rtName = "RTCanvasComposite_" .. (self.item and self.item:GetID() or "temp")
+		local rtSize = 1024 -- Fixed power-of-2 size
 
 		local rt = GetRenderTarget(rtName, rtSize, rtSize)
 
@@ -151,16 +161,14 @@ function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackgr
 
 		cam.Start2D()
 
-		-- Draw everything to the RT at 0,0 with full opacity
-		self:DrawCanvasInternal(0, 0, w, h, withoutGrid, withoutBackground)
+		self:DrawCanvasInternal(0, 0, rtSize, rtSize, withoutGrid, withoutBackground, w, h)
 
 		cam.End2D()
 
 		render.PopRenderTarget()
 
-		-- Now draw the RT with alpha
-		-- Create material if needed
-		if not self.rtMaterial then
+		-- Now draw the RT with alpha from the render target
+		if (not self.rtMaterial) then
 			self.rtMaterial = CreateMaterial(rtName .. "_mat", "UnlitGeneric", {
 				["$basetexture"] = rtName,
 				["$translucent"] = 1,
@@ -206,8 +214,31 @@ function PLUGIN.CanvasDesigner:DrawCanvas(x, y, w, h, withoutGrid, withoutBackgr
 	end
 end
 
--- Separated internal drawing logic
-function PLUGIN.CanvasDesigner:DrawCanvasInternal(x, y, w, h, withoutGrid, withoutBackground)
+--- Draws a canvas, optionally with a grid and background. If the originalWidth and originalHeight
+--- are provided, the canvas elements will be scaled to that.
+--- @param x number
+--- @param y number
+--- @param w number
+--- @param h number
+--- @param withoutGrid boolean
+--- @param withoutBackground boolean
+--- @param originalWidth? number
+--- @param originalHeight? number
+function PLUGIN.CanvasDesigner:DrawCanvasInternal(
+	x, y, w, h,
+	withoutGrid,
+	withoutBackground,
+	originalWidth,
+	originalHeight
+)
+	local scaleX = 1
+	local scaleY = 1
+
+	if (originalWidth and originalHeight) then
+		scaleX = w / originalWidth
+		scaleY = h / originalHeight
+	end
+
 	if (not withoutBackground) then
 		surface.SetDrawColor(255, 255, 255, 255)
 		surface.DrawRect(x, y, w, h)
@@ -225,10 +256,16 @@ function PLUGIN.CanvasDesigner:DrawCanvasInternal(x, y, w, h, withoutGrid, witho
 			continue
 		end
 
-		local drawX = x + element.x - (spriteType.icon.size * element.scaleX) * .5
-		local drawY = y + element.y - (spriteType.icon.size * element.scaleY) * .5
-		local sizeX = spriteType.icon.size * element.scaleX
-		local sizeY = spriteType.icon.size * element.scaleY
+		-- Apply scaling to element positions and sizes
+		local scaledElementX = element.x * scaleX
+		local scaledElementY = element.y * scaleY
+		local scaledScaleX = element.scaleX * scaleX
+		local scaledScaleY = element.scaleY * scaleY
+
+		local drawX = x + scaledElementX - (spriteType.icon.size * scaledScaleX) * .5
+		local drawY = y + scaledElementY - (spriteType.icon.size * scaledScaleY) * .5
+		local sizeX = spriteType.icon.size * scaledScaleX
+		local sizeY = spriteType.icon.size * scaledScaleY
 
 		surface.SetDrawColor(element.color.r, element.color.g, element.color.b, element.color.a)
 		Schema.draw.DrawSpritesheetMaterial(

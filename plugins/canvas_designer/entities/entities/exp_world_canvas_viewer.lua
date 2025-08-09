@@ -10,17 +10,17 @@ ENT.PrintName = "Canvas Viewer"
 ENT.Category = "Experiment Redux"
 ENT.Spawnable = false
 ENT.AdminOnly = true
-ENT.ShowPlayerInteraction = false -- Disabled interaction
+ENT.ShowPlayerInteraction = false
 ENT.RenderGroup = RENDERGROUP_BOTH
 
 local TIME_TO_DECAY = 60 * 60 * 3
 
 -- Network variables for canvas data
 function ENT:SetupDataTables()
-	self:NetworkVar("String", 1, "CanvasName")
-	self:NetworkVar("Float", 0, "CanvasScale")
-	self:NetworkVar("Float", 1, "CreationTime")
-	self:NetworkVar("Float", 2, "MaxAlpha")
+	self:NetworkVar("String", "CanvasName")
+	self:NetworkVar("Float", "CanvasScale")
+	self:NetworkVar("Float", "CreationTime")
+	self:NetworkVar("Float", "MaxAlpha")
 end
 
 function ENT:GetCanvasData()
@@ -60,7 +60,7 @@ if (SERVER) then
 		self:SetMoveType(MOVETYPE_NONE) -- Can't be moved
 
 		-- Default settings
-		self:SetCanvasScale(1.0)
+		self:SetCanvasScale(0.2)
 		self:SetCanvasName("Graffiti Canvas")
 		self:SetCreationTime(CurTime())
 		self:SetMaxAlpha(0.6) -- Default max alpha
@@ -126,18 +126,10 @@ if (SERVER) then
 		self:SetCreationTime(CurTime())
 	end
 else
-	local SCREEN_WIDTH = 512
-	local SCREEN_HEIGHT = 512
-
 	function ENT:Initialize()
 		self.canvasDesigner = nil
 		self.lastCanvasData = ""
-
-		-- Set the render bounds so this keeps drawing for a player up until the canvas edges are off screen
-		self:SetRenderBounds(
-			Vector(-SCREEN_WIDTH / 2, -SCREEN_HEIGHT / 2, 0),
-			Vector(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0)
-		)
+		self.lastCanvasSize = { width = 0, height = 0 }
 	end
 
 	function ENT:Think()
@@ -147,6 +139,41 @@ else
 			self:UpdateCanvasDesigner()
 			self.lastCanvasData = currentData
 		end
+
+		-- Check if canvas size has changed and update render bounds if needed
+		if (self.canvasDesigner) then
+			local canvasWidth, canvasHeight = self.canvasDesigner:GetSize()
+			if (self.lastCanvasSize.width ~= canvasWidth or self.lastCanvasSize.height ~= canvasHeight) then
+				self.lastCanvasSize.width = canvasWidth
+				self.lastCanvasSize.height = canvasHeight
+				self:UpdateRenderBounds()
+			end
+		end
+	end
+
+	function ENT:UpdateRenderBounds()
+		local canvasWidth, canvasHeight
+
+		if (self.canvasDesigner) then
+			canvasWidth, canvasHeight = self.canvasDesigner:GetSize()
+		else
+			-- Default size when no canvas is loaded
+			canvasWidth = PLUGIN.CANVAS_DEFAULT_WIDTH or 400
+			canvasHeight = PLUGIN.CANVAS_DEFAULT_HEIGHT or 400
+		end
+
+		-- Apply the canvas scale to the render bounds
+		local scale = self:GetCanvasScale()
+		local scaledWidth = canvasWidth * scale
+		local scaledHeight = canvasHeight * scale
+
+		-- Set the render bounds so this keeps drawing for a player until the canvas edges are off screen
+		-- Add some padding to ensure proper culling
+		local padding = math.max(scaledWidth, scaledHeight) * 0.1
+		self:SetRenderBounds(
+			Vector(-scaledWidth / 2 - padding, -scaledHeight / 2 - padding, -padding),
+			Vector(scaledWidth / 2 + padding, scaledHeight / 2 + padding, padding)
+		)
 	end
 
 	function ENT:UpdateCanvasDesigner()
@@ -154,6 +181,7 @@ else
 
 		if (not canvasData) then
 			self.canvasDesigner = nil
+			self:UpdateRenderBounds() -- Update bounds even when no canvas
 			return
 		end
 
@@ -175,6 +203,9 @@ else
 
 		-- Create canvas designer instance
 		self.canvasDesigner = PLUGIN.CanvasDesigner:New(fakeItem)
+
+		-- Update render bounds with new canvas data
+		self:UpdateRenderBounds()
 	end
 
 	function ENT:Draw()
@@ -214,22 +245,17 @@ else
 		screenAng:RotateAroundAxis(screenAng:Right(), 90)
 
 		-- Start 3D2D context
-		cam.Start3D2D(screenPos, screenAng, 0.1 * scale)
+		cam.Start3D2D(screenPos, screenAng, scale)
 
 		if (self.canvasDesigner) then
 			local canvasWidth, canvasHeight = self.canvasDesigner:GetSize()
 
-			-- Scale canvas to fit screen
-			local scaleX = SCREEN_WIDTH / canvasWidth * 0.9
-			local scaleY = SCREEN_HEIGHT / canvasHeight * 0.9
-			local drawScale = math.min(scaleX, scaleY)
+			local drawWidth = canvasWidth
+			local drawHeight = canvasHeight
 
-			local drawWidth = canvasWidth * drawScale
-			local drawHeight = canvasHeight * drawScale
-
-			-- Center the canvas on screen
-			local offsetX = -drawWidth / 2
-			local offsetY = -drawHeight / 2
+			-- Center the canvas
+			local offsetX = -drawWidth * .5
+			local offsetY = -drawHeight * .5
 
 			self.canvasDesigner:DrawCanvas(offsetX, offsetY, drawWidth, drawHeight, true, true, currentAlpha)
 		end

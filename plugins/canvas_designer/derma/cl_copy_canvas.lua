@@ -63,6 +63,7 @@ end
 function PANEL:CreateCanvasDropdown()
 	-- Dropdown for canvas selection
 	self.canvasDropdown = vgui.Create("DComboBox", self.topPanel)
+	self.canvasDropdown:SetTextColor(PLUGIN.THEME.text)
 	self.canvasDropdown:SetTall(28)
 	self.canvasDropdown:Dock(FILL)
 	self.canvasDropdown:DockMargin(15, 10, 15, 0)
