@@ -6,12 +6,12 @@ function PLUGIN:FlashbangExploded(client, position)
 	end
 
 	client:AddDisplayLineFrequency(
-        "Someone on your frequency was protected from a flashbang!",
-        Color(255, 216, 0, 255)
+		"Someone on your frequency was protected from a flashbang!",
+		Color(255, 216, 0, 255)
 	)
 	client:AddDisplayLine(
 		"SUPPRESSING LIGHTING! Protected from flashbang...",
-        Color(255, 216, 0, 255)
+		Color(255, 216, 0, 255)
 	)
 
 	return true
@@ -22,8 +22,14 @@ function PLUGIN:PlayerSetFrequency(client, frequency)
 		return
 	end
 
-	client:AddDisplayLineFrequency("Somebody has connected to the network (F: " .. frequency .. ")...", Color(255, 100, 255, 255))
-	client:AddDisplayLine("You have connected to the network (F: " .. frequency .. ")...", Color(255, 100, 255, 255))
+	client:AddDisplayLineFrequency(
+		"Somebody has connected to the network (F: " .. frequency .. ")...",
+		Color(255, 100, 255, 255)
+	)
+	client:AddDisplayLine(
+		"You have connected to the network (F: " .. frequency .. ")...",
+		Color(255, 100, 255, 255)
+	)
 end
 
 function PLUGIN:DoPlayerDeath(client, attacker, damageInfo)
@@ -39,7 +45,7 @@ function PLUGIN:DoPlayerDeath(client, attacker, damageInfo)
 
 	client:AddDisplayLineFrequency(
 		"DANGER! Vital signs terminated at location: " .. location,
-        Color(255, 0, 0, 255)
+		Color(255, 0, 0, 255)
 	)
 end
 
@@ -54,5 +60,15 @@ function PLUGIN:EntityTakeDamage(client, damageInfo)
 		location = "unknown"
 	end
 
-	client:AddDisplayLineFrequency("WARNING! Physical bodily trauma detected on network at location: " .. location, Color(255, 0, 0, 255))
+	client:AddDisplayLineFrequency(
+		"WARNING! Physical bodily trauma detected on network at location: " .. location,
+		Color(255, 0, 0, 255)
+	)
+end
+
+function PLUGIN:OnPlayerOptionSelected(target, client, option, data)
+	if (option == L("searchInventory", client)) then
+		PLUGIN:TrySearchTargetInventory(client, target)
+		return
+	end
 end

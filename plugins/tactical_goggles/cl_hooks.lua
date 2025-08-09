@@ -1,11 +1,27 @@
 local PLUGIN = PLUGIN
 
-function PLUGIN:RenderScreenspaceEffects()
-    if (not IsValid(LocalPlayer())) then
-        return
-    end
+function PLUGIN:GetPlayerEntityMenu(target, options)
+	if (not target:Alive()) then
+		return
+	end
 
-	if (not LocalPlayer():HasTacticalGogglesActivated()) then
+	local client = LocalPlayer()
+
+	if (not client:HasTacticalGogglesActivated()) then
+		return
+	end
+
+	options[L("searchInventory")] = true
+end
+
+function PLUGIN:RenderScreenspaceEffects()
+	local client = LocalPlayer()
+
+	if (not IsValid(client)) then
+		return
+	end
+
+	if (not client:HasTacticalGogglesActivated()) then
 		return
 	end
 
@@ -18,17 +34,17 @@ function PLUGIN:RenderScreenspaceEffects()
 	self.tacticalOverlay:SetInt("$ignorez", 1)
 
 	render.SuppressEngineLighting(true)
-		render.SetMaterial(self.tacticalOverlay)
-		render.DrawScreenQuad()
+	render.SetMaterial(self.tacticalOverlay)
+	render.DrawScreenQuad()
 	render.SuppressEngineLighting(false)
 end
 
 function PLUGIN:Tick()
-    local client = LocalPlayer()
+	local client = LocalPlayer()
 
-    if (not IsValid(client)) then
-        return
-    end
+	if (not IsValid(client)) then
+		return
+	end
 
 	local character = client:GetCharacter()
 
@@ -48,9 +64,9 @@ function PLUGIN:Tick()
 
 	local curTime = CurTime()
 	local health = client:Health()
-    local armor = client:Armor()
+	local armor = client:Armor()
 
-    if (self.nextTacticalWarning and curTime < self.nextTacticalWarning) then
+	if (self.nextTacticalWarning and curTime < self.nextTacticalWarning) then
 		return
 	end
 
@@ -74,31 +90,31 @@ function PLUGIN:Tick()
 		end
 	end
 
-    if (self.lastArmor) then
-        if (armor < self.lastArmor) then
-            if (armor == 0) then
-                self:AddDisplayLine("WARNING! External protection exhausted...", Color(255, 0, 0, 255))
-            else
-                self:AddDisplayLine("WARNING! External protection damaged...", Color(255, 0, 0, 255))
-            end
+	if (self.lastArmor) then
+		if (armor < self.lastArmor) then
+			if (armor == 0) then
+				self:AddDisplayLine("WARNING! External protection exhausted...", Color(255, 0, 0, 255))
+			else
+				self:AddDisplayLine("WARNING! External protection damaged...", Color(255, 0, 0, 255))
+			end
 
-            self.nextTacticalWarning = curTime + 2
-        elseif (armor > self.lastArmor) then
-            if (armor == 100) then
-                self:AddDisplayLine("External protection systems restored...", Color(0, 255, 0, 255))
-            else
-                self:AddDisplayLine("External protection systems regenerating...", Color(0, 0, 255, 255))
-            end
+			self.nextTacticalWarning = curTime + 2
+		elseif (armor > self.lastArmor) then
+			if (armor == 100) then
+				self:AddDisplayLine("External protection systems restored...", Color(0, 255, 0, 255))
+			else
+				self:AddDisplayLine("External protection systems regenerating...", Color(0, 0, 255, 255))
+			end
 
-            self.nextTacticalWarning = curTime + 2
-        end
-    end
+			self.nextTacticalWarning = curTime + 2
+		end
+	end
 
 	if (not self.nextRandomLine or curTime >= self.nextRandomLine) then
-		local text = self.randomDisplayLines[ math.random(1, #self.randomDisplayLines) ]
+		local text = self.randomDisplayLines[math.random(1, #self.randomDisplayLines)]
 
 		if (text and self.lastRandomDisplayLine ~= text) then
-            self:AddDisplayLine(text)
+			self:AddDisplayLine(text)
 
 			self.lastRandomDisplayLine = text
 		end
@@ -108,4 +124,21 @@ function PLUGIN:Tick()
 
 	self.lastHealth = health
 	self.lastArmor = armor
+end
+
+function PLUGIN:HUDPaint()
+	local client = LocalPlayer()
+
+	if (not IsValid(client) or not client:HasTacticalGogglesActivated()) then
+		return
+	end
+
+	-- Clean up expired inventory scans and draw valid ones
+	for target, data in pairs(self.scannedInventories) do
+		if (not IsValid(target) or CurTime() > data.expireTime) then
+			self.scannedInventories[target] = nil
+		elseif (target:Alive()) then
+			self:DrawInventoryInfo(target, data.items)
+		end
+	end
 end

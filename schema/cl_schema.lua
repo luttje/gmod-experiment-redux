@@ -508,7 +508,7 @@ net.Receive("expFlashed", function()
 	surface.PlaySound("hl1/fvox/flatline.wav")
 end)
 
-net.Receive("exp_ClearEffects", function()
+net.Receive("expClearEffects", function()
 	Schema.stunEffects = {}
 	Schema.flashEffect = nil
 	Schema.tearGassed = nil

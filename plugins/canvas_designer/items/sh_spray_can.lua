@@ -87,9 +87,9 @@ ITEM.functions.SpawnInWorld = {
 			end
 
 			-- Check distance - must be within 256 units
-			local hitDistance = trace.StartPos:Distance(trace.HitPos)
+			local hitDistance = trace.StartPos:DistToSqr(trace.HitPos)
 
-			if (hitDistance > 256) then
+			if (hitDistance > 256 ^ 2) then
 				client:Notify("You're too far from the wall! Get closer.")
 				return false
 			end

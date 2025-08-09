@@ -1,10 +1,10 @@
 Schema.achievement = ix.util.GetOrCreateCommonLibrary("Achievement")
 
 if (SERVER) then
-	util.AddNetworkString("exp_AchievementProgress")
-	util.AddNetworkString("exp_AchievementsLoad")
+	util.AddNetworkString("expAchievementProgress")
+	util.AddNetworkString("expAchievementsLoad")
 
-    --- Progress an achievement, optionally with a specific amount.
+	--- Progress an achievement, optionally with a specific amount.
 	--- If the progress is a string, it will be used as a key to track progress (1 progression per key)
 	--- @param achievement any
 	--- @param client Player
@@ -12,17 +12,17 @@ if (SERVER) then
 	--- @return boolean
 	function Schema.achievement.Progress(achievement, client, progress)
 		local achievementTable = Schema.achievement.Get(achievement)
-        local achievements = client:GetData("achievements", {})
+		local achievements = client:GetData("achievements", {})
 
 		if (isstring(progress)) then
-            local achievementProgressKeys = client:GetData("achievementProgressKeys", {})
+			local achievementProgressKeys = client:GetData("achievementProgressKeys", {})
 
-            if (achievementProgressKeys[progress]) then
-                return false
-            end
+			if (achievementProgressKeys[progress]) then
+				return false
+			end
 
-            achievementProgressKeys[progress] = true
-            client:SetData("achievementProgressKeys", achievementProgressKeys)
+			achievementProgressKeys[progress] = true
+			client:SetData("achievementProgressKeys", achievementProgressKeys)
 
 			progress = 1
 		end
@@ -32,7 +32,12 @@ if (SERVER) then
 		end
 
 		if (not achievementTable) then
-			ix.log.Add(client, "schemaDebug", "Schema.achievement.Progress", "Attempted to progress an achievement that does not exist.")
+			ix.log.Add(
+				client,
+				"schemaDebug",
+				"Schema.achievement.Progress",
+				"Attempted to progress an achievement that does not exist."
+			)
 			return false
 		end
 
@@ -42,10 +47,10 @@ if (SERVER) then
 			return false
 		end
 
-        achievements[achievementTable.uniqueID] = math.Clamp(
-            currentAchievement + progress,
+		achievements[achievementTable.uniqueID] = math.Clamp(
+			currentAchievement + progress,
 			0,
-            achievementTable.maximum
+			achievementTable.maximum
 		)
 		client:SetData("achievements", achievements)
 
@@ -60,14 +65,14 @@ if (SERVER) then
 				client:GetCharacter():GiveMoney(achievementTable.reward)
 			end
 
-            if (achievementTable.OnAchieved) then
-                achievementTable:OnAchieved(client)
-            end
+			if (achievementTable.OnAchieved) then
+				achievementTable:OnAchieved(client)
+			end
 
 			hook.Run("OnAchievementAchieved", client, achievementTable)
 		end
 
-		net.Start("exp_AchievementProgress")
+		net.Start("expAchievementProgress")
 		net.WriteUInt(achievementTable.index, 32)
 		net.WriteUInt(achievements[achievementTable.uniqueID], 16)
 		net.Send(client)
@@ -78,7 +83,7 @@ if (SERVER) then
 	function Schema.achievement.LoadProgress(client, character)
 		local achievements = client:GetData("achievements", {})
 
-		net.Start("exp_AchievementsLoad")
+		net.Start("expAchievementsLoad")
 		net.WriteTable(achievements)
 		net.Send(client)
 	end
@@ -112,8 +117,8 @@ else
 		return ix.gui.achievementsPanel
 	end
 
-    function Schema.achievement.UpdatePanel()
-        local panel = Schema.achievement.GetPanel()
+	function Schema.achievement.UpdatePanel()
+		local panel = Schema.achievement.GetPanel()
 
 		if (IsValid(panel)) then
 			panel:Update()
@@ -142,22 +147,22 @@ else
 		return false
 	end
 
-	net.Receive("exp_AchievementProgress", function(msg)
+	net.Receive("expAchievementProgress", function(msg)
 		local achievement = net.ReadUInt(32)
 		local progress = net.ReadUInt(16)
 		local achievementTable = Schema.achievement.Get(achievement)
 
-        if (not achievementTable) then
-            error("Achievement with index " .. achievement .. " does not exist.")
-            return
-        end
+		if (not achievementTable) then
+			error("Achievement with index " .. achievement .. " does not exist.")
+			return
+		end
 
 		Schema.achievement.localAchieved[achievementTable.uniqueID] = progress
 
 		Schema.achievement.UpdatePanel()
 	end)
 
-	net.Receive("exp_AchievementsLoad", function()
+	net.Receive("expAchievementsLoad", function()
 		local achievements = net.ReadTable()
 		Schema.achievement.localAchieved = {}
 

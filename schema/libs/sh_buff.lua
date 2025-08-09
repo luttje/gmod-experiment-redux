@@ -35,8 +35,8 @@ function Schema.buff.MakeActive(buffIndex, activeUntil, buffData)
 end
 
 if (SERVER) then
-	util.AddNetworkString("exp_BuffUpdated")
-	util.AddNetworkString("exp_BuffsLoaded")
+	util.AddNetworkString("expBuffUpdated")
+	util.AddNetworkString("expBuffsLoaded")
 
 	--- Set a buff active for a client, optionally with custom duration and data.
 	--- @param client Player
@@ -159,7 +159,7 @@ if (SERVER) then
 			buffIndex = Schema.buff.Get(buffIndex).index
 		end
 
-		net.Start("exp_BuffUpdated")
+		net.Start("expBuffUpdated")
 		net.WriteUInt(buff.key, 32)
 		net.WriteUInt(buffIndex, 32)
 		net.WriteUInt(buff.activeUntil, 32)
@@ -202,7 +202,7 @@ if (SERVER) then
 
 		character:SetData("buffs", nil)
 
-		net.Start("exp_BuffsLoaded")
+		net.Start("expBuffsLoaded")
 		net.WriteTable(buffs)
 		net.Send(client)
 	end
@@ -488,7 +488,7 @@ else
 		tooltip:SizeToContents()
 	end
 
-	net.Receive("exp_BuffUpdated", function()
+	net.Receive("expBuffUpdated", function()
 		local key = net.ReadUInt(32)
 		local index = net.ReadUInt(32)
 		local activeUntil = net.ReadUInt(32)
@@ -499,7 +499,7 @@ else
 		Schema.buff.RefreshPanel()
 	end)
 
-	net.Receive("exp_BuffsLoaded", function()
+	net.Receive("expBuffsLoaded", function()
 		local buffs = net.ReadTable()
 
 		Schema.buff.localActive = {}

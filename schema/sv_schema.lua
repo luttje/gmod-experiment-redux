@@ -1,5 +1,6 @@
 util.AddNetworkString("expFlashed")
 util.AddNetworkString("expTearGassed")
+util.AddNetworkString("expClearEffects")
 util.AddNetworkString("expClearEntityInfoTooltip")
 util.AddNetworkString("expAmmoUnequip")
 util.AddNetworkString("expDisconnectPenalty")
