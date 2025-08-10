@@ -47,8 +47,8 @@ function PLUGIN:DatabaseConnected()
 	query:Execute()
 
 	-- Add indexes for faster lookups
-	mysql:RawQuery("CREATE INDEX idx_session_id ON exp_premium (session_id)")
-	mysql:RawQuery("CREATE INDEX idx_steamid64 ON exp_premium (steamid64)")
+	mysql:CreateIndexIfNotExists("exp_premium", "idx_session_id", "session_id")
+	mysql:CreateIndexIfNotExists("exp_premium", "idx_steamid64", "steamid64")
 end
 
 function PLUGIN:OnWipeTables()
