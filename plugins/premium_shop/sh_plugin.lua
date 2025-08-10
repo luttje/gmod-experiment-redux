@@ -113,17 +113,48 @@ end
 PLUGIN:RegisterPremiumPackage({
 	key = "sprites_colored",
 	name = "Colored Sprites Pack",
-	description = "Unlock 64 premium colored sprites for your canvas designs.",
+	description = "Gain access to 64 vibrant and richly detailed colored sprites for your canvas creations.",
 	image = Material("experiment-redux/premium/sprites_colored.png"),
+	price = 0.99,
+	currency = "EUR",
+	category = "Canvas Designer",
+	benefits = {
+		"High-quality multicolor design assets",
+		"64 Hand-crafted exclusive elements",
+		"Expanded artistic possibilities"
+	}
+})
+
+PLUGIN:RegisterPremiumPackage({
+	key = "sprites_graffiti_don",
+	name = "Graffiti Don Pack",
+	description = "Unlock 75 bold graffiti tag designs featuring stylized letters, characters, and unique symbols.",
+	image = Material("experiment-redux/premium/sprites_graffiti_don.png"),
+	price = 1.19,
+	currency = "EUR",
+	category = "Canvas Designer",
+	benefits = {
+		"Distinctive graffiti lettering and icons",
+		"75 Rare and exclusive pieces",
+		"More freedom for expressive layouts"
+	}
+})
+
+PLUGIN:RegisterPremiumPackage({
+	key = "sprites_graffiti_stencil",
+	name = "Graffiti Stencil Pack",
+	description = "Access 112 detailed stencil graffiti designs with letters, figures, and intricate cutout shapes.",
+	image = Material("experiment-redux/premium/sprites_graffiti_stencil.png"),
 	price = 1.49,
 	currency = "EUR",
 	category = "Canvas Designer",
 	benefits = {
-		"Premium colored design elements",
-		"64 Exclusive design elements",
-		"Enhanced creative options"
+		"Sharp and precise stencil-style elements",
+		"112 Unique and exclusive graphics",
+		"Greater variety for custom compositions"
 	}
 })
+
 
 PLUGIN:RegisterPremiumPackage({
 	key = "supporter_role",

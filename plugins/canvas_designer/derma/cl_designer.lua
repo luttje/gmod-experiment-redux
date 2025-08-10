@@ -12,7 +12,7 @@ end
 function PANEL:Setup(item)
 	self:SetItem(item)
 	self:SetTitle("Canvas Designer - " .. item:GetName())
-	self:SetSize(1000, 800)
+	self:SetSize(ScrW(), ScrH())
 	self:Center()
 
 	local canvas = PLUGIN.CanvasDesigner:New(item)
@@ -408,7 +408,7 @@ end
 
 function PANEL:CreateAssetBrowser()
 	self.assetBrowser = vgui.Create("EditablePanel", self.container)
-	self.assetBrowser:SetTall(200)
+	self.assetBrowser:SetTall(280)
 	self.assetBrowser:Dock(BOTTOM)
 
 	self:CreateAssetSearchHeader()

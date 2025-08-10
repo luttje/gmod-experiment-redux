@@ -85,7 +85,7 @@ function PLUGIN:RegisterSpriteType(spriteData)
 	end
 end
 
-ix.util.Include("sh_sprite_types.lua")
+ix.util.IncludeDir(PLUGIN.folder .. "/sprite_types", true)
 
 -- Theme colors
 PLUGIN.THEME = {

@@ -1,123 +1,13 @@
 local PLUGIN = PLUGIN
 
-local SPRITESHEET_MATERIAL_BASIC = Material("experiment-redux/designer/basic_spritesheet.png")
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_rectangle",
-	name = "Rectangle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 0, 0),
-	category = "shapes",
-	keywords = "square box rect"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_circle",
-	name = "Circle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 1, 0),
-	category = "shapes",
-	keywords = "round ball"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_triangle",
-	name = "Triangle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 2, 0),
-	category = "shapes",
-	keywords = "tri point"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_diamond",
-	name = "Diamond",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 3, 0),
-	category = "shapes",
-	keywords = "rhombus gem"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_star",
-	name = "Star",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 4, 0),
-	category = "shapes",
-	keywords = "asterisk rating"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_heart",
-	name = "Heart",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 5, 0),
-	category = "shapes",
-	keywords = "love like"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_arrow",
-	name = "Arrow",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 0, 1),
-	category = "arrows",
-	keywords = "direction right east"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_chevron",
-	name = "Chevron",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 1, 1),
-	category = "arrows",
-	keywords = "direction right east"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_cross",
-	name = "Cross",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 2, 1),
-	category = "symbols",
-	keywords = "x delete remove"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_check",
-	name = "Check",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 3, 1),
-	category = "symbols",
-	keywords = "tick yes confirm ok"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_lightning",
-	name = "Lightning",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 4, 1),
-	category = "symbols",
-	keywords = "zap electric shock"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_question",
-	name = "Question",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 5, 1),
-	category = "symbols",
-	keywords = "help unknown ask"
-})
-
-PLUGIN:RegisterSpriteType({
-	type = "basic_exclamation",
-	name = "Exclamation",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_BASIC, 128, 6, 1),
-	category = "symbols",
-	keywords = "alert warning caution"
-})
-
---[[
-	Colored Sprites (Premium)
---]]
-
 -- TODO: Compress this PNG so it isn't too large
 -- TODO: Download these assets not on join, but after the loading screen when the player is already creating/selecting their character.
-local SPRITESHEET_MATERIAL_COLORED = Material("experiment-redux/designer/colored_spritesheet.png") -- 8x8 = 64 sprites
+local SPRITESHEET_MATERIAL = Material("experiment-redux/designer/colored_spritesheet.png") -- 8x8 = 64 sprites
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_skull",
+	type = "colored_skull",
 	name = "Skull",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 0),
 	category = "colored",
 	keywords = "death danger",
 	defaultColor = color_white,
@@ -125,9 +15,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_nanobot",
+	type = "colored_nanobot",
 	name = "Nanobot",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 0),
 	category = "colored",
 	keywords = "robot technology",
 	defaultColor = color_white,
@@ -135,9 +25,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_satellite",
+	type = "colored_satellite",
 	name = "Satellite",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 0),
 	category = "colored",
 	keywords = "space communication",
 	defaultColor = color_white,
@@ -145,9 +35,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_radar_dish",
+	type = "colored_radar_dish",
 	name = "Radar Dish",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 0),
 	category = "colored",
 	keywords = "signal scan",
 	defaultColor = color_white,
@@ -155,19 +45,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_drone",
+	type = "colored_drone",
 	name = "Drone",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 0),
 	category = "colored",
 	keywords = "aerial surveillance",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_circuit_chip",
+	type = "colored_circuit_chip",
 	name = "Circuit Chip",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 0),
 	category = "colored",
 	keywords = "electronics computing",
 	defaultColor = color_white,
@@ -175,9 +65,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_ai_brain",
+	type = "colored_ai_brain",
 	name = "AI Brain",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 0),
 	category = "colored",
 	keywords = "artificial intelligence",
 	defaultColor = color_white,
@@ -185,19 +75,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_network",
+	type = "colored_network",
 	name = "Network",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 0),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 0),
 	category = "colored",
 	keywords = "connection data",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_tall_smokestack",
+	type = "colored_tall_smokestack",
 	name = "Tall smokestack",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 1),
 	category = "colored",
 	keywords = "factory pollution",
 	defaultColor = color_white,
@@ -205,19 +95,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_transmission_tower",
+	type = "colored_transmission_tower",
 	name = "Transmission Tower",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 1),
 	category = "colored",
 	keywords = "broadcast radio",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_watchtower",
+	type = "colored_watchtower",
 	name = "Watchtower",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 1),
 	category = "colored",
 	keywords = "observation guard",
 	defaultColor = color_white,
@@ -225,9 +115,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_laurel_wreath",
+	type = "colored_laurel_wreath",
 	name = "Laurel wreath",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 1),
 	category = "colored",
 	keywords = "victory honor",
 	defaultColor = color_white,
@@ -235,9 +125,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_bolts",
+	type = "colored_bolts",
 	name = "Bolts",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 1),
 	category = "colored",
 	keywords = "hardware fasteners",
 	defaultColor = color_white,
@@ -245,9 +135,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_barcode",
+	type = "colored_barcode",
 	name = "Barcode",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 1),
 	category = "colored",
 	keywords = "scan commerce",
 	defaultColor = color_white,
@@ -255,38 +145,38 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_knife_a",
+	type = "colored_knife_a",
 	name = "Knife A",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 1),
 	category = "colored",
 	keywords = "weapon blade",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_knife_b",
+	type = "colored_knife_b",
 	name = "Knife B",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 1),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 1),
 	category = "colored",
 	keywords = "weapon blade",
 	defaultColor = color_white,
 	premiumKey = "sprites_colored"
 })
 PLUGIN:RegisterSpriteType({
-	type = "premium_shooting_star",
+	type = "colored_shooting_star",
 	name = "Shooting Star",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 2),
 	category = "colored",
 	keywords = "wish meteor",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_star_jagged",
+	type = "colored_star_jagged",
 	name = "Star with jagged edges",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 2),
 	category = "colored",
 	keywords = "burst explosion",
 	defaultColor = color_white,
@@ -294,9 +184,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_target",
+	type = "colored_target",
 	name = "Target",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 2),
 	category = "colored",
 	keywords = "aim bullseye",
 	defaultColor = color_white,
@@ -304,9 +194,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_barbed_wire",
+	type = "colored_barbed_wire",
 	name = "Barbed Wire",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 2),
 	category = "colored",
 	keywords = "fence security",
 	defaultColor = color_white,
@@ -314,9 +204,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_serpent_rod",
+	type = "colored_serpent_rod",
 	name = "Serpent around a rod",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 2),
 	category = "colored",
 	keywords = "medicine healing",
 	defaultColor = color_white,
@@ -324,9 +214,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_pyramid",
+	type = "colored_pyramid",
 	name = "Pyramid",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 2),
 	category = "colored",
 	keywords = "egypt ancient",
 	defaultColor = color_white,
@@ -334,19 +224,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_broken_halo",
+	type = "colored_broken_halo",
 	name = "Broken Halo",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 2),
 	category = "colored",
 	keywords = "fallen angel",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_eye",
+	type = "colored_eye",
 	name = "Eye",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 2),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 2),
 	category = "colored",
 	keywords = "vision watch",
 	defaultColor = color_white,
@@ -354,9 +244,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_eye_triangle",
+	type = "colored_eye_triangle",
 	name = "Eye in Triangle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 3),
 	category = "colored",
 	keywords = "illuminati secret",
 	defaultColor = color_white,
@@ -364,9 +254,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_mechanical_eye",
+	type = "colored_mechanical_eye",
 	name = "Mechanical eye",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 3),
 	category = "colored",
 	keywords = "cybernetic vision",
 	defaultColor = color_white,
@@ -374,9 +264,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_swirl",
+	type = "colored_swirl",
 	name = "Swirl",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 3),
 	category = "colored",
 	keywords = "spiral vortex",
 	defaultColor = color_white,
@@ -384,9 +274,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_hourglass",
+	type = "colored_hourglass",
 	name = "Hourglass",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 3),
 	category = "colored",
 	keywords = "time sand",
 	defaultColor = color_white,
@@ -394,9 +284,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_three_lines",
+	type = "colored_three_lines",
 	name = "Three parallel lines",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 3),
 	category = "colored",
 	keywords = "symbol minimal hamburger",
 	defaultColor = color_white,
@@ -404,9 +294,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_fragmented_circle",
+	type = "colored_fragmented_circle",
 	name = "Fragmented Circle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 3),
 	category = "colored",
 	keywords = "broken shape chart",
 	defaultColor = color_white,
@@ -414,9 +304,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_tower",
+	type = "colored_tower",
 	name = "Tower",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 3),
 	category = "colored",
 	keywords = "fortress stronghold",
 	defaultColor = color_white,
@@ -424,18 +314,18 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_torch",
+	type = "colored_torch",
 	name = "Torch",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 3),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 3),
 	category = "colored",
 	keywords = "flame light",
 	defaultColor = color_white,
 	premiumKey = "sprites_colored"
 })
 PLUGIN:RegisterSpriteType({
-	type = "premium_fist",
+	type = "colored_fist",
 	name = "Fist",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 4),
 	category = "colored",
 	keywords = "power strength",
 	defaultColor = color_white,
@@ -443,9 +333,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_gauntlet",
+	type = "colored_gauntlet",
 	name = "Gauntlet",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 4),
 	category = "colored",
 	keywords = "armor glove",
 	defaultColor = color_white,
@@ -453,9 +343,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_robotic_hand_globe",
+	type = "colored_robotic_hand_globe",
 	name = "Robotic hand gripping globe",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 4),
 	category = "colored",
 	keywords = "technology control",
 	defaultColor = color_white,
@@ -463,9 +353,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_chains_circle",
+	type = "colored_chains_circle",
 	name = "Chains forming a circle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 4),
 	category = "colored",
 	keywords = "unity bondage",
 	defaultColor = color_white,
@@ -473,9 +363,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_broken_chain",
+	type = "colored_broken_chain",
 	name = "Broken chain link",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 4),
 	category = "colored",
 	keywords = "freedom escape",
 	defaultColor = color_white,
@@ -483,9 +373,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_shield_skyline",
+	type = "colored_shield_skyline",
 	name = "Shield with city skyline",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 4),
 	category = "colored",
 	keywords = "protection urban",
 	defaultColor = color_white,
@@ -493,9 +383,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_helmet",
+	type = "colored_helmet",
 	name = "Helmet",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 4),
 	category = "colored",
 	keywords = "armor protection",
 	defaultColor = color_white,
@@ -503,9 +393,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_gas_mask",
+	type = "colored_gas_mask",
 	name = "Gas Mask",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 4),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 4),
 	category = "colored",
 	keywords = "toxic protection",
 	defaultColor = color_white,
@@ -513,9 +403,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_cogs",
+	type = "colored_cogs",
 	name = "Cogs",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 5),
 	category = "colored",
 	keywords = "gears machinery",
 	defaultColor = color_white,
@@ -523,9 +413,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_broken_cog",
+	type = "colored_broken_cog",
 	name = "Broken Cog",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 5),
 	category = "colored",
 	keywords = "damage malfunction",
 	defaultColor = color_white,
@@ -533,9 +423,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_vault",
+	type = "colored_vault",
 	name = "Vault",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 5),
 	category = "colored",
 	keywords = "security storage door",
 	defaultColor = color_white,
@@ -543,9 +433,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_mechanical_wing",
+	type = "colored_mechanical_wing",
 	name = "Mechanical wing",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 5),
 	category = "colored",
 	keywords = "flight machine",
 	defaultColor = color_white,
@@ -553,39 +443,39 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_candle",
+	type = "colored_candle",
 	name = "Candle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 5),
 	category = "colored",
 	keywords = "light flame",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_campfire",
+	type = "colored_campfire",
 	name = "Campfire",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 5),
 	category = "colored",
 	keywords = "fire outdoors",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_hammer",
+	type = "colored_hammer",
 	name = "Hammer",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 5),
 	category = "colored",
 	keywords = "tool strike",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_sickle",
+	type = "colored_sickle",
 	name = "Sickle",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 5),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 5),
 	category = "colored",
 	keywords = "harvest farming",
 	defaultColor = color_white,
@@ -593,19 +483,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_roots",
+	type = "colored_roots",
 	name = "Roots",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 6),
 	category = "colored",
 	keywords = "growth nature",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_tree",
+	type = "colored_tree",
 	name = "Tree",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 6),
 	category = "colored",
 	keywords = "forest nature",
 	defaultColor = color_white,
@@ -613,19 +503,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_droplet_soil",
+	type = "colored_droplet_soil",
 	name = "Droplet on barren soil",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 6),
 	category = "colored",
 	keywords = "drought water",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_rising_tide",
+	type = "colored_rising_tide",
 	name = "Rising tide wave",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 6),
 	category = "colored",
 	keywords = "ocean flood",
 	defaultColor = color_white,
@@ -633,19 +523,19 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_pile_rocks",
+	type = "colored_pile_rocks",
 	name = "Pile of rocks",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 6),
 	category = "colored",
 	keywords = "stones rubble",
 	defaultColor = color_white,
-	premiumKey = "sprites_colored"
+	-- premiumKey = "sprites_colored"
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_mountain_a",
+	type = "colored_mountain_a",
 	name = "Mountain A",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 6),
 	category = "colored",
 	keywords = "peak summit nature",
 	defaultColor = color_white,
@@ -653,9 +543,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_mountain_b",
+	type = "colored_mountain_b",
 	name = "Mountain B",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 6),
 	category = "colored",
 	keywords = "peak summit nature",
 	defaultColor = color_white,
@@ -663,9 +553,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_eclipse",
+	type = "colored_eclipse",
 	name = "Eclipse",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 6),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 6),
 	category = "colored",
 	keywords = "sun moon",
 	defaultColor = color_white,
@@ -673,9 +563,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_raven",
+	type = "colored_raven",
 	name = "Raven",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 0, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 0, 7),
 	category = "colored",
 	keywords = "bird omen",
 	defaultColor = color_white,
@@ -683,9 +573,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_hawk",
+	type = "colored_hawk",
 	name = "Hawk",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 1, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 1, 7),
 	category = "colored",
 	keywords = "bird predator",
 	defaultColor = color_white,
@@ -693,9 +583,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_howling_wolf",
+	type = "colored_howling_wolf",
 	name = "Howling Wolf",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 2, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 2, 7),
 	category = "colored",
 	keywords = "wolf moon",
 	defaultColor = color_white,
@@ -703,9 +593,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_wolf_print",
+	type = "colored_wolf_print",
 	name = "Wolf print",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 3, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 3, 7),
 	category = "colored",
 	keywords = "paw track",
 	defaultColor = color_white,
@@ -713,9 +603,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_snake",
+	type = "colored_snake",
 	name = "Snake",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 4, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 4, 7),
 	category = "colored",
 	keywords = "serpent reptile",
 	defaultColor = color_white,
@@ -723,9 +613,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_bear",
+	type = "colored_bear",
 	name = "Bear",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 5, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 5, 7),
 	category = "colored",
 	keywords = "animal strength",
 	defaultColor = color_white,
@@ -733,9 +623,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_antler_left",
+	type = "colored_antler_left",
 	name = "Antler Left",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 6, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 6, 7),
 	category = "colored",
 	keywords = "deer horn",
 	defaultColor = color_white,
@@ -743,9 +633,9 @@ PLUGIN:RegisterSpriteType({
 })
 
 PLUGIN:RegisterSpriteType({
-	type = "premium_antler_right",
+	type = "colored_antler_right",
 	name = "Antler Right",
-	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL_COLORED, 512, 7, 7),
+	icon = PLUGIN:Icon(SPRITESHEET_MATERIAL, 512, 7, 7),
 	category = "colored",
 	keywords = "deer horn",
 	defaultColor = color_white,
