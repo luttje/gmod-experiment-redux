@@ -65,6 +65,10 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 	PLUGIN.PREMIUM_PACKAGES[packageData.key] = packageData
 end
 
+function Schema.GetPremiumPackage(key)
+	return PLUGIN.PREMIUM_PACKAGES[key]
+end
+
 -- Theme colors
 PLUGIN.THEME = {
 	background = Color(45, 45, 48),
@@ -110,6 +114,7 @@ end
 	Premium Package Registrations
 --]]
 
+local ADDITIONAL_ELEMENT_SLOTS = 8
 PLUGIN:RegisterPremiumPackage({
 	key = "sprites_colored",
 	name = "Colored Sprites Pack",
@@ -121,10 +126,13 @@ PLUGIN:RegisterPremiumPackage({
 	benefits = {
 		"High-quality multicolor design assets",
 		"64 Hand-crafted exclusive elements",
-		"Expanded artistic possibilities"
-	}
+		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
+		"Expanded artistic possibilities",
+	},
+	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS,
 })
 
+ADDITIONAL_ELEMENT_SLOTS = 10
 PLUGIN:RegisterPremiumPackage({
 	key = "sprites_graffiti_don",
 	name = "Graffiti Don Pack",
@@ -136,10 +144,13 @@ PLUGIN:RegisterPremiumPackage({
 	benefits = {
 		"Distinctive graffiti lettering and icons",
 		"75 Rare and exclusive pieces",
-		"More freedom for expressive layouts"
-	}
+		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
+		"More freedom for expressive layouts",
+	},
+	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS,
 })
 
+ADDITIONAL_ELEMENT_SLOTS = 14
 PLUGIN:RegisterPremiumPackage({
 	key = "sprites_graffiti_stencil",
 	name = "Graffiti Stencil Pack",
@@ -151,8 +162,10 @@ PLUGIN:RegisterPremiumPackage({
 	benefits = {
 		"Sharp and precise stencil-style elements",
 		"112 Unique and exclusive graphics",
+		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
 		"Greater variety for custom compositions"
-	}
+	},
+	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS
 })
 
 
@@ -163,7 +176,7 @@ PLUGIN:RegisterPremiumPackage({
 	image = Material("experiment-redux/premium/supporter_role.png"),
 	price = 4.99,
 	currency = "EUR",
-	category = "Flair",
+	category = "Supporter",
 	benefits = {
 		"Heart icon in front of OOC chat messages",
 		"Our appreciation for your support!",

@@ -4,7 +4,6 @@ local ITEM = ITEM
 ITEM.name = "Spray Can"
 ITEM.price = 100
 ITEM.shipmentSize = 10
-ITEM.noBusiness = true -- Disabled for now
 ITEM.model = "models/sprayca2.mdl"
 ITEM.width = 1
 ITEM.height = 1
@@ -198,9 +197,18 @@ ITEM.functions.SpawnInWorld = {
 			client:AddLimitedObject("graffiti", entity)
 			client:RegisterEntityToRemoveOnLeave(entity)
 
-			item:SetData("uses_used", (item:GetData("uses_used", 0) or 0) + 1)
+			local usesUsed = (item:GetData("uses_used", 0) or 0) + 1
 
-			client:Notify("Graffiti sprayed!")
+			if (usesUsed < item.maxUses) then
+				client:Notify("Graffiti sprayed!")
+
+				item:SetData("uses_used", usesUsed)
+			else
+				client:Notify("Graffiti sprayed! Your spray can is now empty, you toss it away.")
+
+				-- Max uses reached, remove item
+				return true
+			end
 		end
 
 		-- Don't lose item

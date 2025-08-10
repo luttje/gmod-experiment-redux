@@ -15,6 +15,10 @@ Route::get('/', function () {
 })->middleware('guest')
     ->name('home');
 
+Route::get('/rules', function () {
+    return view('rules');
+})->name('rules');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');

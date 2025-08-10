@@ -6,6 +6,9 @@ PLUGIN.description = "Show rules, terms of service, or other information to play
 
 PLUGIN.termsOfServiceVersion = "2024-05-04"
 
+ix.config.Add("supportEmail", "support@experiment.games", "The email address for support inquiries.", nil, {
+	category = "Message of the Day"
+})
 ix.config.Add("privacyEmail", "privacy@experiment.games", "The email address for privacy concerns.", nil, {
 	category = "Message of the Day"
 })
@@ -17,10 +20,10 @@ do
 	local COMMAND = {}
 
 	COMMAND.description =
-		"Open the terms of service panel, where you can request to have your data removed."
+	"Open the terms of service panel, where you can request to have your data removed."
 
-    function COMMAND:OnRun(client)
-        net.Start("expTermsOfService")
+	function COMMAND:OnRun(client)
+		net.Start("expTermsOfService")
 		net.Send(client)
 	end
 
@@ -28,39 +31,39 @@ do
 end
 
 if (SERVER) then
-    util.AddNetworkString("expTermsOfService")
-    util.AddNetworkString("expAcceptTermsOfService")
-    util.AddNetworkString("expDisagreeTermsOfService")
+	util.AddNetworkString("expTermsOfService")
+	util.AddNetworkString("expAcceptTermsOfService")
+	util.AddNetworkString("expDisagreeTermsOfService")
 
-    net.Receive("expAcceptTermsOfService", function(_, client)
-        local acceptedTerms = client:GetData("acceptedTerms")
+	net.Receive("expAcceptTermsOfService", function(_, client)
+		local acceptedTerms = client:GetData("acceptedTerms")
 
 		if (acceptedTerms and acceptedTerms.version == PLUGIN.termsOfServiceVersion) then
 			return
 		end
 
-        client:SetData("acceptedTerms", {
+		client:SetData("acceptedTerms", {
 			at = os.time(),
 			version = PLUGIN.termsOfServiceVersion,
-        })
+		})
 
 		client:SaveData()
-    end)
+	end)
 
 	-- Kick the player, remove all their data
-    net.Receive("expDisagreeTermsOfService", function(_, client)
-        PLUGIN:RemovePlayerData(client)
-    end)
+	net.Receive("expDisagreeTermsOfService", function(_, client)
+		PLUGIN:RemovePlayerData(client)
+	end)
 
-    function PLUGIN:RemovePlayerData(client, noKick)
-        local characterIds = client.ixCharList
-        local steamID = client:SteamID64()
+	function PLUGIN:RemovePlayerData(client, noKick)
+		local characterIds = client.ixCharList
+		local steamID = client:SteamID64()
 
 		ix.char.cache[steamID] = nil
 
 		if (#characterIds > 0) then
-            for _, id in ipairs(characterIds) do
-                local character = ix.char.loaded[id]
+			for _, id in ipairs(characterIds) do
+				local character = ix.char.loaded[id]
 
 				if (character) then
 					hook.Run("PreCharacterDeleted", client, character)
@@ -97,58 +100,58 @@ if (SERVER) then
 			query:Execute()
 		end
 
-        -- Other plugins might need to deal with deleted characters.
-        for _, id in ipairs(characterIds) do
-            local isCurrentChar = client:GetCharacter() and client:GetCharacter():GetID() == id
+		-- Other plugins might need to deal with deleted characters.
+		for _, id in ipairs(characterIds) do
+			local isCurrentChar = client:GetCharacter() and client:GetCharacter():GetID() == id
 
-            hook.Run("CharacterDeleted", client, id, isCurrentChar)
+			hook.Run("CharacterDeleted", client, id, isCurrentChar)
 
-            if (isCurrentChar) then
-                client:SetNetVar("char", nil)
-                client:KillSilent()
-                client:RemoveAllAmmo()
-            end
-        end
+			if (isCurrentChar) then
+				client:SetNetVar("char", nil)
+				client:KillSilent()
+				client:RemoveAllAmmo()
+			end
+		end
 
-        -- Remove the player data
-        query = mysql:Delete("ix_players")
-        query:Where("steamid", steamID)
+		-- Remove the player data
+		query = mysql:Delete("ix_players")
+		query:Where("steamid", steamID)
 		query:Callback(function(result)
-            if (not IsValid(client)) then
-                return
-            end
+			if (not IsValid(client)) then
+				return
+			end
 
 			hook.Run("PlayerDataRemoved", client, steamID)
 
-            if (not noKick) then
-                client:Kick("Data removal requested.")
-            end
+			if (not noKick) then
+				client:Kick("Data removal requested.")
+			end
 		end)
-        query:Execute()
-    end
+		query:Execute()
+	end
 end
 
 if (not CLIENT) then
-    return
+	return
 end
 
 PLUGIN.messagesOfTheDay = PLUGIN.messagesOfTheDay or {}
 
 function PLUGIN:AddMessage(order, data)
-    self.messagesOfTheDay[order] = data
+	self.messagesOfTheDay[order] = data
 
-    return order
+	return order
 end
 
 local lastOrder = PLUGIN:AddMessage(1, {
-    vgui = "expTermsOfService", -- Includes rules
+	vgui = "expTermsOfService", -- Includes rules
 
 	noButtons = true,
 
-    ShouldShow = function()
-        local client = LocalPlayer()
+	ShouldShow = function()
+		local client = LocalPlayer()
 
-        local acceptedTerms = client:GetData("acceptedTerms")
+		local acceptedTerms = client:GetData("acceptedTerms")
 
 		return not acceptedTerms or acceptedTerms.version ~= PLUGIN.termsOfServiceVersion
 	end
@@ -163,17 +166,17 @@ local lastOrder = PLUGIN:AddMessage(1, {
 -- })
 
 function PLUGIN:ShowMessageOfTheDay()
-    local parent = ix.gui.characterMenu
+	local parent = ix.gui.characterMenu
 
-    if (not IsValid(parent) or not IsValid(LocalPlayer())) then
-        return
-    end
+	if (not IsValid(parent) or not IsValid(LocalPlayer())) then
+		return
+	end
 
 	if (IsValid(Schema.messageOfTheDayPanel)) then
 		return
 	end
 
-    local messageStack = {}
+	local messageStack = {}
 
 	for _, message in ipairs(self.messagesOfTheDay) do
 		if (not message.ShouldShow or message:ShouldShow()) then
@@ -181,7 +184,7 @@ function PLUGIN:ShowMessageOfTheDay()
 		end
 	end
 
-    Schema.messageOfTheDayPanel = parent:Add("expMessageOfTheDay")
+	Schema.messageOfTheDayPanel = parent:Add("expMessageOfTheDay")
 	Schema.messageOfTheDayPanel:SetMessages(messageStack)
 end
 
@@ -195,13 +198,13 @@ function PLUGIN:InitPostEntity()
 end
 
 net.Receive("expTermsOfService", function()
-    local window = vgui.Create("expFrame")
-    window:SetSize(ScrW() * 0.75, ScrH() * 0.8)
-    window:Center()
-    window:SetTitle("Terms of Service")
-    window:MakePopup()
+	local window = vgui.Create("expFrame")
+	window:SetSize(ScrW() * 0.75, ScrH() * 0.8)
+	window:Center()
+	window:SetTitle("Terms of Service")
+	window:MakePopup()
 
-    local terms = window:Add("expTermsOfService")
+	local terms = window:Add("expTermsOfService")
 	terms:Dock(FILL)
 	terms.Close = function()
 		window:Close()

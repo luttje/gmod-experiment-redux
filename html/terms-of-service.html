@@ -23,7 +23,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -100,11 +101,13 @@
             margin-top: 2em;
             margin-bottom: 2em;
         }
+
         .mt-s {
             margin-top: 1em;
         }
 
-        a, .highlight {
+        a,
+        .highlight {
             color: #A33426;
         }
 
@@ -134,6 +137,10 @@
             padding: .5em;
             margin: 0.5em 0;
             font-size: 1em;
+        }
+
+        .italic {
+            font-style: italic;
         }
     </style>
 </head>
@@ -179,27 +186,39 @@
     </div>
     <div class="wrapper my">
         <h2>TERMS OF SERVICE</h2>
+    </div>
+    <div class="wrapper my">
+        <h3>RULES</h3>
         <p>
-            By playing on our servers, you agree to the following terms:
+            By playing on our servers, you agree to the following rules:
+        </p>
+        <iframe src="https://moderation.experiment.games/rules"
+                style="border: none; width: 100%; height: 500px; margin-top: 0.5em;"></iframe>
+    </div>
+    <div class="wrapper my">
+        <h3>PREMIUM SHOP</h3>
+        <p>
+            If you wish to purchase items from our premium shop, you must also agree to the following conditions.
         </p>
         <ul>
             <li>
-                You will not use cheats, hacks, or any other third-party software that gives you an unfair advantage.
+                When you purchase an item in the premium shop, you are granted a license to use it in-game.
+                Since we cannot guarantee the availability of our items or server(s) indefinitely, we can revoke this license at any time.
             </li>
             <li>
-                You will not exploit bugs or glitches, nor will you share them with others
-                (except through our GitHub repository: <a href="#" onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>)
+                We may change or remove premium shop items at any time and without notice.
+                In such cases, we will do our best to compensate you with a similar item or refund your purchase.
             </li>
             <li>
-                You will not harass, bully, or discriminate against other players or their characters.
-            </li>
-            <li>
-                You will not spam, flood, or otherwise disrupt the chat.
-            </li>
-            <li>
-                You will not impersonate staff or other players.
+                You may request a refund for an item within 14 days of purchase, provided you have not used the item in-game.
             </li>
         </ul>
+        <p class="mt-s italic">
+            If you would like a refund, please contact us through Discord or email us at
+            <span class="highlight">{{support_email}}</span>.
+            Do not request a chargeback, as this may lead to your account being banned.
+            We will do our best to help you and provide a refund where possible.
+        </p>
     </div>
     <div class="wrapper my">
         <h2>BETA TESTING</h2>
@@ -212,7 +231,8 @@
             </li>
             <li>
                 Please help us by reporting these issues on our GitHub repository:
-                <a href="#" onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>
+                <a href="#"
+                   onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>
             </li>
             <li>
                 Your progress can be reset at any time.
@@ -222,15 +242,20 @@
     <div class="wrapper my">
         <h2>AGREEMENT</h2>
         <p>
-            By clicking the "agree"-button below, you agree to the above terms and our data practices.
+            Do you agree to the above terms and our data practices?
         </p>
-        <button id="agreeButton" class="huge" onclick="console.log('TERMS_AGREED')">
+        <button id="agreeButton"
+                class="huge"
+                onclick="console.log('TERMS_AGREED')">
             I agree
         </button>
-        <button id="disagreeButton" class="gray" onclick="disagree()">
+        <button id="disagreeButton"
+                class="gray"
+                onclick="disagree()">
             I disagree
         </button>
-        <div id="disagree-warning" class="hidden">
+        <div id="disagree-warning"
+             class="hidden">
             <p>
                 <strong>Beware:</strong> If you disagree to the terms, you will be disconnected from the server and your data will be removed from our database.
                 <span class="highlight">This action is irreversible. You will lose all progress and items you have gained on our servers.</span>
@@ -238,8 +263,12 @@
             <p>
                 To confirm that you want to proceed, enter "delete everything" in the box below and click the button.
             </p>
-            <input type="text" id="disagreeInput" placeholder="Enter 'delete everything'">
-            <button id="disagreeFinalize" class="gray" onclick="disagreeFinish()">
+            <input type="text"
+                   id="disagreeInput"
+                   placeholder="Enter 'delete everything'">
+            <button id="disagreeFinalize"
+                    class="gray"
+                    onclick="disagreeFinish()">
                 I disagree to the terms and want my data removed
             </button>
         </div>

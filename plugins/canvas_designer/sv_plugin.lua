@@ -28,14 +28,14 @@ function PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, js
 	end
 
 	-- Validate element count and structure
-	if (#data > PLUGIN.MAX_ELEMENTS) then
+	if (#data > self:GetMaximumElements(client)) then
 		client:Notify("Too many elements on canvas!")
 		return false
 	end
 
 	-- Validate canvas dimensions
-	if (canvasWidth < PLUGIN.CANVAS_MINIMUM_WIDTH or canvasWidth > PLUGIN.CANVAS_MAX_WIDTH or
-			canvasHeight < PLUGIN.CANVAS_MINIMUM_HEIGHT or canvasHeight > PLUGIN.CANVAS_MAX_HEIGHT) then
+	if (canvasWidth < self.CANVAS_MINIMUM_WIDTH or canvasWidth > self.CANVAS_MAX_WIDTH or
+			canvasHeight < self.CANVAS_MINIMUM_HEIGHT or canvasHeight > self.CANVAS_MAX_HEIGHT) then
 		client:Notify("Invalid canvas dimensions!")
 		return false
 	end
@@ -56,7 +56,7 @@ function PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, js
 		end
 
 		-- Check if the sprite is premium and if the player has access
-		local spriteType = PLUGIN.SPRITES_BY_TYPE[element.type]
+		local spriteType = self.SPRITES_BY_TYPE[element.type]
 		local isUnlocked = not spriteType.premiumKey or premiumPackages[spriteType.premiumKey]
 
 		if (not isUnlocked) then

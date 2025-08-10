@@ -3,7 +3,6 @@ local ITEM = ITEM
 ITEM.name = "Cleaning Brush"
 ITEM.price = 50
 ITEM.shipmentSize = 5
-ITEM.noBusiness = true
 ITEM.model = "models/props_c17/pushbroom.mdl"
 ITEM.width = 1
 ITEM.height = 3

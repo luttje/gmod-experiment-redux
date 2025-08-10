@@ -213,7 +213,7 @@ return [
     ],
     6 => [
         'title' => 'Keep Content Age-Appropriate',
-        'description' => 'Avoid sexually explicit or overly graphic content in voice/text.',
+        'description' => 'Avoid sexually explicit or overly graphic content.',
         'escalations' => [
             [
                 'type' => 'mute',

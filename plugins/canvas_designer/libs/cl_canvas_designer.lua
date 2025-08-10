@@ -53,7 +53,9 @@ function PLUGIN.CanvasDesigner:OnElementsChanged()
 end
 
 function PLUGIN.CanvasDesigner:AddElement(spriteType, x, y)
-	if (#self.elements >= PLUGIN.MAX_ELEMENTS) then
+	local maxElements = PLUGIN:GetMaximumElements(LocalPlayer())
+
+	if (#self.elements >= maxElements) then
 		return false
 	end
 

@@ -36,12 +36,25 @@ end
 function PANEL:CreateTopPanel()
 	-- Top panel for dropdown selection
 	self.topPanel = vgui.Create("EditablePanel", self.mainContainer)
-	self.topPanel:SetTall(60)
+	self.topPanel:SetTall(120)
 	self.topPanel:Dock(TOP)
 	self.topPanel:DockMargin(0, 0, 0, 8)
 	self.topPanel.Paint = function(panel, width, height)
 		draw.RoundedBox(4, 0, 0, width, height, PLUGIN.THEME.panel)
 	end
+
+	-- Information on where to get canvas
+	local infoLabel = vgui.Create("DLabel", self.topPanel)
+	infoLabel:SetText(
+		"You can get a canvas from 'The Business' and create your own designs. Make sure to set square dimensions for it to be loadable here."
+	)
+	infoLabel:SetTextColor(PLUGIN.THEME.text)
+	infoLabel:SetFont("ixSmallFont")
+	infoLabel:Dock(TOP)
+	infoLabel:DockMargin(15, 15, 15, 0)
+	infoLabel:SetWrap(true)
+	infoLabel:SetAutoStretchVertical(true)
+	infoLabel:SizeToContents()
 
 	self:CreateDropdownLabel()
 	self:CreateCanvasDropdown()
@@ -54,7 +67,7 @@ function PANEL:CreateDropdownLabel()
 	self.dropdownLabel:SetTextColor(PLUGIN.THEME.text)
 	self.dropdownLabel:SetFont("ixMediumFont")
 	self.dropdownLabel:Dock(LEFT)
-	self.dropdownLabel:DockMargin(15, 15, 15, 5)
+	self.dropdownLabel:DockMargin(15, 5, 15, 5)
 	self.dropdownLabel:SizeToContents()
 end
 
@@ -76,27 +89,7 @@ function PANEL:CreateContentPanel()
 	self.contentPanel = vgui.Create("EditablePanel", self.mainContainer)
 	self.contentPanel:Dock(FILL)
 
-	self:CreateColumnHeader(self.contentPanel, "Square Design to Load")
 	self:CreateSelectedDesignPreview()
-end
-
-function PANEL:CreateColumnHeader(parentPanel, headerText)
-	local headerPanel = vgui.Create("EditablePanel", parentPanel)
-	headerPanel:SetTall(40)
-	headerPanel:Dock(TOP)
-	headerPanel:DockMargin(0, 0, 0, 8)
-	headerPanel.Paint = function(panel, width, height)
-		draw.RoundedBox(4, 0, 0, width, height, PLUGIN.THEME.panel)
-
-		surface.SetTextColor(PLUGIN.THEME.text)
-		surface.SetFont("ixMediumFont")
-
-		local textWidth, textHeight = surface.GetTextSize(headerText)
-		surface.SetTextPos(15, height * 0.5 - textHeight * 0.5)
-		surface.DrawText(headerText)
-	end
-
-	return headerPanel
 end
 
 function PANEL:CreateSelectedDesignPreview()

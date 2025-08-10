@@ -21,7 +21,7 @@ PLUGIN.CANVAS_MAX_HEIGHT = 800
 PLUGIN.CANVAS_WIDTH_BITS = 10  -- Max 1023
 PLUGIN.CANVAS_HEIGHT_BITS = 10 -- Max 1023
 
-PLUGIN.MAX_ELEMENTS = 10
+PLUGIN.MIN_MAX_ELEMENTS = 10
 PLUGIN.GRID_SIZE = 20
 
 function PLUGIN:Icon(material, spriteSize, x, y)
@@ -103,6 +103,30 @@ PLUGIN.THEME = {
 	hover = Color(70, 70, 75),
 	underline = Color(255, 255, 255),
 }
+
+--[[
+	Hooks
+--]]
+
+function PLUGIN:GetMaximumElements(client)
+	local maxElements = PLUGIN.MIN_MAX_ELEMENTS
+	local premiumPackages = client:GetPremiumPackages()
+
+	for packageKey, _ in pairs(premiumPackages) do
+		local package = Schema.GetPremiumPackage(packageKey)
+
+		if (package and package.additionalElementSlots) then
+			local additionalSlots = package.additionalElementSlots or 0
+			maxElements = maxElements + additionalSlots
+		end
+	end
+
+	return maxElements
+end
+
+--[[
+	Commands
+--]]
 
 do
 	local COMMAND = {}

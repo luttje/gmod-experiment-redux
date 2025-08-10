@@ -50,7 +50,7 @@ end
 
 function PANEL:CreateElementCounter()
 	self.countLabel = vgui.Create("DLabel", self.topbar)
-	self.countLabel:SetText("Elements: 0/" .. PLUGIN.MAX_ELEMENTS)
+	self.countLabel:SetText("Elements: 0/" .. PLUGIN:GetMaximumElements(LocalPlayer()))
 	self.countLabel:SetTextColor(PLUGIN.THEME.text)
 	self.countLabel:SetFont("ixSmallBoldFont")
 	self.countLabel:Dock(LEFT)
@@ -559,10 +559,28 @@ function PANEL:CreateAssetGrid(parent, filterCategory, searchTerm)
 		assetBtn.OnMousePressed = function(panel, keyCode)
 			if (not isUnlocked) then
 				Derma_Query(
-					"You do not have access to this premium asset.\nSupport us by purchasing it from our store!",
+					"You do not have access to this premium asset.\nSupport us by purchasing it from the Premium Shop!",
 					"Premium Asset",
 					"OK",
-					function() end
+					function() end,
+					"Open Premium Shop",
+					function()
+						if (not IsValid(ix.gui.menu)) then
+							vgui.Create("ixMenu")
+						end
+
+						local premiumShopId
+
+						for _, subPanel in pairs(ix.gui.menu.subpanels) do
+							if (subPanel.subpanelName == "premiumShop") then
+								premiumShopId = subPanel.subpanelID
+							end
+						end
+
+						if (premiumShopId) then
+							ix.gui.menu:TransitionSubpanel(premiumShopId)
+						end
+					end
 				)
 				return
 			end
@@ -846,9 +864,11 @@ function PANEL:SetupAssetSearch()
 end
 
 function PANEL:UpdateElementCount()
+	local maxElements = PLUGIN:GetMaximumElements(LocalPlayer())
 	local count = #self:GetCanvas().elements
-	self.countLabel:SetText("Elements: " .. count .. "/" .. PLUGIN.MAX_ELEMENTS)
-	self.countLabel:SetTextColor(count >= PLUGIN.MAX_ELEMENTS and PLUGIN.THEME.danger or PLUGIN.THEME.success)
+
+	self.countLabel:SetText("Elements: " .. count .. "/" .. maxElements)
+	self.countLabel:SetTextColor(count >= maxElements and PLUGIN.THEME.danger or PLUGIN.THEME.success)
 	self.countLabel:SizeToContents()
 end
 

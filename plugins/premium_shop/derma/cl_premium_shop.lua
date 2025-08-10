@@ -376,6 +376,31 @@ end
 function PANEL:SetItem(package)
 	self:Clear()
 
+	self:SetHelixTooltip(function(tooltip)
+		local name = tooltip:AddRow("name")
+		name:SetImportant()
+		name:SetText(package.name)
+		name:SizeToContents()
+
+		local description = tooltip:AddRow("description")
+		description:SetText(package.description)
+		description:SizeToContents()
+
+		for i, benefit in ipairs(package.benefits) do
+			local row = tooltip:AddRow("benefit_" .. benefit)
+			row:SetText("• " .. benefit)
+			row:SetBackgroundColor(i % 2 == 0 and Color(240, 240, 240, 25) or Color(255, 255, 255, 50))
+			row:SizeToContents()
+		end
+
+		local priceRow = tooltip:AddRow("price")
+		priceRow:SetText(
+			"Price: " .. (PLUGIN.PREMIUM_CURRENCIES[package.currency] or "€") .. string.format("%.2f", package.price)
+		)
+		priceRow:SetTextColor(PLUGIN.THEME.premium)
+		priceRow:SizeToContents()
+	end)
+
 	-- Icon background
 	self.icon = self:Add("DPanel")
 	self.icon:Dock(TOP)
@@ -403,9 +428,7 @@ function PANEL:SetItem(package)
 			surface.DrawText("OWNED")
 		end
 	end
-	self.icon.OnMousePressed = function()
-		ix.gui.premiumShop:PurchasePackage(package.uniqueID)
-	end
+	self.icon:SetMouseInputEnabled(false)
 
 	-- Name label
 	self.name = self:Add("DLabel")

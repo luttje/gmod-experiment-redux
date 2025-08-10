@@ -4,7 +4,6 @@ local ITEM = ITEM
 ITEM.name = "Design Canvas"
 ITEM.price = 25
 ITEM.shipmentSize = 10
-ITEM.noBusiness = true -- Disabled for now
 ITEM.model = "models/props_lab/clipboard.mdl"
 ITEM.width = 1
 ITEM.height = 1
