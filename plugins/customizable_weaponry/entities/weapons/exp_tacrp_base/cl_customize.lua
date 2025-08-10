@@ -76,13 +76,13 @@ function SWEP:CreateCustomizeHUD()
 	bg:SetPos(0, 0)
 	bg:SetSize(ScrW(), ScrH())
 	bg.OnRemove = function(self2)
-		if ! IsValid(self) then return end
+		if not IsValid(self) then return end
 		if PLUGIN.ConVars["autosave"]:GetBool() and PLUGIN.ConVars["free_atts"]:GetBool() then
 			self:SavePreset()
 		end
 	end
 	bg.Paint = function(self2, w, h)
-		if ! IsValid(self) or ! IsValid(self:GetOwner()) or self:GetOwner():GetActiveWeapon() ~= self then
+		if not IsValid(self) or not IsValid(self:GetOwner()) or self:GetOwner():GetActiveWeapon() ~= self then
 			self2:Remove()
 			if (self.GrenadeMenuAlpha or 0) ~= 1 then
 				gui.EnableScreenClicker(false)
@@ -142,12 +142,12 @@ function SWEP:CreateCustomizeHUD()
 
 	local stack = airgap + PLUGIN.SS(34)
 
-	if ! self:GetValue("NoRanger") then
+	if not self:GetValue("NoRanger") then
 		local ranger = vgui.Create("DPanel", bg)
 		ranger:SetPos(scrw - PLUGIN.SS(128) - airgap, stack + smallgap)
 		ranger:SetSize(PLUGIN.SS(128), PLUGIN.SS(64))
 		ranger.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -288,7 +288,7 @@ function SWEP:CreateCustomizeHUD()
 		bodychart:SetSize(PLUGIN.SS(40), PLUGIN.SS(64))
 		bodychart:SetZPos(100)
 		bodychart.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -340,7 +340,7 @@ function SWEP:CreateCustomizeHUD()
 			surface.SetMaterial(body_chest)
 			surface.DrawTexturedRect(x2, y2, w2, h2)
 
-			if ! upperbody then
+			if not upperbody then
 				bodydamagetext("Stomach", dmg, num, mult[HITGROUP_STOMACH], w - PLUGIN.SS(16), PLUGIN.SS(24), hover)
 			end
 			surface.SetMaterial(body_stomach)
@@ -390,7 +390,7 @@ function SWEP:CreateCustomizeHUD()
 		armorbtn:SetMouseInputEnabled(true)
 		armorbtn:MoveToFront()
 		armorbtn.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			if enable_armor and self2:IsHovered() then
 				surface.SetDrawColor(Color(255, 255, 255, 255))
@@ -406,7 +406,7 @@ function SWEP:CreateCustomizeHUD()
 			surface.DrawTexturedRect(0, 0, w, h)
 		end
 		armorbtn.DoClick = function(self2)
-			enable_armor = ! enable_armor
+			enable_armor = not enable_armor
 		end
 
 		stack = stack + PLUGIN.SS(64) + smallgap
@@ -418,7 +418,7 @@ function SWEP:CreateCustomizeHUD()
 		desc_box:SetPos(scrw - PLUGIN.SS(172) - airgap, stack + smallgap)
 		stack = stack + PLUGIN.SS(48) + smallgap
 		desc_box.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -439,7 +439,7 @@ function SWEP:CreateCustomizeHUD()
 			surface.SetTextPos(PLUGIN.SS(6), PLUGIN.SS(24))
 			surface.DrawText(PLUGIN:GetPhrase("cust.description"))
 
-			if ! self.MiscCache["cust_desc"] then
+			if not self.MiscCache["cust_desc"] then
 				self.MiscCache["cust_desc"] = PLUGIN.MultiLineText(nade.Description, w - PLUGIN.SS(8),
 					"TacRP_Myriad_Pro_8")
 			end
@@ -459,7 +459,7 @@ function SWEP:CreateCustomizeHUD()
 		desc_box:SetSize(PLUGIN.SS(172), PLUGIN.SS(36))
 		desc_box:SetPos(scrw - PLUGIN.SS(172) - airgap, stack + smallgap + tabs_h + PLUGIN.SS(2))
 		desc_box.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -470,7 +470,7 @@ function SWEP:CreateCustomizeHUD()
 			-- surface.SetTextPos(PLUGIN.SS(6), PLUGIN.SS(4))
 			-- surface.DrawText(PLUGIN:GetPhrase("cust.description"))
 
-			if ! self.MiscCache["cust_desc"] then
+			if not self.MiscCache["cust_desc"] then
 				self.MiscCache["cust_desc"] = PLUGIN.MultiLineText(self:GetValue("Description"), w - PLUGIN.SS(8),
 					"TacRP_Myriad_Pro_8")
 			end
@@ -495,7 +495,7 @@ function SWEP:CreateCustomizeHUD()
 		trivia_box:SetSize(PLUGIN.SS(172), PLUGIN.SS(36))
 		trivia_box:SetPos(scrw - PLUGIN.SS(172) - airgap, stack + smallgap + tabs_h + PLUGIN.SS(2))
 		trivia_box.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -510,7 +510,7 @@ function SWEP:CreateCustomizeHUD()
 			local manu_w = surface.GetTextSize(manu_str)
 			if manu_w + PLUGIN.SS(6) >= w / 2 then
 				surface.SetFont("TacRP_Myriad_Pro_8")
-				if ! self.MiscCache["cust_manufacturer"] then
+				if not self.MiscCache["cust_manufacturer"] then
 					self.MiscCache["cust_manufacturer"] = PLUGIN.MultiLineText(manu_str, w / 2 - PLUGIN.SS(2),
 						"TacRP_Myriad_Pro_8")
 				end
@@ -554,13 +554,13 @@ function SWEP:CreateCustomizeHUD()
 		credits_box:SetSize(PLUGIN.SS(172), PLUGIN.SS(36))
 		credits_box:SetPos(scrw - PLUGIN.SS(172) - airgap, stack + smallgap + tabs_h + PLUGIN.SS(2))
 		credits_box.Paint = function(self2, w, h)
-			if ! IsValid(self) or ! self.Credits then return end
+			if not IsValid(self) or not self.Credits then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
 			PLUGIN.DrawCorneredBox(0, 0, w, h)
 
-			if ! self.MiscCache["cust_credits"] then
+			if not self.MiscCache["cust_credits"] then
 				self.MiscCache["cust_credits"] = PLUGIN.MultiLineText(self.Credits, w - PLUGIN.SS(8),
 					"TacRP_Myriad_Pro_8")
 			end
@@ -600,7 +600,7 @@ function SWEP:CreateCustomizeHUD()
 			tab_button:SetMouseInputEnabled(true)
 			tab_button:MoveToFront()
 			tab_button.Paint = function(self2, w2, h2)
-				if ! IsValid(self) then return end
+				if not IsValid(self) then return end
 
 				local hover = #tabs > 1 and self2:IsHovered()
 				local selected = #tabs > 1 and self.ActiveDescTab == i
@@ -647,7 +647,7 @@ function SWEP:CreateCustomizeHUD()
 		stack = stack + PLUGIN.SS(48) + smallgap
 	end
 
-	if ! self:GetValue("NoStatBox") then
+	if not self:GetValue("NoStatBox") then
 		local statgroup = self:GetValue("PrimaryMelee") and self.StatGroupsMelee or self.StatGroups
 		local statdisplay = self:GetValue("PrimaryMelee") and self.StatDisplayMelee or self.StatDisplay
 
@@ -658,7 +658,7 @@ function SWEP:CreateCustomizeHUD()
 		group_box:SetSize(PLUGIN.SS(164), PLUGIN.SS(172))
 		group_box:SetPos(scrw - PLUGIN.SS(164) - airgap - smallgap, stack + smallgap * 2 + tabs_h)
 		group_box.Paint = function(self2)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			local w, h = PLUGIN.SS(172), PLUGIN.SS(16)
 			local x, y = 0, 0
@@ -668,7 +668,7 @@ function SWEP:CreateCustomizeHUD()
 			local hoverscore = 0
 
 			for i, v in ipairs(statgroup) do
-				if ! self.StatScoreCache[i] then
+				if not self.StatScoreCache[i] then
 					self.StaticStats = true
 					local sb = v.RatingFunction(self, true)
 					local sc = v.RatingFunction(self, false)
@@ -783,7 +783,7 @@ function SWEP:CreateCustomizeHUD()
 
 		local function updatestat(i, k)
 			if k.ConVarCheck then
-				if ! k.ConVar then k.ConVar = GetConVar(k.ConVarCheck) end
+				if not k.ConVar then k.ConVar = GetConVar(k.ConVarCheck) end
 				if k.ConVar:GetBool() == tobool(k.ConVarInvert) then return end
 			end
 
@@ -798,7 +798,7 @@ function SWEP:CreateCustomizeHUD()
 			if k.HideIfSame and orig == value then return end
 			if k.DefaultValue ~= nil and value == k.DefaultValue and orig == k.DefaultValue then return end
 
-			if k.ValueCheck and self:GetValue(k.ValueCheck) ~= ! k.ValueInvert then
+			if k.ValueCheck and self:GetValue(k.ValueCheck) ~= not k.ValueInvert then
 				return
 			end
 
@@ -868,13 +868,13 @@ function SWEP:CreateCustomizeHUD()
 					good = stat_curr > stat_base
 					goodorbad = true
 				elseif isbool(stat_curr) then
-					good = ! stat_base and stat_curr
+					good = not stat_base and stat_curr
 					goodorbad = true
 				end
 			end
 
 			if k.LowerIsBetter then
-				good = ! good
+				good = not good
 			end
 
 			if goodorbad then
@@ -891,26 +891,26 @@ function SWEP:CreateCustomizeHUD()
 		end
 
 		local function populate_stats(layout)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 			self.StaticStats = true
 			layout:Clear()
 			self.MiscCache["statbox"] = {}
 			self.StatRows = {}
 			for i, k in ipairs(statdisplay) do
 				updatestat(i, k)
-				if ! self.MiscCache["statbox"][i] then continue end
+				if not self.MiscCache["statbox"][i] then continue end
 				local spacer = k.Spacer
 
 				local row = layout:Add("DPanel")
 				row:SetSize(w_statbox, PLUGIN.SS(spacer and 12 or 9))
 				row.StatIndex = i
 				row.Paint = function(self2, w, h)
-					if ! IsValid(self) then return end
-					if ! self.MiscCache["statbox"] then
+					if not IsValid(self) then return end
+					if not self.MiscCache["statbox"] then
 						populate_stats(layout)
 					end
 					local sicache = self.MiscCache["statbox"][self2.StatIndex]
-					if ! sicache then
+					if not sicache then
 						self2:Remove()
 						return
 					end
@@ -920,7 +920,7 @@ function SWEP:CreateCustomizeHUD()
 					local name = PLUGIN:GetPhrase(k.Name) or k.Name
 					surface.DrawText(name .. (spacer and "" or ":"))
 
-					if ! spacer then
+					if not spacer then
 						surface.SetDrawColor(255, 255, 255)
 						surface.SetTextPos(x_1 + PLUGIN.SS(4), 0)
 						surface.DrawText(sicache[1])
@@ -958,7 +958,7 @@ function SWEP:CreateCustomizeHUD()
 		stat_box:SetSize(w_statbox, PLUGIN.SS(172))
 		stat_box:SetPos(scrw - w_statbox - airgap - smallgap, stack + smallgap * 2 + tabs_h)
 		stat_box.Paint = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 
 			surface.SetDrawColor(0, 0, 0, 150)
 			surface.DrawRect(0, 0, w, h)
@@ -1027,7 +1027,7 @@ function SWEP:CreateCustomizeHUD()
 		populate_stats(stat_layout)
 
 		stat_box.PaintOver = function(self2, w, h)
-			if ! IsValid(self) then return end
+			if not IsValid(self) then return end
 			local panel = vgui.GetHoveredPanel()
 			if self.StatRows[panel] then
 				local stat = statdisplay[self.StatRows[panel]]
@@ -1097,7 +1097,7 @@ function SWEP:CreateCustomizeHUD()
 			tab_button:SetMouseInputEnabled(true)
 			tab_button:MoveToFront()
 			tab_button.Paint = function(self2, w2, h2)
-				if ! IsValid(self) then return end
+				if not IsValid(self) then return end
 
 				local hover = self2:IsHovered()
 				local selected = self.ActiveTab == i
@@ -1158,7 +1158,7 @@ function SWEP:CreateCustomizeHUD()
 			slot_name:SetPos(airgap, offset + airgap - PLUGIN.SS(8) + ((slot - 1) * PLUGIN.SS(34 + 8)))
 			slot_name:SetSize(PLUGIN.SS(128), PLUGIN.SS(8))
 			slot_name.Paint = function(self2, w, h)
-				if ! IsValid(self) then return end
+				if not IsValid(self) then return end
 
 				local txt = PLUGIN:TryTranslate(attslot.PrintName or "Slot")
 				if txt then
@@ -1196,11 +1196,11 @@ function SWEP:CreateCustomizeHUD()
 				offset + airgap + ((slot - 1) * PLUGIN.SS(34 + 8)))
 			prosconspanel:SetSize(PLUGIN.SS(128), PLUGIN.SS(34))
 			prosconspanel.Paint = function(self2, w, h)
-				if ! IsValid(self) then return end
+				if not IsValid(self) then return end
 
 				local installed = attslot.Installed
 
-				if ! installed then return end
+				if not installed then return end
 
 				local atttbl = PLUGIN.GetAttTable(installed)
 
@@ -1291,7 +1291,7 @@ function SWEP:CreateCustomizeHUD()
 			local slot_name = vgui.Create("DPanel", slot_bg)
 			slot_name:SetSize(PLUGIN.SS(32), PLUGIN.SS(8))
 			slot_name.Paint = function(self2, w, h)
-				if ! IsValid(self) then return end
+				if not IsValid(self) then return end
 				local col_bg, col_corner, col_text = slot_icon:GetColors()
 
 				surface.SetDrawColor(col_bg)
@@ -1338,7 +1338,7 @@ function SWEP:CreateCustomizeHUD()
 
 	-- tacrp_drop
 	local primarygrenade = self:GetValue("PrimaryGrenade")
-	if (engine.ActiveGamemode() == "terrortown" or PLUGIN.ConVars["allowdrop"]:GetBool()) and PLUGIN.ConVars["cust_drop"]:GetBool() and (! primarygrenade or ! PLUGIN.IsGrenadeInfiniteAmmo(primarygrenade)) then
+	if (engine.ActiveGamemode() == "terrortown" or PLUGIN.ConVars["allowdrop"]:GetBool()) and PLUGIN.ConVars["cust_drop"]:GetBool() and (not primarygrenade or not PLUGIN.IsGrenadeInfiniteAmmo(primarygrenade)) then
 		local phrase = primarygrenade and "cust.drop_nade" or "cust.drop_wep"
 		local dropbox = vgui.Create("DButton", bg)
 		local bw, bh = PLUGIN.SS(52), PLUGIN.SS(10)
@@ -1382,9 +1382,9 @@ end
 function SWEP:DrawCustomizeHUD()
 	local customize = self:GetCustomize()
 
-	if customize and ! lastcustomize then
+	if customize and not lastcustomize then
 		self:CreateCustomizeHUD()
-	elseif ! customize and lastcustomize then
+	elseif not customize and lastcustomize then
 		self:RemoveCustomizeHUD()
 	end
 

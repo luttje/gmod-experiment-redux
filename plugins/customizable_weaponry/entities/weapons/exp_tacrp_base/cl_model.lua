@@ -4,97 +4,97 @@ SWEP.VModel = nil
 SWEP.WModel = nil
 
 function SWEP:KillModel()
-	for _, model in pairs(self.VModel or {}) do
-		SafeRemoveEntity(model)
-	end
-	for _, model in pairs(self.WModel or {}) do
-		SafeRemoveEntity(model)
-	end
+  for _, model in pairs(self.VModel or {}) do
+    SafeRemoveEntity(model)
+  end
+  for _, model in pairs(self.WModel or {}) do
+    SafeRemoveEntity(model)
+  end
 
-	self.VModel = nil
-	self.WModel = nil
+  self.VModel = nil
+  self.WModel = nil
 end
 
 function SWEP:CreateAttachmentModel(wm, atttbl, slot, slottbl, custom_wm)
-	local model = atttbl.Model
+  local model = atttbl.Model
 
-	if wm and atttbl.WorldModel then
-		model = atttbl.WorldModel
-	end
+  if wm and atttbl.WorldModel then
+    model = atttbl.WorldModel
+  end
 
-	local csmodel = ClientsideModel(model)
+  local csmodel = ClientsideModel(model)
 
-	if ! IsValid(csmodel) then return end
+  if not IsValid(csmodel) then return end
 
-	csmodel.Slot = slot
+  csmodel.Slot = slot
 
-	local scale = Matrix()
-	local vec = Vector(1, 1, 1) * (atttbl.Scale or 1)
-	if wm then
-		vec = vec * (slottbl.WMScale or 1)
-	else
-		vec = vec * (slottbl.VMScale or 1)
-	end
-	scale:Scale(vec)
-	csmodel:EnableMatrix("RenderMultiply", scale)
-	csmodel:SetNoDraw(true)
+  local scale = Matrix()
+  local vec = Vector(1, 1, 1) * (atttbl.Scale or 1)
+  if wm then
+    vec = vec * (slottbl.WMScale or 1)
+  else
+    vec = vec * (slottbl.VMScale or 1)
+  end
+  scale:Scale(vec)
+  csmodel:EnableMatrix("RenderMultiply", scale)
+  csmodel:SetNoDraw(true)
 
-	local tbl = {
-		Model = csmodel,
-		Weapon = self
-	}
+  local tbl = {
+    Model = csmodel,
+    Weapon = self
+  }
 
-	table.insert(PLUGIN.CSModelPile, tbl)
+  table.insert(PLUGIN.CSModelPile, tbl)
 
-	if wm then
-		table.insert(self.WModel, csmodel)
-	else
-		table.insert(self.VModel, csmodel)
-	end
+  if wm then
+    table.insert(self.WModel, csmodel)
+  else
+    table.insert(self.VModel, csmodel)
+  end
 
-	return csmodel
+  return csmodel
 end
 
 function SWEP:SetupModel(wm, custom_wm)
-	self:KillModel()
+  self:KillModel()
 
-	if ! wm and ! IsValid(self:GetOwner()) then return end
+  if not wm and not IsValid(self:GetOwner()) then return end
 
-	if ! wm then
-		self.VModel = {}
-	else
-		self.WModel = {}
-	end
+  if not wm then
+    self.VModel = {}
+  else
+    self.WModel = {}
+  end
 
-	if ! wm and self:GetOwner() ~= LocalPlayer() and self:GetOwner() ~= LocalPlayer():GetObserverTarget() then return end
+  if not wm and self:GetOwner() ~= LocalPlayer() and self:GetOwner() ~= LocalPlayer():GetObserverTarget() then return end
 
-	self:DoBodygroups(wm)
+  self:DoBodygroups(wm)
 
-	for slot, slottbl in pairs(self.Attachments) do
-		if ! slottbl.Installed then continue end
+  for slot, slottbl in pairs(self.Attachments) do
+    if not slottbl.Installed then continue end
 
-		local atttbl = PLUGIN.GetAttTable(slottbl.Installed)
+    local atttbl = PLUGIN.GetAttTable(slottbl.Installed)
 
-		if ! atttbl.Model then continue end
+    if not atttbl.Model then continue end
 
-		local csmodel = self:CreateAttachmentModel(wm, atttbl, slot, slottbl)
+    local csmodel = self:CreateAttachmentModel(wm, atttbl, slot, slottbl)
 
-		csmodel.IsHolosight = atttbl.Holosight
+    csmodel.IsHolosight = atttbl.Holosight
 
-		if atttbl.Silencer then
-			local slmodel = self:CreateAttachmentModel(wm, atttbl, slot, slottbl)
-			slmodel.IsMuzzleDevice = true
-			slmodel.NoDraw = true
-		end
+    if atttbl.Silencer then
+      local slmodel = self:CreateAttachmentModel(wm, atttbl, slot, slottbl)
+      slmodel.IsMuzzleDevice = true
+      slmodel.NoDraw = true
+    end
 
-		if wm then
-			slottbl.WModel = csmodel
-		else
-			slottbl.VModel = csmodel
-		end
-	end
+    if wm then
+      slottbl.WModel = csmodel
+    else
+      slottbl.VModel = csmodel
+    end
+  end
 
-	if ! wm then
-		self:CreateFlashlights()
-	end
+  if not wm then
+    self:CreateFlashlights()
+  end
 end
