@@ -6,7 +6,6 @@ function PLUGIN:ConvertArrayToStats(statsArray)
 		totals = {},
 		accuracy = {},
 		hitgroups = {},
-		weapons = {}
 	}
 
 	for _, entry in ipairs(statsArray) do
@@ -16,8 +15,6 @@ function PLUGIN:ConvertArrayToStats(statsArray)
 			stats.accuracy = entry.data
 		elseif (entry.type == "hitgroup") then
 			stats.hitgroups[entry.hitgroup] = entry.data
-		elseif (entry.type == "weapon") then
-			stats.weapons[entry.weapon] = entry.data
 		end
 	end
 
@@ -82,7 +79,7 @@ end
 local PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(80)
+	self:SetTall(120)
 	self:DockPadding(10, 10, 10, 10)
 end
 
@@ -312,6 +309,9 @@ function PANEL:Init()
 	self:Center()
 	self:SetTitle("Hit Statistics: Player Details")
 	self:SetDeleteOnClose(true)
+
+	self.playerStatsParent = self:Add("EditablePanel")
+	self.playerStatsParent:Dock(FILL)
 end
 
 function PANEL:SetPlayerStats(stats, steamID)
@@ -319,14 +319,12 @@ function PANEL:SetPlayerStats(stats, steamID)
 	self.steamID = steamID
 
 	-- Clear existing content
-	for _, child in ipairs(self:GetChildren()) do
-		if (child.ClassName ~= "expFrameTopBar") then
-			child:Remove()
-		end
+	for _, child in ipairs(self.playerStatsParent:GetChildren()) do
+		child:Remove()
 	end
 
 	-- Player info header
-	local headerPanel = self:Add("EditablePanel")
+	local headerPanel = self.playerStatsParent:Add("EditablePanel")
 	headerPanel:SetTall(60)
 	headerPanel:Dock(TOP)
 	headerPanel:DockMargin(10, 10, 10, 10)
@@ -344,16 +342,16 @@ function PANEL:SetPlayerStats(stats, steamID)
 
 	local headerLabel = headerPanel:Add("DLabel")
 	headerLabel:SetText("Player: " .. playerName .. " (" .. steamID .. ")")
-	headerLabel:SetFont("ixLargeFont")
+	headerLabel:SetFont("ixMediumFont")
 	headerLabel:SetTextColor(Color(255, 255, 255))
 	headerLabel:SetPos(15, 15)
 	headerLabel:SizeToContents()
 
 	-- Main stats panel
-	local mainStatsPanel = self:Add("EditablePanel")
-	mainStatsPanel:SetTall(120)
+	local mainStatsPanel = self.playerStatsParent:Add("DSizeToContents")
 	mainStatsPanel:Dock(TOP)
-	mainStatsPanel:DockMargin(10, 0, 10, 10)
+	mainStatsPanel:DockMargin(10, 0, 0, 10)
+	mainStatsPanel:DockPadding(6, 10, 6, 10)
 	mainStatsPanel.Paint = function(pnl, w, h)
 		draw.RoundedBox(4, 0, 0, w, h, Color(40, 40, 45))
 	end
@@ -362,75 +360,31 @@ function PANEL:SetPlayerStats(stats, steamID)
 	self:CreateMainStatsLayout(mainStatsPanel, stats)
 
 	-- Hitgroup distribution
-	local hitgroupPanel = self:Add("DCollapsibleCategory")
-	hitgroupPanel:SetLabel("Body Part Hit Distribution")
-	hitgroupPanel:SetTall(200)
+	local hitgroupPanel = self.playerStatsParent:Add("EditablePanel")
+	hitgroupPanel:SetTall(250)
 	hitgroupPanel:Dock(TOP)
 	hitgroupPanel:DockMargin(10, 0, 10, 10)
-	hitgroupPanel:SetExpanded(true)
+	hitgroupPanel:DockPadding(6, 10, 6, 10)
+	hitgroupPanel.Paint = function(pnl, w, h)
+		draw.RoundedBox(4, 0, 0, w, h, Color(40, 40, 45))
+	end
+
+	-- Header for hitgroup section
+	local hitgroupHeader = hitgroupPanel:Add("DLabel")
+	hitgroupHeader:SetText("Body Part Hit Distribution")
+	hitgroupHeader:SetFont("ixMediumFont")
+	hitgroupHeader:SetTextColor(Color(255, 255, 255))
+	hitgroupHeader:SetTall(25)
+	hitgroupHeader:Dock(TOP)
+	hitgroupHeader:DockMargin(10, 10, 10, 5)
 
 	self:CreateHitgroupLayout(hitgroupPanel, stats.hitgroups or {})
-
-	-- Weapon statistics
-	local weaponPanel = self:Add("DCollapsibleCategory")
-	weaponPanel:SetLabel("Weapon Statistics")
-	weaponPanel:SetTall(200)
-	weaponPanel:Dock(TOP)
-	weaponPanel:DockMargin(10, 0, 10, 10)
-	weaponPanel:SetExpanded(false)
-
-	self:CreateWeaponLayout(weaponPanel, stats.weapons or {})
 end
 
-function PANEL:CreateMainStatsLayout(parent, stats)
-	local totals = stats.totals or {}
-	local accuracy = stats.accuracy or {}
-
-	-- First row
-	local row1 = parent:Add("EditablePanel")
-	row1:SetTall(30)
-	row1:Dock(TOP)
-	row1:DockMargin(15, 15, 15, 5)
-
-	self:CreateStatLabel(row1, "Accuracy:", string.format("%.1f%% (%d/%d)",
-			accuracy.hit_rate or 0, totals.total_hits or 0, totals.shots_fired or 0),
-		self:GetAccuracyColor(accuracy.hit_rate or 0))
-
-	self:CreateStatLabel(row1, "Headshot Rate:", string.format("%.1f%% (%d/%d)",
-			accuracy.headshot_rate or 0, totals.headshot_hits or 0, totals.total_hits or 0),
-		self:GetHeadshotColor(accuracy.headshot_rate or 0), true)
-
-	-- Second row
-	local row2 = parent:Add("EditablePanel")
-	row2:SetTall(30)
-	row2:Dock(TOP)
-	row2:DockMargin(15, 5, 15, 5)
-
-	self:CreateStatLabel(row2, "K/D Ratio:", string.format("%.2f (%d/%d)",
-		totals.kd_ratio or 0, totals.kills or 0, totals.deaths or 0), Color(200, 200, 200))
-
-	self:CreateStatLabel(row2, "Headshot Kills:", string.format("%d/%d",
-		totals.headshot_kills or 0, totals.kills or 0), Color(200, 200, 200), true)
-
-	-- Third row
-	local row3 = parent:Add("EditablePanel")
-	row3:SetTall(30)
-	row3:Dock(TOP)
-	row3:DockMargin(15, 5, 15, 15)
-
-	self:CreateStatLabel(row3, "Total Shots:", tostring(totals.shots_fired or 0), Color(180, 180, 180))
-	self:CreateStatLabel(row3, "Total Hits:", tostring(totals.total_hits or 0), Color(180, 180, 180), true)
-end
-
-function PANEL:CreateStatLabel(parent, labelText, valueText, valueColor, rightAlign)
-	local container = parent:Add("EditablePanel")
-	container:SetSize(parent:GetWide() / 2, 30)
-
-	if (rightAlign) then
-		container:Dock(RIGHT)
-	else
-		container:Dock(LEFT)
-	end
+function PANEL:CreateStatLabel(parent, labelText, valueText, valueColor)
+	local container = parent:Add("DSizeToContents")
+	container:Dock(TOP)
+	container:DockMargin(10, 0, 10, 5)
 
 	local label = container:Add("DLabel")
 	label:SetText(labelText)
@@ -446,11 +400,75 @@ function PANEL:CreateStatLabel(parent, labelText, valueText, valueColor, rightAl
 	value:Dock(FILL)
 end
 
+function PANEL:CreateMainStatsLayout(parent, stats)
+	local totals = stats.totals or {}
+	local accuracy = stats.accuracy or {}
+
+	self:CreateStatLabel(
+		parent,
+		"Accuracy:",
+		string.format(
+			"%.1f%% (%d/%d)",
+			accuracy.hit_rate or 0,
+			totals.total_hits or 0,
+			totals.shots_fired or 0
+		),
+		self:GetAccuracyColor(accuracy.hit_rate or 0)
+	)
+
+	self:CreateStatLabel(
+		parent,
+		"Headshot Rate:",
+		string.format(
+			"%.1f%% (%d/%d)",
+			accuracy.headshot_rate or 0,
+			totals.headshot_hits or 0,
+			totals.total_hits or 0
+		),
+		self:GetHeadshotColor(accuracy.headshot_rate or 0)
+	)
+
+	self:CreateStatLabel(
+		parent,
+		"K/D Ratio:",
+		string.format(
+			"%.2f (%d/%d)",
+			totals.kd_ratio or 0,
+			totals.kills or 0,
+			totals.deaths or 0
+		),
+		Color(200, 200, 200)
+	)
+
+	self:CreateStatLabel(
+		parent,
+		"Headshot Kills:",
+		string.format(
+			"%d/%d",
+			totals.headshot_kills or 0,
+			totals.kills or 0
+		),
+		Color(200, 200, 200)
+	)
+
+	self:CreateStatLabel(
+		parent,
+		"Total Shots:",
+		tostring(totals.shots_fired or 0),
+		Color(180, 180, 180)
+	)
+	self:CreateStatLabel(
+		parent,
+		"Total Hits:",
+		tostring(totals.total_hits or 0),
+		Color(180, 180, 180)
+	)
+end
+
 function PANEL:CreateHitgroupLayout(parent, hitgroups)
-	local listPanel = vgui.Create("DPanel", parent)
+	local listPanel = parent:Add("DScrollPanel")
 	listPanel:Dock(FILL)
-	listPanel:DockMargin(5, 5, 5, 5)
-	listPanel.Paint = function() end
+	listPanel:DockMargin(10, 0, 10, 10)
 
 	-- Calculate total hits for percentages
 	local totalHits = 0
@@ -475,7 +493,7 @@ function PANEL:CreateHitgroupLayout(parent, hitgroups)
 	end
 
 	table.sort(sortedHitgroups, function(a, b)
-		return a.data.hits > b.data.hits
+		return (a.data.hits or 0) > (b.data.hits or 0)
 	end)
 
 	for i, hitgroupData in ipairs(sortedHitgroups) do
@@ -497,7 +515,7 @@ function PANEL:CreateHitgroupLayout(parent, hitgroups)
 
 		local statsLabel = entryPanel:Add("DLabel")
 		local statsText = string.format("%d hits (%.1f%%) | Avg: %.1f dmg, %.0f units",
-			data.hits, percentage, data.avg_damage or 0, data.avg_distance or 0)
+			data.hits or 0, percentage, data.avg_damage or 0, data.avg_distance or 0)
 		statsLabel:SetText(statsText)
 		statsLabel:SetFont("DermaDefault")
 
@@ -510,58 +528,6 @@ function PANEL:CreateHitgroupLayout(parent, hitgroups)
 		end
 
 		statsLabel:SetTextColor(textColor)
-		statsLabel:Dock(FILL)
-	end
-end
-
-function PANEL:CreateWeaponLayout(parent, weapons)
-	local listPanel = vgui.Create("DPanel", parent)
-	listPanel:Dock(FILL)
-	listPanel:DockMargin(5, 5, 5, 5)
-	listPanel.Paint = function() end
-
-	if (table.IsEmpty(weapons)) then
-		local noDataLabel = listPanel:Add("DLabel")
-		noDataLabel:SetText("No weapon data available")
-		noDataLabel:SetFont("ixMediumFont")
-		noDataLabel:SetTextColor(Color(150, 150, 150))
-		noDataLabel:SetContentAlignment(5)
-		noDataLabel:Dock(FILL)
-		return
-	end
-
-	-- Sort weapons by hit count
-	local sortedWeapons = {}
-	for weapon, data in pairs(weapons) do
-		table.insert(sortedWeapons, { name = weapon, data = data })
-	end
-
-	table.sort(sortedWeapons, function(a, b)
-		return a.data.hits > b.data.hits
-	end)
-
-	for i, weaponData in ipairs(sortedWeapons) do
-		local weapon = weaponData.name
-		local data = weaponData.data
-
-		local entryPanel = listPanel:Add("EditablePanel")
-		entryPanel:SetTall(25)
-		entryPanel:Dock(TOP)
-		entryPanel:DockMargin(0, 2, 0, 2)
-
-		local nameLabel = entryPanel:Add("DLabel")
-		nameLabel:SetText(weapon .. ":")
-		nameLabel:SetFont("ixMediumFont")
-		nameLabel:SetTextColor(Color(255, 255, 255))
-		nameLabel:SetSize(150, 25)
-		nameLabel:Dock(LEFT)
-
-		local statsLabel = entryPanel:Add("DLabel")
-		local statsText = string.format("%d hits | Avg: %.1f damage",
-			data.hits, data.avg_damage or 0)
-		statsLabel:SetText(statsText)
-		statsLabel:SetFont("DermaDefault")
-		statsLabel:SetTextColor(Color(200, 200, 200))
 		statsLabel:Dock(FILL)
 	end
 end

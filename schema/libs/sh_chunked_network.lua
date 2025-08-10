@@ -78,20 +78,7 @@ if (SERVER) then
 		-- Send header
 		net.Start(config.headerName)
 		net.WriteUInt(messageAmount, 16)
-
-		-- Write extra data
-		for key, value in pairs(extraData) do
-			if (type(value) == "string") then
-				net.WriteString(value)
-			elseif (type(value) == "number") then
-				net.WriteDouble(value)
-			elseif (type(value) == "boolean") then
-				net.WriteBool(value)
-			elseif (type(value) == "table") then
-				net.WriteTable(value)
-			end
-		end
-
+		net.WriteTable(extraData)
 		net.Send(client)
 
 		if (messageAmount == 0) then
@@ -206,8 +193,7 @@ elseif (CLIENT) then
 			end
 
 			-- Read extra data that was sent with header
-			-- This is message-specific, so we store it for the callback
-			operation.extraData = {}
+			operation.extraData = net.ReadTable()
 
 			if (messageAmount == 0) then
 				-- No data, call callback immediately
