@@ -2,6 +2,10 @@ local PLUGIN = PLUGIN
 
 local SPRITESHEET_MATERIAL = Material("experiment-redux/designer/graffiti_stencil_spritesheet.png") -- 8 columns
 
+if (SERVER) then
+	resource.AddFile("materials/experiment-redux/designer/graffiti_stencil_spritesheet.png")
+end
+
 --[[
 	Graffiti Stencil Sprites
 --]]

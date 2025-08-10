@@ -9,8 +9,6 @@ util.AddNetworkString("expSprayCanDesignSelector")
 util.AddNetworkString("expSprayCanLoadDesign")
 util.AddNetworkString("expSprayCanClearDesign")
 
-resource.AddFile("materials/experiment-redux/designer/basic_spritesheet.png")
-resource.AddFile("materials/experiment-redux/designer/colored_spritesheet.png")
 resource.AddFile("materials/models/spraycan3.vmt")
 resource.AddFile("models/sprayca2.mdl")
 

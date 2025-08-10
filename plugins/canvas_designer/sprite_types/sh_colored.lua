@@ -4,6 +4,10 @@ local PLUGIN = PLUGIN
 -- TODO: Download these assets not on join, but after the loading screen when the player is already creating/selecting their character.
 local SPRITESHEET_MATERIAL = Material("experiment-redux/designer/colored_spritesheet.png") -- 8x8 = 64 sprites
 
+if (SERVER) then
+	resource.AddFile("materials/experiment-redux/designer/colored_spritesheet.png")
+end
+
 PLUGIN:RegisterSpriteType({
 	type = "colored_skull",
 	name = "Skull",

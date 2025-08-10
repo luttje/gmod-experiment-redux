@@ -2,6 +2,10 @@ local PLUGIN = PLUGIN
 
 local SPRITESHEET_MATERIAL = Material("experiment-redux/designer/basic_spritesheet.png")
 
+if (SERVER) then
+	resource.AddFile("materials/experiment-redux/designer/basic_spritesheet.png")
+end
+
 PLUGIN:RegisterSpriteType({
 	type = "basic_rectangle",
 	name = "Rectangle",

@@ -2,83 +2,12 @@ local PLUGIN = PLUGIN
 
 local SPRITESHEET_MATERIAL = Material("experiment-redux/designer/graffiti_don_spritesheet.png") -- 8 columns
 
+if (SERVER) then
+	resource.AddFile("materials/experiment-redux/designer/graffiti_don_spritesheet.png")
+end
+
 --[[
 	Graffiti Don Sprites
-	A
-	B
-	C
-	D
-	E
-	F
-	G
-	H
-	I
-	J
-	K
-	L
-	M
-	N
-	O
-	P
-	Q
-	R
-	S
-	T
-	U
-	V
-	W
-	X
-	Y
-	Z
-	!
-	@
-	#
-	$
-	%
-	^
-	&
-	*
-	(
-	«
-	-
-	=
-	_
-	+
-	{
-	°
-	[
-	‘
-	.
-	,
-	<
-	×
-	?
-	€
-	¢
-	£
-	¥
-	©
-	®
-	~
-	Z (Stylized)
-	B (Stylized)
-	F (Stylized)
-	D (Stylized)
-	Æ (Stylized)
-	J (Stylized)
-	H (Stylized)
-	S (Stylized)
-	0
-	1
-	2
-	3
-	4
-	5
-	6
-	7
-	8
-	9
-	Don C Stencil
 --]]
 
 PLUGIN:RegisterSpriteType({
