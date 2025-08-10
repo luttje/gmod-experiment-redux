@@ -322,8 +322,97 @@ function PLUGIN:GetClaimablePackagesForPlayer(client, callback)
 end
 
 --[[
-	Network callbacks - Shopping Cart System
+	Network callbacks
 --]]
+
+-- Handle payment history requests
+Schema.chunkedNetwork.HandleRequest("PaymentHistory", function(client, respond, requestData)
+	if (not client:GetCharacter()) then
+		return
+	end
+
+	-- Throttle check to prevent spam
+	if (Schema.util.Throttle("premium_history", 5, client)) then
+		client:Notify("Please wait before requesting payment history again.")
+		return
+	end
+
+	local steamid64 = client:SteamID64()
+
+	PLUGIN:GetPlayerPayments(steamid64, function(payments)
+		-- Format the payments for network transmission
+		local formattedPayments = {}
+
+		for _, payment in ipairs(payments) do
+			table.insert(formattedPayments, {
+				session_id = payment.session_id,
+				cart_items = payment.cart_items,
+				total_price = tonumber(payment.total_price),
+				currency = payment.currency,
+				status = payment.status,
+				created_at = payment.created_at,
+				updated_at = payment.updated_at,
+				payment_url = payment.payment_url
+			})
+		end
+
+		respond(formattedPayments)
+	end)
+end)
+
+-- Handle claimable packages requests
+Schema.chunkedNetwork.HandleRequest("ClaimablePackages", function(client, respond, requestData)
+	if (not client:GetCharacter()) then
+		return
+	end
+
+	-- Throttle check to prevent spam
+	if (Schema.util.Throttle("premium_claimable", 5, client)) then
+		client:Notify("Please wait before requesting claimable packages again.")
+		return
+	end
+
+	PLUGIN:GetClaimablePackagesForPlayer(client, function(claimablePackages)
+		respond(table.GetKeys(claimablePackages))
+	end)
+end)
+
+-- Handle admin payments requests
+Schema.chunkedNetwork.HandleRequest("AdminPayments", function(client, respond, requestData)
+	if (not client:IsSuperAdmin()) then
+		client:Notify("You don't have permission to access this feature.")
+		return
+	end
+
+	local searchQuery = requestData.searchQuery or ""
+	local statusFilter = requestData.statusFilter or "all"
+
+	PLUGIN:GetAdminPayments(searchQuery, statusFilter, function(payments)
+		-- Format the payments for network transmission
+		local formattedPayments = {}
+
+		for _, payment in ipairs(payments) do
+			table.insert(formattedPayments, {
+				payment_id = payment.payment_id,
+				session_id = payment.session_id,
+				steamid64 = payment.steamid64,
+				player_name = payment.player_name,
+				cart_items = payment.cart_items,
+				total_price = tonumber(payment.total_price),
+				currency = payment.currency,
+				status = payment.status,
+				created_at = payment.created_at,
+				updated_at = payment.updated_at,
+				payment_url = payment.payment_url
+			})
+		end
+
+		respond(formattedPayments, {
+			searchQuery = searchQuery,
+			statusFilter = statusFilter
+		})
+	end)
+end)
 
 -- Handle shopping cart purchases
 net.Receive("expPremiumShopCart", function(length, client)
@@ -405,44 +494,6 @@ net.Receive("expPremiumShopCart", function(length, client)
 	PLUGIN:CreateStripeCheckoutSessionForCart(client, validatedCart, totalPrice, currency)
 end)
 
-net.Receive("expPremiumShopRequestHistory", function(length, client)
-	if (not client:GetCharacter()) then
-		return
-	end
-
-	-- Throttle check to prevent spam
-	if (Schema.util.Throttle("premium_history", 5, client)) then
-		client:Notify("Please wait before requesting payment history again.")
-		return
-	end
-
-	local steamid64 = client:SteamID64()
-
-	-- Fetch payment history from database
-	PLUGIN:GetPlayerPayments(steamid64, function(payments)
-		-- Format the payments for network transmission
-		local formattedPayments = {}
-
-		for _, payment in ipairs(payments) do
-			table.insert(formattedPayments, {
-				session_id = payment.session_id,
-				cart_items = payment.cart_items,
-				total_price = tonumber(payment.total_price),
-				currency = payment.currency,
-				status = payment.status,
-				created_at = payment.created_at,
-				updated_at = payment.updated_at,
-				payment_url = payment.payment_url
-			})
-		end
-
-		-- Send payment history to client
-		net.Start("expPremiumShopSendHistory")
-		net.WriteTable(formattedPayments)
-		net.Send(client)
-	end)
-end)
-
 net.Receive("expPremiumShopRefreshPayment", function(length, client)
 	local sessionId = net.ReadString()
 
@@ -470,24 +521,6 @@ net.Receive("expPremiumShopRefreshPayment", function(length, client)
 
 		-- Force check with Stripe
 		PLUGIN:ForceCheckClientPayment(client, sessionId, payment)
-	end)
-end)
-
-net.Receive("expPremiumShopRequestClaimable", function(length, client)
-	if (not client:GetCharacter()) then
-		return
-	end
-
-	-- Throttle check to prevent spam
-	if (Schema.util.Throttle("premium_claimable", 5, client)) then
-		client:Notify("Please wait before requesting claimable packages again.")
-		return
-	end
-
-	PLUGIN:GetClaimablePackagesForPlayer(client, function(claimablePackages)
-		net.Start("expPremiumShopClaimablePackages")
-		net.WriteTable(claimablePackages)
-		net.Send(client)
 	end)
 end)
 
@@ -519,43 +552,6 @@ net.Receive("expPremiumShopClaimPackage", function(length, client)
 
 	-- Attempt to claim the package
 	client:GivePremiumKey(packageKey)
-end)
-
-net.Receive("expPremiumShopAdminPayments", function(length, client)
-	if (not client:IsSuperAdmin()) then
-		client:Notify("You don't have permission to access this feature.")
-		return
-	end
-
-	local searchQuery = net.ReadString()
-	local statusFilter = net.ReadString()
-
-	PLUGIN:GetAdminPayments(searchQuery, statusFilter, function(payments)
-		-- Format the payments for network transmission
-		local formattedPayments = {}
-
-		for _, payment in ipairs(payments) do
-			table.insert(formattedPayments, {
-				payment_id = payment.payment_id,
-				session_id = payment.session_id,
-				steamid64 = payment.steamid64,
-				player_name = payment.player_name,
-				cart_items = payment.cart_items,
-				total_price = tonumber(payment.total_price),
-				currency = payment.currency,
-				status = payment.status,
-				created_at = payment.created_at,
-				updated_at = payment.updated_at,
-				payment_url = payment.payment_url
-			})
-		end
-
-		-- Send payment data to client
-		net.Start("expPremiumShopAdminPaymentsResponse")
-		net.WriteTable(formattedPayments)
-		net.WriteString(searchQuery)
-		net.Send(client)
-	end)
 end)
 
 net.Receive("expPremiumShopAdminForceCheck", function(length, client)

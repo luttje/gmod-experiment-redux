@@ -49,20 +49,30 @@ function Schema.chunkedNetwork.Register(messageName, chunkSize, delay)
 end
 
 if (SERVER) then
-	---	Send chunked data to a client
+	---	Send chunked data to a client. Not directly callback because you should use the respond
+	--- function in the closure of HandleRequest to send response data instead.
 	---	@param messageName string The registered message name
 	---	@param client Player The client to send to
 	---	@param data table The data to send (will be chunked automatically)
 	---	@param extraData? table Optional extra data to send with header (e.g., steamID)
 	---	@return number # Delay in seconds for complete transmission
-	function Schema.chunkedNetwork.Send(messageName, client, data, extraData)
+	local function sendResponse(messageName, client, data, extraData)
 		local config = Schema.chunkedNetwork.handlers[messageName]
 
 		if (not config) then
-			error("Schema.chunkedNetwork: Message '" .. messageName .. "' not registered!")
+			error("Schema.chunkedNetwork Response: Message '" .. messageName .. "' not registered!")
 		end
 
 		extraData = extraData or {}
+
+		if (not Schema.IsArrayLike(data)) then
+			ix.util.SchemaErrorNoHalt(
+				"Schema.chunkedNetwork Response: Data must be an array with only sequential numeric keys!"
+			)
+
+			return 0
+		end
+
 		local messageAmount = #data
 
 		-- Send header
@@ -98,7 +108,7 @@ if (SERVER) then
 			function(chunk, chunkIndex, chunkAmount)
 				for _, entry in ipairs(chunk) do
 					net.Start(config.dataName)
-					net.WriteTable(entry)
+					net.WriteType(entry)
 					net.Send(client)
 				end
 			end
@@ -107,9 +117,10 @@ if (SERVER) then
 		return delayInSeconds
 	end
 
-	---	Handle incoming requests for chunked data
+	---	Handle incoming requests for chunked data. The provided callback is given a respond function, use that
+	--- to send response data back to the client.
 	---	@param messageName string The registered message name
-	---	@param callback fun(client: Player, requestData: table) Callback to call when request received
+	---	@param callback fun(client: Player, respond: fun(data: table, extraData?: table), requestData: table) Callback to call when request received
 	function Schema.chunkedNetwork.HandleRequest(messageName, callback)
 		local config = Schema.chunkedNetwork.handlers[messageName]
 
@@ -120,15 +131,29 @@ if (SERVER) then
 		net.Receive(config.requestName, function(len, client)
 			local requestData = {}
 
+			local iterations = 0
+
 			-- Read until we run out of data
-			while (len > net.BytesLeft()) do
+			while (net.BytesLeft() > 0) do
 				local key = net.ReadString()
 				local value = net.ReadType()
 
 				requestData[key] = value
+				iterations = iterations + 1
+
+				if (iterations > 100000) then
+					print(client, messageName, len, requestData)
+					PrintTable(requestData)
+					error("Schema.chunkedNetwork: Infinite loop detected!")
+					return
+				end
 			end
 
-			callback(client, requestData)
+			local respond = function(data, extraData)
+				sendResponse(messageName, client, data, extraData)
+			end
+
+			callback(client, respond, requestData)
 		end)
 	end
 elseif (CLIENT) then
@@ -197,7 +222,7 @@ elseif (CLIENT) then
 
 		-- Data receiver
 		net.Receive(config.dataName, function(length)
-			local entry = net.ReadTable()
+			local entry = net.ReadType()
 			local operation = Schema.chunkedNetwork.activeOperations[messageName]
 
 			if (not operation) then

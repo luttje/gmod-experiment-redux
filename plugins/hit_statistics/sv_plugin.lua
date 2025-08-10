@@ -109,7 +109,7 @@ function PLUGIN:RecordHit(attacker, hitData)
 
 	local query = mysql:Insert("exp_player_hit_stats")
 	query:Insert("character_id", character:GetID())
-	query:Insert("steam_id", attacker:SteamID())
+	query:Insert("steam_id", attacker:SteamID64())
 	query:Insert("victim_character_id", victimCharacterID)
 	query:Insert("hitgroup", hitData.hitgroup)
 	query:Insert("weapon_class", hitData.weapon)
@@ -138,7 +138,7 @@ function PLUGIN:IncrementStat(client, statType, value)
 
 	local query = mysql:Insert("exp_player_hit_stats")
 	query:Insert("character_id", character:GetID())
-	query:Insert("steam_id", client:SteamID())
+	query:Insert("steam_id", client:SteamID64())
 	query:Insert("stat_type", statType)
 	query:Insert("value", value)
 	query:Insert("created_at", os.time())
@@ -329,7 +329,7 @@ function PLUGIN:GetSuspiciousPlayers(callback, thresholds)
 	return true
 end
 
-Schema.chunkedNetwork.HandleRequest("PlayerHitStats", function(client, requestData)
+Schema.chunkedNetwork.HandleRequest("PlayerHitStats", function(client, respond, requestData)
 	if (not client:IsAdmin()) then
 		return
 	end
@@ -343,14 +343,14 @@ Schema.chunkedNetwork.HandleRequest("PlayerHitStats", function(client, requestDa
 	PLUGIN:GetPlayerStats(steamID, function(stats)
 		local statsArray = PLUGIN:ConvertStatsToArray(stats)
 
-		Schema.chunkedNetwork.Send("PlayerHitStats", client, statsArray, {
+		respond(statsArray, {
 			steamID = steamID
 		})
 	end)
 end)
 
 -- Handle suspicious players requests
-Schema.chunkedNetwork.HandleRequest("SuspiciousPlayers", function(client, requestData)
+Schema.chunkedNetwork.HandleRequest("SuspiciousPlayers", function(client, respond, requestData)
 	if (not client:IsAdmin()) then
 		return
 	end
@@ -358,18 +358,20 @@ Schema.chunkedNetwork.HandleRequest("SuspiciousPlayers", function(client, reques
 	local thresholds = requestData.thresholds or {}
 
 	PLUGIN:GetSuspiciousPlayers(function(suspiciousPlayers)
-		Schema.chunkedNetwork.Send("SuspiciousPlayers", client, suspiciousPlayers)
+		respond(suspiciousPlayers, {
+			steamID = steamID
+		})
 	end, thresholds)
 end)
 
 -- Handle players overview requests
-Schema.chunkedNetwork.HandleRequest("PlayersOverview", function(client, requestData)
+Schema.chunkedNetwork.HandleRequest("PlayersOverview", function(client, respond, requestData)
 	if (not client:IsAdmin()) then
 		return
 	end
 
 	PLUGIN:GetPlayersOverview(function(playersStats)
-		Schema.chunkedNetwork.Send("PlayersOverview", client, playersStats)
+		respond(playersStats, {})
 	end)
 end)
 

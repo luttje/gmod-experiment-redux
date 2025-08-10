@@ -4,6 +4,10 @@ PLUGIN.name = "Premium Shop"
 PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Adds premium functionality and a premium shop system with real money purchases."
 
+Schema.chunkedNetwork.Register("PaymentHistory", 50, 0.05)
+Schema.chunkedNetwork.Register("ClaimablePackages", 30, 0.03)
+Schema.chunkedNetwork.Register("AdminPayments", 50, 0.1)
+
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
 ix.util.Include("sv_stripe.lua")

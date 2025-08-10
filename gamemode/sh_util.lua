@@ -178,6 +178,14 @@ function ix.util.SchemaErrorNoHalt(...)
 	ErrorNoHalt("\n")
 end
 
+--- ErrorNoHalt, but with Experiment Redux prefix.
+--- @vararg any
+function ix.util.SchemaErrorNoHaltFormatted(format, ...)
+	ErrorNoHalt("[Experiment Redux] " .. string.format(format, ...))
+	ErrorNoHalt("\n")
+	ErrorNoHalt(debug.traceback("", 2))
+end
+
 --- ErrorNoHaltWithStack, but with Experiment Redux prefix.
 --- @vararg any
 function ix.util.SchemaErrorNoHaltWithStack(...)

@@ -23,10 +23,10 @@ PLUGIN.hitgroupNames = {
 	[HITGROUP_GEAR] = "Gear",
 }
 
-ix.util.Include("sv_plugin.lua")
-ix.util.Include("sv_hooks.lua")
-
 -- Register our chunked messages (this auto-sets up receivers on client)
 Schema.chunkedNetwork.Register("PlayerHitStats", 30, 0.03)
 Schema.chunkedNetwork.Register("SuspiciousPlayers", 50, 0.05)
 Schema.chunkedNetwork.Register("PlayersOverview", 50, 0.05)
+
+ix.util.Include("sv_plugin.lua")
+ix.util.Include("sv_hooks.lua")

@@ -1,15 +1,5 @@
 local PLUGIN = PLUGIN
 
--- Receive admin payments data
-net.Receive("expPremiumShopAdminPaymentsResponse", function()
-	local payments = net.ReadTable()
-	local searchQuery = net.ReadString()
-
-	if (IsValid(PLUGIN.adminPaymentsPanel)) then
-		PLUGIN.adminPaymentsPanel:DisplayPayments(payments, searchQuery)
-	end
-end)
-
 -- Show admin payments panel
 function PLUGIN:ShowAdminPaymentsPanel()
 	if (not LocalPlayer():IsSuperAdmin()) then
@@ -25,9 +15,14 @@ function PLUGIN:ShowAdminPaymentsPanel()
 	self.adminPaymentsPanel:MakePopup()
 
 	-- Request initial data
-	net.Start("expPremiumShopAdminPayments")
-	net.WriteString("") -- Empty search initially
-	net.SendToServer()
+	Schema.chunkedNetwork.Request("AdminPayments", {
+		searchQuery = "",
+		statusFilter = "all"
+	}, function(payments, extraData)
+		if (IsValid(PLUGIN.adminPaymentsPanel)) then
+			PLUGIN.adminPaymentsPanel:DisplayPayments(payments, extraData.searchQuery)
+		end
+	end)
 end
 
 -- Individual admin payment entry panel
@@ -212,9 +207,14 @@ function PANEL:SetPayment(payment, index)
 			timer.Simple(3, function()
 				if (IsValid(self:GetParent():GetParent():GetParent())) then
 					local searchText = self:GetParent():GetParent():GetParent().searchEntry:GetText()
-					net.Start("expPremiumShopAdminPayments")
-					net.WriteString(searchText)
-					net.SendToServer()
+					Schema.chunkedNetwork.Request("AdminPayments", {
+						searchQuery = searchText,
+						statusFilter = self:GetParent():GetParent():GetParent().selectedStatus or "all"
+					}, function(payments, extraData)
+						if (IsValid(self:GetParent():GetParent():GetParent())) then
+							self:GetParent():GetParent():GetParent():DisplayPayments(payments, extraData.searchQuery)
+						end
+					end)
 				end
 			end)
 		end
@@ -390,10 +390,14 @@ function PANEL:Init()
 end
 
 function PANEL:SearchPayments(query)
-	net.Start("expPremiumShopAdminPayments")
-	net.WriteString(query or "")
-	net.WriteString(self.selectedStatus)
-	net.SendToServer()
+	Schema.chunkedNetwork.Request("AdminPayments", {
+		searchQuery = query or "",
+		statusFilter = self.selectedStatus or "all"
+	}, function(payments, extraData)
+		if (IsValid(self)) then
+			self:DisplayPayments(payments, extraData.searchQuery)
+		end
+	end)
 end
 
 function PANEL:DisplayPayments(payments, searchQuery)

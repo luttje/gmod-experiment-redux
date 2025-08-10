@@ -1,21 +1,5 @@
 local PLUGIN = PLUGIN
 
-net.Receive("expPremiumShopSendHistory", function()
-	local payments = net.ReadTable()
-
-	if (IsValid(PLUGIN.paymentHistoryPanel)) then
-		PLUGIN.paymentHistoryPanel:DisplayPayments(payments)
-	end
-end)
-
-net.Receive("expPremiumShopClaimablePackages", function()
-	local claimablePackages = net.ReadTable()
-
-	if (IsValid(PLUGIN.paymentHistoryPanel)) then
-		PLUGIN.paymentHistoryPanel:DisplayClaimablePackages(claimablePackages)
-	end
-end)
-
 function PLUGIN:ShowPaymentHistory()
 	if (IsValid(self.cartPanel)) then
 		self.cartPanel:Close()
@@ -28,12 +12,19 @@ function PLUGIN:ShowPaymentHistory()
 	self.paymentHistoryPanel = vgui.Create("expPaymentHistoryPanel")
 	self.paymentHistoryPanel:MakePopup()
 
-	net.Start("expPremiumShopRequestHistory")
-	net.SendToServer()
+	-- Request payment history
+	Schema.chunkedNetwork.Request("PaymentHistory", {}, function(payments, extraData)
+		if (IsValid(PLUGIN.paymentHistoryPanel)) then
+			PLUGIN.paymentHistoryPanel:DisplayPayments(payments)
+		end
+	end)
 
 	-- Also request claimable packages
-	net.Start("expPremiumShopRequestClaimable")
-	net.SendToServer()
+	Schema.chunkedNetwork.Request("ClaimablePackages", {}, function(claimablePackages, extraData)
+		if (IsValid(PLUGIN.paymentHistoryPanel)) then
+			PLUGIN.paymentHistoryPanel:DisplayClaimablePackages(claimablePackages)
+		end
+	end)
 end
 
 -- Individual payment entry panel
@@ -207,12 +198,6 @@ function PANEL:SetPayment(payment, index)
 			net.SendToServer()
 
 			LocalPlayer():Notify("Refreshing payment status...")
-
-			-- Refresh the list after a delay
-			timer.Simple(2, function()
-				net.Start("expPremiumShopRequestHistory")
-				net.SendToServer()
-			end)
 		end
 
 		self.openPaymentUrl = buttonRow:Add("expButton")
@@ -293,13 +278,6 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 	purchaseRow:SetTall(25)
 	purchaseRow:Dock(TOP)
 	purchaseRow:DockMargin(0, 5, 0, 0)
-
-	local purchaseLabel = purchaseRow:Add("DLabel")
-	purchaseLabel:SetText("Purchased " .. packageData.purchaseCount .. " time(s)")
-	purchaseLabel:SetFont("ixSmallFont")
-	purchaseLabel:SetTextColor(PLUGIN.THEME.textSecondary)
-	purchaseLabel:Dock(LEFT)
-	purchaseLabel:SizeToContents()
 
 	-- Claim button
 	local buttonRow = self:Add("EditablePanel")
@@ -519,11 +497,11 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 	self.claimablePackages = {}
 
 	-- claimablePackages is only the key (in the key) and the amount this player has
-	for packageKey, amount in pairs(claimablePackages) do
+	for _, packageKey in ipairs(claimablePackages) do
 		local package = PLUGIN.PREMIUM_PACKAGES[packageKey]
 
 		if (not package) then
-			ix.util.SchemaErrorNoHalt("Unknown premium package: " .. packageKey)
+			ix.util.SchemaErrorNoHalt("Unknown premium package: ", packageKey)
 			return
 		end
 
@@ -533,7 +511,6 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 			image = package.image,
 			category = package.category,
 			benefits = package.benefits,
-			purchaseCount = amount
 		}
 	end
 
@@ -587,8 +564,11 @@ function PANEL:RefreshAllPending()
 	-- Refresh the list after a delay
 	timer.Simple(3, function()
 		if (IsValid(self)) then
-			net.Start("expPremiumShopRequestHistory")
-			net.SendToServer()
+			Schema.chunkedNetwork.Request("PaymentHistory", {}, function(payments, extraData)
+				if (IsValid(self)) then
+					self:DisplayPayments(payments)
+				end
+			end)
 		end
 	end)
 end

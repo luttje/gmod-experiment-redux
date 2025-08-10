@@ -312,8 +312,12 @@ function Schema.ChunkData(data, chunkSize, delayInChunks, callback, finishCallba
 			-- Ensure that the callback is run in a protected environment, so finish callbacks are still called
 			-- and the queue doesn't get stuck.
 			xpcall(callback, function(error)
-				ix.util.SchemaErrorNoHalt("The ChunkData callback for chunk %i/%i has failed to run with error:\n\t%s", i,
-					chunkAmount, error)
+				ix.util.SchemaErrorNoHaltFormatted(
+					"The ChunkData callback for chunk %i/%i has failed to run with error:\n\t%s",
+					i,
+					chunkAmount,
+					error
+				)
 			end, chunk, i, chunkAmount)
 
 			if (i == chunkAmount and finishCallback) then
@@ -343,13 +347,24 @@ function Schema.ScopedChunkData(queueScope, queueName, data, chunkSize, delay, c
 	local queue = queueScope[queueName]
 
 	if (queue:size() > 1000) then
-		ix.util.SchemaErrorNoHalt("Queue size is too large for '%s'.'%s'! (%i) - Not processing data",
+		ix.util.SchemaErrorNoHaltFormatted(
+			"Queue size is too large for '%s'.'%s'! (%i) - Not processing data",
 			tostring(queueScope),
-			queueName, queue:size())
+			queueName,
+			queue:size()
+		)
 
 		if (isentity(queueScope) and queueScope:IsPlayer()) then
 			queueScope:Kick("ScopedChunkData Data Queue Overflowed!")
 		end
+
+		return 0
+	end
+
+	if (not Schema.IsArrayLike(data)) then
+		ix.util.SchemaErrorNoHalt(
+			"Schema.ScopedChunkData: Data must be an array with only sequential numeric keys!"
+		)
 
 		return 0
 	end
@@ -440,4 +455,23 @@ function Schema.CompactTable(target)
 	end
 
 	return newTable
+end
+
+--- Checks if a table is array-like, with only sequential numberic keys
+--- @param target table
+--- @return boolean # Whether the table is array-like
+--- @realm shared
+function Schema.IsArrayLike(target)
+	local length = #target
+	local count = 0
+
+	for k, _ in pairs(target) do
+		if (type(k) ~= "number" or k ~= math.floor(k) or k < 1 or k > length) then
+			return false
+		end
+
+		count = count + 1
+	end
+
+	return count == length
 end
