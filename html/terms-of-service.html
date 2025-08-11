@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service</title>
+    <title>Experiment &bull; Terms of Service</title>
 
     <!--
         Reminder to self: Garry's Mod's HTML is based on Awesomium, which is based on Chromium 18.
@@ -34,9 +34,10 @@
         body {
             background: black;
             color: white;
-            padding: 1em;
+            padding: 0;
             font-size: 16px;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
+            overflow: hidden;
         }
 
         h1,
@@ -58,7 +59,7 @@
         }
 
         .wrapper {
-            max-width: 512px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -74,8 +75,12 @@
         }
 
         p {
-            margin: 0.5em;
+            margin: 0.5em 0;
             line-height: 1.5em;
+        }
+
+        .w-full {
+            width: 100%;
         }
 
         ul {
@@ -102,8 +107,20 @@
             margin-bottom: 2em;
         }
 
-        .mt-s {
+        .mt-2 {
+            margin-top: 2em;
+        }
+
+        .mt {
             margin-top: 1em;
+        }
+
+        .mb-2 {
+            margin-bottom: 2em;
+        }
+
+        .mb {
+            margin-bottom: 1em;
         }
 
         a,
@@ -111,25 +128,37 @@
             color: #A33426;
         }
 
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
         button {
             background: #A33426;
             color: white;
             border: none;
             font-size: 1em;
-            padding: .5em 1em;
+            padding: 1em 2em;
             margin: 0.5em 0;
             cursor: pointer;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
-            width: 100%;
+            transition: scale 0.2s ease-in-out;
         }
 
         button.huge {
-            font-size: 2em;
-            padding: .8em 1em;
+            width: 70%;
         }
 
-        button.gray {
-            background: #333;
+        button.secondary {
+            background: #634f4f;
+        }
+
+        button:hover {
+            scale: 1.05;
         }
 
         input {
@@ -142,182 +171,347 @@
         .italic {
             font-style: italic;
         }
+
+        .summary-section {
+            padding: 1em 0;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: black;
+            z-index: 100;
+            padding: 1em;
+            border-bottom: 1px solid #333;
+        }
+
+        .content {
+            position: fixed;
+            top: 80px;
+            bottom: 160px;
+            left: 0;
+            right: 0;
+            overflow-y: auto;
+            padding: 1em;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 160px;
+            background: black;
+            border-top: 1px solid #333;
+            padding: 1em;
+            z-index: 100;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: black;
+            border: 2px solid #A33426;
+            padding: 2em;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            color: #A33426;
+            font-family: "LightsOut";
+            font-size: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1em;
+        }
+
+        .modal-buttons button {
+            margin: 0 0.5em;
+        }
     </style>
 </head>
 
 <body>
-    <div class="wrapper logo">
-        <img src="asset://garrysmod/materials/experiment-redux/logo.png">
-    </div>
-    <div class="wrapper my">
-        <h2>WELCOME TO OUR SERVER!</h2>
-        <p>
-            Thanks for considering to come play on our server! We're excited to have you join us.
-        </p>
-        <p>
-            Before we start playing we want to be transparent with you about
-            our <span class="highlight">data practices and policies</span>
-            and our <span class="highlight">terms of service</span>.
-        </p>
-    </div>
-    <div class="wrapper my">
-        <h2>YOUR DATA & RIGHTS</h2>
-        <ul>
-            <li>
-                We collect and store your <span class="highlight">SteamID</span> and <span class="highlight">IP Address (last used to connect)</span> in our database.
-            </li>
-            <li>
-                We collect this data in order to moderate our servers and provide a safe and enjoyable experience for all players.
-            </li>
-            <li>
-                We also record your <span class="highlight">(voice) chat messages</span> for this purpose.
-            </li>
-            <li>
-                We store this data for as long as our servers are operational.
-            </li>
-        </ul>
-        <p class="mt-s">
-            To request a copy of the data we have on you, or to file a complaint, do not hesitate to contact us at <span class="highlight">{{privacy_email}}</span>
-        </p>
-        <p class="mt-s">
-            To have your data removed from our database, click the "disagree"-button below or type <span class="highlight">/TermsOfService</span> in the chat.
-            <b>Please contact us at <span class="highlight">{{privacy_email}}</span> after removing your data, so we can also remove anonymize it in our moderation system.</b>
-        </p>
-    </div>
-    <div class="wrapper my">
-        <h2>TERMS OF SERVICE</h2>
-    </div>
-    <div class="wrapper my">
-        <h3>RULES</h3>
-        <p>
-            By playing on our servers, you agree to the following rules:
-        </p>
-        <iframe src="https://moderation.experiment.games/rules"
-                style="border: none; width: 100%; height: 500px; margin-top: 0.5em;"></iframe>
-    </div>
-    <div class="wrapper my">
-        <h3>PREMIUM SHOP</h3>
-        <p>
-            If you wish to purchase items from our premium shop, you must also agree to the following conditions.
-        </p>
-        <ul>
-            <li>
-                When you purchase an item in the premium shop, you are granted a license to use it in-game.
-                Since we cannot guarantee the availability of our items or server(s) indefinitely, we can revoke this license at any time.
-            </li>
-            <li>
-                We may change or remove premium shop items at any time and without notice.
-                In such cases, we will do our best to compensate you with a similar item or refund your purchase.
-            </li>
-            <li>
-                You may request a refund for an item within 14 days of purchase, provided you have not used the item in-game.
-            </li>
-        </ul>
-        <p class="mt-s italic">
-            If you would like a refund, please contact us through Discord or email us at
-            <span class="highlight">{{support_email}}</span>.
-            Do not request a chargeback, as this may lead to your account being banned.
-            We will do our best to help you and provide a refund where possible.
-        </p>
-    </div>
-    <div class="wrapper my">
-        <h2>BETA TESTING</h2>
-        <p>
-            Our server is currently in a beta testing. This means:
-        </p>
-        <ul>
-            <li>
-                You may encounter bugs, glitches, and other issues.
-            </li>
-            <li>
-                Please help us by reporting these issues on our GitHub repository:
-                <a href="#"
-                   onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>
-            </li>
-            <li>
-                Your progress can be reset at any time.
-            </li>
-        </ul>
-    </div>
-    <div class="wrapper my">
-        <h2>AGREEMENT</h2>
-        <p>
-            Do you agree to the above terms and our data practices?
-        </p>
-        <button id="agreeButton"
-                class="huge"
-                onclick="console.log('TERMS_AGREED')">
-            I agree
-        </button>
-        <button id="disagreeButton"
-                class="gray"
-                onclick="disagree()">
-            I disagree
-        </button>
-        <div id="disagree-warning"
-             class="hidden">
-            <p>
-                <strong>Beware:</strong> If you disagree to the terms, you will be disconnected from the server and your data will be removed from our database.
-                <span class="highlight">This action is irreversible. You will lose all progress and items you have gained on our servers.</span>
-            </p>
-            <p>
-                To confirm that you want to proceed, enter "delete everything" in the box below and click the button.
-            </p>
-            <input type="text"
-                   id="disagreeInput"
-                   placeholder="Enter 'delete everything'">
-            <button id="disagreeFinalize"
-                    class="gray"
-                    onclick="disagreeFinish()">
-                I disagree to the terms and want my data removed
-            </button>
+
+    <body>
+        <div class="header">
+            <div class="wrapper logo">
+                <!-- <img src="asset://garrysmod/materials/experiment-redux/logo.png"
+                     alt="Experiment Logo"> -->
+                <img src="https://experiment.games/assets/logo.png"
+                     alt="Experiment Logo">
+            </div>
         </div>
-    </div>
 
-    <script>
-        function disagree() {
-            document.getElementById('disagree-warning').classList.remove('hidden');
-            window.scrollTo(0, document.body.scrollHeight);
-        }
+        <div class="content">
+            <div class="wrapper mt mb-2">
+                <h2>WELCOME TO OUR SERVER!</h2>
+                <p>
+                    Thanks for considering to come play on our server! We're excited to have you join us.
+                </p>
+                <p>
+                    Before we start playing we want to be transparent with you about
+                    our <span class="highlight">data practices and policies</span>
+                    and our <span class="highlight">terms of service</span>.
+                </p>
+            </div>
 
-        function disagreeFinish() {
-            var input = document.getElementById('disagreeInput').value;
+            <div class="wrapper mt"
+                 id="summaryTermsSection">
+                <h2>SUMMARY OF TERMS & CONDITIONS</h2>
+                <div class="summary-section">
+                    <ul>
+                        <li>We collect your <span class="highlight">SteamID, IP address, and chat messages</span> for moderation purposes</li>
+                        <li>Your data is stored as long as our servers operate</li>
+                        <li>You can request data removal by typing <span class="highlight nowrap">/TermsOfService</span> and clicking the "disagree" button</li>
+                        <li>Premium shop items are licensed to you, because we cannot provide their availability forever</li>
+                        <li>Refunds available within <span class="highlight nowrap">14 days</span> if item unused</li>
+                        <li>Follow server rules as listed in the full terms and conditions</li>
+                    </ul>
+                </div>
+                <p class="italic">
+                    The above summary is provided for your convenience and is not a substitute for the full Terms of Service.
+                </p>
+            </div>
 
-            if (input === 'delete everything') {
-                console.log('TERMS_DISAGREED');
-            } else {
-                alert('Please enter "delete everything" to confirm');
+            <div class="wrapper">
+                <button id="viewFullTerms"
+                        class="w-full secondary"
+                        onclick="toggleFullTerms()">
+                    View Full Terms & Conditions
+                </button>
+            </div>
+
+            <div id="fullTermsSection"
+                 class="wrapper my hidden">
+                <div class="full-terms">
+                    <h2>YOUR DATA & RIGHTS</h2>
+                    <ul>
+                        <li>
+                            We collect and store your <span class="highlight">SteamID</span> and <span class="highlight">IP Address (last used to connect)</span> in our database.
+                        </li>
+                        <li>
+                            We collect this data in order to moderate our servers and provide a safe and enjoyable experience for all players.
+                        </li>
+                        <li>
+                            We also record your <span class="highlight">(voice) chat messages</span> for this purpose.
+                        </li>
+                        <li>
+                            We store this data for as long as our servers are operational.
+                        </li>
+                    </ul>
+                    <p class="mt">
+                        To request a copy of the data we have on you, or to file a complaint, do not hesitate to contact us at <span class="highlight nowrap">{{privacy_email}}</span>
+                    </p>
+                    <p class="mt">
+                        To have your data removed from our database, click the "disagree"-button below or type <span class="highlight nowrap">/TermsOfService</span> in the chat.
+                        <b>Please contact us at <span class="highlight nowrap">{{privacy_email}}</span> after removing your data, so we can also remove anonymize it in our moderation system.</b>
+                    </p>
+
+                    <h2 class="mt">TERMS OF SERVICE</h2>
+
+                    <h3 class="mt">RULES</h3>
+                    <p>
+                        By playing on our servers, you agree to the following rules:
+                    </p>
+                    <iframe src="https://moderation.experiment.games/rules"
+                            style="border: none; width: 100%; height: 500px;"></iframe>
+
+                    <h3 class="mt">PREMIUM SHOP</h3>
+                    <p>
+                        If you wish to purchase items from our premium shop, you must also agree to the following conditions.
+                    </p>
+                    <ul>
+                        <li>
+                            When you purchase an item in the premium shop, you are granted a license to use it in-game.
+                            Since we cannot guarantee the availability of our items or server(s) indefinitely, we can revoke this license at any time.
+                        </li>
+                        <li>
+                            We may change or remove premium shop items at any time and without notice.
+                            In such cases, we will do our best to compensate you with a similar item or refund your purchase.
+                        </li>
+                        <li>
+                            You may request a refund for an item within 14 days of purchase, provided you have not used the item in-game.
+                        </li>
+                    </ul>
+                    <p class="mt italic">
+                        If you would like a refund, please contact us through Discord or email us at
+                        <span class="highlight nowrap">{{support_email}}</span>.
+                        Do not request a chargeback, as this may lead to your account being banned.
+                        We will do our best to help you and provide a refund where possible.
+                    </p>
+
+                    <h2 class="mt">BETA TESTING</h2>
+                    <p>
+                        Our server is currently in a beta testing. This means:
+                    </p>
+                    <ul>
+                        <li>
+                            You may encounter bugs, glitches, and other issues.
+                        </li>
+                        <li>
+                            Please help us by reporting these issues on our GitHub repository:
+                            <a href="#"
+                               onclick="console.log('OPEN_URL:{{github_url}}')">{{github_url}}</a>
+                        </li>
+                        <li>
+                            Your progress can be reset at any time.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="wrapper">
+                <h2>AGREEMENT</h2>
+                <p>
+                    Do you agree to the above terms and our data practices?
+                </p>
+                <div class="buttons">
+                    <button id="disagreeButton"
+                            class="secondary"
+                            onclick="disagree()">
+                        I disagree
+                    </button>
+                    <button id="agreeButton"
+                            class="huge"
+                            onclick="console.log('TERMS_AGREED')">
+                        I agree
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Overlay -->
+        <div id="modal-overlay"
+             class="modal-overlay">
+            <div class="modal-content">
+                <h3>Data Removal Warning</h3>
+                <p>
+                    <strong>Beware:</strong> If you disagree to the terms, you will be disconnected from the server and your data will be removed from our database.
+                    <span class="highlight">This action is irreversible. You will lose all progress and items you have gained on our servers.</span>
+                </p>
+                <p>
+                    To confirm that you want to proceed, enter "delete everything" in the box below and click the button.
+                </p>
+                <input type="text"
+                       id="disagreeInput"
+                       placeholder="Enter 'delete everything'">
+                <span id="delete-error"
+                      class="hidden highlight">You did not enter 'delete everything' correctly</span>
+
+                <div class="modal-buttons">
+                    <button onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button id="disagreeFinalize"
+                            class="secondary"
+                            onclick="disagreeFinish()">
+                        I disagree to the terms and want my data removed
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleFullTerms() {
+                var summaryTermsSection = document.getElementById('summaryTermsSection');
+                var fullTermsSection = document.getElementById('fullTermsSection');
+                var button = document.getElementById('viewFullTerms');
+                var content = document.querySelector('.content');
+
+                if (fullTermsSection.classList.contains('hidden')) {
+                    fullTermsSection.classList.remove('hidden');
+                    summaryTermsSection.classList.add('hidden');
+                    button.innerHTML = 'Hide Full Terms & Conditions';
+                } else {
+                    fullTermsSection.classList.add('hidden');
+                    summaryTermsSection.classList.remove('hidden');
+                    button.innerHTML = 'View Full Terms & Conditions';
+                }
             }
-        }
-    </script>
 
-    <!-- <script>
-        // Garry's Mod's HTML panel doesn't support Array.from, so the following code only loads in the browser
-        // we do this so we can test HTML in the browser without having to load Garry's Mod. Then in Garry's Mod we can
-        // use the exact same HTML and this code will happily be ignored.
-        if (Array.from) {
-            document.addEventListener('DOMContentLoaded', function (event) {
-                var newPath = "../content/";
+            function disagree() {
+                document.getElementById('modal-overlay').style.display = 'block';
+            }
 
-                document.querySelectorAll('img').forEach(function (img) {
-                    if (img.src.includes('asset://garrysmod/')) {
-                        img.src = img.src.replace('asset://garrysmod/', newPath);
-                    }
-                });
+            function closeModal() {
+                document.getElementById('modal-overlay').style.display = 'none';
+                document.getElementById('disagreeInput').value = '';
+            }
 
-                document.querySelectorAll('style').forEach(function (style) {
-                    var cssText = style.innerHTML;
-                    var assetRegex = /asset:\/\/garrysmod\/(\S+)/g;
+            function disagreeFinish() {
+                var input = document.getElementById('disagreeInput').value;
 
-                    cssText = cssText.replace(assetRegex, function (match, path) {
-                        return newPath + path;
-                    });
+                if (input === 'delete everything') {
+                    console.log('TERMS_DISAGREED');
+                    closeModal();
+                    document.getElementById('delete-error').classList.add('hidden');
+                } else {
+                    document.getElementById('delete-error').classList.remove('hidden');
+                }
+            }
 
-                    style.innerHTML = cssText;
-                });
-            });
-        }
-    </script> -->
-</body>
+            // Close modal when clicking outside of it
+            document.getElementById('modal-overlay').onclick = function (event) {
+                if (event.target === this) {
+                    closeModal();
+                }
+            }
+        </script>
+
+        <!-- <script>
+              // Garry's Mod's HTML panel doesn't support Array.from, so the following code only loads in the browser
+              // we do this so we can test HTML in the browser without having to load Garry's Mod. Then in Garry's Mod we can
+              // use the exact same HTML and this code will happily be ignored.
+              if (Array.from) {
+                  document.addEventListener('DOMContentLoaded', function (event) {
+                      var newPath = "../content/";
+
+                      document.querySelectorAll('img').forEach(function (img) {
+                          if (img.src.includes('asset://garrysmod/')) {
+                              img.src = img.src.replace('asset://garrysmod/', newPath);
+                          }
+                      });
+
+                      document.querySelectorAll('style').forEach(function (style) {
+                          var cssText = style.innerHTML;
+                          var assetRegex = /asset:\/\/garrysmod\/(\S+)/g;
+
+                          cssText = cssText.replace(assetRegex, function (match, path) {
+                              return newPath + path;
+                          });
+
+                          style.innerHTML = cssText;
+                      });
+                  });
+              }
+          </script> -->
+    </body>
 
 </html>
