@@ -5,6 +5,6 @@ cd "$(dirname "$0")"
 
 echo "Compressing all content in the ../content directory"
 
-find ../content -type f -not -path "../content/nemesis_ai/*" -exec bzip2 -f -k {} \;
+find ../content -type f -not -path "../content/nemesis_ai/*" -exec bzip2 -f -k -q {} \;
 
 echo "Compression complete"
