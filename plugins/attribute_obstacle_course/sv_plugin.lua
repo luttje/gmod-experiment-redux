@@ -410,6 +410,26 @@ function PLUGIN:CleanupObstacleCourse(courseID)
 	self:CloseObstacleDoor(courseID)
 end
 
+--- Finds which course a player is participating in
+function PLUGIN:FindPlayerCourse(client)
+	for courseID, courseData in pairs(self.obstacleCourses) do
+		if (courseData.waitingPlayers[client] or courseData.activePlayers[client]) then
+			return courseID
+		end
+	end
+
+	return nil
+end
+
+--- Handle player death - disqualify from obstacle course
+function PLUGIN:PlayerDeath(client, inflictor, attacker)
+	local courseID = self:FindPlayerCourse(client)
+
+	if (courseID) then
+		self:DisqualifyPlayer(client, courseID, "Died during the course")
+	end
+end
+
 function PLUGIN:PlayerDisconnected(client)
 	-- Remove from all obstacle courses
 	for courseID, courseData in pairs(self.obstacleCourses) do
