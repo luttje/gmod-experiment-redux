@@ -36,12 +36,13 @@ fi
 
 UPDATE_MESSAGE="$1"
 
-rm -rf "$SCRIPT_BASEDIR/../maps/exp_c18/workshop-addon/maps/*"
+rm -f "$SCRIPT_BASEDIR/../maps/exp_c18/workshop-addon/maps/"*.bsp
 
 # Copy the latest bsp file to the workshop-addon folder
 LATEST_BSP=$(ls -t "$SCRIPT_BASEDIR/../maps/exp_c18" | grep exp_c18_v | head -n 1)
 
 # Ask for confirmation before continuing (so we don't pack the wrong bsp)
+# VIDE Instructions: https://web.archive.org/web/20250729024922/https://www.tophattwaffle.com/packing-custom-content-using-vide-in-steampipe/
 echo "Did you use VIDE to pack the content into $LATEST_BSP?"
 read -p "Press enter to continue, or Ctrl+C to cancel"
 
