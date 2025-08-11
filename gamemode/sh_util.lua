@@ -1,18 +1,16 @@
 ix.util._existingLibraries = ix.util._existingLibraries or {}
 
-if (SERVER) then
-	--- Can be used to re-enable resource.AddFile's functionality.
-	--- @param path string
-	function ix.util.AddResourceFile(path)
-		-- Not necessary since we moved to publishing content through a workshop addon.
-		-- resource.AddFile(path)
-	end
+--- Can be used to re-enable resource.AddFile's functionality.
+--- @param path string
+function ix.util.AddResourceFile(path)
+	-- Not necessary since we moved to publishing content through a workshop addon.
+	-- resource.AddFile(path)
+end
 
-	--- @param path string
-	function ix.util.AddResourceSingleFile(path)
-		-- Not necessary since we moved to publishing content through a workshop addon.
-		-- resource.AddSingleFile(path)
-	end
+--- @param path string
+function ix.util.AddResourceSingleFile(path)
+	-- Not necessary since we moved to publishing content through a workshop addon.
+	-- resource.AddSingleFile(path)
 end
 
 --- Gets an existing or creates a library that loads object types from a directory.
