@@ -89,6 +89,8 @@ function PLUGIN:CreateStripeCheckoutSessionForCart(client, cartItems, totalPrice
 			["Content-Type"] = "application/x-www-form-urlencoded",
 			["Stripe-Version"] = "2023-10-16"
 		},
+		-- SRCDS doesn't respect the Content-Type header, but does this parameter:
+		type = "application/x-www-form-urlencoded",
 		body = encodePostData(postData),
 		success = function(code, body, headers)
 			if (not IsValid(client) or not client:GetCharacter()) then
