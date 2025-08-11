@@ -12,6 +12,12 @@ class ChatLogObserver
      */
     public function created(ChatLog $chatLog): void
     {
+        $apiKey = config('app.openai.key');
+
+        if (empty($apiKey)) {
+            return;
+        }
+
         // Only queue AI moderation if there's a message to analyze
         if (! empty($chatLog->message)) {
             // Dispatch with a small delay to allow for any immediate processing
@@ -24,6 +30,12 @@ class ChatLogObserver
      */
     public function updated(ChatLog $chatLog): void
     {
+        $apiKey = config('app.openai.key');
+
+        if (empty($apiKey)) {
+            return;
+        }
+
         // If message was added/updated and not yet processed, queue for moderation
         if ($chatLog->wasChanged('message') &&
             ! empty($chatLog->message) &&

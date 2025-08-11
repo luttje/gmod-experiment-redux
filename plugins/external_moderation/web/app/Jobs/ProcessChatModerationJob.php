@@ -26,43 +26,23 @@ class ProcessChatModerationJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::info('Starting AI moderation job', [
-            'chat_log_id' => $this->chatLog->id,
-            'message_preview' => substr($this->chatLog->message ?? '', 0, 100),
-            'chat_type' => $this->chatLog->chat_type,
-            'rank' => $this->chatLog->rank,
-            'flagged_at' => $this->chatLog->flagged_at,
-            'moderated_at' => $this->chatLog->moderated_at,
-        ]);
+        $apiKey = config('app.openai.key');
+
+        if (empty($apiKey)) {
+            // If no key is setup, we don't do any automated moderation/flagging.
+            return;
+        }
 
         try {
             // Skip if already processed
             if ($this->chatLog->flagged_at !== null || $this->chatLog->moderated_at !== null) {
-                Log::info('Skipping already processed chat log', [
-                    'chat_log_id' => $this->chatLog->id,
-                    'flagged_at' => $this->chatLog->flagged_at,
-                    'moderated_at' => $this->chatLog->moderated_at,
-                ]);
-
                 return;
             }
 
             // Skip if no message to analyze (e.g., voice chat not yet transcribed)
             if (empty($this->chatLog->message)) {
-                Log::info('Skipping chat log with no message', [
-                    'chat_log_id' => $this->chatLog->id,
-                    'message_length' => strlen($this->chatLog->message ?? ''),
-                ]);
-
                 return;
             }
-
-            Log::info('Calling AI service for moderation', [
-                'chat_log_id' => $this->chatLog->id,
-                'message' => $this->chatLog->message,
-                'chat_type' => $this->chatLog->chat_type,
-                'rank' => $this->chatLog->rank,
-            ]);
 
             // Get AI moderation result
             $result = AiService::doChatModeration(
@@ -71,17 +51,7 @@ class ProcessChatModerationJob implements ShouldQueue
                 $this->chatLog->rank
             );
 
-            Log::info('AI moderation result received', [
-                'chat_log_id' => $this->chatLog->id,
-                'result' => $result,
-            ]);
-
             $this->processAiResult($result);
-
-            Log::info('AI moderation job completed successfully', [
-                'chat_log_id' => $this->chatLog->id,
-            ]);
-
         } catch (\Exception $e) {
             Log::error('AI moderation failed', [
                 'chat_log_id' => $this->chatLog->id,
@@ -103,16 +73,8 @@ class ProcessChatModerationJob implements ShouldQueue
         $ruleId = $result['rule_id'];
         $reasoning = $result['reasoning'];
 
-        Log::info('Processing AI result', [
-            'chat_log_id' => $this->chatLog->id,
-            'classification' => $classification,
-            'rule_id' => $ruleId,
-            'reasoning' => $reasoning,
-        ]);
-
         switch ($classification) {
             case 'SAFE':
-                Log::info('Marking chat log as safe', ['chat_log_id' => $this->chatLog->id]);
                 // Mark as automatically moderated (safe)
                 $this->chatLog->update([
                     'moderated_at' => now(),
@@ -154,12 +116,6 @@ class ProcessChatModerationJob implements ShouldQueue
 
     protected function canAiEnforce(int $ruleId): bool
     {
-        Log::info('Checking if AI can enforce rule', [
-            'chat_log_id' => $this->chatLog->id,
-            'rule_id' => $ruleId,
-            'steam_id' => $this->chatLog->steam_id,
-        ]);
-
         $rules = require app_path('Data/Rules.php');
         $rule = $rules[$ruleId] ?? null;
 
@@ -177,13 +133,6 @@ class ProcessChatModerationJob implements ShouldQueue
             $this->chatLog->steam_id,
             (string) $ruleId
         );
-
-        Log::info('Escalation level determined', [
-            'chat_log_id' => $this->chatLog->id,
-            'rule_id' => $ruleId,
-            'next_escalation_level' => $nextEscalationLevel,
-            'total_escalations' => count($rule['escalations']),
-        ]);
 
         $escalation = $rule['escalations'][$nextEscalationLevel] ?? null;
 
