@@ -16,7 +16,7 @@
     <style>
         @font-face {
             font-family: "LightsOut";
-            src: url(http://fastdl.experiment.games/resource/fonts/lightout.woff)
+            src: url(assets/lightout.woff)
         }
 
         * {
@@ -97,6 +97,10 @@
             display: none;
         }
 
+        .inline-block {
+            display: inline-block;
+        }
+
         .my {
             margin-top: 2em;
             margin-bottom: 2em;
@@ -152,7 +156,7 @@
 
     @foreach ($rules as $rule)
     <li class="mt-s">
-        <h3 class="font-bold">{{ $rule['title'] }}</h3>
+        <h3 class="font-bold inline-block">{{ $rule['title'] }}</h3>
         <p>{{ $rule['description'] }}</p>
     </li>
     @endforeach
