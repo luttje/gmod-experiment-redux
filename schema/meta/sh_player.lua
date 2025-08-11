@@ -92,7 +92,9 @@ function META:IsObjectLimited(objectType, limit)
 		return false
 	end
 
-	self:PruneInvalidObjects()
+	if (SERVER) then
+		self:PruneInvalidObjects()
+	end
 
 	local limitedObjects = character:GetVar("limitedObjects", {})
 	local objects = limitedObjects[objectType] or {}
