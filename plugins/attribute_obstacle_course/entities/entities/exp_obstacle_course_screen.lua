@@ -7,8 +7,8 @@ ENT.PrintName = "Obstacle Course Screen"
 ENT.Author = "Experiment Redux"
 ENT.Spawnable = false
 
-TEST_QUEUE_DATA = {}
-TEST_SURVIVORS_DATA = {}
+TEST_QUEUE_DATA = TEST_QUEUE_DATA or {}
+TEST_SURVIVORS_DATA = TEST_SURVIVORS_DATA or {}
 
 local function GET_RANDOM_NAME()
 	local names = {
@@ -279,58 +279,72 @@ else
 			transitionOffset = -contentHeight * transitionProgress
 		end
 
-		-- Helper function to draw a page of survivors
+		-- Define the drawable area bounds
+		local drawAreaY = y + headerHeight + padding
+		local drawAreaHeight = contentHeight
+		local drawAreaBottom = drawAreaY + drawAreaHeight
+
+		-- Helper function to draw a page of survivors with bounds checking
 		local function DrawSurvivorsPage(pageNum, offsetY)
 			local startIndex = (pageNum - 1) * maxVisibleLines + 1
 			local endIndex = math.min(startIndex + maxVisibleLines - 1, #allPlayers)
 
-			local yPos = y + headerHeight + padding + offsetY
+			local yPos = drawAreaY + offsetY
 			for i = startIndex, endIndex do
 				if (allPlayers[i]) then
 					local player = allPlayers[i]
+					local itemTop = yPos
+					local itemBottom = yPos + lineHeight
 
-					surface.SetDrawColor(player.bgColor)
-					surface.DrawRect(x, yPos, w, lineHeight)
+					-- Calculate visibility factor based on how much of the item is within bounds
+					local visibilityFactor = 1
+					local drawHeight = lineHeight
+					local drawY = yPos
 
-					if (player.position ~= "") then
-						draw.SimpleText(player.position, "DermaDefault", x + 5, yPos + lineHeight * .5,
-							Color(255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-						draw.SimpleText(player.name, "DermaDefault", x + 35, yPos + lineHeight * .5,
-							Color(255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-					else
-						draw.SimpleText(player.name, "DermaDefault", x + 5, yPos + lineHeight * .5,
-							Color(255, 255, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+					-- Check if item is completely outside bounds
+					if (itemBottom < drawAreaY or itemTop > drawAreaBottom) then
+						visibilityFactor = 0
+						-- Check if item is partially outside bounds
+					elseif (itemTop < drawAreaY or itemBottom > drawAreaBottom) then
+						-- Calculate how much of the item is visible
+						local visibleTop = math.max(itemTop, drawAreaY)
+						local visibleBottom = math.min(itemBottom, drawAreaBottom)
+						local visibleHeight = math.max(0, visibleBottom - visibleTop)
+
+						visibilityFactor = visibleHeight / lineHeight
+						drawHeight = visibleHeight
+						drawY = visibleTop
 					end
 
-					draw.SimpleText(player.time, "DermaDefault", x + w - 5, yPos + lineHeight * .5,
-						Color(255, 255, 255), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+					-- Only draw if there's something visible
+					if (visibilityFactor > 0) then
+						local alpha = math.floor(player.bgColor.a * visibilityFactor)
+						local textAlpha = math.floor(255 * visibilityFactor)
+
+						surface.SetDrawColor(player.bgColor.r, player.bgColor.g, player.bgColor.b, alpha)
+						surface.DrawRect(x, drawY, w, drawHeight)
+
+						-- Draw text with adjusted alpha, but only if visibility is reasonable
+						if (visibilityFactor > 0.3) then -- Only show text if at least 30% visible
+							if (player.position ~= "") then
+								draw.SimpleText(player.position, "DermaDefault", x + 5, yPos + lineHeight * .5,
+									Color(255, 255, 255, textAlpha), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+								draw.SimpleText(player.name, "DermaDefault", x + 35, yPos + lineHeight * .5,
+									Color(255, 255, 255, textAlpha), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+							else
+								draw.SimpleText(player.name, "DermaDefault", x + 5, yPos + lineHeight * .5,
+									Color(255, 255, 255, textAlpha), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+							end
+
+							draw.SimpleText(player.time, "DermaDefault", x + w - 5, yPos + lineHeight * .5,
+								Color(255, 255, 255, textAlpha), TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+						end
+					end
 
 					yPos = yPos + lineHeight + 2
 				end
 			end
 		end
-
-		-- Create stencil mask for clipping
-		render.ClearStencil()
-		render.SetStencilEnable(true)
-
-		render.SetStencilWriteMask(1)
-		render.SetStencilTestMask(1)
-		render.SetStencilReferenceValue(1)
-		render.SetStencilCompareFunction(STENCIL_ALWAYS)
-		render.SetStencilPassOperation(STENCIL_REPLACE)
-		render.SetStencilFailOperation(STENCIL_KEEP)
-		render.SetStencilZFailOperation(STENCIL_KEEP)
-
-		render.OverrideDepthEnable(true, false)
-		render.OverrideColorWriteEnable(true, false)
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.DrawRect(x, y + headerHeight, w, contentHeight)
-		render.OverrideColorWriteEnable(false, true)
-		render.OverrideDepthEnable(false, true)
-
-		render.SetStencilCompareFunction(STENCIL_EQUAL)
-		render.SetStencilPassOperation(STENCIL_KEEP)
 
 		DrawSurvivorsPage(self.survivorsCurrentPage, transitionOffset)
 
@@ -339,8 +353,6 @@ else
 			if (nextPage > totalPages) then nextPage = 1 end
 			DrawSurvivorsPage(nextPage, transitionOffset + contentHeight)
 		end
-
-		render.SetStencilEnable(false)
 
 		return y + h
 	end
@@ -413,12 +425,22 @@ else
 			transitionOffset = -w * transitionProgress
 		end
 
+		-- Define the drawable area bounds for queue
+		local drawAreaX = x
+		local drawAreaY = y + headerHeight + padding
+		local drawAreaWidth = w - padding * 2
+		local drawAreaHeight = contentHeight
+		local drawAreaRight = drawAreaX + drawAreaWidth
+		local drawAreaBottom = drawAreaY + drawAreaHeight + (padding * 2) -- (this padding * 2 is just eyeballing it)
+
 		local function DrawQueuePage(pageNum, offsetX)
 			local startIndex = (pageNum - 1) * maxPlayersPerPage + 1
 			local endIndex = math.min(startIndex + maxPlayersPerPage - 1, #waitingPlayers)
 
-			local currentX = x + offsetX
-			local currentY = y + headerHeight + padding
+			local currentX = drawAreaX + offsetX
+			local currentY = drawAreaY
+
+			surface.SetFont("DermaDefault")
 
 			for i = startIndex, endIndex do
 				local name = waitingPlayers[i]
@@ -428,41 +450,75 @@ else
 				local boxWidth = textWidth + itemPadding * 2
 				local boxHeight = lineHeight
 
-				if (currentX + boxWidth > x + w - padding + offsetX and currentX > x + padding + offsetX) then
-					currentX = x + offsetX
+				if (currentX + boxWidth > drawAreaRight + offsetX and currentX > drawAreaX + offsetX) then
+					currentX = drawAreaX + offsetX
 					currentY = currentY + boxHeight + itemSpacing
 				end
 
-				surface.SetDrawColor(100, 100, 100, 80)
-				surface.DrawRect(currentX, currentY, boxWidth, boxHeight)
+				local itemLeft = currentX
+				local itemRight = currentX + boxWidth
+				local itemTop = currentY
+				local itemBottom = currentY + boxHeight
 
-				draw.SimpleText(name, "DermaDefault", currentX + itemPadding, currentY + boxHeight * .5,
-					Color(200, 200, 200), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+				-- Calculate visibility factors for both X and Y axes
+				local xVisibility = 1
+				local yVisibility = 1
+				local drawWidth = boxWidth
+				local drawHeight = boxHeight
+				local drawX = currentX
+				local drawY = currentY
+
+				-- Check X bounds (horizontal transition)
+				if (itemRight < drawAreaX or itemLeft > drawAreaRight) then
+					xVisibility = 0
+				elseif (itemLeft < drawAreaX or itemRight > drawAreaRight) then
+					local visibleLeft = math.max(itemLeft, drawAreaX)
+					local visibleRight = math.min(itemRight, drawAreaRight)
+					local visibleWidth = math.max(0, visibleRight - visibleLeft)
+					xVisibility = visibleWidth / boxWidth
+					drawWidth = visibleWidth
+					drawX = visibleLeft
+				end
+
+				-- Check Y bounds (vertical overflow)
+				if (itemBottom < drawAreaY or itemTop > drawAreaBottom) then
+					yVisibility = 0
+				elseif (itemTop < drawAreaY or itemBottom > drawAreaBottom) then
+					local visibleTop = math.max(itemTop, drawAreaY)
+					local visibleBottom = math.min(itemBottom, drawAreaBottom)
+					local visibleHeight = math.max(0, visibleBottom - visibleTop)
+					yVisibility = visibleHeight / boxHeight
+					drawHeight = visibleHeight
+					drawY = visibleTop
+				end
+
+				local totalVisibility = xVisibility * yVisibility
+
+				-- Only draw if there's something visible
+				if (totalVisibility > 0) then
+					local alpha = math.floor(80 * totalVisibility) -- Base alpha of 80
+					local textAlpha = math.floor(200 * totalVisibility) -- Base alpha of 200
+
+					-- Draw background with adjusted alpha and size
+					surface.SetDrawColor(100, 100, 100, alpha)
+					surface.DrawRect(drawX, drawY, drawWidth, drawHeight)
+
+					-- Only draw text if visibility is reasonable and within original item bounds
+					if (totalVisibility > 0.4 and drawY >= currentY and drawY + drawHeight <= currentY + boxHeight) then
+						local textX = math.max(drawX, currentX + itemPadding)
+						local textY = currentY + boxHeight * .5
+
+						-- Make sure text position is within drawable area
+						if (textX < drawAreaRight and textY >= drawAreaY and textY <= drawAreaBottom) then
+							draw.SimpleText(name, "DermaDefault", textX, textY,
+								Color(200, 200, 200, textAlpha), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+						end
+					end
+				end
 
 				currentX = currentX + boxWidth + itemSpacing
 			end
 		end
-
-		render.ClearStencil()
-		render.SetStencilEnable(true)
-
-		render.SetStencilWriteMask(1)
-		render.SetStencilTestMask(1)
-		render.SetStencilReferenceValue(1)
-		render.SetStencilCompareFunction(STENCIL_ALWAYS)
-		render.SetStencilPassOperation(STENCIL_REPLACE)
-		render.SetStencilFailOperation(STENCIL_KEEP)
-		render.SetStencilZFailOperation(STENCIL_KEEP)
-
-		render.OverrideDepthEnable(true, false)
-		render.OverrideColorWriteEnable(true, false)
-		surface.SetDrawColor(255, 255, 255, 255)
-		surface.DrawRect(x, y, w, h)
-		render.OverrideColorWriteEnable(false, true)
-		render.OverrideDepthEnable(false, true)
-
-		render.SetStencilCompareFunction(STENCIL_EQUAL)
-		render.SetStencilPassOperation(STENCIL_KEEP)
 
 		DrawQueuePage(self.queueCurrentPage, transitionOffset)
 
@@ -471,8 +527,6 @@ else
 			if (nextPage > totalPages) then nextPage = 1 end
 			DrawQueuePage(nextPage, transitionOffset + w)
 		end
-
-		render.SetStencilEnable(false)
 	end
 
 	ENT.CameraRenderTargets = ENT.CameraRenderTargets or {}
