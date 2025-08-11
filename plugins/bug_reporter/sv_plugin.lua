@@ -22,7 +22,7 @@ function PLUGIN:OnLoaded()
 	PERSONAL_ACCESS_TOKEN = variables.PERSONAL_ACCESS_TOKEN
 	GITHUB_OWNER_NAME = variables.GITHUB_OWNER_NAME
 	GITHUB_REPO_NAME = variables.GITHUB_REPO_NAME
-	ISSUE_PREFIX = variables.ISSUE_PREFIX
+	ISSUE_PREFIX = variables.ISSUE_PREFIX or ""
 
 	if (not PERSONAL_ACCESS_TOKEN or not GITHUB_OWNER_NAME or not GITHUB_REPO_NAME or not ISSUE_PREFIX) then
 		ix.util.SchemaErrorNoHalt("Missing required environment variables in the bug reporter .env file.")
