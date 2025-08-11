@@ -220,6 +220,9 @@ end
 function Schema:PlayerSpawn(client)
 	client:SetLocalVar("ragdoll", nil)
 
+	-- Disable zooming
+	client:SetCanZoom(false)
+
 	-- Reset these so they don't interfere the next time the player dies
 	client.expCorpseCharacter = nil
 	client.expDropMode = nil
