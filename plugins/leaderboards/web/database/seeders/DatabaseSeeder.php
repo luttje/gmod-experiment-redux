@@ -22,9 +22,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        if (app()->isProduction()) {
+            // In production, we don't seed the database.
+            return;
+        }
+
         User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
+            // Our user migrations don't have these anymore:
+            // 'name' => 'Admin User',
+            // 'email' => 'admin@example.com',
         ]);
 
         $this->call([
