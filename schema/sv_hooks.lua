@@ -8,6 +8,11 @@ function Schema:GetGameDescription()
 	return Schema.name
 end
 
+function Schema:PlayerSpray(client)
+	-- Prevent player spraying their spray
+	return true
+end
+
 function Schema:PrePlayerLoadedCharacter(client, curChar, prevChar)
 	client.expLastCharacterLoadedAt = CurTime()
 
