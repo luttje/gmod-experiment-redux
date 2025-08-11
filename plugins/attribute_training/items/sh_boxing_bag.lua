@@ -25,8 +25,8 @@ if (CLIENT) then
 end
 
 if (SERVER) then
-	resource.AddFile("materials/models/experiment-redux/boxing_bag/Material.vmt")
-	resource.AddFile("models/experiment-redux/boxing_bag.mdl")
+	ix.util.AddResourceFile("materials/models/experiment-redux/boxing_bag/Material.vmt")
+	ix.util.AddResourceFile("models/experiment-redux/boxing_bag.mdl")
 end
 
 ITEM.functions.Place = {

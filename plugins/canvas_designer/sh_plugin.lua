@@ -80,7 +80,7 @@ function PLUGIN:RegisterSpriteType(spriteData)
 	if (SERVER) then
 		local path = spriteData.icon.material
 
-		resource.AddFile("materials/" .. path)
+		ix.util.AddResourceFile("materials/" .. path)
 	end
 
 	spriteData.icon.material = Material(spriteData.icon.material)

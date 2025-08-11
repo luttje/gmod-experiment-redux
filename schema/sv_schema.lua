@@ -5,14 +5,17 @@ util.AddNetworkString("expClearEntityInfoTooltip")
 util.AddNetworkString("expAmmoUnequip")
 util.AddNetworkString("expDisconnectPenalty")
 
-resource.AddFile("materials/experiment-redux/symbol_background.vmt")
-resource.AddFile("materials/experiment-redux/logo.png")
-resource.AddFile("materials/experiment-redux/arrow-down.png")
-resource.AddFile("materials/experiment-redux/check.png")
-resource.AddFile("materials/experiment-redux/close.png")
+ix.util.AddResourceFile("materials/experiment-redux/symbol_background.vmt")
+ix.util.AddResourceFile("materials/experiment-redux/logo.png")
+ix.util.AddResourceFile("materials/experiment-redux/arrow-down.png")
+ix.util.AddResourceFile("materials/experiment-redux/check.png")
+ix.util.AddResourceFile("materials/experiment-redux/close.png")
 
-resource.AddFile("materials/experiment-redux/mission_available.png")
-resource.AddFile("materials/experiment-redux/mission_unavailable.png")
+ix.util.AddResourceFile("materials/experiment-redux/mission_available.png")
+ix.util.AddResourceFile("materials/experiment-redux/mission_unavailable.png")
+
+-- Experiment Official Server Content (https://steamcommunity.com/sharedfiles/filedetails/?id=3546782165)
+resource.AddWorkshop("3546782165")
 
 -- JersonGaming's Model/Real RNG Ammo Boxes (https://steamcommunity.com/sharedfiles/filedetails/?id=1741790902)
 -- Higher quality ammo boxes, they replace the default ones.
@@ -21,10 +24,10 @@ resource.AddWorkshop("1741790902")
 -- Aperture Scientists Players (https://steamcommunity.com/sharedfiles/filedetails/?id=634829400)
 -- Scientists for citizens, they can be used to create scientist monsters.
 resource.AddWorkshop("634829400")
-resource.AddFile("materials/models/experiment-redux/characters/guardian_scientist_sheet.vmt")
-resource.AddFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody1.vmt")
-resource.AddFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody2.vmt")
-resource.AddFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody3.vmt")
+ix.util.AddResourceFile("materials/models/experiment-redux/characters/guardian_scientist_sheet.vmt")
+ix.util.AddResourceFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody1.vmt")
+ix.util.AddResourceFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody2.vmt")
+ix.util.AddResourceFile("materials/models/experiment-redux/characters/guardian_scientist_sheet_bloody3.vmt")
 
 -- We send the generated HTML and random content to the client so it can be loaded only when its needed.
 AddCSLuaFile("content/cl_html.generated.lua")

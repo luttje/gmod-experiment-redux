@@ -9,8 +9,8 @@ util.AddNetworkString("expSprayCanDesignSelector")
 util.AddNetworkString("expSprayCanLoadDesign")
 util.AddNetworkString("expSprayCanClearDesign")
 
-resource.AddFile("materials/models/spraycan3.vmt")
-resource.AddFile("models/sprayca2.mdl")
+ix.util.AddResourceFile("materials/models/spraycan3.vmt")
+ix.util.AddResourceFile("models/sprayca2.mdl")
 
 function PLUGIN:ValidateDesign(client, item, canvasWidth, canvasHeight, name, jsonData)
 	if (not item or item:GetOwner() ~= client) then

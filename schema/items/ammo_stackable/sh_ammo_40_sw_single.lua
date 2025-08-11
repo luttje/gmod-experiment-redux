@@ -11,6 +11,6 @@ ITEM.description = "A single .40 S&W cartridge"
 ITEM.chanceToScavenge = Schema.RARITY_UNCOMMON
 
 if (SERVER) then
-	resource.AddFile("models/experiment-redux/ammo/45acp.mdl")
-	resource.AddFile("materials/models/experiment-redux/ammo/45acp.vmt")
+  ix.util.AddResourceFile("models/experiment-redux/ammo/45acp.mdl")
+  ix.util.AddResourceFile("materials/models/experiment-redux/ammo/45acp.vmt")
 end

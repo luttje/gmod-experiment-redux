@@ -1,0 +1,13 @@
+{
+    "title": "Experiment Official Server Content",
+    "type": "ServerContent",
+    "tags": [
+        "roleplay",
+        "realism"
+    ],
+    "ignore": [
+        ".vscode*",
+        ".gitignore",
+        "content.jpg"
+    ]
+}

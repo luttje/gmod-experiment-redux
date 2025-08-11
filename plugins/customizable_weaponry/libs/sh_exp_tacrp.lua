@@ -53,7 +53,7 @@ if (SERVER) then
 					and filePath:sub(("content/"):len() + 1)
 					or filePath
 
-				resource.AddSingleFile(filePathWithoutContent)
+				ix.util.AddResourceSingleFile(filePathWithoutContent)
 			end
 		end
 

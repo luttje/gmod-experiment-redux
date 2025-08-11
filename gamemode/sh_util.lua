@@ -1,5 +1,20 @@
 ix.util._existingLibraries = ix.util._existingLibraries or {}
 
+if (SERVER) then
+	--- Can be used to re-enable resource.AddFile's functionality.
+	--- @param path string
+	function ix.util.AddResourceFile(path)
+		-- Not necessary since we moved to publishing content through a workshop addon.
+		-- resource.AddFile(path)
+	end
+
+	--- @param path string
+	function ix.util.AddResourceSingleFile(path)
+		-- Not necessary since we moved to publishing content through a workshop addon.
+		-- resource.AddSingleFile(path)
+	end
+end
+
 --- Gets an existing or creates a library that loads object types from a directory.
 --- For example: Schema.buff, Schema.achievement, Schema.perk
 --- which would then be loaded from the buffs, achievements, and perks directories.
@@ -50,18 +65,18 @@ function ix.util.GetOrCreateCommonLibrary(libraryName, constructor)
 
 			if (SERVER) then
 				if (LIBRARY.backgroundImage) then
-					resource.AddFile("materials/" .. LIBRARY.backgroundImage .. ".vmt")
+					ix.util.AddResourceFile("materials/" .. LIBRARY.backgroundImage .. ".vmt")
 				end
 
 				if (isstring(LIBRARY.foregroundImage)) then
-					resource.AddFile("materials/" .. LIBRARY.foregroundImage .. ".vmt")
+					ix.util.AddResourceFile("materials/" .. LIBRARY.foregroundImage .. ".vmt")
 				elseif (istable(LIBRARY.foregroundImage)) then
 					local spritesheetData = LIBRARY.foregroundImage
 
 					if (spritesheetData.spritesheet:EndsWith(".png")) then
-						resource.AddFile("materials/" .. spritesheetData.spritesheet)
+						ix.util.AddResourceFile("materials/" .. spritesheetData.spritesheet)
 					else
-						resource.AddFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
+						ix.util.AddResourceFile("materials/" .. spritesheetData.spritesheet .. ".vmt")
 					end
 				end
 			else

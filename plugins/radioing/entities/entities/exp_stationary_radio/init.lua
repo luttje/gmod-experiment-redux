@@ -4,35 +4,35 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
 
-resource.AddSingleFile("materials/sprites/redglow8.vmt")
+ix.util.AddResourceSingleFile("materials/sprites/redglow8.vmt")
 
 function ENT:Initialize()
-    self:SetModel("models/props_lab/citizenradio.mdl")
+	self:SetModel("models/props_lab/citizenradio.mdl")
 
-    self:SetMoveType(MOVETYPE_VPHYSICS)
-    self:PhysicsInit(SOLID_VPHYSICS)
-    self:SetUseType(SIMPLE_USE)
-    self:SetHealth(25)
-    self:SetSolid(SOLID_VPHYSICS)
+	self:SetMoveType(MOVETYPE_VPHYSICS)
+	self:PhysicsInit(SOLID_VPHYSICS)
+	self:SetUseType(SIMPLE_USE)
+	self:SetHealth(25)
+	self:SetSolid(SOLID_VPHYSICS)
 
-    local physicsObject = self:GetPhysicsObject()
+	local physicsObject = self:GetPhysicsObject()
 
-    if (IsValid(physicsObject)) then
-        physicsObject:Wake()
-        physicsObject:EnableMotion(true)
-    end
+	if (IsValid(physicsObject)) then
+		physicsObject:Wake()
+		physicsObject:EnableMotion(true)
+	end
 end
 
 function ENT:SetupRadio(client, item)
-    self:SetItemID(item.uniqueID)
-    self.expClient = client
-    self.expItemID = item.id
+	self:SetItemID(item.uniqueID)
+	self.expClient = client
+	self.expItemID = item.id
 
-    self:SetFrequency(item:GetData("frequency", "101.1"))
+	self:SetFrequency(item:GetData("frequency", "101.1"))
 
-    if (item.OnEntityCreated) then
-        item:OnEntityCreated(self)
-    end
+	if (item.OnEntityCreated) then
+		item:OnEntityCreated(self)
+	end
 end
 
 function ENT:ChangeFrequency(frequency)
@@ -57,7 +57,7 @@ function ENT:OnTakeDamage(damageInfo)
 	self:SetHealth(math.max(self:Health() - damageInfo:GetDamage(), 0))
 
 	if (self:Health() <= 0) then
-        self:RemoveWithEffect()
+		self:RemoveWithEffect()
 	end
 end
 
@@ -74,22 +74,22 @@ function ENT:OnOptionSelected(client, option, data)
 		local character = client:GetCharacter()
 		local inventory = character:GetInventory()
 		inventory:Add(self.expItemID)
-        self:Remove()
-    elseif (option == L("setFrequency", client)) then
-        if (Schema.util.Throttle("SetFrequency", 2, client)) then
+		self:Remove()
+	elseif (option == L("setFrequency", client)) then
+		if (Schema.util.Throttle("SetFrequency", 2, client)) then
 			client:Notify("You must wait a moment before setting the frequency again!")
-            return
-        end
+			return
+		end
 
 		local frequency = data
-        local success, fault = PLUGIN:ValidateFrequency(frequency)
+		local success, fault = PLUGIN:ValidateFrequency(frequency)
 
-        if (not success) then
-            return client:Notify(fault)
-        end
+		if (not success) then
+			return client:Notify(fault)
+		end
 
 		self:ChangeFrequency(frequency)
-        hook.Run("PlayerSetFrequency", client, frequency, radio)
+		hook.Run("PlayerSetFrequency", client, frequency, radio)
 
 		client:Notify("You have set the frequency to " .. frequency .. ".")
 	elseif (option == L("turnOff", client)) then

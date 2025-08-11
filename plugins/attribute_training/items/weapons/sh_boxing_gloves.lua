@@ -10,8 +10,8 @@ ITEM.description = "A pair of boxing gloves for stylish punching, perfect for tr
 ITEM.chanceToScavenge = Schema.RARITY_GIGA_RARE
 
 if (SERVER) then
-	resource.AddFile("materials/models/boxing_gloves.vmt")
-	resource.AddFile("materials/models/weapons/boxing_gloves.vmt")
-	resource.AddFile("models/left_boxing_glove.mdl")
-	resource.AddFile("models/right_boxing_glove.mdl")
+	ix.util.AddResourceFile("materials/models/boxing_gloves.vmt")
+	ix.util.AddResourceFile("materials/models/weapons/boxing_gloves.vmt")
+	ix.util.AddResourceFile("models/left_boxing_glove.mdl")
+	ix.util.AddResourceFile("models/right_boxing_glove.mdl")
 end

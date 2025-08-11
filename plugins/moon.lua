@@ -5,7 +5,7 @@ PLUGIN.author = "Experiment Redux"
 PLUGIN.description = "Draws an infinitely far away moon in the skybox."
 
 if (SERVER) then
-	resource.AddFile("materials/experiment-redux/moon.vmt")
+	ix.util.AddResourceFile("materials/experiment-redux/moon.vmt")
 
 	function PLUGIN:InitPostEntity()
 		local sun = ents.FindByClass("env_sun")[1]
@@ -25,12 +25,12 @@ if (SERVER) then
 end
 
 ix.config.Add("moonSize", 4000, "The size of the moon.", nil, {
-	data = {min = 0, max = 10000},
+	data = { min = 0, max = 10000 },
 	category = "moon"
 })
 
 ix.config.Add("moonDistance", 27000, "The distance of the moon from the player.", nil, {
-	data = {min = 1, max = 27000},
+	data = { min = 1, max = 27000 },
 	category = "moon"
 })
 

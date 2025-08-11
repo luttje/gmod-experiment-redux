@@ -2,9 +2,9 @@ util.AddNetworkString("expDoorMenu")
 util.AddNetworkString("expDoorPermission")
 util.AddNetworkString("expDoorPickupProtector")
 
-resource.AddFile("models/experiment-redux/door_protector_basic.mdl")
-resource.AddFile("materials/models/experiment-redux/door-protectors/door_protector_basic.vmt")
-resource.AddFile("materials/experiment-redux/electricity.png")
+ix.util.AddResourceFile("models/experiment-redux/door_protector_basic.mdl")
+ix.util.AddResourceFile("materials/models/experiment-redux/door-protectors/door_protector_basic.vmt")
+ix.util.AddResourceFile("materials/experiment-redux/electricity.png")
 
 ix.log.AddType("lostdoor", function(client, ...)
 	return Format("%s has lost a door.", client:Name())

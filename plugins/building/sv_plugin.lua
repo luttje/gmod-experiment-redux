@@ -2,8 +2,8 @@ local PLUGIN = PLUGIN
 
 util.AddNetworkString("ixBuildingRequestBuildStructure")
 
-resource.AddFile("materials/experiment-redux/blueprint.png")
-resource.AddFile("materials/experiment-redux/replacements/clipboard.vmt")
+ix.util.AddResourceFile("materials/experiment-redux/blueprint.png")
+ix.util.AddResourceFile("materials/experiment-redux/replacements/clipboard.vmt")
 
 net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 	local position = net.ReadVector()
@@ -29,16 +29,16 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 
 	local structures = ents.FindByClass("exp_structure")
 
-    for _, structure in ipairs(structures) do
-        local structureBuilder = structure:GetBuilder()
+	for _, structure in ipairs(structures) do
+		local structureBuilder = structure:GetBuilder()
 
-        if (IsValid(structureBuilder) and structureBuilder == client and structure:GetUnderConstruction()) then
-            client:Notify("You are already building a structure. Finish that first.")
-            return
-        end
-    end
+		if (IsValid(structureBuilder) and structureBuilder == client and structure:GetUnderConstruction()) then
+			client:Notify("You are already building a structure. Finish that first.")
+			return
+		end
+	end
 
-    local isPlacementValid, otherStructureOrError = PLUGIN:GetPlacementValid(client, position, angles)
+	local isPlacementValid, otherStructureOrError = PLUGIN:GetPlacementValid(client, position, angles)
 
 	if (not isPlacementValid) then
 		client:Notify(otherStructureOrError)
@@ -49,7 +49,7 @@ net.Receive("ixBuildingRequestBuildStructure", function(_, client)
 		position = position + weapon.ixItem.structureOffset
 	end
 
-    local structure = PLUGIN:BuildStructure(client, item, position, angles)
+	local structure = PLUGIN:BuildStructure(client, item, position, angles)
 	local otherStructureGroundLevel = IsValid(otherStructureOrError) and otherStructureOrError:GetGroundLevel() or 0
 	structure:SetGroundLevel(otherStructureGroundLevel + 1)
 
@@ -87,7 +87,7 @@ function PLUGIN:EntityTakeDamage(entity, damageInfo)
 	end
 
 	if (not entity.IsStructureOrPart) then
-        -- Crowbars should do extra damage to structures and bolt generators, but minimal damage to anything else
+		-- Crowbars should do extra damage to structures and bolt generators, but minimal damage to anything else
 		if (weapon.ixItem.uniqueID == "crowbar") then
 			if (entity.IsBoltGenerator) then
 				damageInfo:ScaleDamage(1.1)
@@ -115,9 +115,9 @@ end
 
 -- Let's allow users to use structures as doors
 function PLUGIN:PlayerUse(client, entity)
-    if (not entity.IsStructureOrPart) then
-        return
-    end
+	if (not entity.IsStructureOrPart) then
+		return
+	end
 
 	local parent = entity:GetParent()
 

@@ -2,7 +2,7 @@ AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
 
-resource.AddSingleFile("materials/sprites/redglow8.vmt")
+ix.util.AddResourceSingleFile("materials/sprites/redglow8.vmt")
 
 function ENT:Initialize()
 	self:SetModel("models/props_lab/citizenradio.mdl")
@@ -45,7 +45,7 @@ function ENT:OnTakeDamage(damageInfo)
 	self:SetHealth(math.max(self:Health() - damageInfo:GetDamage(), 0))
 
 	if (self:Health() <= 0) then
-        self:RemoveWithEffect()
+		self:RemoveWithEffect()
 	end
 end
 

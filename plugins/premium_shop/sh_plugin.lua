@@ -66,7 +66,7 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 	if (SERVER) then
 		local path = packageData.image
 
-		resource.AddFile("materials/" .. path)
+		ix.util.AddResourceFile("materials/" .. path)
 	end
 
 	packageData.image = Material(packageData.image)
