@@ -341,7 +341,7 @@ timer.Create("StripeCleanupExpiredPayments", 3600, 0, function() -- Run every ho
 	query:Update("status", "expired")
 	query:Update("updated_at", os.time())
 	query:Where("status", "pending")
-	query:Where("created_at", "<", expiredTime)
+	query:WhereLT("created_at", expiredTime)
 	query:Callback(function(data, status, affectedRows)
 		if (affectedRows and affectedRows > 0) then
 			print("[Stripe] Marked " .. affectedRows .. " pending payments as expired")
