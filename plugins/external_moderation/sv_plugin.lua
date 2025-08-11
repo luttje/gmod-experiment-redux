@@ -4,7 +4,7 @@ local API_KEY, APP_URL
 local SYNC_INTERVAL_IN_SECONDS = 15
 
 local activeSanctions = {}
-local lastSanctionSync = 0
+local previousSanctions = {} -- Track previous sanctions to detect newly applied ones
 
 local function getClientRank(client)
 	local rank = "player"
@@ -51,6 +51,53 @@ local function isPlayerMuted(steamID64)
 	return false
 end
 
+-- Helper function to check if a sanction is newly applied
+local function isNewSanction(sanction)
+	return not previousSanctions[sanction.id]
+end
+
+-- Helper function to notify player about their sanction
+local function notifyPlayerOfSanction(player, sanction)
+	if (not IsValid(player)) then
+		return
+	end
+
+	local message = ""
+	local reason = sanction.reason or "No reason provided"
+
+	if (sanction.type == "mute") then
+		message = "You have been muted. Reason: " .. reason
+
+		if (sanction.expires_in and not sanction.is_permanent) then
+			message = message .. " (Expires " .. sanction.expires_in .. ")"
+		else
+			message = message .. " (Permanent)"
+		end
+	elseif (sanction.type == "ban") then
+		-- Note: Banned players will likely be kicked before seeing this warning,
+		-- but we'll show it anyway for consistency and in case there's a delay
+		message = "You have been banned. Reason: " .. reason
+
+		if (sanction.expires_in and not sanction.is_permanent) then
+			message = message .. " (Expires " .. sanction.expires_in .. ")"
+		else
+			message = message .. " (Permanent)"
+		end
+	else
+		-- Handle any other sanction types that might be added in the future
+		message = "You have received a " .. sanction.type .. ". Reason: " .. reason
+
+		if (sanction.expires_in and not sanction.is_permanent) then
+			message = message .. " (Expires " .. sanction.expires_in .. ")"
+		else
+			message = message .. " (Permanent)"
+		end
+	end
+
+	-- Send the notification to the player
+	ix.chat.Send(nil, "sanction", message, nil, { player })
+end
+
 -- Sync sanctions from the API
 local function syncSanctions()
 	if (PLUGIN.disabled) then
@@ -62,6 +109,8 @@ local function syncSanctions()
 			local success, data = pcall(util.JSONToTable, response.body)
 
 			if (success and data and data.success and data.data) then
+				-- Store previous sanctions before updating
+				previousSanctions = table.Copy(activeSanctions)
 				activeSanctions = {}
 
 				-- Store sanctions by ID for easy lookup
@@ -69,20 +118,32 @@ local function syncSanctions()
 					activeSanctions[sanction.id] = sanction
 				end
 
-				lastSanctionSync = CurTime()
-
 				if (DEBUG_MODERATION) then
 					ix.util.SchemaPrint("Synced " .. table.Count(activeSanctions) .. " active sanctions.")
 				end
 
-				-- Immediately check if any players are banned that need to be kicked
+				-- Check all connected players for sanctions and notify about new ones
 				for _, player in ipairs(player.GetAll()) do
 					local steamID64 = player:SteamID64()
-					local isBanned, banSanction = isPlayerBanned(steamID64)
+					local playerSanctions = getPlayerSanctions(steamID64)
 
+					-- Check for bans first (these players will be kicked)
+					local isBanned, banSanction = isPlayerBanned(steamID64)
 					if (isBanned) then
+						-- Notify about new ban before kicking (though they likely won't see it)
+						if (isNewSanction(banSanction)) then
+							notifyPlayerOfSanction(player, banSanction)
+						end
+
 						player:Kick("You are banned from this server. Reason: "
 							.. (banSanction.reason or "No reason provided"))
+					else
+						-- Check for other sanctions (mutes, etc.) and notify about new ones
+						for _, sanction in pairs(playerSanctions) do
+							if (isNewSanction(sanction)) then
+								notifyPlayerOfSanction(player, sanction)
+							end
+						end
 					end
 				end
 			else
