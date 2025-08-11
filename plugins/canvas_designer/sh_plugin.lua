@@ -55,6 +55,10 @@ function PLUGIN:RegisterSpriteType(spriteData)
 		ix.util.SchemaError("RegisterSpriteType: 'icon' is required")
 	end
 
+	if (type(spriteData.icon.material) ~= "string") then
+		ix.util.SchemaError("RegisterSpriteType: 'icon.material' must be a string upon registration")
+	end
+
 	if (not spriteData.category or type(spriteData.category) ~= "string" or spriteData.category == "") then
 		ix.util.SchemaError("RegisterSpriteType: 'category' must be a non-empty string")
 	end
@@ -72,6 +76,14 @@ function PLUGIN:RegisterSpriteType(spriteData)
 	if (PLUGIN.SPRITES_BY_TYPE[spriteData.type]) then
 		ix.util.SchemaError("RegisterSpriteType: sprite type '" .. spriteData.type .. "' is already registered")
 	end
+
+	if (SERVER) then
+		local path = spriteData.icon.material
+
+		resource.AddFile("materials/" .. path)
+	end
+
+	spriteData.icon.material = Material(spriteData.icon.material)
 
 	spriteData.keywords = spriteData.keywords or ""
 

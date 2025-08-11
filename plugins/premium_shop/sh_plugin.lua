@@ -42,8 +42,8 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 		ix.util.SchemaError("RegisterPremiumPackage: 'name' must be a non-empty string")
 	end
 
-	if (not packageData.image or type(packageData.image) ~= "IMaterial") then
-		ix.util.SchemaError("RegisterPremiumPackage: 'image' must be a valid Material")
+	if (not packageData.image or type(packageData.image) ~= "string") then
+		ix.util.SchemaError("RegisterPremiumPackage: 'image' must be a string upon registration")
 	end
 
 	if (not packageData.description or type(packageData.description) ~= "string") then
@@ -62,6 +62,14 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 	if (PLUGIN.PREMIUM_PACKAGES[packageData.key]) then
 		ix.util.SchemaError("RegisterPremiumPackage: package key '" .. packageData.key .. "' is already registered")
 	end
+
+	if (SERVER) then
+		local path = packageData.image
+
+		resource.AddFile("materials/" .. path)
+	end
+
+	packageData.image = Material(packageData.image)
 
 	packageData.currency = packageData.currency or PLUGIN.DEFAULT_CURRENCY
 	packageData.category = packageData.category or "General"
@@ -123,7 +131,7 @@ PLUGIN:RegisterPremiumPackage({
 	key = "sprites_colored",
 	name = "Colored Sprites Pack",
 	description = "Gain access to 64 vibrant and richly detailed colored sprites for your canvas creations.",
-	image = Material("experiment-redux/premium/sprites_colored.png"),
+	image = "experiment-redux/premium/sprites_colored.png",
 	price = 0.99,
 	currency = "EUR",
 	category = "Canvas Designer",
@@ -141,7 +149,7 @@ PLUGIN:RegisterPremiumPackage({
 	key = "sprites_graffiti_don",
 	name = "Graffiti Don Pack",
 	description = "Unlock 75 bold graffiti tag designs featuring stylized letters, characters, and unique symbols.",
-	image = Material("experiment-redux/premium/sprites_graffiti_don.png"),
+	image = "experiment-redux/premium/sprites_graffiti_don.png",
 	price = 1.19,
 	currency = "EUR",
 	category = "Canvas Designer",
@@ -159,7 +167,7 @@ PLUGIN:RegisterPremiumPackage({
 	key = "sprites_graffiti_stencil",
 	name = "Graffiti Stencil Pack",
 	description = "Access 112 detailed stencil graffiti designs with letters, figures, and intricate cutout shapes.",
-	image = Material("experiment-redux/premium/sprites_graffiti_stencil.png"),
+	image = "experiment-redux/premium/sprites_graffiti_stencil.png",
 	price = 1.49,
 	currency = "EUR",
 	category = "Canvas Designer",
@@ -177,7 +185,7 @@ PLUGIN:RegisterPremiumPackage({
 	key = "supporter_role",
 	name = "Supporter Role",
 	description = "Show your support for the server with a special supporter role!",
-	image = Material("experiment-redux/premium/supporter_role.png"),
+	image = "experiment-redux/premium/supporter_role.png",
 	price = 4.99,
 	currency = "EUR",
 	category = "Supporter",
