@@ -5,6 +5,7 @@ ITEM.model = "models/right_boxing_glove.mdl"
 ITEM.width = 1
 ITEM.height = 1
 ITEM.class = "exp_boxing_gloves"
+ITEM.price = 1000
 ITEM.weaponCategory = "melee"
 ITEM.description = "A pair of boxing gloves for stylish punching, perfect for training strength."
 ITEM.chanceToScavenge = Schema.RARITY_GIGA_RARE

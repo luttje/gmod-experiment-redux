@@ -60,11 +60,11 @@ function PANEL:BuyItem(uniqueID)
 			L(
 				"confirmPurchaseShipment",
 				itemTable.shipmentSize,
-				ix.currency.Get(itemTable.price * itemTable.shipmentSize)
+				ix.currency.Get((itemTable.price or 0) * itemTable.shipmentSize)
 			)
 		)
 	else
-		self.purchaseLabel:SetText(L("confirmPurchase", ix.currency.Get(itemTable.price)))
+		self.purchaseLabel:SetText(L("confirmPurchase", ix.currency.Get(itemTable.price or 0)))
 	end
 
 	self.purchaseLabel:SizeToContents()
