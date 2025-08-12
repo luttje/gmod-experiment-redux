@@ -150,6 +150,7 @@ function PANEL:Init()
 	self.categories:Layout()
 
 	self:SetupSearch()
+	self:SetupCartButton()
 	self:SetupHistoryButton()
 	self:SetupDisclaimer()
 
@@ -190,7 +191,7 @@ function PANEL:SetupHeader()
 end
 
 function PANEL:SetupSearch()
-	-- Create a panel to hold the search bar and history button
+	-- Create a panel to hold the search bar and category list
 	self.searchPanel = self:Add("DPanel")
 	self.searchPanel:Dock(TOP)
 	self.searchPanel:SetTall(BUTTON_HEIGHT)
@@ -202,7 +203,7 @@ function PANEL:SetupSearch()
 	self.search:SetText(PLUGIN.lastPremiumSearch or "")
 	self.search:Dock(FILL)
 	self.search:SetFont("ixMediumFont")
-	self.search:DockMargin(0, 0, 140, 0) -- Make room for history button
+	self.search:DockMargin(0, 0, 240, 0) -- Make room for cart and history buttons
 	self.search.OnTextChanged = function(this)
 		local query = self.search:GetText()
 
@@ -235,10 +236,25 @@ function PANEL:SetupHistoryButton()
 	self.historyButton = self.searchPanel:Add("expButton")
 	self.historyButton:SetText("Payment History")
 	self.historyButton:Dock(RIGHT)
+	self.historyButton:DockMargin(0, 0, 8, 0)
 	self.historyButton:SizeToContents()
 	self.historyButton.DoClick = function()
 		PLUGIN:ShowPaymentHistory()
 	end
+end
+
+function PANEL:SetupCartButton()
+	-- Shopping cart button
+	self.cartButton = self.searchPanel:Add("expButton")
+	self.cartButton:SetText("Shopping Cart")
+	self.cartButton:Dock(RIGHT)
+	self.cartButton:SizeToContents()
+	self.cartButton.DoClick = function()
+		PLUGIN:ShowCartPanel()
+	end
+
+	-- Update cart button text
+	PLUGIN:UpdateCartUI()
 end
 
 function PANEL:SetupDisclaimer()
@@ -324,134 +340,19 @@ function PANEL:PurchasePackage(packageKey)
 		return
 	end
 
-	-- Create purchase confirmation dialog
-	local confirmFrame = vgui.Create("expFrame")
-	confirmFrame:SetTitle("Confirm Purchase")
-	confirmFrame:SetWide(400)
-	confirmFrame:SetTall(200)
-	confirmFrame:Center()
-	confirmFrame:MakePopup()
-	confirmFrame:SetDeleteOnClose(true)
-
-	local packageLabel = confirmFrame:Add("DLabel")
-	packageLabel:SetText("Package: " .. package.name)
-	packageLabel:SetFont("ixMediumFont")
-	packageLabel:SetTextColor(Color(255, 255, 255))
-	packageLabel:Dock(TOP)
-	packageLabel:DockMargin(8, 8, 8, 4)
-	packageLabel:SizeToContents()
-
-	local priceLabel = confirmFrame:Add("DLabel")
-	local currencySymbol = PLUGIN.PREMIUM_CURRENCIES[package.currency] or "€"
-	priceLabel:SetText("Price: " .. currencySymbol .. string.format("%.2f", package.price))
-	priceLabel:SetFont("ixMediumFont")
-	priceLabel:SetTextColor(PLUGIN.THEME.premium)
-	priceLabel:Dock(TOP)
-	priceLabel:DockMargin(8, 4, 8, 8)
-	priceLabel:SizeToContents()
-
-	local descLabel = confirmFrame:Add("DLabel")
-	descLabel:SetText(package.description)
-	descLabel:SetFont("ixSmallFont")
-	descLabel:SetTextColor(PLUGIN.THEME.textSecondary)
-	descLabel:Dock(TOP)
-	descLabel:DockMargin(8, 8, 8, 8)
-	descLabel:SetWrap(true)
-	descLabel:SetAutoStretchVertical(true)
-
-	local buttonPanel = confirmFrame:Add("DPanel")
-	buttonPanel:SetTall(40)
-	buttonPanel:Dock(BOTTOM)
-	buttonPanel:DockMargin(8, 8, 8, 8)
-	buttonPanel:SetPaintBackground(false)
-
-	local cancelButton = buttonPanel:Add("expButton")
-	cancelButton:SetText("Cancel")
-	cancelButton:Dock(LEFT)
-	cancelButton:SizeToContents()
-	cancelButton:DockMargin(0, 0, 8, 0)
-	cancelButton.DoClick = function()
-		confirmFrame:Close()
+	-- If it's already in the cart, don't add it.
+	if (PLUGIN:GetCartCount(packageKey) > 0) then
+		LocalPlayer():Notify("This package is already in your cart!")
+		return
 	end
 
-	local purchaseButton = buttonPanel:Add("expButton")
-	purchaseButton:SetText("Purchase")
-	purchaseButton:Dock(FILL)
-	purchaseButton.DoClick = function()
-		confirmFrame:Close()
-
-		net.Start("expPremiumShopPurchase")
-		net.WriteString(packageKey)
-		net.WriteString("package")
-		net.SendToServer()
-	end
-
-	confirmFrame:InvalidateChildren(true)
+	PLUGIN:AddToCart("package", packageKey, 1)
+	LocalPlayer():Notify("Added " .. package.name .. " to cart!")
 end
 
 function PANEL:PurchaseItem(itemTable)
-	-- Create purchase confirmation dialog
-	local confirmFrame = vgui.Create("expFrame")
-	confirmFrame:SetTitle("Confirm Purchase")
-	confirmFrame:SetWide(400)
-	confirmFrame:SetTall(200)
-	confirmFrame:Center()
-	confirmFrame:MakePopup()
-	confirmFrame:SetDeleteOnClose(true)
-
-	local itemLabel = confirmFrame:Add("DLabel")
-	itemLabel:SetText("Item: " .. itemTable.name)
-	itemLabel:SetFont("ixMediumFont")
-	itemLabel:SetTextColor(Color(255, 255, 255))
-	itemLabel:Dock(TOP)
-	itemLabel:DockMargin(8, 8, 8, 4)
-	itemLabel:SizeToContents()
-
-	local priceLabel = confirmFrame:Add("DLabel")
-	priceLabel:SetText("Price: €" .. string.format("%.2f", itemTable.premiumPriceInEuro))
-	priceLabel:SetFont("ixMediumFont")
-	priceLabel:SetTextColor(PLUGIN.THEME.premium)
-	priceLabel:Dock(TOP)
-	priceLabel:DockMargin(8, 4, 8, 8)
-	priceLabel:SizeToContents()
-
-	local descLabel = confirmFrame:Add("DLabel")
-	descLabel:SetText(itemTable.description or "No description available")
-	descLabel:SetFont("ixSmallFont")
-	descLabel:SetTextColor(PLUGIN.THEME.textSecondary)
-	descLabel:Dock(TOP)
-	descLabel:DockMargin(8, 8, 8, 8)
-	descLabel:SetWrap(true)
-	descLabel:SetAutoStretchVertical(true)
-
-	local buttonPanel = confirmFrame:Add("DPanel")
-	buttonPanel:SetTall(40)
-	buttonPanel:Dock(BOTTOM)
-	buttonPanel:DockMargin(8, 8, 8, 8)
-	buttonPanel:SetPaintBackground(false)
-
-	local cancelButton = buttonPanel:Add("expButton")
-	cancelButton:SetText("Cancel")
-	cancelButton:Dock(LEFT)
-	cancelButton:SizeToContents()
-	cancelButton:DockMargin(0, 0, 8, 0)
-	cancelButton.DoClick = function()
-		confirmFrame:Close()
-	end
-
-	local purchaseButton = buttonPanel:Add("expButton")
-	purchaseButton:SetText("Purchase")
-	purchaseButton:Dock(FILL)
-	purchaseButton.DoClick = function()
-		confirmFrame:Close()
-
-		net.Start("expPremiumShopPurchase")
-		net.WriteString(itemTable.uniqueID)
-		net.WriteString("item")
-		net.SendToServer()
-	end
-
-	confirmFrame:InvalidateChildren(true)
+	PLUGIN:AddToCart("item", itemTable.uniqueID, 1)
+	LocalPlayer():Notify("Added " .. itemTable.name .. " to cart!")
 end
 
 function PANEL:Refresh()
@@ -611,10 +512,6 @@ vgui.Register("expPremiumItem", PANEL, "ixBusinessItem")
 
 -- Add premium shop button to main menu
 hook.Add("CreateMenuButtons", "expPremiumShop", function(tabs)
-	-- Disable for now
-	if (true) then
-		return
-	end
 	tabs["premiumShop"] = function(container)
 		container:Add("expPremiumShop")
 	end

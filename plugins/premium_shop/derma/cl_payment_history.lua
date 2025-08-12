@@ -31,7 +31,7 @@ end
 PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(200)
+	self:SetTall(180)
 	self:DockPadding(10, 10, 10, 10)
 end
 
@@ -77,7 +77,7 @@ function PANEL:SetPayment(payment, index)
 	self.statusLabel:Dock(LEFT)
 	self.statusLabel:SizeToContents()
 
-	-- Set status color and adjust panel height
+	-- Set status color
 	local statusColor = Color(255, 255, 255)
 	if (payment.status == "completed") then
 		statusColor = PLUGIN.THEME.success
@@ -103,36 +103,36 @@ function PANEL:SetPayment(payment, index)
 	self.totalLabel:Dock(RIGHT)
 	self.totalLabel:SizeToContents()
 
-	-- Tracking ID row
-	local trackingRow = self:Add("EditablePanel")
-	trackingRow:SetTall(25)
-	trackingRow:Dock(TOP)
-	trackingRow:DockMargin(0, 5, 0, 0)
+	-- Session ID row
+	local sessionRow = self:Add("EditablePanel")
+	sessionRow:SetTall(25)
+	sessionRow:Dock(TOP)
+	sessionRow:DockMargin(0, 5, 0, 0)
 
-	local trackingLabel = trackingRow:Add("DLabel")
-	trackingLabel:SetText("ID:")
-	trackingLabel:SetFont("DermaDefault")
-	trackingLabel:SetTextColor(PLUGIN.THEME.textSecondary)
-	trackingLabel:SizeToContents()
-	trackingLabel:Dock(LEFT)
+	local sessionLabel = sessionRow:Add("DLabel")
+	sessionLabel:SetText("Session ID:")
+	sessionLabel:SetFont("DermaDefault")
+	sessionLabel:SetTextColor(PLUGIN.THEME.textSecondary)
+	sessionLabel:SizeToContents()
+	sessionLabel:Dock(LEFT)
 
-	-- Tracking ID text entry (read-only)
-	self.trackingEntry = trackingRow:Add("DTextEntry")
-	self.trackingEntry:SetText(payment.tracking_id)
-	self.trackingEntry:SetDisabled(true)
-	self.trackingEntry:SetFont("DermaDefault")
-	self.trackingEntry:Dock(FILL)
-	self.trackingEntry:DockMargin(5, 0, 5, 0)
+	-- Session ID text entry (read-only)
+	self.sessionEntry = sessionRow:Add("DTextEntry")
+	self.sessionEntry:SetText(payment.session_id)
+	self.sessionEntry:SetDisabled(true)
+	self.sessionEntry:SetFont("DermaDefault")
+	self.sessionEntry:Dock(FILL)
+	self.sessionEntry:DockMargin(5, 0, 5, 0)
 
-	-- Copy button for tracking ID
-	self.copyButton = trackingRow:Add("expButton")
+	-- Copy button for session ID
+	self.copyButton = sessionRow:Add("expButton")
 	self.copyButton:SetText("Copy")
 	self.copyButton:SizeToContents()
 	self.copyButton:Dock(RIGHT)
 	self.copyButton.DoClick = function()
-		self.trackingEntry:SelectAll()
-		SetClipboardText(payment.tracking_id)
-		LocalPlayer():Notify("ID copied to clipboard!")
+		self.sessionEntry:SelectAll()
+		SetClipboardText(payment.session_id)
+		LocalPlayer():Notify("Session ID copied to clipboard!")
 	end
 
 	-- Items row
@@ -188,14 +188,16 @@ function PANEL:SetPayment(payment, index)
 	-- Refresh button for pending payments
 	if (payment.status == "pending") then
 		self.refreshButton = buttonRow:Add("expButton")
-		self.refreshButton:SetText("Check Status")
+		self.refreshButton:SetText("Refresh Status")
 		self.refreshButton:SizeToContents()
 		self.refreshButton:Dock(RIGHT)
 		self.refreshButton:DockMargin(8, 0, 0, 0)
 		self.refreshButton.DoClick = function()
 			net.Start("expPremiumShopRefreshPayment")
-			net.WriteString(payment.tracking_id)
+			net.WriteString(payment.session_id)
 			net.SendToServer()
+
+			LocalPlayer():Notify("Refreshing payment status...")
 		end
 
 		self.openPaymentUrl = buttonRow:Add("expButton")
@@ -229,7 +231,7 @@ vgui.Register("expPaymentEntryPanel", PANEL, "EditablePanel")
 PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(170)
+	self:SetTall(150)
 	self:DockPadding(10, 10, 10, 10)
 end
 
@@ -249,6 +251,15 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 	nameLabel:Dock(LEFT)
 	nameLabel:SizeToContents()
 
+	-- Status indicator (not owned on this character)
+	local statusLabel = nameRow:Add("DLabel")
+	statusLabel:SetText("NOT CLAIMED")
+	statusLabel:SetFont("ixSmallFont")
+	statusLabel:SetTextColor(PLUGIN.THEME.warning)
+	statusLabel:SetContentAlignment(6)
+	statusLabel:Dock(RIGHT)
+	statusLabel:SizeToContents()
+
 	-- Description row
 	local descRow = self:Add("EditablePanel")
 	descRow:SetTall(25)
@@ -261,6 +272,12 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 	descLabel:SetTextColor(PLUGIN.THEME.textSecondary)
 	descLabel:Dock(FILL)
 	descLabel:SetWrap(true)
+
+	-- Purchase count row
+	local purchaseRow = self:Add("EditablePanel")
+	purchaseRow:SetTall(25)
+	purchaseRow:Dock(TOP)
+	purchaseRow:DockMargin(0, 5, 0, 0)
 
 	-- Claim button
 	local buttonRow = self:Add("EditablePanel")
@@ -283,7 +300,7 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 
 	-- Paint background
 	self.Paint = function(pnl, w, h)
-		draw.RoundedBox(4, 0, 0, w, h, Color(60, 60, 40))
+		draw.RoundedBox(4, 0, 0, w, h, Color(60, 60, 40)) -- Yellow tint for claimable
 	end
 end
 
@@ -317,7 +334,7 @@ function PANEL:Init()
 
 	-- Claims tab
 	self.claimsTab = self.tabPanel:Add("expButton")
-	self.claimsTab:SetText("Claims")
+	self.claimsTab:SetText("Claim Packages")
 	self.claimsTab:Dock(LEFT)
 	self.claimsTab:SizeToContents()
 	self.claimsTab.DoClick = function()
@@ -354,7 +371,7 @@ function PANEL:Init()
 	self.historyBottomPanel:SetVisible(false)
 
 	self.refreshAllButton = self.historyBottomPanel:Add("expButton")
-	self.refreshAllButton:SetText("Check All Pending Payments")
+	self.refreshAllButton:SetText("Refresh All Pending Payments")
 	self.refreshAllButton:Dock(FILL)
 	self.refreshAllButton.DoClick = function()
 		self:RefreshAllPending()
@@ -501,12 +518,11 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 
 	if (table.Count(claimablePackages) == 0) then
 		local emptyLabel = self.claimsScroll:Add("DLabel")
-		emptyLabel:SetText("No packages need claiming on this character")
+		emptyLabel:SetText("No packages available to claim on this character")
 		emptyLabel:SetFont("ixMediumFont")
 		emptyLabel:SetTextColor(PLUGIN.THEME.textSecondary)
 		emptyLabel:SetContentAlignment(5)
 		emptyLabel:Dock(FILL)
-
 		return
 	end
 
@@ -529,7 +545,7 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 	end
 
 	-- Update claims tab text to show count
-	self.claimsTab:SetText("Claims (" .. table.Count(claimablePackages) .. ")")
+	self.claimsTab:SetText("Claim Packages (" .. table.Count(claimablePackages) .. ")")
 end
 
 function PANEL:RefreshAllPending()
@@ -537,13 +553,13 @@ function PANEL:RefreshAllPending()
 		if (payment.status == "pending") then
 			timer.Simple(_ * 0.5, function() -- Stagger requests
 				net.Start("expPremiumShopRefreshPayment")
-				net.WriteString(payment.tracking_id)
+				net.WriteString(payment.session_id)
 				net.SendToServer()
 			end)
 		end
 	end
 
-	LocalPlayer():Notify("Checking status of all pending payments...")
+	LocalPlayer():Notify("Refreshing all pending payments...")
 
 	-- Refresh the list after a delay
 	timer.Simple(3, function()
