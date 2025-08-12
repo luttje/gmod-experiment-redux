@@ -82,6 +82,9 @@ function PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType, call
 		return
 	end
 
+	-- Generate a unique tracking ID that we'll use consistently
+	local trackingId = "exp_" .. os.time() .. "_" .. math.random(10000, 99999) .. "_" .. client:SteamID64()
+
 	-- Create checkout data with correct structure
 	local checkoutData = {
 		data = {
@@ -93,8 +96,6 @@ function PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType, call
 					description = itemDescription,
 					media = {},
 					redirect_url = LEMONSQUEEZY_SUCCESS_URL,
-					-- receipt_button_text = "Return to Game",
-					-- receipt_link_url = "steam://run/4000"
 				},
 				checkout_options = {
 					embed = false,
@@ -108,7 +109,8 @@ function PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType, call
 						player_name = client:Name(),
 						package_key = packageKey,
 						package_type = packageType,
-						server_name = GetHostName()
+						server_ip = game.GetIPAddress(),
+						tracking_id = trackingId -- Add our tracking ID to custom data
 					}
 				},
 				expires_at = nil,
@@ -164,31 +166,33 @@ function PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType, call
 				local checkoutUrl = response.data.attributes.url
 				local checkoutId = response.data.id
 
-				-- Store payment record in database
+				-- Store payment record in database using our tracking ID
 				PLUGIN:CreatePaymentRecord(
-					checkoutId,
+					trackingId,
 					checkoutUrl,
 					client,
 					packageKey,
 					packageType,
 					price,
 					currency,
+					checkoutId,
 					function(success, paymentId)
 						if (not success) then
-							print("[LemonSqueezy] Failed to create payment record for checkout: " .. checkoutId)
+							print("[LemonSqueezy] Failed to create payment record for tracking ID: " .. trackingId)
 						else
-							-- Start automatic polling for this payment
-							PLUGIN:StartPaymentPolling(checkoutId, client:SteamID64())
+							-- Start automatic polling for this payment using tracking ID
+							PLUGIN:StartPaymentPolling(trackingId, client:SteamID64())
 						end
 					end
 				)
 
 				net.Start("expPremiumShopLemonSqueezyURL")
 				net.WriteString(checkoutUrl)
-				net.WriteString(checkoutId)
+				net.WriteString(trackingId) -- Send tracking ID to client
 				net.Send(client)
 
-				print("[LemonSqueezy] Created checkout: " .. checkoutId .. " for " .. client:Name())
+				print("[LemonSqueezy] Created checkout: " ..
+					checkoutId .. " with tracking ID: " .. trackingId .. " for " .. client:Name())
 
 				if (callback) then
 					callback(true, response)
@@ -213,36 +217,37 @@ function PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType, call
 	})
 end
 
-function PLUGIN:StartPaymentPolling(sessionId, steamid64)
-	-- Clear any existing timer for this session
-	if (self.activePollingTimers[sessionId]) then
-		timer.Remove(self.activePollingTimers[sessionId])
+function PLUGIN:StartPaymentPolling(trackingId, steamid64)
+	-- Clear any existing timer for this tracking ID
+	if (self.activePollingTimers[trackingId]) then
+		timer.Remove(self.activePollingTimers[trackingId])
 	end
 
-	local timerName = "PremiumPaymentPoll_" .. sessionId
+	local timerName = "PremiumPaymentPoll_" .. trackingId
 	local pollCount = 0
-	local maxPolls = 240 -- 1 hour with 15-second intervals (240 * 15 = 3600 seconds)
+	local intervalSeconds = 5
+	local maxPolls = 3600 / intervalSeconds
 
-	print("[Premium Shop] Starting automatic payment polling for session: " .. sessionId)
+	print("[Premium Shop] Starting automatic payment polling for tracking ID: " .. trackingId)
 
 	-- Store timer name for cleanup
-	self.activePollingTimers[sessionId] = timerName
+	self.activePollingTimers[trackingId] = timerName
 
-	timer.Create(timerName, 15, maxPolls, function()
+	timer.Create(timerName, intervalSeconds, maxPolls, function()
 		pollCount = pollCount + 1
 
-		-- Get payment record from database
-		PLUGIN:GetPaymentRecord(sessionId, function(success, payment)
+		-- Get payment record from database using tracking ID
+		PLUGIN:GetPaymentRecord(trackingId, function(success, payment)
 			if (not success) then
-				print("[Premium Shop] Payment record not found during polling: " .. sessionId)
+				print("[Premium Shop] Payment record not found during polling: " .. trackingId)
 				timer.Remove(timerName)
-				self.activePollingTimers[sessionId] = nil
+				self.activePollingTimers[trackingId] = nil
 				return
 			end
 
 			-- Check if payment is completed
 			if (payment.status == "completed") then
-				print("[Premium Shop] Payment completed during polling: " .. sessionId)
+				print("[Premium Shop] Payment completed during polling: " .. trackingId)
 
 				-- Find the player if they're online
 				local targetPlayer = nil
@@ -255,47 +260,45 @@ function PLUGIN:StartPaymentPolling(sessionId, steamid64)
 
 				if (targetPlayer and IsValid(targetPlayer) and targetPlayer:GetCharacter()) then
 					-- Player is online, process immediately
-					PLUGIN:HandleSuccessfulPayment(targetPlayer, payment, sessionId)
+					PLUGIN:HandleSuccessfulPayment(targetPlayer, payment, trackingId)
 				else
 					-- Player is offline, mark for processing when they join
-					PLUGIN:MarkPaymentForOfflineProcessing(sessionId, steamid64, payment)
+					PLUGIN:MarkPaymentForOfflineProcessing(trackingId, steamid64, payment)
 				end
 
 				-- Stop polling
 				timer.Remove(timerName)
-				self.activePollingTimers[sessionId] = nil
+				self.activePollingTimers[trackingId] = nil
 				return
 			end
 
 			-- Check if payment failed or expired
 			if (payment.status == "failed" or payment.status == "expired" or payment.status == "refunded") then
-				print("[Premium Shop] Payment " .. payment.status .. " during polling: " .. sessionId)
+				print("[Premium Shop] Payment " .. payment.status .. " during polling: " .. trackingId)
 				timer.Remove(timerName)
-				self.activePollingTimers[sessionId] = nil
+				self.activePollingTimers[trackingId] = nil
 				return
 			end
 
 			-- Continue polling if still pending
 			if (pollCount >= maxPolls) then
-				-- The player can manually refresh their payment status
-				print("[Premium Shop] Payment polling timeout for session: " .. sessionId)
-				self.activePollingTimers[sessionId] = nil
+				print("[Premium Shop] Payment polling timeout for tracking ID: " .. trackingId)
+				self.activePollingTimers[trackingId] = nil
 			end
 		end)
 	end)
 end
 
-function PLUGIN:MarkPaymentForOfflineProcessing(sessionId, steamid64, payment)
-	-- Add a flag to the payment record indicating it needs processing when player joins
+function PLUGIN:MarkPaymentForOfflineProcessing(trackingId, steamid64, payment)
 	local query = mysql:Update("exp_premium")
 	query:Update("needs_processing", 1)
 	query:Update("updated_at", os.time())
-	query:Where("session_id", sessionId)
+	query:Where("tracking_id", trackingId)
 	query:Callback(function(data, status)
 		if (status) then
-			print("[Premium Shop] Marked payment for offline processing: " .. sessionId)
+			print("[Premium Shop] Marked payment for offline processing: " .. trackingId)
 		else
-			print("[Premium Shop] Failed to mark payment for offline processing: " .. sessionId)
+			print("[Premium Shop] Failed to mark payment for offline processing: " .. trackingId)
 		end
 	end)
 	query:Execute()
@@ -318,13 +321,13 @@ function PLUGIN:ProcessOfflinePayments(client)
 			payment.cart_items = util.JSONToTable(payment.cart_items)
 
 			-- Process the payment
-			PLUGIN:HandleSuccessfulPayment(client, payment, payment.session_id)
+			PLUGIN:HandleSuccessfulPayment(client, payment, payment.tracking_id)
 
 			-- Remove the processing flag
 			local updateQuery = mysql:Update("exp_premium")
 			updateQuery:Update("needs_processing", 0)
 			updateQuery:Update("updated_at", os.time())
-			updateQuery:Where("session_id", payment.session_id)
+			updateQuery:Where("tracking_id", payment.tracking_id)
 			updateQuery:Execute()
 		end
 	end)
@@ -489,7 +492,7 @@ end)
 
 -- Clean up old polling timers on plugin unload
 function PLUGIN:OnUnloaded()
-	for sessionId, timerName in pairs(self.activePollingTimers) do
+	for trackingId, timerName in pairs(self.activePollingTimers) do
 		timer.Remove(timerName)
 	end
 	self.activePollingTimers = {}

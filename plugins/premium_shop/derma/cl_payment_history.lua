@@ -103,35 +103,35 @@ function PANEL:SetPayment(payment, index)
 	self.totalLabel:Dock(RIGHT)
 	self.totalLabel:SizeToContents()
 
-	-- Session ID row
-	local sessionRow = self:Add("EditablePanel")
-	sessionRow:SetTall(25)
-	sessionRow:Dock(TOP)
-	sessionRow:DockMargin(0, 5, 0, 0)
+	-- Tracking ID row
+	local trackingRow = self:Add("EditablePanel")
+	trackingRow:SetTall(25)
+	trackingRow:Dock(TOP)
+	trackingRow:DockMargin(0, 5, 0, 0)
 
-	local sessionLabel = sessionRow:Add("DLabel")
-	sessionLabel:SetText("ID:")
-	sessionLabel:SetFont("DermaDefault")
-	sessionLabel:SetTextColor(PLUGIN.THEME.textSecondary)
-	sessionLabel:SizeToContents()
-	sessionLabel:Dock(LEFT)
+	local trackingLabel = trackingRow:Add("DLabel")
+	trackingLabel:SetText("ID:")
+	trackingLabel:SetFont("DermaDefault")
+	trackingLabel:SetTextColor(PLUGIN.THEME.textSecondary)
+	trackingLabel:SizeToContents()
+	trackingLabel:Dock(LEFT)
 
-	-- Session ID text entry (read-only)
-	self.sessionEntry = sessionRow:Add("DTextEntry")
-	self.sessionEntry:SetText(payment.session_id)
-	self.sessionEntry:SetDisabled(true)
-	self.sessionEntry:SetFont("DermaDefault")
-	self.sessionEntry:Dock(FILL)
-	self.sessionEntry:DockMargin(5, 0, 5, 0)
+	-- Tracking ID text entry (read-only)
+	self.trackingEntry = trackingRow:Add("DTextEntry")
+	self.trackingEntry:SetText(payment.tracking_id)
+	self.trackingEntry:SetDisabled(true)
+	self.trackingEntry:SetFont("DermaDefault")
+	self.trackingEntry:Dock(FILL)
+	self.trackingEntry:DockMargin(5, 0, 5, 0)
 
-	-- Copy button for session ID
-	self.copyButton = sessionRow:Add("expButton")
+	-- Copy button for tracking ID
+	self.copyButton = trackingRow:Add("expButton")
 	self.copyButton:SetText("Copy")
 	self.copyButton:SizeToContents()
 	self.copyButton:Dock(RIGHT)
 	self.copyButton.DoClick = function()
-		self.sessionEntry:SelectAll()
-		SetClipboardText(payment.session_id)
+		self.trackingEntry:SelectAll()
+		SetClipboardText(payment.tracking_id)
 		LocalPlayer():Notify("ID copied to clipboard!")
 	end
 
@@ -194,7 +194,7 @@ function PANEL:SetPayment(payment, index)
 		self.refreshButton:DockMargin(8, 0, 0, 0)
 		self.refreshButton.DoClick = function()
 			net.Start("expPremiumShopRefreshPayment")
-			net.WriteString(payment.session_id)
+			net.WriteString(payment.tracking_id)
 			net.SendToServer()
 		end
 
@@ -537,7 +537,7 @@ function PANEL:RefreshAllPending()
 		if (payment.status == "pending") then
 			timer.Simple(_ * 0.5, function() -- Stagger requests
 				net.Start("expPremiumShopRefreshPayment")
-				net.WriteString(payment.session_id)
+				net.WriteString(payment.tracking_id)
 				net.SendToServer()
 			end)
 		end
