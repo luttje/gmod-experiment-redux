@@ -112,7 +112,7 @@ function PLUGIN:SaveData()
 			continue
 		end
 
-		local steamID = character:GetPlayer():SteamID64()
+		local steamID = character.steamID
 
 		-- Build the update expressions for ON DUPLICATE KEY UPDATE
 		local updates = {}
