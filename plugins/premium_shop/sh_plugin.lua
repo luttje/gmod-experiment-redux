@@ -296,34 +296,3 @@ do
 
 	ix.command.Add("ListPremiumKeys", COMMAND)
 end
-
-do
-	local COMMAND = {}
-	COMMAND.description = "Checks any outstanding payments for a player."
-	COMMAND.arguments = {
-		ix.type.player,
-	}
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client, target, key)
-		local steamid64 = target:SteamID64()
-
-		PLUGIN:GetPlayerPayments(steamid64, function(payments)
-			if (#payments == 0) then
-				client:Notify(target:GetName() .. " has no payment history.")
-				return
-			end
-
-			for _, payment in ipairs(payments) do
-				if (payment.status == "pending") then
-					PLUGIN:ForceCheckClientPayment(target, payment.session_id, payment)
-				else
-					client:Notify(target:GetName() .. "'s payment session " .. payment.session_id ..
-						" is already processed with status: " .. payment.status)
-				end
-			end
-		end)
-	end
-
-	ix.command.Add("PaymentsCheckPending", COMMAND)
-end

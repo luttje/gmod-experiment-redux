@@ -110,7 +110,7 @@ function PANEL:SetPayment(payment, index)
 	sessionRow:DockMargin(0, 5, 0, 0)
 
 	local sessionLabel = sessionRow:Add("DLabel")
-	sessionLabel:SetText("Session ID:")
+	sessionLabel:SetText("ID:")
 	sessionLabel:SetFont("DermaDefault")
 	sessionLabel:SetTextColor(PLUGIN.THEME.textSecondary)
 	sessionLabel:SizeToContents()
@@ -132,7 +132,7 @@ function PANEL:SetPayment(payment, index)
 	self.copyButton.DoClick = function()
 		self.sessionEntry:SelectAll()
 		SetClipboardText(payment.session_id)
-		LocalPlayer():Notify("Session ID copied to clipboard!")
+		LocalPlayer():Notify("ID copied to clipboard!")
 	end
 
 	-- Items row

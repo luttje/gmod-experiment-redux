@@ -41,7 +41,8 @@ try {
         throw new Exception('Invalid JSON payload');
     }
 
-    logMessage('Webhook data: '.json_encode($data, JSON_PRETTY_PRINT));
+    // Commented because in production we don't log all data since there's privacy-sensitive data in there
+    // logMessage('Webhook data: '.json_encode($data, JSON_PRETTY_PRINT));
 
     // Connect to database
     $pdo = createDatabaseConnection($env);
@@ -61,7 +62,7 @@ try {
             logMessage("Order status: $orderStatus, formatted: $orderStatusFormatted");
 
             // Extract custom data from the order
-            $customData = json_decode($order['attributes']['first_order_item']['product_options']['custom_data'] ?? '{}', true);
+            $customData = $data['meta']['custom_data'] ?? [];
 
             // Extract custom data
             $steamid64 = $customData['steamid64'] ?? '';
@@ -70,6 +71,7 @@ try {
             $packageType = $customData['package_type'] ?? 'package';
 
             if (empty($steamid64) || empty($packageKey)) {
+                // Log for problem solving, we delete these logs every once in a while. SteamID is not too privacy sensitive data.
                 logMessage("Missing required custom data: steamid64=$steamid64, packageKey=$packageKey");
                 http_response_code(400);
                 echo json_encode(['error' => 'Missing required custom data']);

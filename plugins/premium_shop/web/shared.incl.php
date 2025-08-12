@@ -59,7 +59,7 @@ function createDatabaseConnection($env)
 function logMessage($message, $logFile = null)
 {
     if ($logFile === null) {
-        $logFile = __DIR__.'/webhook.log';
+        $logFile = __DIR__.'/../webhook.log';
     }
 
     $timestamp = date('Y-m-d H:i:s');
