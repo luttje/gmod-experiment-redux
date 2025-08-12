@@ -60,12 +60,33 @@ function Schema.GetPremiumPackage(slug)
 end
 
 --[[
+	Theme colors
+--]]
+
+PLUGIN.THEME = {
+	background = Color(45, 45, 48),
+	surface = Color(60, 60, 65),
+	panel = Color(55, 55, 60),
+	primary = Color(0, 122, 255),
+	secondary = Color(88, 166, 255),
+	success = Color(40, 167, 69),
+	warning = Color(255, 193, 7),
+	danger = Color(220, 53, 69),
+	text = Color(240, 240, 240),
+	textSecondary = Color(180, 180, 180),
+	border = Color(80, 80, 85),
+	hover = Color(70, 70, 75),
+	premium = Color(255, 215, 0),   -- Gold color for premium
+	premiumAccent = Color(255, 165, 0) -- Orange accent for premium
+}
+
+--[[
 	Player Meta functions
 --]]
 
 local playerMeta = FindMetaTable("Player")
 
-function playerMeta:HasPremiumKey(slug)
+function playerMeta:HasPremiumPackage(slug)
 	if (not self:GetCharacter()) then
 		return false
 	end
@@ -90,7 +111,7 @@ end
 
 local ADDITIONAL_ELEMENT_SLOTS = 8
 PLUGIN:RegisterPremiumPackage({
-	slug = "sprites_colored",
+	slug = "colored-sprites-pack",
 	name = "Colored Sprites Pack",
 	description = "Gain access to 64 vibrant and richly detailed colored sprites for your canvas creations.",
 	image = "experiment-redux/premium/sprites_colored.png",
@@ -105,7 +126,7 @@ PLUGIN:RegisterPremiumPackage({
 
 ADDITIONAL_ELEMENT_SLOTS = 10
 PLUGIN:RegisterPremiumPackage({
-	slug = "sprites_graffiti_don",
+	slug = "graffiti-don-pack",
 	name = "Graffiti Don Pack",
 	description = "Unlock 75 bold graffiti tag designs featuring stylized letters, characters, and unique symbols.",
 	image = "experiment-redux/premium/sprites_graffiti_don.png",
@@ -120,7 +141,7 @@ PLUGIN:RegisterPremiumPackage({
 
 ADDITIONAL_ELEMENT_SLOTS = 14
 PLUGIN:RegisterPremiumPackage({
-	slug = "sprites_graffiti_stencil",
+	slug = "graffiti-stencil-pack",
 	name = "Graffiti Stencil Pack",
 	description = "Access 112 detailed stencil graffiti designs with letters, figures, and intricate cutout shapes.",
 	image = "experiment-redux/premium/sprites_graffiti_stencil.png",
@@ -135,7 +156,7 @@ PLUGIN:RegisterPremiumPackage({
 
 
 PLUGIN:RegisterPremiumPackage({
-	slug = "supporter_role_lifetime",
+	slug = "supporter-role-lifetime",
 	name = "Supporter Role",
 	description = "Show your support for the server with a special supporter role!",
 	image = "experiment-redux/premium/supporter_role.png",
@@ -159,53 +180,53 @@ do
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, target, key)
-		if (not PLUGIN.PREMIUM_PACKAGES[key]) then
-			client:Notify("Invalid premium package key: " .. key)
+	function COMMAND:OnRun(client, target, slug)
+		if (not PLUGIN.PREMIUM_PACKAGES[slug]) then
+			client:Notify("Invalid premium package key: " .. slug)
 			return
 		end
 
-		if (target:GivePremiumKey(key)) then
-			client:Notify("Gave premium key '" .. key .. "' to " .. target:GetName())
-			target:Notify("You have received the premium package: " .. PLUGIN.PREMIUM_PACKAGES[key].name)
+		if (target:GivePremiumPackage(slug)) then
+			client:Notify("Gave premium key '" .. slug .. "' to " .. target:GetName())
+			target:Notify("You have received the premium package: " .. PLUGIN.PREMIUM_PACKAGES[slug].name)
 		else
 			client:Notify("Failed to give premium key to " .. target:GetName())
 		end
 	end
 
-	ix.command.Add("GivePremiumKey", COMMAND)
+	ix.command.Add("GivePremiumPackage", COMMAND)
 end
 
 do
 	local COMMAND = {}
-	COMMAND.description = "Remove a premium key from a player."
+	COMMAND.description = "Remove a premium package from a player."
 	COMMAND.arguments = {
 		ix.type.player,
 		ix.type.text
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, target, key)
-		if (key == "*") then
+	function COMMAND:OnRun(client, target, targetSlug)
+		if (targetSlug == "*") then
 			local premiumPackages = target:GetPremiumPackages()
 
-			for key, _ in pairs(premiumPackages) do
-				target:RemovePremiumKey(key)
+			for slug, _ in pairs(premiumPackages) do
+				target:RemovePremiumPackage(slug)
 			end
 
-			client:Notify("Removed all premium keys from " .. target:GetName())
+			client:Notify("Removed all premium packages from " .. target:GetName())
 			return
 		end
 
-		if (target:RemovePremiumKey(key)) then
-			client:Notify("Removed premium key '" .. key .. "' from " .. target:GetName())
-			target:Notify("Your premium package '" .. key .. "' has been removed.")
+		if (target:RemovePremiumPackage(targetSlug)) then
+			client:Notify("Removed premium key '" .. targetSlug .. "' from " .. target:GetName())
+			target:Notify("Your premium package '" .. targetSlug .. "' has been removed.")
 		else
 			client:Notify("Failed to remove premium key from " .. target:GetName())
 		end
 	end
 
-	ix.command.Add("RemovePremiumKey", COMMAND)
+	ix.command.Add("RemovePremiumPackage", COMMAND)
 end
 
 do
@@ -237,7 +258,7 @@ do
 		end
 	end
 
-	ix.command.Add("ListPremiumKeys", COMMAND)
+	ix.command.Add("ListPackages", COMMAND)
 end
 
 do

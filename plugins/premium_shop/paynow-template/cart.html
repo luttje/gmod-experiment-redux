@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="flex justify-between mb-4">
+    <div class="flex flex-col">
+        <span class="cart-page-title">Cart</span>
+    </div>
+    <div class="nr-item flex flex-col text-right">
+        {{ cart.lines|length }} item{% if cart.lines|length > 1 %}s{% endif %}
+    </div>
+</div>
+<hr>
+{% if cart.lines|length == 0 %}
+<h2 class="text-center mx-auto mt-5">Your cart is empty!</h2>
+{% else %}
+<table class="cart-table table table-hover table-striped mt-5">
+    <thead>
+        <th></th>
+        <th>Product</th>
+        <th></th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th>&nbsp;</th>
+    </thead>
+    <tbody>
+        {% for line in cart.lines %}
+        <tr class="mt-2 mb-5">
+            <td class="image">
+                {% if line.image_url %}
+                    <img alt="{{ line.name }}" src="{{ line.image_url }}" />
+                {% else %}
+                <div class="flex w-full items-center justify-center">
+                    <i class="fa-solid fa-box-open text-3xl"></i>
+                </div>
+                {% endif %}
+            </td>
+            <td class="name">
+                <div class="name-sec">
+                    <div class="name-serv">
+                        {% if line.selected_gameserver %}
+                            <span>{{ line.selected_gameserver.name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="product-name">{{ line.name }}</span>
+            </td>
+            <td class="options !w-0 lg:!w-[25%]"></td>
+            <td class="price">
+                <span class="font-bold text-xl">{{ (line.price * line.quantity) | money }} {{ store.currency }}</span>
+            </td>
+            <td class="quantity">
+                <form method="POST" action="/cart/set/{{ line.slug }}">
+                    <input onfocusout="this.form.submit();" type="text" name="quantity" value="{{ line.quantity }}" {% if line.price==0.00 %}disabled="disabled" {% endif %} />
+                </form>
+            </td>
+            <td class="total !w-[25%] lg:!w-[15%]">
+                <span class="font-bold !text-base lg:!text-xl">{{ (line.price * line.quantity) | money }} {{ store.currency }}</span>
+                {% if line.quantity > 1 %}
+                <div>
+                    <span class="text-gray-700 !text-xs lg:!text-base">{{ line.price | money }} {{ store.currency }} each</span>
+                </div>
+                {% endif %}
+            </td>
+            <td class="close">
+                <a href="/cart/remove/{{ line.slug }}" class="rem-btn"><i class="fa-solid fa-xmark"></i></a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if cart.lines|length > 0 %}
+<div class="flex flex-col lg:flex-row gap-4 lg:gap-0 items-start justify-between mt-6">
+    <a class="remove-btn flex items-center gap-2" href="/cart/empty">
+        <span>Remove All</span> <i class="fa-solid fa-trash"></i>
+    </a>
+    <div class="flex flex-col gap-4 w-7/12 lg:w-3/12">
+        <div class="flex flex-col"></div>
+        <div class="flex flex-col">
+            <div class="subtotal flex flex-col gap-4 items-center">
+                <div class="flex justify-between w-full">
+                    <span>Total</span>
+                    <p>{{ cart.total | money }} {{ store.currency }}</p>
+                </div>
+                <div class="flex text-center w-full">
+                    <a href="/cart/checkout" class="add-btn">Proceed to checkout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

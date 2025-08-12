@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="flex justify-between ml-4 mb-4">
+    <div class="flex flex-col gap-[8px] w-full">
+        {% if account_view == "orders" %}
+            {% for order in orders %}
+                <div class="grid grid-cols-12 bg-[--panel-body] w-full">
+                    <div class="flex flex-col col-span-8 lg:col-span-5">
+                        {% for line in order.lines %}
+                            <div class="flex">
+                                <div class="flex min-w-[96px] min-h-[96px] justify-center items-center">
+                                    {% if line.product_image_url %}
+                                    <img class="w-[96px] h-[96px]" src="{{ line.product_image_url }}" />
+                                    {% else %}
+                                    <i class="fa-solid fa-box-open text-5xl"></i>
+                                    {% endif %}
+                                </div>
+
+                                <div class="flex flex-col justify-center ml-[10px] lg:ml-[24px]">
+                                    <span class="block max-w-[170px] lg:max-w-[250px] truncate font-bold text-zinc-100 text-[20px] font-[Rajdhani]">{{ line.product_name }}</span>
+                                    <span class="text-sm">{{ order.is_subscription ? (not order.billing_cycle_sequence ? 'Subscription Payment' : 'Subscription Renewal') : 'One-Time Purchase' }}</span>
+                                    <span class="text-xs">{{ order.pretty_id }}</span>
+                                    <span class="block lg:hidden text-base font-semibold text-gray-100">{{ order.completed_at|time_diff }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="hidden lg:flex col-span-2 lg:col-span-2 items-center">
+                        <span class="text-base font-semibold text-gray-100 font-[Rajdhani]">{{ order.completed_at|time_diff }}</span>
+                    </div>
+
+                    <div class="flex col-span-2 ml-[40px] lg:ml-0 lg:col-span-1 items-center">
+                        <span class="text-2xl font-bold font-[Rajdhani]">{{ order.total_amount_str }}</span>
+                    </div>
+
+                    <div class="flex items-center lg:mr-[40px] justify-center lg:justify-end col-span-12 lg:col-span-4">
+                        {% if order.is_subscription %}
+                            <a href="/account/subscriptions/{{ order.subscription_id }}">
+                                <div class="flex gap-[9px] items-center p-2 font-[Rajdhani] font-bold tracking-wider text-[--main-color]">
+                                    <span class="text-[18px] uppercase">View subscription</span>
+                                    <i class="fa-solid fa-repeat"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if account_view == "subscriptions" or account_view == "subscription-detail" %}
+            {% if account_view == "subscription-detail" %}
+                <div>
+                    <span class="font-[Rajdhani] text-[40px] uppercase">Viewing subscription {{ subscription.pretty_id }}</span>
+                </div>
+                {% set subscriptions = [subscription] %}
+            {% endif %}
+
+            {% for subscription in subscriptions %}
+                <div class="grid grid-cols-12 bg-[--panel-body] w-full">
+                    <div class="flex flex-col col-span-8 lg:col-span-4">
+                        <div class="flex">
+                            <div class="flex min-w-[96px] min-h-[96px] justify-center items-center">
+                                {% if subscription.product_image_url %}
+                                <img class="w-[96px] h-[96px]" src="{{ subscription.product_image_url }}" />
+                                {% else %}
+                                <i class="fa-solid fa-box-open text-5xl"></i>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex flex-col justify-center ml-[10px] lg:ml-[24px]">
+                                <span class="block max-w-[250px] truncate font-bold text-zinc-100 text-[20px] font-[Rajdhani]">{{ subscription.product_name }}</span>
+                                <span class="text-sm capitalize">{{ subscription.status }}</span>
+                                <span class="text-xs">{{ subscription.pretty_id }}</span>
+
+                                <div class="flex flex-col lg:hidden">
+                                    <span class="text-sm font-[Rajdhani]">Activated <span class="text-white !font-bold">{{ subscription.active_at|time_diff }}</span></span>
+                                    {% if subscription.status == 'canceled' %}
+                                    <span class="text-sm font-[Rajdhani]">Canceled <span class="text-white !font-bold">{{ subscription.canceled_at|time_diff }}</span></span>
+                                    {% else %}
+                                    <span class="text-sm font-[Rajdhani]">Renews <span class="text-white !font-bold">{{ subscription.current_period_end|time_diff }}</span></span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hidden lg:flex flex-col col-span-2 justify-center">
+                        <span class="text-base font-[Rajdhani]">Activated <span class="text-white !font-bold">{{ subscription.active_at|time_diff }}</span></span>
+                        {% if subscription.status == 'canceled' %}
+                        <span class="text-base font-[Rajdhani]">Canceled <span class="text-white !font-bold">{{ subscription.canceled_at|time_diff }}</span></span>
+                        {% else %}
+                        <span class="text-base font-[Rajdhani]">Renews <span class="text-white !font-bold">{{ subscription.current_period_end|time_diff }}</span></span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex flex-col col-span-4 lg:col-span-2 justify-center items-center">
+                        <span class="text-2xl font-bold font-[Rajdhani]">{{ subscription.total_amount_str }}</span>
+                        <span class="text-sm font-semibold font[Rajdhani]">Every {{ subscription.interval_value }} {{ subscription.interval_scale }}</span>
+                    </div>
+
+                    <div class="flex items-center lg:mr-[40px] col-span-12 justify-center lg:justify-end lg:col-span-4">
+                        {% if subscription.status != 'canceled' %}
+                            <form method="POST" action="/account/subscriptions/{{ subscription.id }}/cancel">
+                                <button class="flex gap-[9px] items-center p-2 font-[Rajdhani] font-bold tracking-wider text-red-500">
+                                    <span class="text-[18px] uppercase">Cancel Subscription</span>
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if account_view == "inventory-items" %}
+            {% for item in inventory_items %}
+                <div class="grid grid-cols-12 bg-[--panel-body] w-full">
+                    <div class="flex flex-col col-span-6 lg:col-span-5">
+                        <div class="flex">
+                            <div class="flex flex-col justify-center ml-[12px] py-2">
+                                <span class="block max-w-[170px] lg:max-w-[350px] truncate font-bold text-zinc-100 text-[20px] font-[Rajdhani]">{{ item.product.name }}</span>
+                                <span class="text-sm capitalize">{{ item.state }}</span>
+                                <span class="text-xs">{{ subscription.pretty_id }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col col-span-6 lg:col-span-3 justify-center">
+                        {% if item.active_at %}
+                        <span class="text-base font-[Rajdhani]">Activated <span class="text-white !font-bold">{{ item.active_at|time_diff }}</span></span>
+                        {% elseif item.added_at %}
+                        <span class="text-base font-[Rajdhani]">Added <span class="text-white !font-bold">{{ item.added_at|time_diff }}</span></span>
+                        {% endif %}
+
+                        {% if item.removed_at %}
+                        <span class="text-base font-[Rajdhani]">Removed <span class="text-white !font-bold">{{ item.removed_at|time_diff }}</span></span>
+                        {% elseif item.expires_at %}
+                        <span class="text-base font-[Rajdhani]">Expires <span class="text-white !font-bold">{{ item.expires_at|time_diff }}</span></span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center justify-center col-span-12 lg:mr-[40px] lg:justify-end lg:col-span-4">
+                        {% if item.subscription_id %}
+                            <a href="/account/subscriptions/{{ item.subscription_id }}">
+                                <div class="flex gap-[9px] items-center p-2 font-[Rajdhani] font-bold tracking-wider text-[--main-color]">
+                                    <span class="text-[18px] uppercase">View subscription</span>
+                                    <i class="fa-solid fa-repeat"></i>
+                                </div>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div class="flex flex-col rounded-[6px] bg-[--border-color] p-[1px]">
+    <a href="/account" class="block relative h-[72px] px-[24px] {% if account_view != "orders" %}bg-[--panel-body]{% endif %}">
+        {% if account_view == "orders" %}
+            <div class="absolute left-0 h-[72px] w-[10px] bg-[--main-color]"></div>
+        {% endif %}
+        <div class="flex flex-col h-full justify-center uppercase">
+            <span class="text-[--text-color] text-sm">Account</span>
+            <span class="text-zinc-100 font-bold text-[16px] font-[Rajdhani] tracking-wider">Orders</span>
+        </div>
+    </a>
+    <a href="/account/subscriptions" class="block relative h-[72px] px-[24px] mt-[1px] {% if account_view != "subscriptions" and account_view != "subscription-detail" %}bg-[--panel-body]{% endif %}">
+        {% if account_view == "subscriptions" or account_view == "subscription-detail" %}
+            <div class="absolute left-0 h-[72px] w-[10px] bg-[--main-color]"></div>
+        {% endif %}
+        <div class="flex flex-col h-full justify-center uppercase">
+            <span class="text-[--text-color] text-sm">Account</span>
+            <span class="text-zinc-100 font-bold text-[16px] font-[Rajdhani] tracking-wider">Subscriptions</span>
+        </div>
+    </a>
+    <a href="/account/inventory-items" class="block relative h-[72px] px-[24px] mt-[1px] {% if account_view != "inventory-items" %}bg-[--panel-body]{% endif %}">
+        {% if account_view == "inventory-items" %}
+            <div class="absolute left-0 h-[72px] w-[10px] bg-[--main-color]"></div>
+        {% endif %}
+        <div class="flex flex-col h-full justify-center uppercase">
+            <span class="text-[--text-color] text-sm">Account</span>
+            <span class="text-zinc-100 font-bold text-[16px] font-[Rajdhani] tracking-wider">Items</span>
+        </div>
+    </a>
+</div>
+{% endblock %}

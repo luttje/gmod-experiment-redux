@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-body" data-product-slug="{{ product.slug }}">
+    <div class="product-page grid grid-cols-12 gap-4">
+        <div class="product-page-image flex items-center justify-center col-span-12 lg:col-span-5 gap-7">
+            {% if product.image_url %}
+            <img class="product-img" alt="{{ product.name }}" src="{{ product.image_url }}" />
+            {% else %}
+            <i class="fa-solid fa-box-open text-gray-900 text-9xl"></i>
+            {% endif %}
+        </div>
+        <div class="product-page-details lg:col-span-7 col-span-12">
+            <div class="product-details-top">
+                <div class="product-stock-out">
+                    {% if product.stock.available_to_purchase == false %}
+                    <span class="!text-red-400 !font-bold !text-2xl">
+                        OUT OF STOCK
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="product-info">
+                    <div class="flex flex-col product-name">
+                        {{ product.name }}
+                        {% if product.label %}
+                        <span>{{ product.label }}</span>
+                        {% endif %}
+                        {% if product.pricing.active_sale %}
+                        <span class="!text-[--main-color]">{{ product.pricing.active_sale.name }}</span>
+                        {% endif %}
+
+                        {% if product.pricing.vat_rate %}
+                        <span class="!text-sm">Including {{ product.pricing.vat_rate.percentage }}% {{ product.pricing.vat_rate.vat_abbreviation }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="product-price">
+                        {% if product.pricing.active_sale %}
+                        <h3 class="line-through text-red-400">{{ product.pricing.price_original|money }} {{ store.currency }}</h3>
+                        {% endif %}
+
+                        {% if product.price == 0.00 %}
+                        <h3>Free</h3>
+                        {% else %}
+                        <h3>{{ product.price|money }} {{ store.currency }}</h3>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="product-bot mt-4">
+                <div class="product-small-description">
+
+                    {% if product.single_game_server_only %}
+                    <div class="small-title">
+                        <i class="fa-solid fa-server text-[--main-color]"></i>
+                        <span class="min-w-[140px] ml-1">Game Server</span>
+                        <span class="product-det-border"></span>
+                    </div>
+                
+                    <div class="mt-2 mb-4">
+                        <select id="gameServerDropdown" name="gameServer" class="form-select block w-full pl-3 pr-10 py-2 text-base bg-[--panel-body] border border-[--border-color] sm:text-sm rounded-md shadow-md">
+                            {% for gameServer in product.gameservers %}
+                                <option value="{{ gameServer.id }}">{{ gameServer.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    {% for custom_variable in product.custom_variables %}
+                    <div class="small-title">
+                        <i class="fa-solid fa-gear text-[--main-color]"></i>
+                        <span class="min-w-[140px] ml-1">{{ custom_variable.name }}</span>
+                        <span class="product-det-border"></span>
+                    </div>
+                
+                    <div class="mt-2 mb-4">
+                        {% if custom_variable.type == "dropdown" %}
+                            <select id="customVariables[{{ custom_variable.identifier }}]" name="{{ custom_variable.identifier }}" class="form-select block w-full pl-3 pr-10 py-2 text-base bg-[--panel-body] border border-[--border-color] sm:text-sm rounded-md shadow-md">
+                                {% for option in custom_variable.options %}
+                                    <option value="{{ option.value }}">{{ option.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <input type="{{ custom_variable.type }}" pattern="{{ custom_variable.value_regex }}" required id="customVariables[{{ custom_variable.identifier }}]" name="{{ custom_variable.identifier }}" placeholder="{{ custom_variable.description }}" class="form-select block w-full placeholder:opacity-50 pl-3 pr-10 py-2 text-base bg-[--panel-body] border border-[--border-color] sm:text-sm rounded-md shadow-md" />
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="small-title">
+                        <i class="fa-solid fa-basket-shopping text-[--main-color]"></i>
+                        <span class="ml-1">Checkout</span>
+                        <span class="product-det-border"></span>
+                    </div>
+                    <div class="small-text">{{ product.label | raw }}</div>
+                </div>
+            </div>
+            <div class="product-buttons mt-4">
+                <div class="mt-4">
+                    {% if product.stock.available_to_purchase == false %}
+                    <span class="!text-red-400 !font-bold !text-2xl">
+                        OUT OF STOCK
+                    </span>
+                    {% else %}
+                    <div id="mainActions" class="mt-2 flex gap-2">
+                        {% if product.allow_subscription %}
+                        <button onclick="subscribeToProduct();" class="add-btn">Subscribe</a>
+                            {% endif %}
+                            {% if product.allow_one_time_purchase %}
+                            <button onclick="addProductToCart();" class="add-btn">Add to Cart</a>
+                            {% endif %}
+                            {% if product.allow_one_time_purchase and not product.is_gifting_disabled %}
+                            <button id="giftButton" onclick="toggleGiftActions();" class="add-gift-btn">Gift</button>
+                            {% endif %}
+                    </div>
+
+                    <div id="giftActions" class="hidden mt-2 flex gap-2">
+                        <input type="text" id="idInput" placeholder="Enter {{ auth_provider == 'steam' ? 'SteamID64' : auth_provider }}" class="border rounded px-3 py-2">
+                        <button id="purchaseFromGift" onclick="handlePurchase('{{ auth_provider }}');" class="add-gift-btn">
+                            Gift
+                        </button>
+                        <button id="closeGift" onclick="toggleGiftActions();" class="close-gift">
+                            Close
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="prose !prose-zinc !prose-invert max-w-full product-description mt-4">
+        {{ product.description | raw }}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,230 @@
+{
+    "author": "PayNow",
+    "updates": {
+        "supported": true,
+        "version_check_supported": true,
+        "version": "1.0.7",
+        "github_url": "https://github.com/paynow-gg/obsidian-template",
+        "github_branch": "main"
+    },
+    "config": [
+        {
+            "header": "General Options",
+            "options": [
+                {
+                    "id": "index",
+                    "name": "Index Page Content",
+                    "default": "<p>Welcome to your store!</p> <p></p> <h2>Quick Setup Guide:</h2> <p>To display products here:</p> <ol> <li>Create a tag</li> <li>Assign the tag to product(s)</li> <li>Create a navlink for the tag</li> </ol>",
+                    "description": "The text you see on the home page.",
+                    "type": "rich-text"
+                },
+                {
+                    "id": "support_url",
+                    "name": "Support URL",
+                    "default": "",
+                    "description": "URL to a website where your customers can receive support.",
+                    "type": "textarea"
+                }
+            ]
+        },
+        {
+            "header": "Template Colors",
+            "options": [
+              {
+                "id": "main-color",
+                "name": "Main Color",
+                "default": "#754DD4",
+                "description": "Template main content color",
+                "type": "colour-picker"
+              },
+              {
+                "id": "second-color",
+                "name": "Second Color",
+                "default": "#754DD4",
+                "description": "Second color, used for gradients and hover animations",
+                "type": "colour-picker"
+              }
+            ]
+        },
+        {
+            "header": "Banner Settings",
+            "options": [
+                {
+                    "id": "banner",
+                    "name": "Banner",
+                    "description": "Is the large banner enabled?",
+                    "type": "toggle",
+                    "default": false
+                },
+                {
+                    "id": "banner_img",
+                    "name": "Banner Image",
+                    "default": "https://cdn.paynow.gg/images/templates/gord/banner.png",
+                    "description": "The image of the banner.",
+                    "type": "image-uploader"
+                },
+                {
+                    "id": "banner_text",
+                    "name": "Banner Title",
+                    "default": "MAIN BANNER",
+                    "description": "The title of the large banner.",
+                    "type": "textarea"
+                },
+                {
+                    "id": "banner_link",
+                    "name": "Banner Link",
+                    "default": "",
+                    "description": "The destination URL for the banner's redirection. Optional.",
+                    "type": "textarea"
+                },
+                {
+                    "id": "banner_only_home",
+                    "name": "Show Banner only on the home page",
+                    "description": "Should the banner be shown only on the main home page?",
+                    "type": "toggle",
+                    "default": false
+                }
+            ]
+        },
+        {
+            "header": "Customize Home Page",
+            "options": [
+              {
+                "id": "home_sections",
+                "name": "Home Sections",
+                "description": "",
+                "type": "nested-array",
+                "default": [
+                  {
+                    "home_section_title": "Disclaimer",
+                    "home_section_text": "<p>All products are sold by PayNow.gg, our authorized reseller and official Merchant of Record. They handle all sales, payments, and order fulfillment.</p>",
+                    "home_section_link": "",
+                    "home_section_link_text": ""
+                  }
+                ],
+                "nested_options": [
+                  {
+                    "id": "home_section_title",
+                    "name": "Section Name",
+                    "default": "",
+                    "type": "textarea"
+                  },
+                  {
+                    "id": "home_section_text",
+                    "name": "Section Content",
+                    "default": "",
+                    "type": "rich-text"
+                  },
+                  {
+                    "id": "home_section_link",
+                    "name": "Section Button Link",
+                    "default": "",
+                    "description": "URL Link of a button in this section, keep empty to disable",
+                    "type": "textarea"
+                  },
+                  {
+                    "id": "home_section_link_text",
+                    "name": "Section Button Name",
+                    "default": "",
+                    "description": "Button name of a button in this section, keep empty to disable",
+                    "type": "textarea"
+                  }
+                ]
+              }
+            ]
+        },
+        {
+          "header": "Custom Pages",
+          "options": [
+            {
+              "id": "custom_pages",
+              "name": "Page Entries",
+              "type": "nested-array",
+              "default": [],
+              "nested_options": [
+                {
+                  "id": "path",
+                  "name": "Page Path",
+                  "default": "custom-page",
+                  "description": "Make sure this path is unique",
+                  "type": "textarea"
+                },
+                {
+                  "id": "title",
+                  "name": "Page Title",
+                  "default": "",
+                  "type": "textarea"
+                },
+                {
+                  "id": "content",
+                  "name": "Page Content",
+                  "default": "",
+                  "type": "rich-text"
+                },
+                {
+                  "id": "icon",
+                  "name": "Navigation Icon",
+                  "description": "A fontawesome icon ID to show in the navbar (example: fa-circle-info)",
+                  "default": "fa-circle-info",
+                  "type": "textarea"
+                },
+                {
+                  "id": "settings",
+                  "name": "Don't show in navigation",
+                  "description": "If enabled this custom page wont show in navbar",
+                  "type": "toggle",
+                  "default": false
+                }
+              ]
+            }
+          ]
+      },
+        {
+            "header": "Social Media",
+            "options": [
+                {
+                    "id": "discord",
+                    "name": "Discord Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                    "id": "twitch",
+                    "name": "Twitch Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                    "id": "youtube",
+                    "name": "Youtube Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                    "id": "twitter",
+                    "name": "Twitter Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                    "id": "instagram",
+                    "name": "Instagram Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                    "id": "facebook",
+                    "name": "Facebook Link",
+                    "default": "",
+                    "type": "textarea"
+                },
+                {
+                  "id": "tiktok",
+                  "name": "Tiktok Link",
+                  "default": "",
+                  "type": "textarea"
+                }
+            ]
+        }
+    ]
+}

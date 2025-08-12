@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="border-top home-content">
+        {% include 'svgs/stripes.html' %}
+    
+        <div class="home-content-sec content-field">
+            <h1 class="home-content-tit">Order Completed</h1>
+    
+            <div class="home-content-text">
+                {{ complete.text | raw }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

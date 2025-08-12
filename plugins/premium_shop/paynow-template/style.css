@@ -1,0 +1,918 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.container {
+    position: relative;
+    height: 100%;
+
+    @media only screen and (max-width: 768px) {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+html {
+    font: 15px / 1.4 sans-serif;
+    font-family: 'Roboto Flex', sans-serif;
+    font-weight: 400;
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    word-wrap: break-word;
+    background-color: transparent;
+}
+
+body {
+    background-color: transparent;
+    font-family: 'Roboto Flex', sans-serif;
+    color: var(--text-color);
+}
+
+.body.out-game {
+    background-color: var(--bg-color);
+    background-image: url("https://cdn.paynow.gg/images/templates/gord/bg-blur.png");
+    object-fit: cover;
+}
+
+.index-section h1 {
+    font-family: Rajdhani;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 24px;
+    text-transform: uppercase;
+    color: #F4F4F5;
+}
+
+.social-media {
+    width: 20%;
+}
+
+.header-account {
+    width: 20%;
+}
+
+.social-media li a i {
+    font-size: 20px;
+    color: #fff;
+}
+
+.social-media li a i {
+    padding: 10px 8px;
+    background: var(--first-color);
+    border-radius: 2px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+
+.topbar {
+    background: var(--first-color);
+    padding: var(--spacing-s);
+}
+
+.social-media li a.twitch i {
+    background: #9147FF;
+}
+
+.social-media-item.discord i {
+    background: #5865F2;
+}
+
+.social-media-item.youtube i {
+    background: #DC2626;
+}
+
+.social-media-item.twitter i {
+    background: black;
+}
+
+.social-media-item.instagram i {
+    background: #ff00a5;
+}
+
+.social-media-item.facebook i {
+    background: #3146dd;
+}
+
+.topbar {
+    background: var(--panel-body);
+    padding: var(--spacing-s);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+li.nav-item a {
+    font-family: 'Rajdhani';
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 16px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+li.nav-item a:hover {
+    color: var(--hover-color);
+}
+
+li.nav-item.active a {
+    color: var(--main-color);
+}
+
+li.nav-item a i {
+    opacity: 0.4;
+}
+
+li.nav-item a {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.module {
+    background: linear-gradient(0deg, #18181B, #18181B), linear-gradient(180deg, rgba(39, 39, 42, 0.2) 0%, rgba(24, 24, 27, 0) 21.88%);
+    border-radius: var(--border-radius);
+    border: var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.home-content {
+    background: linear-gradient(0deg, #18181B, #18181B), linear-gradient(180deg, rgba(39, 39, 42, 0.2) 0%, rgba(24, 24, 27, 0) 21.88%);
+    border-radius: var(--border-radius);
+    border: var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.module-body {
+    padding: var(--spacing-s);
+}
+
+h2.module-title {
+    font-family: Rajdhani;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    text-transform: uppercase;
+    color: #F4F4F5;
+    position: absolute;
+    margin-top: -24px;
+    margin-left: 10px;
+}
+
+.index-section {
+    background: linear-gradient(0deg, #18181B, #18181B), linear-gradient(180deg, rgba(39, 39, 42, 0.2) 0%, rgba(24, 24, 27, 0) 21.88%);
+    border-radius: var(--border-radius);
+    border: var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.index-section>h1 {
+    text-align: left;
+    position: absolute;
+    margin-top: -24px;
+    margin-left: 10px;
+}
+
+.index-section-body {
+    padding: var(--spacing-m) var(--spacing-s);
+}
+
+.index-section-body p {
+    margin-bottom: var(--spacing-s);
+}
+
+.index-section-body a {
+    padding: var(--spacing-xs) var(--spacing-s);
+    background: var(--button);
+    color: #fff;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    text-align: left;
+    font-family: 'Rajdhani';
+    text-transform: uppercase;
+}
+
+.home-content-sec {
+    padding: var(--spacing-m) var(--spacing-s);
+}
+
+h1.home-content-tit {
+    font-family: Rajdhani;
+    font-size: 60px;
+    font-weight: 400;
+    line-height: 60px;
+    text-align: left;
+    color: #F4F4F5;
+    text-transform: uppercase;
+}
+
+.progress-bar {
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    height: 12px;
+}
+
+@keyframes moveStripes {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 40px 0;
+    }
+}
+
+@keyframes pulseOpacity {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+input {
+    background: var(--input);
+    border-color: var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+}
+
+:focus-visible {
+    outline: 0;
+}
+
+input:focus-visible {
+    outline-offset: 0px;
+}
+
+.payment-goal {
+    background: var(--first-color);
+    border-radius: 50px;
+    width: 100%;
+    height: 12px;
+    overflow: hidden;
+}
+
+.goal-current {
+    font-family: Roboto Flex;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 32px;
+    margin-bottom: var(--spacing-s);
+}
+
+.payment-goal-display {
+    display: flex;
+    justify-content: space-between;
+}
+
+.payment-goal-data {
+    text-align: center;
+    text-align: -webkit-center;
+    font-family: Roboto Flex;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.payment-max {
+    font-family: Roboto Flex;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.btn-gift {
+    background: var(--button);
+    border-color: var(--button);
+    transition: var(--transition);
+    border-radius: var(--border-radius);
+}
+
+.btn:hover {
+    background: var(--button);
+    filter: contrast(0.8);
+    transition: var(--transition);
+}
+
+.btn {
+    font-weight: 700;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: var(--border-radius);
+    background: var(--button);
+    border-color: var(--button);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.error-msg {
+    background: #d75252;
+    margin: var(--spacing-s);
+    border-radius: var(--border-radius);
+    color: #fff;
+    font-family: 'Rajdhani';
+    margin-top: 0;
+}
+
+.success-msg {
+    background: #52d787;
+    margin: var(--spacing-s);
+    border-radius: var(--border-radius);
+    color: #fff;
+    font-family: 'Rajdhani';
+    margin-top: 0;
+}
+
+.header-item svg {
+    height: 24px;
+}
+
+.header-item {
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xs);
+    background: var(--second-color);
+    border-radius: var(--border-radius);
+    border: 1px solid #3F3F4640;
+    position: relative;
+}
+
+.header-item.header-item-fixed {
+    width: 40px;
+}
+
+.header-item:first-child {
+    padding: 0;
+}
+
+span.cart-number {
+    position: absolute;
+    top: -11px;
+    right: -11px;
+    height: 22px;
+    width: 22px;
+    background: var(--main-color);
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Roboto Flex;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    color: #fff;
+}
+
+.category-package {
+    background: linear-gradient(0deg, #18181B, #18181B), linear-gradient(180deg, rgba(39, 39, 42, 0.2) 0%, rgba(24, 24, 27, 0) 21.88%);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+span.category-package-name {
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+}
+
+.category-package-details {
+    padding: var(--spacing-s);
+}
+
+.package-bott {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    align-content: center;
+    padding: var(--spacing-s) var(--spacing-xs);
+    border-top: var(--border);
+    position: relative;
+    overflow: hidden;
+    background: var(--second-color);
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.category-package-price-list {
+    font-family: Roboto Flex;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: left;
+    color: #fff;
+}
+
+.category-package-buttons {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: var(--spacing-xs);
+}
+
+.btn-svg span {
+    color: #FAFAFA;
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.btn-svg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.category-package-buttons a {
+    border-radius: 0;
+    height: 35px;
+}
+
+.category-package-price-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.btn-modal svg {
+    height: 36px;
+}
+
+.btn-modal {
+    width: 40px;
+    padding: 0;
+    height: 35px;
+}
+
+.category-page {
+    text-align: center;
+    text-align: -webkit-center;
+}
+
+h2.category-title {
+    font-family: Rajdhani;
+    font-size: 60px;
+    font-weight: 400;
+    line-height: 60px;
+    text-align: center;
+    color: #F4F4F5;
+}
+
+.category-description {
+    font-family: Roboto Flex;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    text-align: center;
+    color: var(--text-color);
+}
+
+span.category-package-price-disc {
+    color: #d96969;
+    font-size: 12px;
+    text-decoration: line-through;
+}
+
+
+
+
+.footer-copyright {
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+}
+
+footer {
+    background: var(--footer-bg);
+    padding: var(--spacing-m) 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-links a {
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+a:hover {
+    color: #fff;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.footer-copyright span {
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+    color: #71717A;
+    text-transform: uppercase;
+}
+
+.product-page,
+.product-description {
+    background: var(--panel-body);
+    box-shadow: var(--shadow);
+    border: var(--border);
+    border-radius: var(--border-radius);
+}
+
+@media (min-width: 1536px) {
+    .container {
+        max-width: 1280px !important;
+    }
+}
+
+.product-page-image {
+    padding: var(--spacing-s);
+    background: #27272A40;
+}
+
+img.product-img {
+    max-height: 15rem;
+    width: auto;
+}
+
+.product-page-details {
+    padding: var(--spacing-m) var(--spacing-s);
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-name {
+    font-family: Rajdhani;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 36px;
+    text-align: left;
+    color: #fff;
+}
+
+.product-price {
+    font-family: Rajdhani;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 30px;
+    text-align: left;
+    color: #F4F4F5;
+}
+
+.product-details-top span {
+    font-family: Roboto Flex;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    text-align: left;
+    color: var(--text-color);
+}
+
+.small-title span {
+    font-family: Rajdhani;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.small-title svg path {
+    fill: var(--main-color);
+}
+
+.small-title {
+    display: flex;
+    align-items: center;
+}
+
+span.product-det-border {
+    width: 100%;
+    background: #27272A;
+    height: 2px;
+    margin-left: var(--spacing-xs);
+}
+
+.product-description {
+    padding: var(--spacing-m);
+}
+
+button.add-btn {
+    background: var(--button);
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+button#giftButton {
+    background: #3374ed;
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+button#purchaseFromGift {
+    background: var(--button);
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+button#closeGift {
+    background: #e36060;
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+span.cart-page-title {
+    font-family: Rajdhani;
+    font-size: 60px;
+    font-weight: 400;
+    line-height: 60px;
+    text-align: left;
+    color: #F4F4F5;
+    text-transform: uppercase;
+}
+
+.nr-item {
+    font-family: Rajdhani;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 24px;
+    align-self: center;
+    color: #F4F4F5;
+}
+
+hr {
+    border-color: #27272A;
+}
+
+table {
+    max-width: 100%;
+    background-color: transparent;
+    width: 100%;
+}
+
+.table>thead>tr>th,
+.table>tbody>tr>th,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>tbody>tr>td,
+.table>tfoot>tr>td {
+    padding: 15px 8px;
+    line-height: 1.42857143;
+    vertical-align: top;
+    text-align: left;
+    align-content: center;
+}
+
+table tbody td {
+    vertical-align: middle;
+}
+
+table>thead>tr>th {
+    vertical-align: bottom;
+}
+
+table tbody .image {
+    width: 10%;
+    text-align: center;
+    align-content: center;
+}
+
+table tbody .name {
+    width: 100%;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    margin-left: var(--spacing-xs);
+}
+
+table tbody .options {
+    width: 25%;
+    text-align: center;
+}
+
+table tbody .price {
+    width: 15%;
+    text-align: center;
+}
+
+table tbody .quantity {
+    width: 5%;
+    text-align: center;
+}
+
+table tbody .total {
+    width: 15%;
+    text-align: center;
+}
+
+table tbody .close {
+    width: 5%;
+    text-align: center;
+}
+
+table input {
+    width: 40px;
+    text-align: center;
+}
+
+tbody tr {
+    background: var(--panel-body);
+    border-top: var(--spacing-xs) solid #1b1b1b;
+}
+
+tbody tr:first-child {
+    border: none;
+}
+
+.table>thead>tr>th {
+    text-transform: uppercase;
+    font-family: Rajdhani;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: left;
+    color: #fff;
+}
+
+td.image {
+    background: var(--second-color);
+    padding: var(--spacing-xs) !important;
+}
+
+td.image .product-img {
+    height: 65px;
+    width: auto;
+}
+
+td.name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-content: center;
+    gap: var(--spacing-xs);
+}
+
+span.product-name {
+    font-family: Rajdhani;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+}
+
+.name-sec {
+    font-family: Roboto Flex;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    text-align: left;
+    color: #A1A1AA;
+}
+
+td.price span {
+    font-family: Rajdhani;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    color: #A1A1AA;
+}
+
+td.total span {
+    font-family: Rajdhani;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    color: #fff;
+}
+
+td.close {
+    align-content: center;
+}
+
+table tbody .close a i {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.remove-btn {
+    background: #E11D48;
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+    border: 1px solid #ffffff3d;
+}
+
+a.add-btn {
+    background: var(--button);
+    padding: var(--spacing-xs) var(--spacing-s);
+    border: var(--border);
+    font-family: Rajdhani;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0.1em;
+    color: #fff;
+    text-transform: uppercase;
+    border: 1px solid #FFFFFF66;
+    width: 100%;
+}
+
+.subtotal span {
+    font-family: Rajdhani;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: left;
+    color: #A1A1AA;
+    text-transform: uppercase;
+}
+
+.subtotal p {
+    font-family: Rajdhani;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 24px;
+    text-align: right;
+    color: #fff;
+}

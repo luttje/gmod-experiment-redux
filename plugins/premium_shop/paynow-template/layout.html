@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible"
+          content="ie=edge">
+    <title>{{ store.name }}</title>
+    <link rel="shortcut icon"
+          href="{{ favicon }}">
+
+    <meta name="robots"
+          content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="og:type"
+          content="website">
+    <meta name="og:locale"
+          content="en_EN">
+    <meta name="og:image:width"
+          content="1200">
+    <meta name="og:image:height"
+          content="630">
+    <meta name="twitter:card"
+          content="summary_large_image">
+    <meta name="og:site_name"
+          content="{{ store.name }}">
+    <meta name="og:title"
+          content="{{ store.name }}">
+    <meta name="og:image:alt"
+          content="{{ store.name }}">
+    <meta name="theme-color"
+          content="{{ config("main-color") }}">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+    <link href="{{ asset('style.css') }}"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap"
+          rel="stylesheet">
+    <link href="https://cdn.paynow.gg/fonts/fontawesome-6.6.0/css/all.min.css"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --main-color: {
+                    {
+                    config("main-color")
+                }
+            }
+
+            ;
+
+            /*- main color -*/
+            --hover-color: {
+                    {
+                    config("second-color")
+                }
+            }
+
+            ;
+
+            /*- hover color-*/
+            --text-color: #A1A1AA;
+
+            --header-bg: #18181B;
+            --footer-bg: #09090B66;
+
+            --button: {
+                    {
+                    config("main-color")
+                }
+            }
+
+            ;
+
+            --border-radius: 0px;
+            --bg-color: #18181B;
+            --panel-body: #18181B;
+            --border-color: #3F3F46;
+            --border: 1px solid var(--border-color);
+            --border-top: linear-gradient(0deg, #18181B, #18181B),
+            linear-gradient(180deg, rgba(39, 39, 42, 0.2) 0%, rgba(24, 24, 27, 0) 21.88%);
+            --shadow: 0px 0px 2px 0px #000000;
+
+            --first-color: #3F3F46;
+            --second-color: #27272A;
+            --input: #09090B;
+            --dropdown:;
+            --dropdown-active:;
+
+            --logo-height: 100px;
+            --btn-pad: 0.5rem;
+            --spacing-xs: 0.5rem;
+            --spacing-s: 1rem;
+            --spacing-m: 1.5rem;
+
+            --transition: 0.3s easy-out;
+        }
+    </style>
+
+    <script src="https://cdn.tailwindcss.com?plugins=typography"
+            nonce="MzQzMDQ1NjQ5MSwzMjA2ODk0MDcz"></script>
+    <script src="{{ asset("script.js") }}"></script>
+</head>
+
+<body class="body">
+    <div class="container mx-auto !min-h-[calc(100vh-16.5rem)]">
+        <div class="nav topbar mb-4 mt-5 flex justify-between items-center">
+            <ul class="inline-flex flex-wrap items-center h-full gap-10 tracking-wide">
+                <li class="nav-item {% if request.path == "/" %}active{% endif %}">
+                    <a href="/">
+                        Home
+                    </a>
+                </li>
+
+                {% for navlink in navlinks %}
+                <li class="nav-item {% if activeRootNavlink.node_id == navlink.node_id %}active{% endif %}">
+                    <div class="relative inline-block text-left">
+                        <a class="flex items-center"
+                           href="{% if navlink.children|length > 0 %}#{% else %}/products?tag={{ navlink.tag_query }}{% endif %}"
+                           onclick="toggleDropdown('{{ navlink.node_id }}')">
+                            {{ navlink.name }}
+                            {% if navlink.children|length > 0 %}
+                            <i class="fa-solid fa-chevron-down"></i>
+                            {% endif %}
+                        </a>
+
+                        {% if navlink.children|length > 0 %}
+                        {% include 'menu-links.html' with {'navlink': navlink, 'activeNavlink': activeNavlink} only %}
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+
+                {% for custom_page in custom_pages %}
+                {% if not custom_page.settings %}
+                {% if custom_page.path starts with '/' %}
+                {% set page_parsed_path = custom_page.path %}
+                {% else %}
+                {% set page_parsed_path = '/' ~ custom_page.path %}
+                {% endif %}
+
+                <li class="nav-item {% if request.path == page_parsed_path %}active{% endif %}">
+                    <a href="{{ page_parsed_path }}">
+                        <div class="nav-icon">
+                            <i class="fa-solid {{ custom_page.icon }}"></i>
+                        </div>
+                        {{ custom_page.title }}
+                    </a>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+
+            <div class="header-account flex mt-4 md:mt-0 md:justify-end gap-2 md:items-center">
+                {% if customer.id %}
+                <a href="/account">
+                    <div class="header-item">
+                        <img class="header-item header-item-fixed"
+                             alt="Avatar"
+                             src="{{ customer.profile.avatar_url }}" />
+                    </div>
+                </a>
+                {% endif %}
+                {% if customer.id %}
+                <a href="/auth/sign-out">
+                    <div class="header-item">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </div>
+                </a>
+                {% else %}
+                <a href="/auth/sign-in">
+                    <div class="font-[Rajdhani] font-semibold header-item !px-2">
+                        <span class="uppercase mr-2">Sign in</span>
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </div>
+                </a>
+                {% endif %}
+                {% if config("support_url") %}
+                <a href="{{ config("support_url") }}">
+                    <div class="header-item">
+                        <div class="header-subsc">
+                            {% include 'svgs/support.html' %}
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
+                {% if customer.id %}
+                <a href="/cart">
+                    <div class="header-item">
+                        <div class="header-cart">
+                            {% include 'svgs/cart.html' %}
+                            <span class="cart-number">{{ cart.lines|length }}</span>
+                        </div>
+                    </div>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if config("banner") == "true" and (not config("banner_only_home") or request.path == "/") %}
+        <a class="{% if not config("banner_link") %}pointer-events-none{% endif %}"
+           href="{{ config("banner_link") }}">
+            <div class="relative w-full h-[192px] mb-4 mt-3 rounded-lg">
+                <img class="object-cover w-full h-full"
+                     src="{{ config("banner_img") }}">
+                <h1 class="text-6xl font-[Rajdhani] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">{{ config("banner_text") }}</h1>
+            </div>
+        </a>
+        {% endif %}
+
+        {% set is_full_width_container = block('sidebar') is not defined and modules is empty %}
+
+        <div class="grid grid-cols-12 gap-4 mt-8">
+            <div class="flex flex-col col-span-12 lg:col-span-3 gap-7 {% if is_full_width_container %}hidden{% endif %}">
+                {# {% if config("navigation") == "Navbar" %}
+                <nav class="nav navbar">
+                    <ul class="inline-flex flex-wrap items-center h-full gap-6 tracking-wide">
+                        <li class="nav-item {% if request.path == "/" %}active{% endif %}">
+                            <a href="/">Home</a>
+                        </li>
+
+                        {% for navlink in navlinks %}
+                        <li class="nav-item {% if activeNavlink.node_id == navlink.node_id %}active{% endif %}">
+                            <div class="relative inline-block text-left">
+                                <a href="{% if navlink.children|length > 0 %}#{% else %}products?tag={{ navlink.tag_query }}{% endif %}" onclick="toggleDropdown('{{ navlink.node_id }}')">
+                                    {% if config("nav_icon") == "Show" %}
+                                    {% if config("nav_icon_type") == "Icons" %}
+                                    <div class="nav-icon">
+                                        {% if config("icon1") == "Home" %}<i class="fa-solid fa-house"></i>{% endif %}
+                                        <i class="fa-solid fa-box"></i>
+                                        <i class="fa-solid fa-cube"></i>
+                                        <i class="fa-solid fa-list"></i>
+                                        <i class="fa-solid fa-table"></i>
+                                    </div>
+                                    {% endif %}
+                                    {% if config("nav_icon_type") == "Images" %}
+                                    <span class="nav-icon"></span>
+                                    {% endif %}
+                                    {% endif %}
+                                    {{ navlink.name }}
+
+                                    {% if navlink.children|length > 0 %}
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                    {% endif %}
+                                </a>
+
+                                {% if navlink.children|length > 0 %}
+                                {% include 'menu-links.html' with {'navlink': navlink} only %}
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+                {% endif %} #}
+
+                {% if block('sidebar') is not defined %}
+                {{ modules | raw }}
+                {% else %}
+                {% block sidebar %}{% endblock %}
+                {% endif %}
+            </div>
+
+            {% if notification %}
+            <div id="notification-alert"
+                 class="bg-red-500 text-gray-100 shadow-xl border border-[--border-color] px-4 py-3 text-xl fixed mr-4 lg:mr-0 lg:right-24 bottom-12 animate-bounce duration-[2000ms] transition-opacity">
+                {{ notification.message }}
+            </div>
+            {% endif %}
+
+            <div class="{% if is_full_width_container %}lg:col-span-12{% else %}lg:col-span-9{% endif %} col-span-12">
+                <div class="">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-[85px]">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="footer-copyright">
+                    <span class="font-medium">© {{ store.name }} {{ 'now' | date('Y') }}</span>
+                </div>
+
+                <div class="flex justify-center gap-5 footer-links">
+                    <a href="/legal/user-agreement">User Agreement</a>
+                    <a href="/legal/terms-of-service">Terms of Service</a>
+                    <a href="/legal/privacy-policy">Privacy Policy</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const isInGame = document.cookie.includes("ingame=true") || window.location.hash.includes("in-game");
+
+        if (isInGame) {
+            document.cookie = "ingame=true; path=/";
+        } else {
+            document.body.classList.add('out-game');
+        }
+    </script>
+</body>
+
+</html>

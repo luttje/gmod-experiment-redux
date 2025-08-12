@@ -1,0 +1,36 @@
+<div class="module">
+    {% include 'svgs/stripes.html' %}
+        
+    <div class="module-header module-top">
+        <h2 class="module-title">{{ module.data.settings.header }}</h2>
+    </div>
+    <div class="module-body flex flex-col gap-[16px]">
+        {% for customer in module.data.customers|slice(0, module.data.settings.limit) %}
+        <div class="flex items-center">
+            <img src="{{ customer.steam.avatarUrl ?: defaultAvatar }}" alt="Avatar" class="w-[48px] h-[48px] rounded-full mr-3">
+            <div>
+                <p class="text-lg text-gray-100 font-medium">{{ customer.steam.name ?? customer.name }}</p>
+                {% if module.data.settings.displayCustomerSpendAmount %}
+                <p class="text-sm">
+                    {% if customer.stats.total_spend_amount_gross and module.data.settings.field == 'total_spend_amount_gross' %}
+                    Spent {{ customer.stats.total_spend_amount_gross | money_store_currency }}
+                    {% elseif customer.stats.total_spend_amount_net and module.data.settings.field == 'total_spend_amount_net' %}
+                    Spent {{ customer.stats.total_spend_amount_net | money_store_currency }}
+                    {% elseif customer.stats.average_spend_amount_gross and module.data.settings.field == 'average_spend_amount_gross' %}
+                    Spent {{ customer.stats.average_spend_amount_gross | money_store_currency }}
+                    {% elseif customer.stats.average_spend_amount_net and module.data.settings.field == 'average_spend_amount_net' %}
+                    Spent {{ customer.stats.average_spend_amount_net | money_store_currency }}
+                    {% elseif customer.stats.total_payments and module.data.settings.field == 'total_payments' %}
+                    Made {{ customer.stats.total_payments }} Payments
+                    {% else %}
+                    Data not available
+                    {% endif %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p class="module-empty">No top customers to display.</p>
+        {% endfor %}
+    </div>
+</div>

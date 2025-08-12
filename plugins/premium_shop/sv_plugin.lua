@@ -8,11 +8,23 @@ local STATUS_MAP = {
 	canceled = "canceled"
 }
 
+ix.log.AddType("premiumStatusChanged", function(client, orderId, status, steamID, itemSlug)
+	return Format("Order %s status changed to %s for %s (%s)", orderId, status, steamID, itemSlug)
+end, FLAG_SUCCESS)
+
+ix.log.AddType("premiumAdminAction", function(client, action)
+	return Format("%s performed admin action: %s", client:Name(), action)
+end, FLAG_NORMAL)
+
+ix.log.AddType("premiumPackageClaimed", function(client, packageKey)
+	return Format("%s claimed premium package: %s", client:Name(), packageKey)
+end, FLAG_SUCCESS)
+
 function PLUGIN:OnLoaded()
-	local envFile = file.Read(PLUGIN.folder .. "/web/.env", "LUA")
+	local envFile = file.Read(PLUGIN.folder .. "/.env", "LUA")
 
 	if (not envFile) then
-		ix.util.SchemaErrorNoHalt("The .env file is missing from the web folder for Leaderboards.")
+		ix.util.SchemaErrorNoHalt("The .env file is missing from the premium_shop plugin.")
 		self.disabled = true
 		return
 	end
@@ -25,7 +37,16 @@ function PLUGIN:OnLoaded()
 end
 
 function PLUGIN:DatabaseConnected()
-	local statusses = table.concat(table.GetKeys(STATUS_MAP), ", ")
+	local statusses = ""
+
+	for status, _ in pairs(STATUS_MAP) do
+		if (statusses ~= "") then
+			statusses = statusses .. ", "
+		end
+
+		statusses = statusses .. "'" .. status .. "'"
+	end
+
 	local query
 	query = mysql:Create("exp_premium")
 	query:Create("order_id", "VARCHAR(255) NOT NULL")
@@ -50,7 +71,7 @@ function PLUGIN:OnWipeTables()
 end
 
 function PLUGIN:PrePlayerMessageSend(speaker, chatType, text, bAnonymous)
-	if (speaker:HasPremiumKey("supporter_role")) then
+	if (speaker:HasPremiumPackage("supporter-role-lifetime")) then
 		speaker.ixLastOOC = nil -- No OOC delay for supporters
 	end
 end
@@ -63,7 +84,7 @@ function PLUGIN:PlayerLoadedCharacter(client, character, currentChar)
 end
 
 -- Save premium packages when they change
-function PLUGIN:OnPlayerGainPremiumKey(client, key)
+function PLUGIN:OnPlayerGainPackage(client, key)
 	local character = client:GetCharacter()
 
 	if (character) then
@@ -72,7 +93,7 @@ function PLUGIN:OnPlayerGainPremiumKey(client, key)
 	end
 end
 
-function PLUGIN:OnPlayerLosePremiumKey(client, key)
+function PLUGIN:OnPlayerLosePackage(client, key)
 	local character = client:GetCharacter()
 
 	if (character) then
@@ -87,34 +108,34 @@ end
 
 local playerMeta = FindMetaTable("Player")
 
-function playerMeta:GivePremiumKey(key)
+function playerMeta:GivePremiumPackage(slug)
 	if (not self:GetCharacter()) then
 		return false
 	end
 
 	local premiumPackages = self:GetPremiumPackages()
-	premiumPackages[key] = true
+	premiumPackages[slug] = true
 	self:SetCharacterNetVar("premiumPackages", premiumPackages)
 
-	hook.Run("OnPlayerGainPremiumKey", self, key)
+	hook.Run("OnPlayerGainPackage", self, slug)
 	return true
 end
 
-function playerMeta:RemovePremiumKey(key)
+function playerMeta:RemovePremiumPackage(slug)
 	if (not self:GetCharacter()) then
 		return false
 	end
 
 	local premiumPackages = self:GetPremiumPackages()
-	premiumPackages[key] = nil
+	premiumPackages[slug] = nil
 	self:SetCharacterNetVar("premiumPackages", premiumPackages)
 
-	hook.Run("OnPlayerLosePremiumKey", self, key)
+	hook.Run("OnPlayerLosePackage", self, slug)
 	return true
 end
 
 --[[
-	Database functions for payments
+	Database functions for payment records
 --]]
 
 function PLUGIN:CreatePaymentRecord(orderId, steamId64, playerName, itemSlug, status, callback)
@@ -128,13 +149,20 @@ function PLUGIN:CreatePaymentRecord(orderId, steamId64, playerName, itemSlug, st
 	query:Insert("updated_at", os.time())
 	query:Callback(function(result, status, lastID)
 		if (status == false) then
-			ix.log.Add(nil, "schemaDebug", "CreateAlliance",
-				"Failed to create alliance with result " .. tostring(result) .. " and lastID " .. tostring(lastID) .. ".")
+			ix.log.Add(nil, "schemaDebug", "CreatePaymentRecord",
+				"Failed to create payment record with result " ..
+				tostring(result) .. " and lastID " .. tostring(lastID) .. ".")
+
+			if (callback) then
+				callback(false)
+			end
+
 			return
 		end
 
-		character:SetData("rank", rank)
-		callback(lastID, members)
+		if (callback) then
+			callback(true)
+		end
 	end)
 	query:Execute()
 end
@@ -149,13 +177,57 @@ function PLUGIN:UpdatePaymentRecord(orderId, status, callback)
 			ix.log.Add(nil, "schemaDebug", "UpdatePaymentRecord",
 				"Failed to update payment record with result " ..
 				tostring(result) .. " and lastID " .. tostring(lastID) .. ".")
+
+			if (callback) then
+				callback(false)
+			end
 			return
 		end
 
-		callback(true)
+		if (callback) then
+			callback(true)
+		end
 	end)
 	query:Execute()
 end
+
+function PLUGIN:GetPlayerPaymentRecords(steamId64, callback)
+	local query = mysql:Select("exp_premium")
+	query:Where("steamid64", steamId64)
+	query:OrderByDesc("created_at")
+	query:Callback(function(result, status, lastID)
+		if (status == false) then
+			ix.log.Add(nil, "schemaDebug", "GetPlayerPaymentRecords",
+				"Failed to get payment records with result " .. tostring(result) .. ".")
+			callback({})
+			return
+		end
+
+		callback(result or {})
+	end)
+	query:Execute()
+end
+
+function PLUGIN:GetAllPaymentRecords(searchQuery, callback)
+	local query = "SELECT * FROM exp_premium "
+
+	if (searchQuery and searchQuery ~= "") then
+		query = query .. "WHERE (player_name LIKE '%" .. mysql:Escape(searchQuery) .. "%' OR "
+			.. "steamid64 LIKE '%" .. mysql:Escape(searchQuery) .. "%' OR "
+			.. "order_id LIKE '%" .. mysql:Escape(searchQuery) .. "%')"
+	end
+
+	query = query .. " ORDER BY created_at DESC LIMIT 200"
+
+	mysql:RawQuery(query, function(result)
+		callback(result)
+	end)
+end
+
+--[[
+	PayNow.gg Integration Commands
+	(Will be sent by PayNow.gg to us through the PayNow Garry's Mod Addon)
+--]]
 
 concommand.Add("exp_premium_order", function(client, command, arguments)
 	if (IsValid(client) and not client:IsSuperAdmin()) then
@@ -179,17 +251,172 @@ concommand.Add("exp_premium_order", function(client, command, arguments)
 		return
 	end
 
+	-- Get player name for record keeping
+	local playerName = "Unknown Player"
 	local player = player.GetBySteamID64(steamId64)
 
-	if (player) then
-		player:GivePremiumKey(itemSlug)
+	if (IsValid(player)) then
+		playerName = player:Name()
+
+		-- Apply the package changes if player is online
+		if (status == "purchased" or status == "renewed") then
+			player:GivePremiumPackage(itemSlug)
+		elseif (status == "refunded" or status == "canceled" or status == "expired") then
+			player:RemovePremiumPackage(itemSlug)
+		end
 	end
 
-	PLUGIN:UpdatePaymentRecord(orderId, status, function(success)
-		if (success) then
-			client:Notify("Payment record updated successfully for order ID: " .. orderId)
-		else
-			client:Notify("Failed to update payment record for order ID: " .. orderId)
+	-- -- Create or update the payment record
+	-- PLUGIN:CreatePaymentRecord(orderId, steamId64, playerName, itemSlug, status, function(success)
+	-- 	if (success) then
+	-- 		if (IsValid(client)) then
+	-- 			client:Notify("Payment record created successfully for order ID: " .. orderId)
+	-- 		end
+
+	-- 		ix.log.Add(client, "premiumStatusChanged", orderId, status, steamId64, itemSlug)
+	-- 	else
+	-- 		-- Try to update existing record instead
+	-- 		PLUGIN:UpdatePaymentRecord(orderId, status, function(updateSuccess)
+	-- 			if (updateSuccess) then
+	-- 				if (IsValid(client)) then
+	-- 					client:Notify("Payment record updated successfully for order ID: " .. orderId)
+	-- 				end
+
+	-- 				ix.log.Add(client, "premiumStatusChanged", orderId, status, steamId64, itemSlug)
+	-- 			else
+	-- 				if (IsValid(client)) then
+	-- 					client:Notify("Failed to create/update payment record for order ID: " .. orderId)
+	-- 				end
+
+	-- 				ix.log.Add(client, "schemaDebug", "exp_premium_order",
+	-- 					"Failed to create/update payment record: " .. orderId)
+	-- 			end
+	-- 		end)
+	-- 	end
+	-- end)
+	if (status == "purchased") then
+		PLUGIN:CreatePaymentRecord(orderId, steamId64, playerName, itemSlug, status, function(success)
+			if (success) then
+				if (IsValid(client)) then
+					client:Notify("Payment record created successfully for order ID: " .. orderId)
+				end
+
+				ix.log.Add(client, "premiumStatusChanged", orderId, status, steamId64, itemSlug)
+			else
+				ix.log.Add(client, "schemaDebug", "exp_premium_order",
+					"Failed to create payment record: " .. orderId)
+			end
+		end)
+	else
+		PLUGIN:UpdatePaymentRecord(orderId, status, function(success)
+			if (success) then
+				if (IsValid(client)) then
+					client:Notify("Payment record updated successfully for order ID: " .. orderId)
+				end
+
+				ix.log.Add(client, "premiumStatusChanged", orderId, status, steamId64, itemSlug)
+			else
+				if (IsValid(client)) then
+					client:Notify("Failed to update payment record for order ID: " .. orderId)
+				end
+
+				ix.log.Add(client, "schemaDebug", "exp_premium_order",
+					"Failed to update payment record: " .. orderId)
+			end
+		end)
+	end
+end)
+
+--[[
+	Network handling for claiming packages
+--]]
+
+util.AddNetworkString("expPremiumShopClaimPackage")
+
+net.Receive("expPremiumShopClaimPackage", function(length, client)
+	if (not client:GetCharacter()) then
+		return
+	end
+
+	local packageKey = net.ReadString()
+
+	if (not packageKey or packageKey == "") then
+		client:Notify("Invalid package key.")
+		return
+	end
+
+	if (not PLUGIN.PREMIUM_PACKAGES[packageKey]) then
+		client:Notify("Unknown package: " .. packageKey)
+		return
+	end
+
+	-- Check if they already have this package
+	if (client:HasPremiumPackage(packageKey)) then
+		client:Notify("You already have this package on this character.")
+		return
+	end
+
+	-- Check if they own this package (have purchased/renewed it)
+	PLUGIN:GetPlayerPaymentRecords(client:SteamID64(), function(paymentRecords)
+		local hasValidPayment = false
+
+		for _, record in ipairs(paymentRecords) do
+			if (record.item_slug == packageKey and (record.status == "purchased" or record.status == "renewed")) then
+				hasValidPayment = true
+				break
+			end
 		end
+
+		if (not hasValidPayment) then
+			client:Notify("You don't own this package or it's not available for claiming.")
+			return
+		end
+
+		-- Give them the package
+		if (client:GivePremiumPackage(packageKey)) then
+			local packageName = PLUGIN.PREMIUM_PACKAGES[packageKey].name
+			client:Notify("Successfully claimed: " .. packageName)
+
+			ix.log.Add(client, "premiumPackageClaimed", packageKey)
+		else
+			client:Notify("Failed to claim package. Please try again.")
+		end
+	end)
+end)
+
+--[[
+	Network callbacks
+--]]
+
+-- Handle payment history requests
+Schema.chunkedNetwork.HandleRequest("PaymentHistory", function(client, respond, requestData)
+	if (not client:GetCharacter()) then
+		return
+	end
+
+	-- Throttle check to prevent spam
+	if (Schema.util.Throttle("premium_history", 5, client)) then
+		client:Notify("Please wait before requesting payment history again.")
+		return
+	end
+
+	PLUGIN:GetPlayerPaymentRecords(client:SteamID64(), function(paymentRecords)
+		respond(paymentRecords)
+	end)
+end)
+
+-- Handle admin payment records requests
+Schema.chunkedNetwork.HandleRequest("AdminPayments", function(client, respond, requestData)
+	if (not client:IsSuperAdmin()) then
+		client:Notify("You don't have permission to access this feature.")
+		return
+	end
+
+	local searchQuery = requestData.searchQuery or ""
+
+	PLUGIN:GetAllPaymentRecords(searchQuery, function(paymentRecords)
+		respond(paymentRecords, {
+			searchQuery = searchQuery
+		})
 	end)
 end)

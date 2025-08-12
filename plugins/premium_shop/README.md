@@ -18,3 +18,5 @@
     - On Cancel: `exp_premium_order canceled {product.slug} {order.id} {order.customer.steam.id}`
 
     Ensure to set `Execute when online` for all commands and set them to execute on all or the Experiment Game Server.
+
+6. Create a zip-file of the `paynow-template` directory and upload it to the PayNow.gg dashboard when selecting [the Webstore Template](https://dashboard.paynow.gg/webstore/templates)

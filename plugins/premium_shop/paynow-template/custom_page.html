@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="border-top home-content">
+    {% include 'svgs/stripes.html' %}
+
+    <div class="home-content-sec content-field">
+        <h1 class="home-content-tit">{{ title }}</h1>
+
+        <div class="home-content-text prose !prose-zinc !prose-invert">
+            {{ content|raw }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

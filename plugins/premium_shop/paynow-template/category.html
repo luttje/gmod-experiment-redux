@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{#
+<script nonce="MjY3MjA4MDMwNSwyMDU0ODkxMDYw">
+    // Load product to modal
+    const loadProduct = (slug) => {
+        document.getElementById('modal-content').innerHTML = "";
+        const spinner = document.getElementById(`spinner-${slug}`);
+        spinner.classList.toggle('hidden');
+
+        fetch(`/products/${slug}`)
+            .then(async response => {
+                if (!response.ok) {
+                    alert(await response.text());
+                    return;
+                }
+
+                document.getElementById('modal').classList.toggle('hidden');
+                document.getElementById('modal-content').innerHTML += await response.text();
+                spinner.classList.toggle('hidden');
+            })
+    };
+</script>#}
+
+<div class="category-page">
+    <h2 class="category-title">
+        {{ activeTag.name }}
+    </h2>
+
+    <div class="category-description">
+        {{ activeTag.description|raw }}
+    </div>
+</div>
+
+<div class="category-packages grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mt-6">
+
+    {% for product in products %}
+    <div class="category-package">
+        <div class="category-package-details flex flex-col justify-center items-center gap-4 h-full">
+            <a href="/products/{{ product.slug }}" data-remote="/products/{{ product.slug }}">
+            <div class="flex flex-col gap-3 text-center">
+                <div class="category-package-img flex items-center justify-center">
+                    {% if product.image_url %}
+                    <img class="package-img" alt="{{ product.name }}" src="{{ product.image_url }}" />
+                    {% else %}
+                    <i class="fa-solid fa-box-open text-[--first-color] text-9xl"></i>
+                    {% endif %}
+                </div>
+
+                <span class="category-package-name">{{ product.name }}</span>
+            </div>
+            </a>
+
+        </div>
+        <div class="package-bott">
+            <div class="category-package-price-list">
+                {% if product.pricing.active_sale %}
+                <span class="category-package-price-disc">{{ product.pricing.price_original|money }} {{ store.currency}}</span>
+                <span class="category-package-price">{{ product.price|money }} {{ store.currency }}</span>
+                {% else %}
+                <span class="category-package-price">{{ product.price|money }} {{ store.currency }}</span>
+                {% endif %}
+            </div>
+
+            <div class="category-package-buttons">
+                {# <a href="#" onclick="loadProduct('{{ product.slug }}')" data-remote="/products/{{ product.slug }}" class="btn btn-info btn-svg btn-modal">
+                    {% include 'svgs/eye.html' %}
+                </a> #}
+
+                {% if product.stock.available_to_purchase %}
+                <a href="/products/{{ product.slug }}" data-remote="/products/{{ product.slug }}" class="btn btn-info category-buy-btn">
+                    <div class="btn-svg">
+                        <span>Buy</span>
+                        {% include 'svgs/purchase.html' %}
+                    </div>
+                </a>
+                {% else %}
+                <span class="!text-red-400 !font-bold">
+                    OUT OF STOCK
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

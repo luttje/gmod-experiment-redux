@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="border-top home-content">
+    {% include 'svgs/stripes.html' %}
+
+    <div class="home-content-sec content-field">
+        <h1 class="home-content-tit">{{ store.name }}</h1>
+
+        <div class="home-content-text !max-w-none !prose !prose-zinc !prose-invert">
+            {{ template.index|raw }}
+        </div>
+    </div>
+</div>
+
+{% for section in config("home_sections") %}
+<div class="index-section border-top mt-10">
+    {% include 'svgs/stripes.html' %}
+
+    <h1>{{ section.home_section_title }}</h1>
+    <div class="index-section-body content-field">
+        <div class="max-w-full -mt-4 prose !prose-zinc !prose-invert">{{ section.home_section_text|raw }}</div>
+        {% if section.home_section_link %}
+            <div class="mt-4">
+                <a class="btn btn-info" href="{{ section.home_section_link }}">
+                    {{ section.home_section_link_text }}
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

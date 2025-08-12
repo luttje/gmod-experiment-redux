@@ -1,0 +1,10 @@
+<div class="card module">
+    {% include 'svgs/stripes.html' %}
+        
+    <div class="module-header">
+        <h2 class="module-title">{{ module.data.settings.header }}</h2>
+    </div>
+    <div class="module-body">
+        <div>{{ module.data.settings.content | raw }}</div>
+    </div>
+</div>
