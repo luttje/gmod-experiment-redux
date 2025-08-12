@@ -31,7 +31,7 @@ end
 PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(180)
+	self:SetTall(200)
 	self:DockPadding(10, 10, 10, 10)
 end
 
@@ -77,7 +77,7 @@ function PANEL:SetPayment(payment, index)
 	self.statusLabel:Dock(LEFT)
 	self.statusLabel:SizeToContents()
 
-	-- Set status color
+	-- Set status color and adjust panel height
 	local statusColor = Color(255, 255, 255)
 	if (payment.status == "completed") then
 		statusColor = PLUGIN.THEME.success
@@ -188,7 +188,7 @@ function PANEL:SetPayment(payment, index)
 	-- Refresh button for pending payments
 	if (payment.status == "pending") then
 		self.refreshButton = buttonRow:Add("expButton")
-		self.refreshButton:SetText("Refresh Status")
+		self.refreshButton:SetText("Check Status")
 		self.refreshButton:SizeToContents()
 		self.refreshButton:Dock(RIGHT)
 		self.refreshButton:DockMargin(8, 0, 0, 0)
@@ -196,8 +196,6 @@ function PANEL:SetPayment(payment, index)
 			net.Start("expPremiumShopRefreshPayment")
 			net.WriteString(payment.session_id)
 			net.SendToServer()
-
-			LocalPlayer():Notify("Refreshing payment status...")
 		end
 
 		self.openPaymentUrl = buttonRow:Add("expButton")
@@ -231,7 +229,7 @@ vgui.Register("expPaymentEntryPanel", PANEL, "EditablePanel")
 PANEL = {}
 
 function PANEL:Init()
-	self:SetTall(150)
+	self:SetTall(170)
 	self:DockPadding(10, 10, 10, 10)
 end
 
@@ -251,15 +249,6 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 	nameLabel:Dock(LEFT)
 	nameLabel:SizeToContents()
 
-	-- Status indicator (not owned on this character)
-	local statusLabel = nameRow:Add("DLabel")
-	statusLabel:SetText("NOT CLAIMED")
-	statusLabel:SetFont("ixSmallFont")
-	statusLabel:SetTextColor(PLUGIN.THEME.warning)
-	statusLabel:SetContentAlignment(6)
-	statusLabel:Dock(RIGHT)
-	statusLabel:SizeToContents()
-
 	-- Description row
 	local descRow = self:Add("EditablePanel")
 	descRow:SetTall(25)
@@ -272,12 +261,6 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 	descLabel:SetTextColor(PLUGIN.THEME.textSecondary)
 	descLabel:Dock(FILL)
 	descLabel:SetWrap(true)
-
-	-- Purchase count row
-	local purchaseRow = self:Add("EditablePanel")
-	purchaseRow:SetTall(25)
-	purchaseRow:Dock(TOP)
-	purchaseRow:DockMargin(0, 5, 0, 0)
 
 	-- Claim button
 	local buttonRow = self:Add("EditablePanel")
@@ -300,7 +283,7 @@ function PANEL:SetClaimablePackage(packageData, packageKey)
 
 	-- Paint background
 	self.Paint = function(pnl, w, h)
-		draw.RoundedBox(4, 0, 0, w, h, Color(60, 60, 40)) -- Yellow tint for claimable
+		draw.RoundedBox(4, 0, 0, w, h, Color(60, 60, 40))
 	end
 end
 
@@ -334,7 +317,7 @@ function PANEL:Init()
 
 	-- Claims tab
 	self.claimsTab = self.tabPanel:Add("expButton")
-	self.claimsTab:SetText("Claim Packages")
+	self.claimsTab:SetText("Claims")
 	self.claimsTab:Dock(LEFT)
 	self.claimsTab:SizeToContents()
 	self.claimsTab.DoClick = function()
@@ -371,7 +354,7 @@ function PANEL:Init()
 	self.historyBottomPanel:SetVisible(false)
 
 	self.refreshAllButton = self.historyBottomPanel:Add("expButton")
-	self.refreshAllButton:SetText("Refresh All Pending Payments")
+	self.refreshAllButton:SetText("Check All Pending Payments")
 	self.refreshAllButton:Dock(FILL)
 	self.refreshAllButton.DoClick = function()
 		self:RefreshAllPending()
@@ -518,11 +501,12 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 
 	if (table.Count(claimablePackages) == 0) then
 		local emptyLabel = self.claimsScroll:Add("DLabel")
-		emptyLabel:SetText("No packages available to claim on this character")
+		emptyLabel:SetText("No packages need claiming on this character")
 		emptyLabel:SetFont("ixMediumFont")
 		emptyLabel:SetTextColor(PLUGIN.THEME.textSecondary)
 		emptyLabel:SetContentAlignment(5)
 		emptyLabel:Dock(FILL)
+
 		return
 	end
 
@@ -545,7 +529,7 @@ function PANEL:DisplayClaimablePackages(claimablePackages)
 	end
 
 	-- Update claims tab text to show count
-	self.claimsTab:SetText("Claim Packages (" .. table.Count(claimablePackages) .. ")")
+	self.claimsTab:SetText("Claims (" .. table.Count(claimablePackages) .. ")")
 end
 
 function PANEL:RefreshAllPending()
@@ -559,7 +543,7 @@ function PANEL:RefreshAllPending()
 		end
 	end
 
-	LocalPlayer():Notify("Refreshing all pending payments...")
+	LocalPlayer():Notify("Checking status of all pending payments...")
 
 	-- Refresh the list after a delay
 	timer.Simple(3, function()

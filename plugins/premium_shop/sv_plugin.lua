@@ -1,16 +1,8 @@
 local PLUGIN = PLUGIN
 
-util.AddNetworkString("expPremiumShopCart")
-
-util.AddNetworkString("expPremiumShopRequestHistory")
-util.AddNetworkString("expPremiumShopSendHistory")
+util.AddNetworkString("expPremiumShopPurchase")
 util.AddNetworkString("expPremiumShopRefreshPayment")
-util.AddNetworkString("expPremiumShopRequestClaimable")
-util.AddNetworkString("expPremiumShopClaimablePackages")
 util.AddNetworkString("expPremiumShopClaimPackage")
-
-util.AddNetworkString("expPremiumShopAdminPayments")
-util.AddNetworkString("expPremiumShopAdminPaymentsResponse")
 util.AddNetworkString("expPremiumShopAdminForceCheck")
 
 ix.log.AddType("premiumPurchase", function(client, packageKey)
@@ -36,19 +28,23 @@ function PLUGIN:DatabaseConnected()
 	query:Create("session_id", "VARCHAR(255) NOT NULL")
 	query:Create("steamid64", "VARCHAR(32) NOT NULL")
 	query:Create("player_name", "VARCHAR(64) NOT NULL")
-	query:Create("cart_items", "TEXT NOT NULL") -- JSON encoded cart items
+	query:Create("cart_items", "TEXT NOT NULL") -- JSON encoded single item
 	query:Create("total_price", "DECIMAL(10,2) NOT NULL")
 	query:Create("currency", "VARCHAR(3) NOT NULL")
 	query:Create("payment_url", "TEXT NOT NULL")
-	query:Create("status", "ENUM('pending', 'completed', 'failed', 'expired') NOT NULL DEFAULT 'pending'")
+	query:Create("status", "ENUM('pending', 'completed', 'failed', 'expired', 'refunded') NOT NULL DEFAULT 'pending'")
 	query:Create("created_at", "INT(11) UNSIGNED NOT NULL")
 	query:Create("updated_at", "INT(11) UNSIGNED NOT NULL")
+	query:Create("lemonsqueezy_order_id", "VARCHAR(255)")
+	query:Create("needs_processing", "TINYINT(1) DEFAULT 0")
 	query:PrimaryKey("payment_id")
 	query:Execute()
 
 	-- Add indexes for faster lookups
 	mysql:CreateIndexIfNotExists("exp_premium", "idx_session_id", "session_id")
 	mysql:CreateIndexIfNotExists("exp_premium", "idx_steamid64", "steamid64")
+	mysql:CreateIndexIfNotExists("exp_premium", "idx_lemonsqueezy_order_id", "lemonsqueezy_order_id")
+	mysql:CreateIndexIfNotExists("exp_premium", "idx_needs_processing", "needs_processing")
 end
 
 function PLUGIN:OnWipeTables()
@@ -85,8 +81,14 @@ end
 -- Data persistence for premium packages
 function PLUGIN:PlayerLoadedCharacter(client, character, currentChar)
 	local premiumPackages = character:GetData("premiumPackages", {})
-
 	client:SetCharacterNetVar("premiumPackages", premiumPackages)
+
+	-- Process any offline payments for this player
+	timer.Simple(2, function()
+		if (IsValid(client) and client:GetCharacter()) then
+			PLUGIN:ProcessOfflinePayments(client)
+		end
+	end)
 end
 
 -- Save premium packages when they change
@@ -150,6 +152,7 @@ function PLUGIN:GetPaymentStatistics(callback)
 			completed = 0,
 			failed = 0,
 			expired = 0,
+			refunded = 0,
 			totalRevenue = 0
 		}
 
@@ -207,7 +210,15 @@ end
 	Database functions for payments
 --]]
 
-function PLUGIN:CreatePaymentRecord(sessionId, paymentUrl, client, cartItems, totalPrice, currency, callback)
+function PLUGIN:CreatePaymentRecord(sessionId, paymentUrl, client, packageKey, packageType, totalPrice, currency,
+									callback)
+	local cartItems = {
+		{
+			type = packageType,
+			key = packageKey,
+			quantity = 1
+		}
+	}
 	local cartItemsJson = util.TableToJSON(cartItems)
 	local currentTime = os.time()
 
@@ -222,6 +233,8 @@ function PLUGIN:CreatePaymentRecord(sessionId, paymentUrl, client, cartItems, to
 	query:Insert("payment_url", paymentUrl)
 	query:Insert("created_at", currentTime)
 	query:Insert("updated_at", currentTime)
+	query:Insert("lemonsqueezy_order_id", sessionId)
+	query:Insert("needs_processing", 0)
 	query:Callback(function(data, status, lastID)
 		if (callback) then
 			callback(status, lastID)
@@ -414,84 +427,57 @@ Schema.chunkedNetwork.HandleRequest("AdminPayments", function(client, respond, r
 	end)
 end)
 
--- Handle shopping cart purchases
-net.Receive("expPremiumShopCart", function(length, client)
-	local cartData = net.ReadTable()
+-- Handle individual purchases (replaces cart system)
+net.Receive("expPremiumShopPurchase", function(length, client)
+	local packageKey = net.ReadString()
+	local packageType = net.ReadString()
 
 	if (not client:GetCharacter()) then
 		return
 	end
 
-	if (not cartData or not cartData.items or #cartData.items == 0) then
-		client:Notify("Your cart is empty.")
-		return
-	end
-
 	-- Throttle check to prevent spam
-	if (Schema.util.Throttle("premium_cart", 5, client)) then
+	if (Schema.util.Throttle("premium_purchase", 5, client)) then
 		client:Notify("Please wait before making another purchase.")
 		return
 	end
 
-	-- Validate all items in cart
-	local validatedCart = {}
-	local totalPrice = 0
-	local currency = nil
+	-- Validate purchase
+	local package = nil
+	local price = 0
+	local currency = "EUR"
 
-	for _, cartItem in ipairs(cartData.items) do
-		local item = nil
-		local price = 0
-		local itemCurrency = "EUR"
-
-		if (cartItem.type == "package") then
-			item = PLUGIN.PREMIUM_PACKAGES[cartItem.key]
-			if (not item) then
-				client:Notify("Invalid premium package in cart: " .. tostring(cartItem.key))
-				return
-			end
-
-			if (client:HasPremiumKey(cartItem.key)) then
-				client:Notify("You already own: " .. item.name)
-				return
-			end
-
-			price = item.price
-			itemCurrency = item.currency or "EUR"
-		elseif (cartItem.type == "item") then
-			item = ix.item.Get(cartItem.key)
-			if (not item or not item.premiumPriceInEuro) then
-				client:Notify("Invalid premium item in cart: " .. tostring(cartItem.key))
-				return
-			end
-
-			price = item.premiumPriceInEuro
-			itemCurrency = "EUR"
-		else
-			client:Notify("Invalid item type in cart.")
+	if (packageType == "package") then
+		package = PLUGIN.PREMIUM_PACKAGES[packageKey]
+		if (not package) then
+			client:Notify("Invalid premium package.")
 			return
 		end
 
-		-- Ensure all items use the same currency
-		if (not currency) then
-			currency = itemCurrency
-		elseif (currency ~= itemCurrency) then
-			client:Notify("All items in cart must use the same currency.")
+		if (client:HasPremiumKey(packageKey)) then
+			client:Notify("You already own this premium package!")
 			return
 		end
 
-		totalPrice = totalPrice + (price * (cartItem.quantity or 1))
+		price = package.price
+		currency = package.currency or "EUR"
+	elseif (packageType == "item") then
+		local itemTable = ix.item.Get(packageKey)
+		if (not itemTable or not itemTable.premiumPriceInEuro) then
+			client:Notify("Invalid premium item.")
+			return
+		end
 
-		table.insert(validatedCart, {
-			type = cartItem.type,
-			key = cartItem.key,
-			quantity = cartItem.quantity or 1,
-			item = item,
-			price = price
-		})
+		price = itemTable.premiumPriceInEuro
+		currency = "EUR"
+		package = itemTable
+	else
+		client:Notify("Invalid purchase type.")
+		return
 	end
 
-	-- Create Stripe checkout session for the entire cart
-	PLUGIN:CreateStripeCheckoutSessionForCart(client, validatedCart, totalPrice, currency)
+	-- Create LemonSqueezy checkout
+	PLUGIN:CreateLemonSqueezyCheckout(client, packageKey, packageType)
 end)
 
 net.Receive("expPremiumShopRefreshPayment", function(length, client)
@@ -519,12 +505,11 @@ net.Receive("expPremiumShopRefreshPayment", function(length, client)
 			return
 		end
 
-		-- Force check with Stripe
+		-- Force check with database
 		PLUGIN:ForceCheckClientPayment(client, sessionId, payment)
 	end)
 end)
 
--- TODO: When we implement this for items we need to take into account race conditions where a player could spam the claim button
 net.Receive("expPremiumShopClaimPackage", function(length, client)
 	local packageKey = net.ReadString()
 

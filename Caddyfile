@@ -198,3 +198,12 @@ moderation.experiment.games {
 	php_fastcgi unix//run/php/php8.3-fpm.sock
 	file_server
 }
+
+billing.experiment.games {
+	root * /srv/experiment-redux/plugins/premium_shop/web
+	encode gzip
+
+	php_fastcgi unix//run/php/php8.3-fpm.sock
+
+	file_server
+}

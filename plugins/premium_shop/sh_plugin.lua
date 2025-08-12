@@ -2,7 +2,7 @@ local PLUGIN = PLUGIN
 
 PLUGIN.name = "Premium Shop"
 PLUGIN.author = "Experiment Redux"
-PLUGIN.description = "Adds premium functionality and a premium shop system with real money purchases."
+PLUGIN.description = "Adds premium functionality and a premium shop system with LemonSqueezy integration."
 
 Schema.chunkedNetwork.Register("PaymentHistory", 50, 0.05)
 Schema.chunkedNetwork.Register("ClaimablePackages", 30, 0.03)
@@ -10,8 +10,8 @@ Schema.chunkedNetwork.Register("AdminPayments", 50, 0.1)
 
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
-ix.util.Include("sv_stripe.lua")
-ix.util.Include("cl_stripe.lua")
+ix.util.Include("sv_lemonsqueezy.lua")
+ix.util.Include("cl_lemonsqueezy.lua")
 
 ix.lang.AddTable("english", {
 	premiumShop = "Premium Shop",
@@ -20,8 +20,8 @@ ix.lang.AddTable("english", {
 -- Premium constants
 PLUGIN.PREMIUM_CURRENCIES = {
 	EUR = "€",
-	-- USD = "$",
-	-- GBP = "£"
+	USD = "$",
+	GBP = "£"
 }
 
 PLUGIN.DEFAULT_CURRENCY = "EUR"
@@ -59,21 +59,25 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 		ix.util.SchemaError("RegisterPremiumPackage: 'currency' must be a valid currency code")
 	end
 
+	-- Validate LemonSqueezy variant ID
+	if (not packageData.lemonsqueezyVariantId or type(packageData.lemonsqueezyVariantId) ~= "string") then
+		ix.util.SchemaError("RegisterPremiumPackage: 'lemonsqueezyVariantId' must be a string")
+	end
+
 	if (PLUGIN.PREMIUM_PACKAGES[packageData.key]) then
 		ix.util.SchemaError("RegisterPremiumPackage: package key '" .. packageData.key .. "' is already registered")
 	end
 
 	if (SERVER) then
 		local path = packageData.image
-
 		ix.util.AddResourceFile("materials/" .. path)
 	end
 
 	packageData.image = Material(packageData.image)
-
 	packageData.currency = packageData.currency or PLUGIN.DEFAULT_CURRENCY
 	packageData.category = packageData.category or "General"
 	packageData.benefits = packageData.benefits or {}
+
 	PLUGIN.PREMIUM_PACKAGES[packageData.key] = packageData
 end
 
@@ -135,6 +139,7 @@ PLUGIN:RegisterPremiumPackage({
 	price = 0.99,
 	currency = "EUR",
 	category = "Canvas Designer",
+	lemonsqueezyVariantId = "947308",
 	benefits = {
 		"High-quality multicolor design assets",
 		"64 Hand-crafted exclusive elements",
@@ -153,6 +158,7 @@ PLUGIN:RegisterPremiumPackage({
 	price = 1.19,
 	currency = "EUR",
 	category = "Canvas Designer",
+	lemonsqueezyVariantId = "947323",
 	benefits = {
 		"Distinctive graffiti lettering and icons",
 		"75 Rare and exclusive pieces",
@@ -171,6 +177,7 @@ PLUGIN:RegisterPremiumPackage({
 	price = 1.49,
 	currency = "EUR",
 	category = "Canvas Designer",
+	lemonsqueezyVariantId = "947326",
 	benefits = {
 		"Sharp and precise stencil-style elements",
 		"112 Unique and exclusive graphics",
@@ -180,7 +187,6 @@ PLUGIN:RegisterPremiumPackage({
 	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS
 })
 
-
 PLUGIN:RegisterPremiumPackage({
 	key = "supporter_role",
 	name = "Supporter Role",
@@ -189,6 +195,7 @@ PLUGIN:RegisterPremiumPackage({
 	price = 4.99,
 	currency = "EUR",
 	category = "Supporter",
+	lemonsqueezyVariantId = "947327",
 	benefits = {
 		"Heart icon in front of OOC chat messages",
 		"Our appreciation for your support!",
