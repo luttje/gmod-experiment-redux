@@ -135,7 +135,7 @@ end, FLAG_WARNING)
 
 ix.log.AddType("schemaDebug", function(client, ...)
 	local arg = { ... }
-	return Format("(%s) function: %s, debug log: %s", client:Name(), arg[1], arg[2])
+	return Format("(%s) function: %s, debug log: %s", IsValid(client) and client:Name() or "CONSOLE", arg[1], arg[2])
 end, FLAG_DANGER)
 
 --- ! WORKAROUND for helix bug where inventory that is closed doesn't remove receivers.

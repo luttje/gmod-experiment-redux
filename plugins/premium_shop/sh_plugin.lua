@@ -10,21 +10,10 @@ Schema.chunkedNetwork.Register("AdminPayments", 50, 0.1)
 
 ix.util.Include("sv_plugin.lua")
 ix.util.Include("cl_plugin.lua")
-ix.util.Include("sv_stripe.lua")
-ix.util.Include("cl_stripe.lua")
 
 ix.lang.AddTable("english", {
 	premiumShop = "Premium Shop",
 })
-
--- Premium constants
-PLUGIN.PREMIUM_CURRENCIES = {
-	EUR = "€",
-	-- USD = "$",
-	-- GBP = "£"
-}
-
-PLUGIN.DEFAULT_CURRENCY = "EUR"
 
 -- Premium package tracking
 PLUGIN.PREMIUM_PACKAGES = {}
@@ -34,8 +23,8 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 		ix.util.SchemaError("RegisterPremiumPackage: packageData is required")
 	end
 
-	if (not packageData.key or type(packageData.key) ~= "string" or packageData.key == "") then
-		ix.util.SchemaError("RegisterPremiumPackage: 'key' must be a non-empty string")
+	if (not packageData.slug or type(packageData.slug) ~= "string" or packageData.slug == "") then
+		ix.util.SchemaError("RegisterPremiumPackage: 'slug' must be a non-empty string")
 	end
 
 	if (not packageData.name or type(packageData.name) ~= "string" or packageData.name == "") then
@@ -50,17 +39,8 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 		ix.util.SchemaError("RegisterPremiumPackage: 'description' must be a string")
 	end
 
-	if (not packageData.price or type(packageData.price) ~= "number" or packageData.price <= 0) then
-		ix.util.SchemaError("RegisterPremiumPackage: 'price' must be a positive number")
-	end
-
-	-- Validate currency (optional, defaults to EUR)
-	if (packageData.currency and not PLUGIN.PREMIUM_CURRENCIES[packageData.currency]) then
-		ix.util.SchemaError("RegisterPremiumPackage: 'currency' must be a valid currency code")
-	end
-
-	if (PLUGIN.PREMIUM_PACKAGES[packageData.key]) then
-		ix.util.SchemaError("RegisterPremiumPackage: package key '" .. packageData.key .. "' is already registered")
+	if (PLUGIN.PREMIUM_PACKAGES[packageData.slug]) then
+		ix.util.SchemaError("RegisterPremiumPackage: package slug '" .. packageData.slug .. "' is already registered")
 	end
 
 	if (SERVER) then
@@ -71,33 +51,13 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 
 	packageData.image = Material(packageData.image)
 
-	packageData.currency = packageData.currency or PLUGIN.DEFAULT_CURRENCY
-	packageData.category = packageData.category or "General"
 	packageData.benefits = packageData.benefits or {}
-	PLUGIN.PREMIUM_PACKAGES[packageData.key] = packageData
+	PLUGIN.PREMIUM_PACKAGES[packageData.slug] = packageData
 end
 
-function Schema.GetPremiumPackage(key)
-	return PLUGIN.PREMIUM_PACKAGES[key]
+function Schema.GetPremiumPackage(slug)
+	return PLUGIN.PREMIUM_PACKAGES[slug]
 end
-
--- Theme colors
-PLUGIN.THEME = {
-	background = Color(45, 45, 48),
-	surface = Color(60, 60, 65),
-	panel = Color(55, 55, 60),
-	primary = Color(0, 122, 255),
-	secondary = Color(88, 166, 255),
-	success = Color(40, 167, 69),
-	warning = Color(255, 193, 7),
-	danger = Color(220, 53, 69),
-	text = Color(240, 240, 240),
-	textSecondary = Color(180, 180, 180),
-	border = Color(80, 80, 85),
-	hover = Color(70, 70, 75),
-	premium = Color(255, 215, 0),   -- Gold color for premium
-	premiumAccent = Color(255, 165, 0) -- Orange accent for premium
-}
 
 --[[
 	Player Meta functions
@@ -105,13 +65,13 @@ PLUGIN.THEME = {
 
 local playerMeta = FindMetaTable("Player")
 
-function playerMeta:HasPremiumKey(key)
+function playerMeta:HasPremiumKey(slug)
 	if (not self:GetCharacter()) then
 		return false
 	end
 
 	local premiumPackages = self:GetCharacterNetVar("premiumPackages", {})
-	return premiumPackages[key] == true
+	return premiumPackages[slug] == true
 end
 
 function playerMeta:GetPremiumPackages()
@@ -124,17 +84,16 @@ end
 
 --[[
 	Premium Package Registrations
+
+	Note that the `slug` must match the product slug on PayNow.gg
 --]]
 
 local ADDITIONAL_ELEMENT_SLOTS = 8
 PLUGIN:RegisterPremiumPackage({
-	key = "sprites_colored",
+	slug = "sprites_colored",
 	name = "Colored Sprites Pack",
 	description = "Gain access to 64 vibrant and richly detailed colored sprites for your canvas creations.",
 	image = "experiment-redux/premium/sprites_colored.png",
-	price = 0.99,
-	currency = "EUR",
-	category = "Canvas Designer",
 	benefits = {
 		"High-quality multicolor design assets",
 		"64 Hand-crafted exclusive elements",
@@ -146,13 +105,10 @@ PLUGIN:RegisterPremiumPackage({
 
 ADDITIONAL_ELEMENT_SLOTS = 10
 PLUGIN:RegisterPremiumPackage({
-	key = "sprites_graffiti_don",
+	slug = "sprites_graffiti_don",
 	name = "Graffiti Don Pack",
 	description = "Unlock 75 bold graffiti tag designs featuring stylized letters, characters, and unique symbols.",
 	image = "experiment-redux/premium/sprites_graffiti_don.png",
-	price = 1.19,
-	currency = "EUR",
-	category = "Canvas Designer",
 	benefits = {
 		"Distinctive graffiti lettering and icons",
 		"75 Rare and exclusive pieces",
@@ -164,13 +120,10 @@ PLUGIN:RegisterPremiumPackage({
 
 ADDITIONAL_ELEMENT_SLOTS = 14
 PLUGIN:RegisterPremiumPackage({
-	key = "sprites_graffiti_stencil",
+	slug = "sprites_graffiti_stencil",
 	name = "Graffiti Stencil Pack",
 	description = "Access 112 detailed stencil graffiti designs with letters, figures, and intricate cutout shapes.",
 	image = "experiment-redux/premium/sprites_graffiti_stencil.png",
-	price = 1.49,
-	currency = "EUR",
-	category = "Canvas Designer",
 	benefits = {
 		"Sharp and precise stencil-style elements",
 		"112 Unique and exclusive graphics",
@@ -182,13 +135,10 @@ PLUGIN:RegisterPremiumPackage({
 
 
 PLUGIN:RegisterPremiumPackage({
-	key = "supporter_role",
+	slug = "supporter_role_lifetime",
 	name = "Supporter Role",
 	description = "Show your support for the server with a special supporter role!",
 	image = "experiment-redux/premium/supporter_role.png",
-	price = 4.99,
-	currency = "EUR",
-	category = "Supporter",
 	benefits = {
 		"Heart icon in front of OOC chat messages",
 		"Our appreciation for your support!",
