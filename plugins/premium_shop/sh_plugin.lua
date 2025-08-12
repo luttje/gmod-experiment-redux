@@ -51,7 +51,6 @@ function PLUGIN:RegisterPremiumPackage(packageData)
 
 	packageData.image = Material(packageData.image)
 
-	packageData.benefits = packageData.benefits or {}
 	PLUGIN.PREMIUM_PACKAGES[packageData.slug] = packageData
 end
 
@@ -115,12 +114,6 @@ PLUGIN:RegisterPremiumPackage({
 	name = "Colored Sprites Pack",
 	description = "Gain access to 64 vibrant and richly detailed colored sprites for your canvas creations.",
 	image = "experiment-redux/premium/sprites_colored.png",
-	benefits = {
-		"High-quality multicolor design assets",
-		"64 Hand-crafted exclusive elements",
-		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
-		"Expanded artistic possibilities",
-	},
 	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS,
 })
 
@@ -130,12 +123,6 @@ PLUGIN:RegisterPremiumPackage({
 	name = "Graffiti Don Pack",
 	description = "Unlock 75 bold graffiti tag designs featuring stylized letters, characters, and unique symbols.",
 	image = "experiment-redux/premium/sprites_graffiti_don.png",
-	benefits = {
-		"Distinctive graffiti lettering and icons",
-		"75 Rare and exclusive pieces",
-		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
-		"More freedom for expressive layouts",
-	},
 	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS,
 })
 
@@ -145,12 +132,6 @@ PLUGIN:RegisterPremiumPackage({
 	name = "Graffiti Stencil Pack",
 	description = "Access 112 detailed stencil graffiti designs with letters, figures, and intricate cutout shapes.",
 	image = "experiment-redux/premium/sprites_graffiti_stencil.png",
-	benefits = {
-		"Sharp and precise stencil-style elements",
-		"112 Unique and exclusive graphics",
-		ADDITIONAL_ELEMENT_SLOTS .. " Additional element slots for your canvas",
-		"Greater variety for custom compositions"
-	},
 	additionalElementSlots = ADDITIONAL_ELEMENT_SLOTS
 })
 
@@ -160,11 +141,6 @@ PLUGIN:RegisterPremiumPackage({
 	name = "Supporter Role",
 	description = "Show your support for the server with a special supporter role!",
 	image = "experiment-redux/premium/supporter_role.png",
-	benefits = {
-		"Heart icon in front of OOC chat messages",
-		"Our appreciation for your support!",
-		"Chat without OOC chat delay"
-	}
 })
 
 --[[
