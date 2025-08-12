@@ -611,6 +611,10 @@ vgui.Register("expPremiumItem", PANEL, "ixBusinessItem")
 
 -- Add premium shop button to main menu
 hook.Add("CreateMenuButtons", "expPremiumShop", function(tabs)
+	-- Disable for now
+	if (true) then
+		return
+	end
 	tabs["premiumShop"] = function(container)
 		container:Add("expPremiumShop")
 	end
