@@ -37,6 +37,7 @@ function Schema:CharacterLoaded(character)
 	Schema.buff.LoadActive(client, character)
 	Schema.achievement.LoadProgress(client, character)
 	Schema.armor.RefreshNetworkArmor(character)
+	Schema.progression.NetworkAll(client)
 
 	if (character.isBot) then
 		-- ! Workaround. This fixes a Helix bug with bots getting a random model from the faction,
