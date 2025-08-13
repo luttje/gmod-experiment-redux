@@ -1,4 +1,4 @@
-Schema.armor = Schema.armor or {}
+Schema.armor = ix.util.RegisterLibrary("armor")
 
 function Schema.armor.FindArmor(character, itemId)
 	local allArmor = character:GetData("armor", {})
@@ -23,31 +23,31 @@ function Schema.armor.SetArmor(character, itemId)
 
 	allArmor[#allArmor + 1] = itemId
 
-    character:SetData("armor", allArmor)
+	character:SetData("armor", allArmor)
 
 	Schema.armor.RefreshNetworkArmor(character)
 end
 
 function Schema.armor.RemoveArmor(character, itemId)
-    local allArmor = character:GetData("armor", {})
-    local existingArmor, index = Schema.armor.FindArmor(character, itemId)
+	local allArmor = character:GetData("armor", {})
+	local existingArmor, index = Schema.armor.FindArmor(character, itemId)
 
-    if (not existingArmor) then
-        ErrorNoHalt("[Experiment] Attempt to remove an armor item that doesn't exist on the character!\n")
-        return
-    end
+	if (not existingArmor) then
+		ErrorNoHalt("[Experiment] Attempt to remove an armor item that doesn't exist on the character!\n")
+		return
+	end
 
-    table.remove(allArmor, index)
+	table.remove(allArmor, index)
 
-    character:SetData("armor", allArmor)
+	character:SetData("armor", allArmor)
 
-    Schema.armor.RefreshNetworkArmor(character)
+	Schema.armor.RefreshNetworkArmor(character)
 end
 
 function Schema.armor.RefreshNetworkArmor(character)
 	local client = character:GetPlayer()
-    local allArmor = character:GetData("armor", {})
-    local armorUniqueIDs = {}
+	local allArmor = character:GetData("armor", {})
+	local armorUniqueIDs = {}
 
 	for _, itemId in ipairs(allArmor) do
 		local item = ix.item.instances[itemId]
@@ -112,7 +112,7 @@ function Schema.armor.DamageAfterArmor(character, damage)
 			if (item.removeOnDestroy) then
 				Schema.armor.RemoveArmor(character, itemId)
 				character:GetInventory():Remove(itemId)
-				character.player:EmitSound("physics/body/body_medium_impact_soft"..math.random(1, 7)..".wav")
+				character.player:EmitSound("physics/body/body_medium_impact_soft" .. math.random(1, 7) .. ".wav")
 			end
 		end
 

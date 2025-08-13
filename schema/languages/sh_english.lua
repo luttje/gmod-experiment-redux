@@ -2,6 +2,7 @@ LANGUAGE = {
 	schemaName = "Experiment Redux",
 
 	theBusiness = "The Business",
+	missionTracker = "Mission Tracker",
 
 	optAccessibilityFont = "Enable more readable font",
 	optdAccessibilityFont =

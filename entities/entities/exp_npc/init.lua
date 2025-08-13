@@ -64,13 +64,13 @@ function ENT:Initialize()
 		self:SetupRandomVoiceSet(model)
 	end
 
-    if (self:GetDisplayName() == "") then
-        if (model:find("female", nil, true) ~= nil) then
-            self:SetDisplayName("Jane Doe")
-        else
-            self:SetDisplayName("John Doe")
-        end
-    end
+	if (self:GetDisplayName() == "") then
+		if (model:find("female", nil, true) ~= nil) then
+			self:SetDisplayName("Jane Doe")
+		else
+			self:SetDisplayName("John Doe")
+		end
+	end
 
 	if (self.expNpcData.OnSpawn) then
 		self.expNpcData:OnSpawn(self)
@@ -94,7 +94,7 @@ function ENT:SetupRandomVoiceSet(model)
 		"vo/npc/male01/hi02.wav",
 		"vo/npc/male01/hi02.wav",
 		"vo/npc/male01/doingsomething.wav",
-        "vo/npc/male01/doingsomething.wav",
+		"vo/npc/male01/doingsomething.wav",
 		"vo/npc/male01/answer18.wav"
 	}
 
@@ -109,7 +109,7 @@ end
 
 function ENT:SetupNPC(npc)
 	self.expNpcData = npc
-    self:SetNpcId(npc.uniqueID)
+	self:SetNpcId(npc.uniqueID)
 
 	if (npc.name) then
 		self:SetDisplayName(npc.name)
@@ -137,17 +137,28 @@ function ENT:SetupNPC(npc)
 		self:SetVoiceSet(npc.voiceSet)
 	end
 
-    if (npc.voicePitch) then
-        self:SetVoicePitch(npc.voicePitch)
-    end
+	if (npc.voicePitch) then
+		self:SetVoicePitch(npc.voicePitch)
+	end
 
-    self:CapabilitiesRemove(bit.bor(
-        CAP_MOVE_GROUND,
-        CAP_MOVE_JUMP,
-        CAP_MOVE_FLY,
-        CAP_MOVE_CLIMB,
+	local health = npc:GetHealth()
+
+	if (health ~= Schema.npc.NO_HEALTH) then
+		self:SetMaxHealth(health)
+		self:SetHealth(health)
+	else
+		self:SetMaxHealth(100)
+		self:SetHealth(100)
+		self.expIsInvincible = true
+	end
+
+	self:CapabilitiesRemove(bit.bor(
+		CAP_MOVE_GROUND,
+		CAP_MOVE_JUMP,
+		CAP_MOVE_FLY,
+		CAP_MOVE_CLIMB,
 		CAP_MOVE_SWIM,
-        CAP_MOVE_CRAWL,
+		CAP_MOVE_CRAWL,
 		CAP_MOVE_SHOOT
 	))
 end
@@ -163,11 +174,11 @@ function ENT:Think()
 
 	self.nextCheckThink = CurTime() + 1
 
-    if (self.expNpcData.OnThink) then
-        self.expNpcData:OnThink(self)
-    end
+	if (self.expNpcData.OnThink) then
+		self.expNpcData:OnThink(self)
+	end
 
-    self:NextThink(CurTime())
+	self:NextThink(CurTime())
 	return true
 end
 
@@ -183,16 +194,17 @@ function ENT:PrintChat(message, isYelling)
 
 	ix.chat.Send(nil, "npc", message, false, receivers, {
 		name = self:GetDisplayName(),
-		yelling = isYelling == true -- Verbose equality check in case someone calls PrintChat with table.Random (second return value is string key there)
+		yelling = isYelling ==
+			true -- Verbose equality check in case someone calls PrintChat with table.Random (second return value is string key there)
 	})
 end
 
 function ENT:SpeakFromSet(randomVoiceLines, index)
-    randomVoiceLines = randomVoiceLines or self:GetVoiceSet()
+	randomVoiceLines = randomVoiceLines or self:GetVoiceSet()
 
-    if (not randomVoiceLines) then
-        return
-    end
+	if (not randomVoiceLines) then
+		return
+	end
 
 	local randomVoiceLine = randomVoiceLines[index or math.random(#randomVoiceLines)]
 
@@ -205,7 +217,7 @@ end
 
 function ENT:Use(activator, caller)
 	if (not Schema.util.Throttle("NpcInteract", 2, activator)) then
-		Schema.npc.StartInteraction(activator, self)
+		Schema.npc.TryStartInteraction(activator, self)
 	end
 
 	if (Schema.util.Throttle("NpcSpeak", 2, self)) then

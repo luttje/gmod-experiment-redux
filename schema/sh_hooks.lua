@@ -32,11 +32,11 @@ hook.Add("InitializedSchema", "hackEnglishOnlyInitialize", hackOptionRestriction
 hook.Add("OnReloaded", "hackEnglishOnlyOnReloaded", hackOptionRestrictions)
 
 function Schema:DoPluginIncludes(path, plugin)
-	Schema.achievement.LoadFromDir(path .. "/achievements")
-	Schema.buff.LoadFromDir(path .. "/buffs")
-	Schema.perk.LoadFromDir(path .. "/perks")
-	Schema.npc.LoadFromDir(path .. "/npcs")
-	Schema.map.LoadFromDir(path .. "/maps")
+	Schema.achievement.IncludeDirectory(path .. "/achievements")
+	Schema.buff.IncludeDirectory(path .. "/buffs")
+	Schema.perk.IncludeDirectory(path .. "/perks")
+	Schema.npc.IncludeDirectory(path .. "/npcs")
+	Schema.map.IncludeDirectory(path .. "/maps")
 end
 
 function Schema:Tick()

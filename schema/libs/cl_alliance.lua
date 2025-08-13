@@ -1,5 +1,6 @@
-Schema.alliance = Schema.alliance or {}
-Schema.alliance.notices = Schema.alliance.notices or {}
+Schema.alliance = ix.util.RegisterLibrary("alliance", {
+	notices = {},
+})
 
 net.Receive("AllianceMemberInvitation", function()
 	local allianceId = net.ReadUInt(32)

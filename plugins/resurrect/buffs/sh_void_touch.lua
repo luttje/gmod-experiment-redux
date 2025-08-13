@@ -9,7 +9,9 @@ BUFF.foregroundImage = {
 	size = 32,
 }
 BUFF.durationInSeconds = 30 * 60
-BUFF.description = "You've been recently resurrected, yet you feel a void touch. If you fall now, you'll be unable to be resurrected."
+BUFF.persistThroughDeath = true
+BUFF.description =
+"You've been recently resurrected, yet you feel a void touch. If you fall now, you'll be unable to be resurrected."
 
 function BUFF.hooks:CanPlayerResurrectTarget(client, target, corpse)
 	if (corpse and not corpse:GetNetVar("expVoidTouch", nil)) then

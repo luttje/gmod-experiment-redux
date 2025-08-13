@@ -49,6 +49,14 @@ function PANEL:SetPerk(perk)
 	self:Update()
 end
 
+function PANEL:GetText()
+	if (self.perk) then
+		return self.perk.name .. " " .. (self.perk.description or "")
+	end
+
+	return ""
+end
+
 function PANEL:Update()
 	if (not self.perk) then
 		return
@@ -149,22 +157,60 @@ PANEL = {}
 
 function PANEL:Init()
 	self:Dock(FILL)
+	self:SetSearchEnabled(true)
 
 	self.perks = {}
 	self.nextThink = 0
 
-	local sortedPerks = table.ClearKeys(Schema.perk.GetAll())
+	-- Create scroll panel
+	self.canvas = self:Add("DScrollPanel")
+	self.canvas:Dock(FILL)
 
+	local sortedPerks = table.ClearKeys(Schema.perk.GetAll())
 	table.SortByMember(sortedPerks, "name", true)
 
 	for _, perk in ipairs(sortedPerks) do
-		local panel = self:Add("exp_Perk")
+		local panel = self.canvas:Add("exp_Perk")
 		panel:SetPerk(perk)
 		panel:Dock(TOP)
 		panel:DockMargin(4, 4, 4, 4)
 
 		self.perks[#self.perks + 1] = panel
 	end
+end
+
+function PANEL:SetSearchEnabled(bValue)
+	if (not bValue) then
+		if (IsValid(self.searchEntry)) then
+			self.searchEntry:Remove()
+		end
+		return
+	end
+
+	-- search entry
+	self.searchEntry = self:Add("ixIconTextEntry")
+	self.searchEntry:Dock(TOP)
+	self.searchEntry:SetEnterAllowed(false)
+
+	self.searchEntry.OnChange = function(entry)
+		self:FilterPerks(entry:GetValue())
+	end
+end
+
+function PANEL:FilterPerks(query)
+	if (not query) then return end
+
+	query = string.PatternSafe(query:lower())
+	local bEmpty = query == ""
+
+	for _, perkPanel in ipairs(self.perks) do
+		if (not IsValid(perkPanel) or not perkPanel.GetText) then continue end
+
+		local bFound = bEmpty or perkPanel:GetText():lower():find(query)
+		perkPanel:SetVisible(bFound)
+	end
+
+	self:InvalidateChildren(true)
 end
 
 function PANEL:Update()
@@ -186,7 +232,7 @@ function PANEL:Think()
 	ix.gui.perksPanel = self
 end
 
-vgui.Register("exp_Perks", PANEL, "DScrollPanel")
+vgui.Register("exp_Perks", PANEL, "EditablePanel")
 
 hook.Add("CreateMenuButtons", "expAddPerksMenuButton", function(tabs)
 	tabs["perks"] = function(container)

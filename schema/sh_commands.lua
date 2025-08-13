@@ -275,8 +275,8 @@ do
 	}
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, npcID)
-		local npc = Schema.npc.Get(npcID)
+	function COMMAND:OnRun(client, npcId)
+		local npc = Schema.npc.Get(npcId)
 
 		if (not npc) then
 			client:Notify("Invalid NPC ID!")

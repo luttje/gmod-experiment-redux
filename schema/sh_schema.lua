@@ -28,7 +28,26 @@ Schema.disabledPlugins = {
 	"doors",
 }
 
-ix.util.Include("libs/thirdparty/sh_netstream2.lua")
+Schema.chunkedNetwork.RegisterFireAndForget("NpcEdit", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("NpcEditOpen", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("NpcInteractEdit", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("NpcInteractShowDynamic", 50, 0.03)
+
+Schema.chunkedNetwork.Register("Progressions", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("ProgressionEdit", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("ProgressionsEdit", 50, 0.03)
+Schema.chunkedNetwork.RegisterFireAndForget("ProgressionDynamicAll", 50, 0.03)
+
+--- Delay between sending progression chunks (to prevent reliable buffer overflow)
+Schema.ChunkDelayProgressionItem = 0.05
+
+--- Maximum number of progression items to send at once to the client
+Schema.ChunkMaxSizeProgressionItem = 500
+
+Schema.MessageIDBitCount = 16
+
+-- Maximum message index given the bitcount
+Schema.MaxMessageIndex = math.pow(2, Schema.MessageIDBitCount) - 1
 
 ix.util.Include("sh_commands.lua")
 
@@ -72,11 +91,11 @@ RANKS = {
 
 ix.util.IncludeDir("meta")
 
-Schema.achievement.LoadFromDir(Schema.folder .. "/schema/achievements")
-Schema.buff.LoadFromDir(Schema.folder .. "/schema/buffs")
-Schema.perk.LoadFromDir(Schema.folder .. "/schema/perks")
-Schema.npc.LoadFromDir(Schema.folder .. "/schema/npcs")
-Schema.map.LoadFromDir(Schema.folder .. "/schema/maps")
+Schema.achievement.IncludeDirectory(Schema.folder .. "/schema/achievements")
+Schema.buff.IncludeDirectory(Schema.folder .. "/schema/buffs")
+Schema.perk.IncludeDirectory(Schema.folder .. "/schema/perks")
+Schema.npc.IncludeDirectory(Schema.folder .. "/schema/npcs")
+Schema.map.IncludeDirectory(Schema.folder .. "/schema/maps")
 
 ix.chat.Register("achievement", {
 	OnChatAdd = function(self, speaker, text)

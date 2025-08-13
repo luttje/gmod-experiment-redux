@@ -1,6 +1,9 @@
-Schema.util = Schema.util or {}
-Schema.util.transactions = Schema.util.transactions or {}
-Schema.util.throttles = Schema.util.throttles or {}
+Schema.util = ix.util.RegisterLibrary("util", {
+	transactions = {},
+	throttles = {}
+})
+
+local PATH_DATA_DESIGN = SERVER and "helix/experiment-redux/"
 
 function Schema.util.ForceEndPath(path)
 	if (not path:EndsWith("/")) then
@@ -8,6 +11,201 @@ function Schema.util.ForceEndPath(path)
 	end
 
 	return path
+end
+
+--- Returns the filename if it has an extension, otherwise returns the filename with the extension appended.
+--- @param fileName string The filename
+--- @param extension string The extension to append if no extension is found
+--- @return string
+--- @realm shared
+function Schema.util.FileEnsureExtension(fileName, extension)
+	local endsWithAnyExtension = fileName:find("%.[^%./\\]+$")
+
+	if (endsWithAnyExtension) then
+		return fileName
+	end
+
+	return fileName .. "." .. extension
+end
+
+--- Safely joins path components with a slash.
+--- @param ... string The path components
+--- @return string # The joined path
+--- @realm shared
+function Schema.util.JoinPath(...)
+	local path = ""
+
+	for i = 1, select("#", ...) do
+		local component = select(i, ...)
+
+		if (component:sub(-1) == "/") then
+			component = component:sub(1, -2)
+		end
+
+		if (i == 1) then
+			path = component
+		else
+			path = path .. "/" .. component
+		end
+	end
+
+	return path
+end
+
+--- Gets the schema folder.
+--- @return string
+--- @realm shared
+function Schema.util.GetSchemaFolder()
+	return engine.ActiveGamemode()
+end
+
+--- Saves data to a data folder.
+--- @param filePath string The file path relative to a data folder.
+--- @param data table The data to save, to be JSON encoded.
+--- @param baseFolder string The base folder to save the data in.
+--- @realm shared
+function Schema.util.SaveData(filePath, data, baseFolder)
+	filePath = Schema.util.FileEnsureExtension(filePath, "txt")
+
+	file.Write(
+		Schema.util.JoinPath(baseFolder, filePath),
+		util.TableToJSON(data)
+	)
+end
+
+--- Saves data to the schema's data folder.
+--- @param filePath string The file path relative to the schema's data folder.
+--- @param data table The data to save, to be JSON encoded.
+--- @realm shared
+function Schema.util.SaveSchemaData(filePath, data)
+	Schema.util.SaveData(
+		filePath,
+		data,
+		Schema.util.JoinPath(PATH_DATA_DESIGN, Schema.util.GetSchemaFolder())
+	)
+end
+
+--- Deletes data from a data folder.
+--- @param filePath string The file path relative to a data folder.
+--- @param baseFolder string The base folder to save the data in.
+--- @realm shared
+function Schema.util.DeleteData(filePath, baseFolder)
+	filePath = Schema.util.FileEnsureExtension(filePath, "txt")
+
+	file.Delete(
+		Schema.util.JoinPath(baseFolder, filePath),
+		"DATA"
+	)
+end
+
+--- Deletes data from the schema's data folder.
+--- @param filePath string The file path relative to the schema's data folder.
+--- @realm shared
+function Schema.util.DeleteSchemaData(filePath)
+	Schema.util.DeleteData(
+		filePath,
+		Schema.util.JoinPath(PATH_DATA_DESIGN, Schema.util.GetSchemaFolder())
+	)
+end
+
+--- Checks if data exists in a data folder.
+--- @param filePath string The file path relative to a data folder.
+--- @param baseFolder string The base folder to save the data in.
+--- @return boolean # Whether the data exists.
+--- @realm shared
+function Schema.util.DataExists(filePath, baseFolder)
+	filePath = Schema.util.FileEnsureExtension(filePath, "txt")
+
+	return file.Exists(
+		Schema.util.JoinPath(baseFolder, filePath),
+		"DATA"
+	)
+end
+
+--- Checks if data exists in the schema's data folder.
+--- @param filePath string The file path relative to the schema's data folder.
+--- @return boolean # Whether the data exists.
+--- @realm shared
+function Schema.util.SchemaDataExists(filePath)
+	return Schema.util.DataExists(
+		filePath,
+		Schema.util.JoinPath(PATH_DATA_DESIGN, Schema.util.GetSchemaFolder())
+	)
+end
+
+--- Restores data from a data folder.
+--- @param filePath string The file path relative to a data folder.
+--- @param default? any The default value to return if the data does not exist. Default is an empty table.
+--- @param baseFolder string The base folder to save the data in.
+--- @return any # The restored data, or the default value.
+--- @realm shared
+function Schema.util.RestoreData(filePath, default, baseFolder)
+	filePath = Schema.util.FileEnsureExtension(filePath, "txt")
+
+	if (Schema.util.SchemaDataExists(filePath)) then
+		local data = file.Read(
+			Schema.util.JoinPath(baseFolder, filePath),
+			"DATA"
+		)
+
+		if (data) then
+			local success, value = pcall(util.JSONToTable, data)
+
+			if (success and value ~= nil) then
+				return value
+			else
+				local success, value = pcall(util.JSONToTable, data)
+
+				if (success and value ~= nil) then
+					return value
+				end
+			end
+		end
+	end
+
+	if (default ~= nil) then
+		return default
+	else
+		return {}
+	end
+end
+
+--- Restores data from the schema's data folder.
+--- @param filePath string The file path relative to the schema's data folder.
+--- @param default? any The default value to return if the data does not exist. Default is an empty table.
+--- @return any # The restored data, or the default value.
+--- @realm shared
+function Schema.util.RestoreSchemaData(filePath, default)
+	return Schema.util.RestoreData(
+		filePath,
+		default,
+		Schema.util.JoinPath(PATH_DATA_DESIGN, Schema.util.GetSchemaFolder())
+	)
+end
+
+--- Finds all files in a data folder.
+--- @param filePath string The file path relative to a data folder. Can contain a wildcard.
+--- @param baseFolder string The base folder to save the data in.
+--- @return table, table # The files found, and the directories found.
+--- @realm shared
+function Schema.util.FindData(filePath, baseFolder)
+	filePath = Schema.util.FileEnsureExtension(filePath, "txt")
+
+	return file.Find(
+		Schema.util.JoinPath(baseFolder, filePath),
+		"DATA"
+	)
+end
+
+--- Finds all files in the schema's data folder.
+--- @param filePath string The file path relative to the schema's data folder. Can contain a wildcard.
+--- @return table, table # The files found, and the directories found.
+--- @realm shared
+function Schema.util.FindSchemaData(filePath)
+	return Schema.util.FindData(
+		filePath,
+		Schema.util.JoinPath(PATH_DATA_DESIGN, Schema.util.GetSchemaFolder())
+	)
 end
 
 function Schema.util.GetUniqueID()
@@ -42,6 +240,55 @@ function Schema.util.UrlEncode(inputString)
 	end):gsub(" ", "+")
 
 	return result
+end
+
+--- Quickly perform English pluralization.
+--- @deprecated You should use `L` and language localization instead for better support for other languages.
+--- @param singular string The singular form of the word
+--- @param amount number The value to determine the pluralization
+--- @return string
+--- @realm shared
+function Schema.util.Pluralize(singular, amount)
+	if (amount == 1) then
+		return singular
+	end
+
+	return singular .. "s"
+end
+
+--- Returns whether the given value is safe to use as a file name.
+--- @param value string
+--- @return boolean
+--- @realm shared
+function Schema.util.IsSafeFileName(value)
+	-- Check for any character that is not a letter (%w), digit (%d), space (%s), period (.), hyphen (-), or underscore (_).
+	return string.match(value, "^[%w%d%s%.%-%_]+$") ~= nil
+end
+
+--- Copies a table, but ignores cyclic references. This is useful for
+--- copying tables needed to be JSON encoded.
+--- @param target table The table to copy
+--- @param copied? table Already copied tables
+--- @return table # The new table copy
+--- @realm shared
+function Schema.util.CopyOmitCyclicReference(target, copied)
+	copied = copied or {}
+	local newTable = {}
+
+	copied[target] = newTable
+
+	for k, v in pairs(target) do
+		if (istable(v)) then
+			-- Skip already copied tables to avoid cyclic references
+			if (not copied[v]) then
+				newTable[k] = Schema.util.CopyOmitCyclicReference(v, copied)
+			end
+		else
+			newTable[k] = v
+		end
+	end
+
+	return newTable
 end
 
 --- Creates a scope that allows only a single transaction to be active at a time.

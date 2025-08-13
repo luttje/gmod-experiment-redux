@@ -1,4 +1,4 @@
-Schema.draw = Schema.draw or {}
+Schema.draw = ix.util.RegisterLibrary("draw")
 
 --- Draws a circle on the screen.
 -- Source: https://wiki.facepunch.com/gmod/surface.DrawPoly

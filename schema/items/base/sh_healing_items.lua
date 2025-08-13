@@ -10,7 +10,7 @@ ITEM.description = "A bandage roll, there isn't much so use it wisely."
 -- ITEM.healSound = "items/medshot4.wav"
 
 function ITEM:GetHealSound()
-    return self.healSound or "items/medshot4.wav"
+	return self.healSound or "items/medshot4.wav"
 end
 
 function ITEM:GetHealAmount()
@@ -22,27 +22,28 @@ ITEM.functions.ApplySelf = {
 	tip = "Use this item to heal yourself.",
 	icon = "icon16/heart.png",
 	OnRun = function(item)
-        local client = item.player
+		local client = item.player
 		local throttled, remaining = Schema.util.Throttle("allowHeal", 10, client)
 
-        if (throttled) then
-            client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
-            return false
-        end
+		if (throttled) then
+			client:Notify("You can't use this for another " .. string.NiceTime(remaining) .. "!")
+			return false
+		end
 
 		local healAmount = Schema.GetHealAmount(client, item:GetHealAmount())
+		local currentHealth = client:Health()
+		local maxHealth = client:GetMaxHealth()
+		local maxHealAmount = math.min(healAmount, maxHealth - currentHealth)
 
-		client:SetHealth(
-			math.Clamp(client:Health() + healAmount, 0, client:GetMaxHealth())
-		)
+		client:SetHealth(currentHealth + maxHealAmount)
 
-        local healSound = item:GetHealSound()
+		local healSound = item:GetHealSound()
 
 		if (healSound) then
 			client:EmitSound(healSound, 50, 100, 0.7)
 		end
 
-		hook.Run("PlayerHealed", client, client, item, healAmount)
+		hook.Run("PlayerHealed", client, client, item, maxHealAmount)
 	end
 }
 
@@ -81,7 +82,7 @@ ITEM.functions.ApplyLookAt = {
 			math.Clamp(client:Health() + healAmount, 0, client:GetMaxHealth())
 		)
 
-        local healSound = item:GetHealSound()
+		local healSound = item:GetHealSound()
 
 		if (healSound) then
 			client:EmitSound(healSound, 50, 100, 0.7)

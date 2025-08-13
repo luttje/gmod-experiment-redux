@@ -8,33 +8,34 @@ BUFF.foregroundImage = {
 	size = 32,
 }
 BUFF.durationInSeconds = 15 * 60
-BUFF.description = "You are invulnerable to damage from other players for a short duration, unless you attack, speak or take other damage."
+BUFF.description =
+"You are invulnerable to damage from other players for a short duration, unless you attack, speak or take other damage."
 
 if (not SERVER) then
 	return
 end
 
 local function bufferEffect(client)
-    if (not Schema.util.Throttle("QuantumBufferDamageSound", 0.5, client)) then
-        client:EmitSound("ambient/energy/zap7.wav", 75, 100 + math.random(0, 100))
-    end
+	if (not Schema.util.Throttle("QuantumBufferDamageSound", 0.5, client)) then
+		client:EmitSound("ambient/energy/zap7.wav", 75, 100 + math.random(0, 100))
+	end
 
 	local flickerDuration = 1
-    if (not Schema.util.Throttle("QuantumBufferDamageEffect", flickerDuration, client) and not client.expQuantumBufferFlickering) then
+	if (not Schema.util.Throttle("QuantumBufferDamageEffect", flickerDuration, client) and not client.expQuantumBufferFlickering) then
 		client.expQuantumBufferFlickering = true
-        client:RemoveAllClientDecals()
+		client:RemoveAllClientDecals()
 
-        local oldMaterial = client:GetMaterial()
+		local oldMaterial = client:GetMaterial()
 		local flickerAmount = 5
-        local flickerCount = 0
+		local flickerCount = 0
 		local flickerInterval = flickerDuration / flickerAmount
 
 		timer.Create("QuantumBufferDamageEffect" .. client:EntIndex(), flickerInterval, flickerAmount, function()
 			if (IsValid(client)) then
-                client:SetMaterial("models/effects/vol_light001")
+				client:SetMaterial("models/effects/vol_light001")
 			end
 
-            timer.Simple(flickerInterval * .5, function()
+			timer.Simple(flickerInterval * .5, function()
 				if (IsValid(client)) then
 					client:SetMaterial(oldMaterial)
 
@@ -58,17 +59,22 @@ function BUFF:OnShouldExpire(client, buff)
 end
 
 function BUFF.hooks:PostPlayerLoadout(client)
-    if (Schema.buff.GetActive(client, self.index)) then
-        return
-    end
+	if (Schema.buff.GetActive(client, self.index)) then
+		return
+	end
+
+	-- Not if the player is being resurrected.
+	if (client.expIsResurrecting) then
+		return
+	end
 
 	Schema.buff.SetActive(client, self.index)
 end
 
 function BUFF.hooks:EntityTakeDamage(entity, damageInfo)
-    if (not entity:IsPlayer()) then
-        return
-    end
+	if (not entity:IsPlayer()) then
+		return
+	end
 
 	if (Schema.buff.GetActive(entity, self.index)) then
 		local attacker = damageInfo:GetAttacker()
@@ -92,8 +98,8 @@ end
 
 function BUFF.hooks:PlayerWeaponChanged(client, weapon)
 	if (weapon:GetClass() == "ix_hands"
-            or weapon:GetClass() == "ix_keys"
-            or weapon:GetClass() == "exp_keys"
+			or weapon:GetClass() == "ix_keys"
+			or weapon:GetClass() == "exp_keys"
 			or weapon:GetClass() == "gmod_tool"
 			or weapon:GetClass() == "weapon_physgun") then
 		return
@@ -123,11 +129,11 @@ function BUFF.hooks:PlayerSecondElapsed(client)
 end
 
 function BUFF.hooks:CanPlayerInteractItem(client, action, item)
-    local instance = ix.item.instances[item]
+	local instance = ix.item.instances[item]
 
-    if (not instance or instance.uniqueID == "tutorial") then
-        return
-    end
+	if (not instance or instance.uniqueID == "tutorial") then
+		return
+	end
 
 	if (Schema.buff.GetActive(client, self.index)) then
 		client.expQuantumBufferShouldExpire = true

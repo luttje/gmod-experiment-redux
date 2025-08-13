@@ -1,6 +1,7 @@
-Schema.ammo = Schema.ammo or {}
-Schema.ammo.ammoCalibre = Schema.ammo.ammoCalibre or {}
-Schema.ammo.lookupCalibre = Schema.ammo.lookupCalibre or {}
+Schema.ammo = ix.util.RegisterLibrary("ammo", {
+	ammoCalibre = {},
+	lookupCalibre = {},
+})
 
 function Schema.ammo.RegisterCalibre(ammo, calibre, calibreName)
 	local ammoName = (isstring(ammo) and ammo or ammo.name):lower()

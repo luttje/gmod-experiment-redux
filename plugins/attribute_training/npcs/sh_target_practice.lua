@@ -1,5 +1,10 @@
+local PLUGIN = PLUGIN
+
+--- @type ExperimentNpc
+--- @diagnostic disable-next-line: assign-type-mismatch
 local NPC = NPC
 
+-- NPC Properties
 NPC.name = "Jeff Atkinson"
 NPC.description = "A stern looking fellow, he's got a hard look in his eyes."
 NPC.model = "models/Humans/Group03/male_09.mdl"
@@ -11,24 +16,98 @@ NPC.attributeRewards = {
 	["dexterity"] = 1,
 }
 
-local challengeStart = NPC:RegisterInteraction("challengeStart", {
+-- Progression keys
+NPC.PROGRESSION_NEXT_CHALLENGE_START = "nextChallengeStart"
+
+local INTERACTION_SET = NPC:RegisterInteractionSet({
+	--- The unique identifier for this interaction set.
+	uniqueID = "jeffAtkinson_DexterityTraining",
+
+	--- A function that determines if the player should start with this interaction set
+	--- @param interactionSet InteractionSet
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interactionSet, player, npcEntity)
+		-- Always allow access to this interaction set
+		return true
+	end,
+})
+
+--[[
+	Challenge start interaction
+--]]
+
+local INTERACTION_CHALLENGE_START = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "challengeStart",
+
 	text = [[
 		Hey you want to practice your dexterity? I can help you with that.
 
 		<b>Ensure you have enough ammo for your weapon, and we'll start the challenge.</b>
 	]],
-	responses = {
-		{
-			text = "I'm ready!",
-			next = "challengeStarted",
-		},
-		{
-			text = "I'm not ready yet.",
-		},
-	}
+
+	--- @param interaction Interaction
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		-- Check if player is not in cooldown and no challenge is currently active
+		local nextChallengeStart = Schema.progression.Get(
+			player,
+			NPC.uniqueID,
+			NPC.PROGRESSION_NEXT_CHALLENGE_START
+		) or 0
+		local currentTime = CurTime()
+
+		-- Don't start if in cooldown
+		if nextChallengeStart > currentTime then
+			return false
+		end
+
+		-- Don't start if there's already a challenge running
+		if npcEntity.expCurrentChallenge then
+			return false
+		end
+
+		return true
+	end,
 })
 
-local challengeStarted = NPC:RegisterInteraction("challengeStarted", {
+INTERACTION_CHALLENGE_START:RegisterResponse({
+	answer = "I'm ready!",
+	next = "challengeStarted",
+
+	--- @param response InteractionResponse
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return string?
+	serverOnChoose = function(response, player, npcEntity)
+		-- Set up the challenge
+		npcEntity.expCurrentChallenge = {
+			client = player,
+			startAt = CurTime() + 10,
+			duration = NPC.trainingDuration,
+		}
+
+		player:SetCharacterNetVar("targetPracticeChallenger", npcEntity)
+
+		-- Send chat message
+		npcEntity:PrintChat("Alright " .. player:Name() .. ", let's get started!")
+	end,
+})
+
+INTERACTION_CHALLENGE_START:RegisterResponse({
+	answer = "I'm not ready yet.",
+})
+
+--[[
+	Challenge started interaction
+--]]
+
+local INTERACTION_CHALLENGE_STARTED = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "challengeStarted",
+
 	text = [[
 		If you look over to my right, there's a couple big contraptions on top of the train station.
 
@@ -36,31 +115,79 @@ local challengeStarted = NPC:RegisterInteraction("challengeStarted", {
 
 		I'll count down from 3, and then we'll start.
 	]],
-	responses = {
-		{
-			text = "Alright, let me get to shooting!",
-		},
-	}
+
+	--- @param interaction Interaction
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		-- Never start this directly, it only follows other interactions
+		return false
+	end,
 })
 
-local challengeAlreadyStartedSelf = NPC:RegisterInteraction("challengeAlreadyStartedSelf", {
+INTERACTION_CHALLENGE_STARTED:RegisterResponse({
+	answer = "Alright, let me get to shooting!",
+})
+
+--[[
+	Challenge already started (same player)
+--]]
+
+local INTERACTION_CHALLENGE_ALREADY_STARTED_SELF = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "challengeAlreadyStartedSelf",
+
 	text = "You're already in the middle of a challenge. Focus on that first!",
-	responses = {}
+
+	--- @param interaction Interaction
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		-- Check if this player has an active challenge
+		return npcEntity.expCurrentChallenge and npcEntity.expCurrentChallenge.client == player
+	end,
 })
 
-local challengeAlreadyStartedOther = NPC:RegisterInteraction("challengeAlreadyStartedOther", {
+-- No responses for this interaction (player should focus on current challenge)
+
+--[[
+	Challenge already started (other player)
+--]]
+
+local INTERACTION_CHALLENGE_ALREADY_STARTED_OTHER = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "challengeAlreadyStartedOther",
+
 	text = "We're in the middle of a challenge right now. You'll have to wait until it's over.",
-	responses = {
-		{
-			text = "I'll come back later then"
-		},
-	}
+
+	--- @param interaction Interaction
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		-- Check if there's an active challenge but not for this player
+		return npcEntity.expCurrentChallenge and npcEntity.expCurrentChallenge.client ~= player
+	end,
 })
 
-local challengeRecentlyStarted = NPC:RegisterInteraction("challengeRecentlyStarted", {
-	text = function(client, npcEntity, answersPanel)
-		local character = client:GetCharacter()
-		local nextChallengeStart = character:GetData("nextChallengeStart", 0)
+INTERACTION_CHALLENGE_ALREADY_STARTED_OTHER:RegisterResponse({
+	answer = "I'll come back later then",
+})
+
+--[[
+	Challenge recently completed (cooldown)
+--]]
+
+local INTERACTION_CHALLENGE_RECENTLY_STARTED = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "challengeRecentlyStarted",
+
+	--- Dynamic text based on remaining cooldown time
+	text = function(interaction, player, npcEntity)
+		local nextChallengeStart = Schema.progression.Get(
+		-- player, -- Only LocalPlayer on client
+			NPC.uniqueID,
+			NPC.PROGRESSION_NEXT_CHALLENGE_START
+		) or 0
 		local curTime = CurTime()
 		local nextChallengeStartRemaining = string.NiceTime(math.ceil(nextChallengeStart - curTime))
 
@@ -68,50 +195,34 @@ local challengeRecentlyStarted = NPC:RegisterInteraction("challengeRecentlyStart
 			.. NPC.trainingIntervalInMinutes .. " minutes, come back in "
 			.. nextChallengeStartRemaining .. "!"
 	end,
-	responses = {
-		{
-			text = "I might come back later then"
-		},
-	}
+
+	--- @param interaction Interaction
+	--- @param player Player
+	--- @param npcEntity Entity
+	--- @return boolean
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		-- Check if player is in cooldown
+		local nextChallengeStart = Schema.progression.Get(
+			player,
+			NPC.uniqueID,
+			NPC.PROGRESSION_NEXT_CHALLENGE_START
+		) or 0
+		local currentTime = CurTime()
+
+		-- Start this interaction if in cooldown and no active challenge
+		return nextChallengeStart > currentTime and not npcEntity.expCurrentChallenge
+	end,
 })
 
-function NPC:OnInteract(client, npcEntity, desiredInteraction)
-	if (npcEntity.expCurrentChallenge) then
-		if (npcEntity.expCurrentChallenge.client == client) then
-			return challengeAlreadyStartedSelf
-		end
-
-		return challengeAlreadyStartedOther
-	end
-
-	local character = client:GetCharacter()
-
-	if (character:GetData("nextChallengeStart", 0) > CurTime()) then
-		return challengeRecentlyStarted
-	end
-
-	if (desiredInteraction == nil) then
-		return challengeStart
-	end
-
-	if (desiredInteraction == challengeStarted) then
-		npcEntity.expCurrentChallenge = {
-			client = client,
-			startAt = CurTime() + 10,
-			duration = NPC.trainingDuration,
-		}
-
-		client:SetCharacterNetVar("targetPracticeChallenger", npcEntity)
-
-		npcEntity:PrintChat("Alright " .. client:Name() .. ", let's get started!")
-
-		return challengeStarted
-	end
-
-	return desiredInteraction
-end
+INTERACTION_CHALLENGE_RECENTLY_STARTED:RegisterResponse({
+	answer = "I might come back later then",
+})
 
 function NPC:OnThink(npcEntity)
+	self:HandleChallengeLogic(npcEntity)
+end
+
+function NPC:HandleChallengeLogic(npcEntity)
 	local curTime = CurTime()
 
 	if (not npcEntity.expCurrentChallenge) then
@@ -136,7 +247,14 @@ function NPC:OnThink(npcEntity)
 
 			npcEntity.expCurrentChallenge = nil
 			client:SetCharacterNetVar("targetPracticeChallenger", nil)
-			character:SetData("nextChallengeStart", curTime + (NPC.trainingIntervalInMinutes * 60))
+
+			-- Set cooldown using progression system
+			Schema.progression.Change(
+				client,
+				NPC.uniqueID,
+				NPC.PROGRESSION_NEXT_CHALLENGE_START,
+				curTime + (NPC.trainingIntervalInMinutes * 60)
+			)
 
 			return
 		end
@@ -169,9 +287,7 @@ function NPC:OnThink(npcEntity)
 	end
 end
 
-function NPC:OnEnd(client, npcEntity)
-end
-
+-- Client-side HUD (this might need to be handled differently in the new system)
 if (CLIENT) then
 	function NPC:HUDPaint(npcEntity)
 		local client = LocalPlayer()

@@ -1,4 +1,10 @@
-Schema.npc = ix.util.GetOrCreateCommonLibrary("NPC", function() return setmetatable({}, Schema.meta.npc) end)
+--- Client library that exposes functions to interact with NPCs.
+--- It also has all functions a `CommonLibrary` has.
+--- @class Schema.npc : CommonLibrary
+Schema.npc = ix.util.GetOrCreateCommonLibrary("NPC", function() return ix.util.NewMetaObject(Schema.meta.npc) end)
+
+Schema.npc.NO_HEALTH = -1
+Schema.npc.MAX_EDICT_BITS = 13
 
 ix.chat.Register("npc", {
 	CanSay = function(self, speaker, text)
@@ -34,4 +40,42 @@ function Schema.npc.HasCompletedInteraction(client, interaction, scope)
 	end
 
 	return false
+end
+
+--- Returns whether the player can manage NPC's and interactions
+--- @param player Player
+--- @return boolean
+--- @realm shared
+function Schema.npc.HasManagePermission(player)
+	return ix.command.HasAccess(player, "NpcSpawn")
+end
+
+--- @realm shared
+function Schema.npc.GetRandomVoiceSet(model)
+	local randomVoiceLines = {
+		"vo/npc/male01/excuseme01.wav",
+		"vo/npc/male01/excuseme01.wav",
+		"vo/npc/male01/excuseme01.wav",
+		"vo/npc/male01/question19.wav",
+		"vo/npc/male01/hi01.wav",
+		"vo/npc/male01/hi01.wav",
+		"vo/npc/male01/hi01.wav",
+		"vo/npc/male01/hi01.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/hi02.wav",
+		"vo/npc/male01/doingsomething.wav",
+		"vo/npc/male01/answer18.wav"
+	}
+
+	if (model:find("female", nil, true) ~= nil) then
+		for i = 1, #randomVoiceLines do
+			randomVoiceLines[i] = randomVoiceLines[i]:gsub("male", "female")
+		end
+	end
+
+	return randomVoiceLines
 end

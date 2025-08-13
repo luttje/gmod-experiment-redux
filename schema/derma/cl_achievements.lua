@@ -55,30 +55,40 @@ function PANEL:SetAchievement(achievement)
 	self:Update()
 end
 
+function PANEL:GetText()
+	if (self.achievement) then
+		return self.achievement.name .. " " .. (self.achievement.description or "")
+	end
+
+	return ""
+end
+
 function PANEL:Update()
 	if (not self.achievement) then
 		return
 	end
 
-    self.name:SetText(self.achievement.name)
+	self.name:SetText(self.achievement.name)
 	self.name:SizeToContents()
-	self.description:SetText(self.achievement.description .. " (rewards " .. ix.currency.Get(self.achievement.reward) .. ")")
+	self.description:SetText(self.achievement.description ..
+		" (rewards " .. ix.currency.Get(self.achievement.reward) .. ")")
 	self.description:SizeToContents()
 
-	self.progressLabel:SetText(Schema.achievement.GetProgress(self.achievement.uniqueID) .. " / " .. self.achievement.maximum)
+	self.progressLabel:SetText(Schema.achievement.GetProgress(self.achievement.uniqueID) ..
+		" / " .. self.achievement.maximum)
 
 	local opacity = 255
 
-    if (Schema.achievement.HasAchieved(self.achievement.uniqueID)) then
-        self.icon:SetBadge({
+	if (Schema.achievement.HasAchieved(self.achievement.uniqueID)) then
+		self.icon:SetBadge({
 			spritesheet = Material("experiment-redux/flatmsicons32.png"),
 			x = 29,
 			y = 5,
 			size = 32,
 		}, derma.GetColor("Success", self))
-    else
-        opacity = 20
-    end
+	else
+		opacity = 20
+	end
 
 	self.achievedOpacity = opacity
 
@@ -119,25 +129,63 @@ vgui.Register("exp_Achievement", PANEL, "EditablePanel")
 PANEL = {}
 
 function PANEL:Init()
-    self:Dock(FILL)
+	self:Dock(FILL)
+	self:SetSearchEnabled(true)
 
-    self.achievements = {}
-    self.nextThink = 0
+	self.achievements = {}
+	self.nextThink = 0
 
-    local sortedAchievements = table.ClearKeys(Schema.achievement.GetAll())
+	-- Create scroll panel
+	self.canvas = self:Add("DScrollPanel")
+	self.canvas:Dock(FILL)
 
-    table.SortByMember(sortedAchievements, "name", true)
+	local sortedAchievements = table.ClearKeys(Schema.achievement.GetAll())
+	table.SortByMember(sortedAchievements, "name", true)
 
 	for _, achievement in ipairs(sortedAchievements) do
-        local panel = self:Add("exp_Achievement")
-        panel:SetAchievement(achievement)
-        panel:Dock(TOP)
+		local panel = self.canvas:Add("exp_Achievement")
+		panel:SetAchievement(achievement)
+		panel:Dock(TOP)
 		panel:DockMargin(4, 4, 4, 4)
 
-        self.achievements[#self.achievements + 1] = panel
-    end
+		self.achievements[#self.achievements + 1] = panel
+	end
 
-    ix.gui.achievementsPanel = self
+	ix.gui.achievementsPanel = self
+end
+
+function PANEL:SetSearchEnabled(bValue)
+	if (! bValue) then
+		if (IsValid(self.searchEntry)) then
+			self.searchEntry:Remove()
+		end
+		return
+	end
+
+	-- search entry
+	self.searchEntry = self:Add("ixIconTextEntry")
+	self.searchEntry:Dock(TOP)
+	self.searchEntry:SetEnterAllowed(false)
+
+	self.searchEntry.OnChange = function(entry)
+		self:FilterAchievements(entry:GetValue())
+	end
+end
+
+function PANEL:FilterAchievements(query)
+	if (! query) then return end
+
+	query = string.PatternSafe(query:lower())
+	local bEmpty = query == ""
+
+	for _, achievementPanel in ipairs(self.achievements) do
+		if (! IsValid(achievementPanel) or ! achievementPanel.GetText) then continue end
+
+		local bFound = bEmpty or achievementPanel:GetText():lower():find(query)
+		achievementPanel:SetVisible(bFound)
+	end
+
+	self:InvalidateChildren(true)
 end
 
 function PANEL:Update()
@@ -156,7 +204,7 @@ function PANEL:Think()
 	end
 end
 
-vgui.Register("exp_Achievements", PANEL, "DScrollPanel")
+vgui.Register("exp_Achievements", PANEL, "EditablePanel")
 
 hook.Add("CreateMenuButtons", "expAddAchievementsMenuButton", function(tabs)
 	tabs["achievements"] = function(container)

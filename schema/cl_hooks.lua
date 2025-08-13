@@ -965,3 +965,170 @@ function Schema:PostPlayerDraw(client)
 
 	Schema.clientsideModelCache = clientsideModelCache
 end
+
+Schema.chunkedNetwork.HandleSend("NpcInteractShowDynamic", function(data, extraData)
+	local npcEntity = Entity(data.npcEntityIndex)
+	local npc = data.npc
+	local interaction = data.interaction
+
+	Schema.InitMetaObject(npc, Schema.meta.npc)
+	Schema.InitMetaObject(interaction, Schema.meta.interaction)
+
+	local responses = interaction:GetResponses()
+
+	for _, response in ipairs(responses) do
+		Schema.InitMetaObject(response, Schema.meta.interactionResponse)
+	end
+
+	local panel = vgui.Create("expEntityMenu")
+	panel:InitDoubleList()
+	panel:SetEntity(npcEntity)
+	panel:SetCallOnRemove(function()
+		if (IsValid(Schema.npc.panel)) then
+			Schema.npc.panel:Remove()
+		end
+	end)
+
+	local interactionPanel = vgui.Create("expNpcInteraction")
+	interactionPanel:SetInteraction(interaction, npc, npcEntity, true)
+
+	panel:SetMainPanel(interactionPanel)
+	panel:SetToRemoveOnceInvalid(interactionPanel)
+end)
+
+Schema.chunkedNetwork.HandleSend("ProgressionDynamicAll", function(data, extraData)
+	-- Put the data into the dynamic trackers, the values in stored.
+	for _, dynamicData in ipairs(data) do
+		local tracker = dynamicData.progressionTracker
+		local keys = dynamicData.keys
+		local goals = tracker.goals
+
+		-- Hydrate the tracker, ensuring the correct metatables are set
+		tracker.isInProgress = function(player, progression)
+			-- TODO: Check if the progression is in progress (isInProgressInfo.type, isInProgressInfo.value)
+			return true
+		end
+
+		-- Register the goals so the metatables are set for em
+		tracker.goals = {}
+
+		tracker = setmetatable(tracker, Schema.meta.progressionTracker)
+
+		for _, goalInfo in ipairs(goals) do
+			goalInfo.getProgress = Schema.progression.CreateGetProgressScript(tracker, goalInfo.getProgressScript)
+
+			tracker:RegisterGoal(goalInfo)
+		end
+
+		-- If the tracker doesn't exist, we create it
+		if (not Schema.progression.dynamicTrackers[tracker.uniqueID]) then
+			Schema.progression.dynamicTrackers[tracker.uniqueID] = tracker
+		end
+
+		Schema.progression.StoreTracker(tracker)
+
+		-- If the scope doesn't exist, we create it
+		if (not Schema.progression.stored[tracker.scope]) then
+			Schema.progression.stored[tracker.scope] = {}
+		end
+
+		-- Put the keys into the stored
+		for key, value in pairs(keys) do
+			Schema.progression.stored[tracker.scope][key] = value
+		end
+	end
+end)
+
+Schema.chunkedNetwork.HandleSend("NpcEditOpen", function(data, extraData)
+	local npcToEditIndex = data.entityIndex
+	local npcData
+
+	if (npcToEditIndex) then
+		npcData = data
+	end
+
+	if (IsValid(Schema.npc.editorPanel)) then
+		Schema.npc.editorPanel:Close()
+	end
+
+	local function openDialog(npcToEdit)
+		local dialog = vgui.Create("expNpcEditor")
+		Schema.npc.editorPanel = dialog
+
+		if (npcData) then
+			Schema.InitMetaObject(npcData, Schema.meta.npc)
+			dialog:SetNpcToEdit(npcToEdit, npcData)
+		end
+
+		dialog:SetSize(ScrW(), ScrH())
+		dialog:Center()
+		dialog:SetSizable(true)
+		dialog:SetScreenLock(true)
+		dialog:SetDraggable(false)
+		dialog:MakePopup()
+	end
+
+	if (not npcToEditIndex) then
+		openDialog()
+		return
+	end
+
+	-- Since the server only just spawned the NPC, we need to wait for the entity to be valid.
+	local waitForEntityTimer = "expWaitForNpcEntity" .. tostring(SysTime())
+
+	timer.Create(waitForEntityTimer, 0.01, 500, function()
+		local npcToEdit = Entity(npcToEditIndex)
+
+		if (IsValid(npcToEdit)) then
+			openDialog(npcToEdit)
+			timer.Remove(waitForEntityTimer)
+		end
+	end)
+end)
+
+Schema.chunkedNetwork.HandleSend("ProgressionsEdit", function(progressions, extraData)
+	local dialog = vgui.Create("expProgressionsEditor")
+	dialog:SetSize(ScrW(), ScrH())
+	dialog:Center()
+	dialog:SetSizable(true)
+	dialog:SetScreenLock(true)
+	dialog:SetDraggable(false)
+	dialog:MakePopup()
+	Schema.progression.editorPanel = dialog
+
+	-- For testing:
+	-- local progressions = {
+	-- 	{
+	-- 		currentUniqueID = "azzd",
+	-- 		uniqueID = "azzd",
+	-- 		scope = "azzd#test",
+	-- 		name = "Test azzd",
+	-- 		completedKey = "completed",
+	-- 		isInProgressInfo = {
+	-- 			type = "key",
+	-- 			value = "accepted",
+	-- 		},
+	-- 		progressionKeys = {
+	-- 			{ key = "completed", type = "boolean" },
+	-- 			{ key = "accepted",  type = "boolean" },
+	-- 		},
+	-- 		goals = {
+	-- 			{
+	-- 				key = "goal1",
+	-- 				name = "Goal 1",
+	-- 				type = "boolean",
+	-- 				getProgressScript = "return 1, 2, 3",
+	-- 			},
+	-- 			{
+	-- 				key = "goal2",
+	-- 				name = "Goal 2",
+	-- 				type = "boolean",
+	-- 				getProgressScript = "return 3, 4, 5",
+	-- 			},
+	-- 		}
+	-- 	},
+	-- }
+
+	Schema.PrintTableDev(progressions)
+	dialog:LoadProgressions(progressions)
+end)

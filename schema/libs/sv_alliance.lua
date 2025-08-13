@@ -8,7 +8,7 @@ util.AddNetworkString("AllianceRequestUpdateMembersDeclined")
 util.AddNetworkString("AllianceForceUpdate")
 util.AddNetworkString("AllianceUpdateMembers")
 
-Schema.alliance = Schema.alliance or {}
+Schema.alliance = ix.util.RegisterLibrary("alliance")
 
 function Schema.alliance.LoadTables()
 	local query

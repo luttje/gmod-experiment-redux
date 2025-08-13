@@ -1,5 +1,6 @@
-Schema.generator = Schema.generator or {}
-Schema.generator.stored = Schema.generator.stored or {}
+Schema.generator = ix.util.RegisterLibrary("generator", {
+	stored = {},
+})
 
 function Schema.generator.Register(name, power, health, produce, uniqueID, upgrades)
 	Schema.generator.stored[uniqueID] = {
@@ -17,15 +18,15 @@ function Schema.generator.GetAll()
 end
 
 function Schema.generator.Get(name)
-	if ( Schema.generator.stored[name] ) then
+	if (Schema.generator.stored[name]) then
 		return Schema.generator.stored[name]
 	else
 		local generator
 
 		for k, v in pairs(Schema.generator.stored) do
-			if ( string.find( string.lower(v.name), string.lower(name) ) ) then
+			if (string.find(string.lower(v.name), string.lower(name))) then
 				if (generator) then
-					if ( string.len(v.name) < string.len(generator.name) ) then
+					if (string.len(v.name) < string.len(generator.name)) then
 						generator = v
 					end
 				else

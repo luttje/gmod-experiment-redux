@@ -8,6 +8,12 @@ local ENTITY_PANEL_FRACTION = 1 - MAIN_PANEL_FRACTION
 DEFINE_BASECLASS("ixEntityMenu")
 
 function PANEL:Init()
+	if (IsValid(Schema.entityPanel)) then
+		Schema.entityPanel:Remove()
+		return
+	end
+
+	Schema.entityPanel = self
 end
 
 function PANEL:InitDoubleList()
@@ -149,6 +155,25 @@ function PANEL:Paint(width, height) -- luacheck: ignore 312
 
 	self.list:PaintManual()
 	render.SetScissorRect(0, 0, 0, 0, false)
+end
+
+function PANEL:SetCallOnRemove(callback)
+	self.callOnRemove = self.callOnRemove or {}
+	self.callOnRemove[callback] = true
+end
+
+function PANEL:UnsetCallOnRemove(callback)
+	if (self.callOnRemove) then
+		self.callOnRemove[callback] = nil
+	end
+end
+
+function PANEL:OnRemove()
+	if (self.callOnRemove) then
+		for callback in pairs(self.callOnRemove) do
+			callback()
+		end
+	end
 end
 
 vgui.Register("expEntityMenu", PANEL, "ixEntityMenu")

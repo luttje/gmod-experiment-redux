@@ -1053,3 +1053,325 @@ end
 function Schema:OnPlayerLockerClosed(client, lockers)
 	ix.log.Add(client, "closeLockers")
 end
+
+Schema.chunkedNetwork.HandleSend("NpcEdit", function(client, data, extraData)
+	local npcToEdit = Entity(data.entityIndex or 0)
+	local name = data.name and data.name:Trim()
+	local model = data.model and data.model:Trim()
+	local uniqueID = data.uniqueID and data.uniqueID:Trim()
+	local description = data.description and data.description:Trim()
+	local voicePitch = data.voicePitch and tonumber(data.voicePitch) or 100
+	local interactionSets = data.interactionSets or {}
+
+	if (not Schema.npc.HasManagePermission(client)) then
+		client:Notify("You do not have permission to manage NPCs!")
+		return
+	end
+
+	if (uniqueID == "") then
+		client:Notify("You must enter a uniqueID for the NPC!")
+		return
+	end
+
+	if (not Schema.util.IsSafeFileName(uniqueID)) then
+		client:Notify("The uniqueID you entered is not valid (must be usable as a file name)!")
+		return
+	end
+
+	if (name == "") then
+		client:Notify("You must enter a name for the NPC!")
+		return
+	end
+
+	if (description == "") then
+		client:Notify("You must enter a description for the NPC!")
+		return
+	end
+
+	if (model == "") then
+		client:Notify("You must enter a model for the NPC!")
+		return
+	end
+
+	if (not util.IsValidModel(model)) then
+		client:Notify("The model you entered is not valid!")
+		return
+	end
+
+	if (voicePitch < 0 or voicePitch > 255) then
+		client:Notify("The voice pitch must be between 0 and 255!")
+		return
+	end
+
+	local existingNpc = Schema.npc.Get(uniqueID)
+	local npcData = {
+		uniqueID = uniqueID,
+		name = name,
+		model = model,
+		description = description,
+		voicePitch = voicePitch,
+		interactionSets = interactionSets,
+	}
+
+	if (npcToEdit ~= Entity(0)) then
+		if (not IsValid(npcToEdit) or not npcToEdit.IsExperimentNPC) then
+			client:Notify("The NPC you are trying to edit is not a valid NPC!")
+			return
+		end
+
+		local currentID = npcToEdit:GetNpcId()
+
+		if (currentID ~= uniqueID) then
+			if (existingNpc) then
+				client:Notify("An NPC with this uniqueID already exists!")
+				return
+			end
+
+			-- Remove the file so a new one can be created
+			Schema.npc.Destroy(currentID)
+
+			-- Remove the old registration
+			local currentNpc = Schema.npc.Get(currentID)
+			Schema.npc.UnRegister(currentNpc)
+		else
+			-- Ensure the tables are emptied so if there's no in the new data, we don't keep the old
+			-- (since they're merged)
+			local currentNpc = Schema.npc.Get(currentID)
+			currentNpc.interactionSets = {}
+		end
+	else
+		if (existingNpc) then
+			client:Notify("An NPC with this uniqueID already exists!")
+			return
+		end
+	end
+
+	-- Save the data as configured by the user (before Register modifies it)
+	Schema.npc.Save(npcData)
+
+	local npc = Schema.npc.RegisterDynamic(npcData)
+
+	if (npcToEdit ~= Entity(0)) then
+		npcToEdit:SetupNPC(npc)
+	else
+		local npcEntity = Schema.npc.SpawnForPlayer(npc, client)
+		Schema.npc.OpenEditor(client, npcEntity)
+	end
+end)
+
+-- Hook into inline editting, when an admin edits the interaction inside the interaction panel.
+Schema.chunkedNetwork.HandleSend("NpcInteractEdit", function(client, data, extraData)
+	if (not Schema.npc.HasManagePermission(client)) then
+		client:Notify("You do not have permission to edit NPC interactions!")
+		return
+	end
+
+	local npcId = data[1]
+	local npcName = data[2]
+	local text = data[3]
+	local answers = data[4]
+
+	if (not isstring(npcName)) then
+		client:Notify("Invalid NPC name specified!")
+		return
+	end
+
+	if (not isstring(text)) then
+		client:Notify("Invalid text specified!")
+		return
+	end
+
+	if (not istable(answers)) then
+		client:Notify("Invalid answers specified!")
+		return
+	end
+
+	local npc = Schema.npc.Get(npcId)
+
+	if (not npc) then
+		client:Notify("Invalid NPC specified!")
+		return
+	end
+
+	-- Check if this player is indeed interacting with this NPC
+	if (not client.expCurrentInteraction or client.expCurrentInteraction.npcEntity:GetNpcId() ~= npcId) then
+		client:Notify("You are not currently interacting with this NPC!")
+		return
+	end
+
+	local interactionSet = client.expCurrentInteraction.interactionSet
+
+	if (not interactionSet.isDynamic) then
+		client:Notify("This NPC interaction set is not dynamic and cannot be edited!")
+		return
+	end
+
+	local interaction = client.expCurrentInteraction.interaction
+
+	if (not interaction) then
+		client:Notify("You are not currently interacting with this NPC!")
+		return
+	end
+
+	-- Try load the data, editting it, then saving it back
+	local npcRegistration = Schema.npc.Load(npcId)
+
+	if (not npcRegistration) then
+		client:Notify("Failed to load NPC data for editing!")
+		return
+	end
+
+	local foundSet = false
+	local foundInter = false
+
+	-- Find the interaction set and edit it
+	for _, set in ipairs(npcRegistration.interactionSets) do
+		if (set.uniqueID == interactionSet.uniqueID) then
+			foundSet = true
+
+			-- Find the interaction and edit it
+			for _, inter in ipairs(set.interactions) do
+				if (inter.uniqueID == interaction.uniqueID) then
+					foundInter = true
+					inter.text = text
+
+					-- If an answer does not exist, we add it
+					for i, answer in ipairs(answers) do
+						if (not inter.responses[i]) then
+							inter.responses[i] = {
+								answer = answer,
+							}
+						else
+							inter.responses[i].answer = answer
+						end
+					end
+
+					-- If an answer exists that should not, we remove it
+					for i = #answers + 1, #inter.responses do
+						inter.responses[i] = nil
+					end
+
+					inter.responses = table.ClearKeys(inter.responses)
+
+					break
+				end
+			end
+
+			break
+		end
+	end
+
+	if (not foundSet) then
+		client:Notify("Failed to find the interaction set for editing!")
+		return
+	end
+
+	if (not foundInter) then
+		client:Notify("Failed to find the interaction for editing!")
+		return
+	end
+
+	npcRegistration.name = npcName
+
+	Schema.npc.Save(npcRegistration)
+
+	-- Reload the data
+	local newNpc = Schema.npc.RegisterDynamic(npcRegistration)
+
+	local npcEntity = client.expCurrentInteraction.npcEntity
+
+	if (IsValid(npcEntity)) then
+		npcEntity:SetupNPC(newNpc)
+	end
+end)
+
+Schema.chunkedNetwork.HandleRequest("Progressions", function(client, respond, requestData)
+	if (not Schema.progression.HasManagePermission(client)) then
+		client:Notify("You do not have permission to manage progression trackers!")
+		return
+	end
+
+	local progressions = Schema.util.CopyOmitCyclicReference(Schema.progression.GetAllDynamic())
+
+	respond(progressions)
+end)
+
+Schema.chunkedNetwork.HandleSend("ProgressionEdit", function(client, data, extraData)
+	if (not Schema.progression.HasManagePermission(client)) then
+		client:Notify("You do not have permission to manage progression trackers!")
+		return
+	end
+
+	local name = data.name and data.name:Trim()
+	local scope = data.scope and data.scope:Trim()
+	local currentUniqueID = data.currentUniqueID and data.currentUniqueID:Trim()
+	local uniqueID = data.uniqueID and data.uniqueID:Trim()
+	local completedKey = data.completedKey
+	local isInProgressInfo = data.isInProgressInfo
+	local progressionKeys = data.progressionKeys or {}
+	local goals = data.goals or {}
+
+	if (uniqueID == "") then
+		client:Notify("You must enter a uniqueID for the progression tracker!")
+		return
+	end
+
+	if (not Schema.util.IsSafeFileName(uniqueID)) then
+		client:Notify("The uniqueID you entered is not valid (must be usable as a file name)!")
+		return
+	end
+
+	if (scope == "") then
+		client:Notify("You must enter a scope for the progression tracker!")
+		return
+	end
+
+	if (name == "") then
+		client:Notify("You must enter a name for the progression tracker!")
+		return
+	end
+
+	local existingProgression = Schema.progression.GetTracker(uniqueID)
+	local progressionData = {
+		uniqueID = uniqueID,
+		scope = scope,
+		name = name,
+		completedKey = completedKey,
+		isInProgressInfo = isInProgressInfo,
+		progressionKeys = progressionKeys,
+		goals = goals,
+	}
+
+	if (currentUniqueID) then
+		if (currentUniqueID ~= uniqueID) then
+			if (existingProgression) then
+				client:Notify("An progression tracker with this uniqueID already exists!")
+				return
+			end
+
+			-- Remove the file so a new one can be created
+			Schema.progression.Destroy(currentUniqueID)
+
+			-- Remove the old registration
+			local currentProgression = Schema.progression.GetTracker(currentUniqueID)
+			assert(currentProgression, "The current progression should exist")
+			Schema.progression.UnRegisterTracker(currentProgression)
+		else
+			-- Ensure the tables are emptied so if there's no in the new data, we don't keep the old
+			-- (since they're merged)
+			local currentProgression = Schema.progression.GetTracker(currentUniqueID)
+			currentProgression.progressionKeys = {}
+			currentProgression.goals = {}
+		end
+	end
+
+	-- Save the data as configured by the user (before Register modifies it)
+	Schema.progression.Save(progressionData)
+
+	local progression = Schema.progression.RegisterDynamic(progressionData)
+
+	Schema.PrintTableDev(progression)
+
+	-- Ensure the player has updated info
+	Schema.progression.NetworkDynamicChanges(client)
+end)

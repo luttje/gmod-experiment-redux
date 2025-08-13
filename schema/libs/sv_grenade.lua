@@ -1,4 +1,4 @@
-Schema.grenade = Schema.grenade or {}
+Schema.grenade = ix.util.RegisterLibrary("grenade")
 
 function Schema.grenade.SpawnFlash(position)
 	Schema.MakeExplosion(position, 16)
@@ -41,7 +41,7 @@ function Schema.grenade.SpawnTearGas(position, grenadeEntityIndex)
 
 	hook.Run("TearGasExploded", position)
 
-	timer.Create("Tear Gas: "..grenadeEntityIndex, 1, 30, function()
+	timer.Create("Tear Gas: " .. grenadeEntityIndex, 1, 30, function()
 		local curTime = CurTime()
 
 		for _, otherClient in ipairs(ents.FindInSphere(position, 512)) do
@@ -92,28 +92,28 @@ function Schema.grenade.CreateGrenadeEntity(client, power)
 		return
 	end
 
-    if (IsValid(entity:GetPhysicsObject())) then
-        entity:GetPhysicsObject():ApplyForceCenter(client:GetAimVector() * (800 + power))
-        entity:GetPhysicsObject():AddAngleVelocity(Vector(600, math.random(-1200, 1200), 0))
-    end
+	if (IsValid(entity:GetPhysicsObject())) then
+		entity:GetPhysicsObject():ApplyForceCenter(client:GetAimVector() * (800 + power))
+		entity:GetPhysicsObject():AddAngleVelocity(Vector(600, math.random(-1200, 1200), 0))
+	end
 
 	local grenadeTrailsEnabled = ix.config.Get("grenadeTrailsEnabled")
 
-    if (grenadeTrailsEnabled) then
-        local grenadeTrailColor = ix.config.Get("grenadeTrailColor")
-        local grenadeTrailMaxLifetime = ix.config.Get("grenadeTrailMaxLifetime")
+	if (grenadeTrailsEnabled) then
+		local grenadeTrailColor = ix.config.Get("grenadeTrailColor")
+		local grenadeTrailMaxLifetime = ix.config.Get("grenadeTrailMaxLifetime")
 
 		local trail = util.SpriteTrail(entity, entity:LookupAttachment("fuse"), grenadeTrailColor, true, 8, 1, 1,
-            (1 / 9) * 0.5, "sprites/bluelaser1.vmt")
+			(1 / 9) * 0.5, "sprites/bluelaser1.vmt")
 
-        if (grenadeTrailMaxLifetime > -1) then
+		if (grenadeTrailMaxLifetime > -1) then
 			local fadeOutTime = grenadeTrailMaxLifetime * .25
-            local fadeOutAfter = grenadeTrailMaxLifetime - fadeOutTime
+			local fadeOutAfter = grenadeTrailMaxLifetime - fadeOutTime
 
 			timer.Simple(fadeOutAfter, function()
-                if (not IsValid(trail)) then
-                    return
-                end
+				if (not IsValid(trail)) then
+					return
+				end
 
 				local fadeSteps = 10
 				local fadeStepDuration = fadeOutTime / fadeSteps
@@ -125,7 +125,7 @@ function Schema.grenade.CreateGrenadeEntity(client, power)
 						return
 					end
 
-                    local alpha = Lerp(1 - (timer.RepsLeft(timerName) / fadeSteps), startAlpha, 0)
+					local alpha = Lerp(1 - (timer.RepsLeft(timerName) / fadeSteps), startAlpha, 0)
 					trail:Fire("Alpha", alpha * 255, 0)
 
 					if (alpha == 0) then
