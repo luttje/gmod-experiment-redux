@@ -300,22 +300,36 @@ do
 		self.goalsPanel:DockMargin(20, 4, 0, 0)
 		self.goalsPanel.Paint = nil
 
-		local goalsList = vgui.Create("DPanelList", self.goalsPanel)
+		local goalsList = vgui.Create("EditablePanel", self.goalsPanel)
 		goalsList:Dock(FILL)
-		goalsList:SetPadding(4)
-		goalsList:SetSpacing(4)
 
 		local goals = self.tracker:GetGoals()
 		local isCompleted = self.tracker:IsCompleted(LocalPlayer())
+		local yPos = 0
 
 		for _, goal in ipairs(goals) do
 			local goalPanel = vgui.Create("expProgressionGoal", goalsList)
 			goalPanel:SetProgressionGoal(goal, isCompleted)
-			goalsList:AddItem(goalPanel)
+			goalPanel:SetPos(0, yPos)
+			goalPanel:SetWide(goalsList:GetWide())
+
+			yPos = yPos + 52 + 4 -- Height of goal panel + spacing
 		end
 
-		goalsList:SizeToChildren(false, true)
-		self.goalsPanel:SizeToChildren(false, true)
+		-- Set the height of the goals list to accommodate all goals
+		goalsList:SetTall(math.max(yPos - 4, 0)) -- Remove last spacing
+		self.goalsPanel:SetTall(goalsList:GetTall())
+
+		goalsList.PerformLayout = function(panel)
+			local yPos = 0
+			for _, child in ipairs(panel:GetChildren()) do
+				if IsValid(child) and child.ClassName == "expProgressionGoal" then
+					child:SetPos(0, yPos)
+					child:SetWide(panel:GetWide())
+					yPos = yPos + 52 + 4
+				end
+			end
+		end
 	end
 
 	function PANEL:ToggleExpanded()
@@ -361,13 +375,13 @@ do
 end
 
 do
-	--- @class expProgressionGoal : DPanel
+	--- @class expProgressionGoal : EditablePanel
 	local PANEL = {}
 
 	-- Called when the panel is initialized.
 	function PANEL:Init()
 		local padding = 4
-		self:SetSize(self:GetParent():GetWide(), 34 + padding + padding)
+		self:SetTall(52)
 
 		self.nameLabel = vgui.Create("DLabel", self)
 		self.nameLabel:SetFont("DermaDefaultBold")
@@ -383,13 +397,17 @@ do
 		self.progressCheckMark:SetPos(8, 8)
 		self.progressCheckMark:SetVisible(false)
 
-		self.progressLabel = vgui.Create("DLabel", self.progressBar)
-		self.progressLabel:SetText("")
+		self.progressLabel = vgui.Create("DLabel", self)
+		self.progressLabel:SetText("0")
 		self.progressLabel:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+		self.progressLabel:SetFont("DermaDefault")
+		self.progressLabel:SetTextColor(Color(255, 255, 255))
 
-		self.maximumLabel = vgui.Create("DLabel", self.progressBar)
-		self.maximumLabel:SetText("")
+		self.maximumLabel = vgui.Create("DLabel", self)
+		self.maximumLabel:SetText("/ 100")
 		self.maximumLabel:SetExpensiveShadow(1, Color(0, 0, 0, 150))
+		self.maximumLabel:SetFont("DermaDefault")
+		self.maximumLabel:SetTextColor(Color(200, 200, 200))
 
 		-- Called when the panel should be painted.
 		function self.progressBar.Paint(progressBar)
@@ -436,26 +454,18 @@ do
 		if (isbool(progress)) then
 			self.progressCheckMark:SetVisible(progress)
 			self.progressFraction = nil
+			self.progressLabel:SetVisible(false)
+			self.maximumLabel:SetVisible(false)
 		else
 			self.progressCheckMark:SetVisible(false)
 			self.progressFraction = progress
+			self.progressLabel:SetVisible(true)
+			self.maximumLabel:SetVisible(true)
+
+			-- Update label text
+			self.progressLabel:SetText(tostring(current))
+			self.maximumLabel:SetText("/ " .. tostring(maximum))
 		end
-
-		self.progressLabel:SetText(current)
-		self.progressLabel:SizeToContents()
-
-		self.maximumLabel:SetText(maximum)
-		self.maximumLabel:SizeToContents()
-
-		self.progressLabel:SetPos(
-			0,
-			(self.progressBar:GetTall() / 2) - (self.progressLabel:GetTall() / 2) - 1
-		)
-
-		self.maximumLabel:SetPos(
-			self.progressBar:GetWide() - self.maximumLabel:GetWide() - 8,
-			(self.progressBar:GetTall() / 2) - (self.maximumLabel:GetTall() / 2) - 1
-		)
 	end
 
 	-- Called when the layout should be performed.
@@ -463,11 +473,22 @@ do
 		local padding = 4
 		self.nameLabel:SizeToContents()
 
-		self.progressBar:SetPos(36 + padding, self.nameLabel.y + self.nameLabel:GetTall())
-		self.progressBar:SetSize(self:GetWide() - 38 - padding - padding, 12 + padding)
+		-- Position progress bar
+		self.progressBar:SetPos(36 + padding, self.nameLabel.y + self.nameLabel:GetTall() + 4)
+		self.progressBar:SetSize(self:GetWide() - 140 - padding, 16) -- Make progress bar a bit taller and leave room for labels
+
+		-- Position labels to the right of the progress bar
+		self.progressLabel:SizeToContents()
+		self.maximumLabel:SizeToContents()
+
+		local labelsX = self.progressBar.x + self.progressBar:GetWide() + 8
+		local labelsY = self.progressBar.y + (self.progressBar:GetTall() - self.progressLabel:GetTall()) / 2
+
+		self.progressLabel:SetPos(labelsX, labelsY)
+		self.maximumLabel:SetPos(labelsX + self.progressLabel:GetWide(), labelsY)
 	end
 
-	vgui.Register("expProgressionGoal", PANEL, "DPanel")
+	vgui.Register("expProgressionGoal", PANEL, "EditablePanel")
 end
 
 hook.Add("CreateMenuButtons", "expAddMissionTrackerMenuButton", function(tabs)

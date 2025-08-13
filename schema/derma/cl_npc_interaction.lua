@@ -190,6 +190,13 @@ button:disabled {
 			<script>
 				var answers = ]] .. answersJson .. [[;
 
+				function disableAnswerButtons() {
+					var buttons = document.getElementById("answers").getElementsByTagName("button");
+					for (var i = 0; i < buttons.length; i++) {
+						buttons[i].disabled = true;
+					}
+				}
+
 				for (var i = 0; i < answers.length; i++) {
 					(function(i) {
 						var buttonContainer = document.createElement("div");
@@ -199,6 +206,7 @@ button:disabled {
 						button.innerText = answers[i].text;
 						button.disabled = !answers[i].editable;
 						button.onclick = function() {
+							disableAnswerButtons();
 							interop.chooseAnswer(answers[i].index);
 						};
 

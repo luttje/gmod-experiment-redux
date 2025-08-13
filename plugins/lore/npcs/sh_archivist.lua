@@ -14,6 +14,84 @@ NPC.rewardMoney = 2500
 -- Progression constants
 NPC.PROGRESSION_FIRST_MEETING_COMPLETED = "firstMeetingCompleted"
 NPC.PROGRESSION_COLLECTION_ACCEPTED = "collectionAccepted"
+NPC.PROGRESSION_LORE_ITEMS_COLLECTED = "loreItemsCollected"
+
+--[[
+	Lore Collection Mission Tracker
+--]]
+
+NPC.LORE_COLLECTION_TRACKER = Schema.progression.RegisterTracker({
+	--- Which scope is the progression in? This NPC in this case.
+	scope = NPC.uniqueID,
+
+	--- The unique identifier for this tracker, must be unique over all trackers.
+	uniqueID = NPC.uniqueID .. "#loreCollection",
+
+	--- Name shown in the UI for this tracker (mission/quest)
+	name = "Information Gathering",
+
+	--- The key that marks this goal as completed, will be a boolean value.
+	completedKey = nil, -- This mission never really "completes" - it's ongoing
+
+	--- The key that marks this goal as in-progress, will be a boolean value.
+	isInProgress = NPC.PROGRESSION_COLLECTION_ACCEPTED,
+})
+
+--- This will be shown in the mission interface as a goal we are tracking.
+NPC.LORE_COLLECTION_TRACKER_GOAL = NPC.LORE_COLLECTION_TRACKER:RegisterGoal({
+	--- The key of the progression this goal tracks
+	key = NPC.PROGRESSION_LORE_ITEMS_COLLECTED,
+
+	--- The name of the goal shown in the UI
+	name = "Collect Lore Items",
+
+	--- The type of this progression
+	type = "number",
+
+	--- The function that determines the progress of this goal and how to
+	--- display it in the UI. It is called on both the client and server.
+	---
+	--- @param goal ProgressionTrackerGoal
+	--- @param player Player
+	--- @param progression number
+	--- @return number|boolean, any, any
+	getProgress = function(goal, player, progression)
+		local collected = progression or 0
+
+		-- The achievement gets the maximum set based on the amount of lore items available
+		local maximum = Schema.achievement.Get("archivist").maximum
+
+		return math.min(collected / maximum, 1), maximum, collected
+	end,
+})
+
+if (CLIENT) then
+	--- Having this function will cause the npc to have a mission marker over their head
+	--- Return false to show to unavailable marker and true to show the available marker.
+	--- This is only called on the client.
+	---
+	--- @param npcEntity Entity
+	--- @return boolean?
+	function NPC:ClientGetAvailable(npcEntity)
+		-- Check if collection mission is in progress
+		if (Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_COLLECTION_ACCEPTED, true)) then
+			-- Mission in progress - check if player has lore items
+			local player = LocalPlayer()
+			if (player and player:GetCharacter()) then
+				local inventory = player:GetCharacter():GetInventory():GetItems()
+				for _, itemInstance in pairs(inventory) do
+					if itemInstance.isLoreItem then
+						return true -- Show available marker if player has lore items
+					end
+				end
+			end
+			return false -- Show unavailable marker if no lore items
+		end
+
+		-- If collection mission not accepted, show available marker
+		return true
+	end
+end
 
 local INTERACTION_SET = NPC:RegisterInteractionSet({
 	--- The unique identifier for this interaction set.
@@ -238,6 +316,8 @@ INTERACTION_COLLECTION_ACCEPTED:RegisterResponse({
 	serverOnChoose = function(response, player, npcEntity)
 		-- Mark collection as accepted
 		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_COLLECTION_ACCEPTED, true)
+		-- Initialize lore items collected counter
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_LORE_ITEMS_COLLECTED, 0)
 	end,
 })
 
@@ -287,9 +367,33 @@ end
 local INTERACTION_CONTINUE_COLLECTION = INTERACTION_SET:RegisterInteraction({
 	uniqueID = "continueCollection",
 
-	text = [[
-		Did you find anything interesting?
-	]],
+	text = function(interaction, player, npcEntity)
+		local collectedCount = Schema.progression.Get(
+		-- player, -- Only LocalPlayer on client
+			NPC.uniqueID,
+			NPC.PROGRESSION_LORE_ITEMS_COLLECTED
+		) or 0
+
+		if collectedCount == 0 then
+			return "Did you find anything interesting?"
+		elseif collectedCount < 5 then
+			return "You've brought me " ..
+				collectedCount ..
+				" " .. Schema.util.Pluralize("item", collectedCount) .. " so far. Did you find anything else?"
+		elseif collectedCount < 10 then
+			return "Excellent work! You've collected " ..
+				collectedCount ..
+				" " ..
+				Schema.util.Pluralize("item", collectedCount) ..
+				". The truth is starting to reveal itself. Do you have more?"
+		else
+			return "Remarkable! " ..
+				collectedCount ..
+				" " ..
+				Schema.util.Pluralize("item", collectedCount) ..
+				" collected. You're truly helping to uncover the secrets of this place. What else have you found?"
+		end
+	end,
 
 	--- Determines if the NPC will start with this interaction when the player interacts with them.
 	--- @param interaction Interaction
@@ -334,6 +438,11 @@ INTERACTION_CONTINUE_COLLECTION:RegisterResponse({
 		end
 
 		if count > 0 then
+			-- Update the lore items collected counter
+			Schema.progression.Change(client, NPC.uniqueID, NPC.PROGRESSION_LORE_ITEMS_COLLECTED, function(value)
+				return (value or 0) + count
+			end)
+
 			client:Notify(
 				"You have given the Archivist " .. count .. " " .. Schema.util.Pluralize("lore item", count) .. "."
 			)

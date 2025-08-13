@@ -283,17 +283,7 @@ do
 			return
 		end
 
-		local data = {}
-		data.start = client:GetShootPos()
-		data.endpos = data.start + client:GetAimVector() * 96
-		data.filter = client
-		local trace = util.TraceLine(data)
-
-		local angledTowardsPlayer = (client:GetPos() - trace.HitPos):Angle()
-		angledTowardsPlayer.p = 0
-
-		-- Spawn slightly above the ground so legs don't glitch
-		Schema.npc.SpawnEntity(npc, trace.HitPos + trace.HitNormal * 4, angledTowardsPlayer)
+		Schema.npc.SpawnForPlayer(npc, client)
 
 		client:Notify("NPC spawned successfully.")
 	end

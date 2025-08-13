@@ -257,7 +257,7 @@ end
 --- @param player Player
 --- @return Entity
 function Schema.npc.SpawnForPlayer(npc, player)
-	local trace = player:GetTargetTrace()
+	local trace = player:GetEyeTraceNoCursor()
 
 	local angledTowardsPlayer = (player:GetPos() - trace.HitPos):Angle()
 	angledTowardsPlayer.p = 0
