@@ -367,6 +367,7 @@ local INTERACTION_MISSION_ONE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 			end
 
 			player:Notify("You've completed the mission and received a medical skill boost.")
+			player.expHealMissionOneTargets = nil -- No longer needed
 
 			npcEntity:PrintChat(
 				player:Name() ..
@@ -560,6 +561,7 @@ local INTERACTION_MISSION_THREE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 			end
 
 			player:Notify("You've completed the mission and received a medical skill boost.")
+			player.expHealMissionThreeTargets = nil -- No longer needed
 
 			npcEntity:PrintChat(player:Name() ..
 				", you've done a great job! You've healed " .. NPC.missionThreeHealAmount .. " characters in need.")
@@ -583,6 +585,15 @@ function NPC:HandleHealMissionOne(player, target)
 	if player == target then
 		return
 	end
+
+	-- Check if this player has already healed this target this play session
+	if (player.expHealMissionOneTargets and player.expHealMissionOneTargets[target]) then
+		return
+	end
+
+	-- Mark this target as healed by this player
+	player.expHealMissionOneTargets = player.expHealMissionOneTargets or {}
+	player.expHealMissionOneTargets[target] = true
 
 	-- Increment heal count
 	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT, function(value)
@@ -626,6 +637,15 @@ function NPC:HandleHealMissionThree(player, target)
 	if player == target then
 		return
 	end
+
+	-- Check if this player has already healed this target this play session
+	if (player.expHealMissionThreeTargets and player.expHealMissionThreeTargets[target]) then
+		return
+	end
+
+	-- Mark this target as healed by this player
+	player.expHealMissionThreeTargets = player.expHealMissionThreeTargets or {}
+	player.expHealMissionThreeTargets[target] = true
 
 	-- Increment heal count
 	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT, function(value)
