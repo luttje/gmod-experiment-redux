@@ -122,3 +122,10 @@ function PLUGIN:PostDrawHUD()
 	self.lockerRotInfoPanel = panel
 	panel:SetPaintedManually(true)
 end
+
+function PLUGIN:AdjustProgressionHUD(desiredWidth, x, y)
+	local phaseInfo = GetNetVar("locker_rot_event")
+	if ((phaseInfo or TEST_LOCKER_ROT_PANEL) and IsValid(self.lockerRotInfoPanel)) then
+		return desiredWidth, x, y + self.lockerRotInfoPanel:GetTall() + 16
+	end
+end

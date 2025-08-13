@@ -237,6 +237,24 @@ do
 		self.text:SetFont("ixMenuButtonFont")
 		self.text:SetExpensiveShadow(1, color_black)
 
+		self.actions = self:Add("EditablePanel")
+		self.actions:Dock(RIGHT)
+
+		self.trackOnHUD = self.actions:Add("ixCheckBox")
+		self.trackOnHUD:SetEnabledText("Track on HUD")
+		self.trackOnHUD:SetDisabledText("Don't Track")
+		self.trackOnHUD:SizeToContents()
+		self.trackOnHUD:Dock(TOP)
+		self.trackOnHUD.DoClick = function(panel)
+			local shouldTrack = panel:GetValue()
+
+			if (self.tracker) then
+				Schema.progression.SetTrackerOnHUD(self.tracker, shouldTrack)
+			end
+		end
+
+		self.actions:SetWide(self.trackOnHUD:GetWide())
+
 		-- self.expandButton = self:Add("DButton")
 		-- self.expandButton:SetText("")
 		-- self.expandButton:SetWide(20)
@@ -266,8 +284,10 @@ do
 
 	function PANEL:SetInfoStyle(bInfo)
 		if (bInfo) then
-			self.text:SetTextColor(Color(100, 150, 255))
+			self.text:SetTextColor(Color(255, 255, 255, 80))
 		end
+
+		self.actions:SetVisible(not bInfo)
 	end
 
 	function PANEL:SetProgressionTracker(tracker)
@@ -275,6 +295,7 @@ do
 		self.isExpanded = not tracker:IsCompleted(LocalPlayer()) -- Auto-expand in-progress trackers
 
 		self:SetText(tracker:GetName())
+		self.trackOnHUD:SetChecked(Schema.progression.IsTrackerOnHUD(self.tracker), true)
 		-- self.expandButton:SetVisible(true)
 
 		-- Set color based on completion status

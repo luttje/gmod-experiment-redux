@@ -52,7 +52,6 @@ local function attachPartClone(client, uniqueID)
 				if (IsValid(client) and isfunction(client.AttachPACPart)) then
 					if (not isCopy) then
 						pacData = table.Copy(pacData)
-						PrintTable(pacData)
 						makePartsUnique(pacData)
 					end
 
