@@ -14,23 +14,27 @@ function ITEM:GetText()
 		I've been working on a new type of material generator for the company the past weeks. They won't tell me what they'll use it for, but it's supposed to convert raw materials into energy...
 
 		<b>Tuesday, 6th of June, 2045:</b>
-		Breakfast, lunch, and dinner. That's all I do now. I work on the generator all day, every day.
+		Breakfast, lunch, and dinner. That's the only enjoyable thing I have now. I work on the generator all day, every day.
 		I can't shake the feeling that the company is hiding something from us. I've been working here for years, but I've never felt like I was doing the right thing. I'm afraid of what my colleagues are doing, there's experiments going on that I don't understand.
 
 		<b>Wednesday, 7th of June, 2045:</b>
-		I saw them construct a giant city out of nowhere. I don't know how they did it, but I know it's not right. I'm afraid of what they're doing, and I'm afraid of what I'm doing. I can't keep working here, I need to leave.
+		I saw them construct a giant city out of nowhere. I don't know how they did it, but I know it's not right. They brought in some eastern European architects to design it. They went into the city, but I didn't see them come out.
+		I'm afraid of what they're doing, and I'm afraid of what I'm doing. I can't keep working here, I need to leave.
 
 		<b>Thursday, 8th of June, 2045:</b>
 		I saw a cat today. It was nice to see something normal for once.
 
 		<b>Wednesday, 12th of July, 2045:</b>
-		I've neglected my diary for a while. I saw them bring in a bunch of test subjects into the facility. They wouldn't tell us what they were for, but I know it's not good. I need to leave, but I don't know where to go.
+		I've neglected my diary for a while. I saw them bring in a bunch of "test subjects" into the facility. They wouldn't tell us what they were for, but I know it's not good. I need to leave, but I don't know where to go.
 		I'm afraid they'll bring them into that giant city. I don't know what they're planning, but I know it's not good.
 
 		<b>Friday, 14th of July, 2045:</b>
 		This is not okay, that city was filled with gun shots and screams. I can't stay here, I need to leave. I need to leave now.
 
 		<b>Saturday, 15th of July, 2045:</b>
-		I don't know where I'm going, but I can't stay here. I need to leave. I need to leave now.
+		An alarm went off today, but none of my colleagues knew what it was for. I can't shake the feeling that something terrible is about to happen.
+
+		<b>Sunday?</b>
+		They're sending me into the city... From what I've heard and seen, it's a one-way trip.
 	]]
 end
