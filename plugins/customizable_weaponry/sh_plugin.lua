@@ -106,3 +106,126 @@ function PLUGIN:InitializedPlugins()
 		end
 	end
 end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "(DEBUG) Spawns an NPC to test weapon damage."
+	COMMAND.arguments = {
+		bit.bor(ix.type.number, ix.type.optional),
+	}
+
+	function COMMAND:OnRun(client, health)
+		if (IsValid(client.expDebugDamageNpc)) then
+			client.expDebugDamageNpc:Remove()
+			client.expDebugDamageNpc = nil
+		end
+
+		health = health or 100
+
+		if (health <= 0) then
+			client:Notify("Invalid health value, must be greater than 0.")
+			return
+		end
+
+		local trace = client:GetEyeTraceNoCursor()
+
+		if (trace.HitPos:DistToSqr(client:GetPos()) > 512 ^ 2) then
+			client:Notify("You are too far away to spawn an NPC.")
+			return
+		end
+
+		-- Spawn the NPC
+		local npc = ents.Create("npc_citizen")
+		npc:SetPos(trace.HitPos)
+		npc:SetAngles(Angle(0, client:EyeAngles().y, 0))
+		npc:Spawn()
+		npc:CapabilitiesClear()
+		npc:SetHealth(health)
+
+		client.expDebugDamageNpc = npc
+
+		client:Notify("You have spawned an NPC to test weapon damage.")
+	end
+
+	ix.command.Add("DebugDamageNpcSpawn", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "(DEBUG) Remove the NPC spawned for weapon damage testing."
+
+	function COMMAND:OnRun(client)
+		if (not IsValid(client.expDebugDamageNpc)) then
+			client:Notify("There is no NPC to remove.")
+			return
+		end
+
+		client.expDebugDamageNpc:Remove()
+		client.expDebugDamageNpc = nil
+	end
+
+	ix.command.Add("DebugDamageNpcRemove", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "(DEBUG) Gives you all weapons that exist for damage testing."
+
+	function COMMAND:OnRun(client)
+		local weapons = {}
+
+		for _, item in pairs(ix.item.list) do
+			if (item.base == "base_customizable_weaponry"
+					or item.base == "base_weapons") then
+				table.insert(weapons, item)
+			end
+		end
+
+		if (#weapons == 0) then
+			client:Notify("There are no weapons available for damage testing.")
+			return
+		end
+
+		for _, weaponItem in ipairs(weapons) do
+			client:Give(weaponItem.class)
+		end
+
+		client:Notify("You have been given " .. tostring(#weapons) .. " weapons for damage testing.")
+	end
+
+	ix.command.Add("DebugDamageAllWeapons", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "(DEBUG) Gives you ammo for all weapons that you have on you."
+
+	function COMMAND:OnRun(client)
+		local totalPrimaryAmmoCount = 0
+
+		for _, weapon in ipairs(client:GetWeapons()) do
+			if (not IsValid(weapon) or not weapon:IsWeapon()) then
+				continue
+			end
+
+			local primaryAmmoType = weapon:GetPrimaryAmmoType()
+
+			if (primaryAmmoType > -1) then
+				local primaryAmmoCount = weapon:GetMaxClip1()
+				client:GiveAmmo(primaryAmmoCount, primaryAmmoType, true)
+				totalPrimaryAmmoCount = totalPrimaryAmmoCount + primaryAmmoCount
+			end
+		end
+
+		client:Notify(
+			"You have been given " .. totalPrimaryAmmoCount
+			.. " rounds of primary ammo in total for all weapons you have on you."
+		)
+	end
+
+	ix.command.Add("DebugDamageRefillAmmo", COMMAND)
+end
