@@ -190,7 +190,7 @@ function META:CanItemsFit(w, h, quantity, onlyMain)
 		for _, invID in ipairs(bags) do
 			local bagInv = ix.item.inventories[invID]
 			if (bagInv and remainingQuantity > 0) then
-				local canFitBag, bagPositions = bagInv:CanFitMultiple(w, h, remainingQuantity, true)
+				local canFitBag, bagPositions = bagInv:CanItemsFit(w, h, remainingQuantity, true)
 
 				-- Add what we can from this bag
 				local actuallyFit = math.min(#bagPositions, remainingQuantity)
