@@ -55,6 +55,64 @@ function Schema.npc.ToggleInlineEditor()
 	Schema.npc.isInlineEditing = not Schema.npc.isInlineEditing
 end
 
+function Schema.npc.CreateRewardHTML(bolts, items, attributes)
+	local html = "<div class=\"rewards\"><h2>Rewards</h2>"
+
+	-- Add bolts if provided
+	if (bolts and bolts > 0) then
+		html = html .. "<div><h3>Bolts:</h3> " .. string.Comma(bolts) .. "</div>"
+	end
+
+	-- Add items if provided
+	if (items and table.Count(items) > 0) then
+		html = html .. "<div><h3>Items:</h3><ul>"
+
+		for itemID, quantity in pairs(items) do
+			local itemName = itemID
+
+			if (ix.item.list[itemID]) then
+				itemName = ix.item.list[itemID].name or itemID
+			end
+
+			html = html .. "<li>" .. quantity .. "x " .. itemName .. "</li>"
+		end
+
+		html = html .. "</ul></div>"
+	end
+
+	-- Add attributes if provided
+	if (attributes and table.Count(attributes) > 0) then
+		html = html .. "<div><h3>Attribute increases:</h3><ul>"
+
+		for attributeID, increase in pairs(attributes) do
+			local attributeName = attributeID
+
+			if (ix.attributes.list[attributeID]) then
+				attributeName = ix.attributes.list[attributeID].name or attributeID
+			end
+
+			-- Format the increase value nicely
+			local formattedIncrease = increase
+
+			if (type(increase) == "number") then
+				if (increase == math.floor(increase)) then
+					formattedIncrease = tostring(increase)
+				else
+					formattedIncrease = string.format("%.2f", increase)
+				end
+			end
+
+			html = html .. "<li>+" .. formattedIncrease .. " " .. attributeName .. "</li>"
+		end
+
+		html = html .. "</ul></div>"
+	end
+
+	html = html .. "</div>"
+
+	return html
+end
+
 net.Receive("expNpcInteractShow", function(length)
 	local npcEntity = net.ReadEntity()
 	local interactionSet = net.ReadString()

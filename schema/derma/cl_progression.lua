@@ -292,10 +292,17 @@ do
 
 	function PANEL:SetProgressionTracker(tracker)
 		self.tracker = tracker
-		self.isExpanded = not tracker:IsCompleted(LocalPlayer()) -- Auto-expand in-progress trackers
+		local isCompleted = tracker:IsCompleted(LocalPlayer()) -- Auto-expand in-progress trackers
+		self.isExpanded = not isCompleted
 
 		self:SetText(tracker:GetName())
-		self.trackOnHUD:SetChecked(Schema.progression.IsTrackerOnHUD(self.tracker), true)
+
+		if (not isCompleted) then
+			self.trackOnHUD:SetVisible(true)
+			self.trackOnHUD:SetChecked(Schema.progression.IsTrackerOnHUD(self.tracker), true)
+		else
+			self.trackOnHUD:SetVisible(false)
+		end
 		-- self.expandButton:SetVisible(true)
 
 		-- Set color based on completion status

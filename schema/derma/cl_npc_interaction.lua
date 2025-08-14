@@ -87,6 +87,19 @@ button:disabled {
 	display: flex;
 	flex-direction: row;
 }
+
+.rewards ul, .rewards ul li {
+	margin: 0;
+	padding: 0;
+}
+
+.rewards h3 {
+	opacity: 0.7;
+}
+
+.rewards div {
+	margin-top: 12px;
+}
 ]]
 
 	function PANEL:Init()

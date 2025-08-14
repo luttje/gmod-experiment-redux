@@ -256,7 +256,7 @@ end
 
 -- Client-side functions
 if CLIENT then
-	function NPC:GetAvailable(npcEntity)
+	function NPC:ClientGetAvailable(npcEntity)
 		local client = LocalPlayer()
 		local raceStartedAt = client:GetCharacterNetVar("expRaceStartedAt")
 		return raceStartedAt ~= nil

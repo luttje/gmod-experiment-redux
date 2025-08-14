@@ -1,4 +1,3 @@
--- New system - Dr. Lila Hart Medic NPC with Mission Trackers
 local PLUGIN = PLUGIN
 
 --- @type ExperimentNpc
@@ -20,23 +19,34 @@ NPC.missionThreeHealAmount = 50
 NPC.PROGRESSION_MISSION_ONE_ACCEPTED = "mission_one_accepted"
 NPC.PROGRESSION_MISSION_ONE_COMPLETED = "mission_one_completed"
 NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT = "mission_one_healed_count"
+NPC.PROGRESSION_MISSION_ONE_REWARDED = "mission_one_rewarded"
 NPC.PROGRESSION_MISSION_TWO_ACCEPTED = "mission_two_accepted"
 NPC.PROGRESSION_MISSION_TWO_COMPLETED = "mission_two_completed"
+NPC.PROGRESSION_MISSION_TWO_REWARDED = "mission_two_rewarded"
 NPC.PROGRESSION_MISSION_THREE_ACCEPTED = "mission_three_accepted"
 NPC.PROGRESSION_MISSION_THREE_COMPLETED = "mission_three_completed"
 NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT = "mission_three_healed_count"
+NPC.PROGRESSION_MISSION_THREE_REWARDED = "mission_three_rewarded"
 NPC.PROGRESSION_MISSIONS_COMPLETED = "missions_completed"
 NPC.PROGRESSION_NEXT_MISSION_TIME = "next_mission_time"
 
 -- Attribute Rewards
-NPC.missionOneAttributeRewards = {
-	["medical"] = 1.5,
+NPC.missionOneRewards = {
+	-- bolts = 1337,
+	-- items = { item_id = 2 },
+	attributes = {
+		["medical"] = 1.5,
+	}
 }
-NPC.missionTwoAttributeRewards = {
-	["medical"] = 2,
+NPC.missionTwoRewards = {
+	attributes = {
+		["medical"] = 2,
+	}
 }
-NPC.attributeThreeRewards = {
-	["medical"] = 10,
+NPC.missionThreeRewards = {
+	attributes = {
+		["medical"] = 10,
+	}
 }
 
 --[[
@@ -54,7 +64,7 @@ NPC.MISSION_ONE_TRACKER = Schema.progression.RegisterTracker({
 	name = "Medical Assistance I",
 
 	--- The key that marks this goal as completed, will be a boolean value.
-	completedKey = NPC.PROGRESSION_MISSION_ONE_COMPLETED,
+	completedKey = NPC.PROGRESSION_MISSION_ONE_REWARDED,
 
 	--- The key that marks this goal as in-progress, will be a boolean value.
 	isInProgress = NPC.PROGRESSION_MISSION_ONE_ACCEPTED,
@@ -94,7 +104,7 @@ NPC.MISSION_TWO_TRACKER = Schema.progression.RegisterTracker({
 	scope = NPC.uniqueID,
 	uniqueID = NPC.uniqueID .. "#resurrectMission",
 	name = "Life Saver",
-	completedKey = NPC.PROGRESSION_MISSION_TWO_COMPLETED,
+	completedKey = NPC.PROGRESSION_MISSION_TWO_REWARDED,
 	isInProgress = NPC.PROGRESSION_MISSION_TWO_ACCEPTED,
 })
 
@@ -118,7 +128,7 @@ NPC.MISSION_THREE_TRACKER = Schema.progression.RegisterTracker({
 	scope = NPC.uniqueID,
 	uniqueID = NPC.uniqueID .. "#healMission3",
 	name = "Medical Assistance II",
-	completedKey = NPC.PROGRESSION_MISSION_THREE_COMPLETED,
+	completedKey = NPC.PROGRESSION_MISSION_THREE_REWARDED,
 	isInProgress = NPC.PROGRESSION_MISSION_THREE_ACCEPTED,
 })
 
@@ -156,6 +166,22 @@ if (CLIENT) then
 	--- @param npcEntity Entity
 	--- @return boolean?
 	function NPC:ClientGetAvailable(npcEntity)
+		-- Check if any mission is completed but not rewarded
+		if (Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true) and
+				not Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_ONE_REWARDED, true)) then
+			return true -- Show available marker for reward claim
+		end
+
+		if (Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_TWO_COMPLETED, true) and
+				not Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_TWO_REWARDED, true)) then
+			return true -- Show available marker for reward claim
+		end
+
+		if (Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_THREE_COMPLETED, true) and
+				not Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_THREE_REWARDED, true)) then
+			return true -- Show available marker for reward claim
+		end
+
 		-- Check if any mission is in progress
 		if (Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_ONE_ACCEPTED, true) and
 				not Schema.progression.Check(self.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true)) then
@@ -175,7 +201,7 @@ if (CLIENT) then
 			return false
 		end
 
-		-- If all missions are completed, don't show marker
+		-- If all missions are completed and rewarded, don't show marker
 		local missionsCompleted = Schema.progression.Get(self.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED) or 0
 		if (missionsCompleted >= 3) then
 			return nil
@@ -327,10 +353,6 @@ local INTERACTION_MISSION_ONE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 			NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT
 		) or 0
 
-		if (healedCount >= NPC.missionOneHealAmount) then
-			return "You've done a great job healing the injured!"
-		end
-
 		return "You have healed " ..
 			healedCount ..
 			" out of " ..
@@ -342,43 +364,65 @@ local INTERACTION_MISSION_ONE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 		local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT) or 0
 		local completed = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true)
 
-		return accepted and (healedCount < NPC.missionOneHealAmount or not completed)
-	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		-- Check if mission is now complete
-		local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT) or 0
-
-		if (healedCount >= NPC.missionOneHealAmount) then
-			-- Complete the mission
-			Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true)
-			Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
-				return (value or 0) + 1
-			end)
-			Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_NEXT_MISSION_TIME,
-				CurTime() + (NPC.missionIntervalInMinutes * 60))
-
-			-- Give rewards
-			local character = player:GetCharacter()
-			if character then
-				for attribute, reward in pairs(NPC.missionOneAttributeRewards) do
-					character:UpdateAttrib(attribute, reward)
-				end
-			end
-
-			player:Notify("You've completed the mission and received a medical skill boost.")
-			player.expHealMissionOneTargets = nil -- No longer needed
-
-			npcEntity:PrintChat(
-				player:Name() ..
-				", you've done a great job! You've healed " .. NPC.missionOneHealAmount .. " characters in need."
-			)
-		end
+		return accepted and healedCount < NPC.missionOneHealAmount and not completed
 	end,
 })
 
 INTERACTION_MISSION_ONE_PROGRESS:RegisterResponse({
 	answer = "I'm still working on it.",
+})
+
+-- NEW: Mission 1 Complete Interaction
+local INTERACTION_MISSION_ONE_COMPLETE = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "missionOneComplete",
+
+	text = function(interaction, player, npcEntity)
+		return "Excellent work, " .. player:Name() .. "! You've successfully healed " .. NPC.missionOneHealAmount ..
+			" different characters. Your medical skills have proven invaluable to our community!\n\n" ..
+			Schema.npc.CreateRewardHTML(NPC.missionOneRewards.bolts, NPC.missionOneRewards.items,
+				NPC.missionOneRewards.attributes)
+	end,
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		local completed = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true)
+		local rewarded = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_REWARDED, true)
+
+		return completed and not rewarded
+	end,
+})
+
+INTERACTION_MISSION_ONE_COMPLETE:RegisterResponse({
+	answer = "Claim Reward",
+
+	serverOnChoose = function(response, player, npcEntity)
+		-- Mark as rewarded to prevent double claims
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_REWARDED, true)
+
+		-- Update missions completed counter
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
+			return (value or 0) + 1
+		end)
+
+		-- Set next mission cooldown
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_NEXT_MISSION_TIME,
+			CurTime() + (NPC.missionIntervalInMinutes * 60))
+
+		-- Give rewards
+		local character = player:GetCharacter()
+		if character then
+			for attribute, reward in pairs(NPC.missionOneRewards.attributes) do
+				character:UpdateAttrib(attribute, reward)
+			end
+		end
+
+		player.expHealMissionOneTargets = nil -- Clear tracking data
+
+		npcEntity:PrintChat(player:Name() .. ", thank you for your dedicated service to our community!")
+	end,
+})
+
+INTERACTION_MISSION_ONE_COMPLETE:RegisterResponse({
+	answer = "I'll come back later.",
 })
 
 --[[
@@ -454,6 +498,58 @@ INTERACTION_MISSION_TWO_PROGRESS:RegisterResponse({
 	answer = "Alright, I'll get to it.",
 })
 
+-- NEW: Mission 2 Complete Interaction
+local INTERACTION_MISSION_TWO_COMPLETE = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "missionTwoComplete",
+
+	text = function(interaction, player, npcEntity)
+		return "Outstanding, " ..
+			player:Name() .. "! You've successfully brought someone back from the brink of death. " ..
+			"Your heroic actions have saved a life today!\n\n" ..
+			Schema.npc.CreateRewardHTML(NPC.missionTwoRewards.bolts, NPC.missionTwoRewards.items,
+				NPC.missionTwoRewards.attributes)
+	end,
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		local completed = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_TWO_COMPLETED, true)
+		local rewarded = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_TWO_REWARDED, true)
+
+		return completed and not rewarded
+	end,
+})
+
+INTERACTION_MISSION_TWO_COMPLETE:RegisterResponse({
+	answer = "Claim Reward",
+
+	serverOnChoose = function(response, player, npcEntity)
+		-- Mark as rewarded to prevent double claims
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_TWO_REWARDED, true)
+
+		-- Update missions completed counter
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
+			return (value or 0) + 1
+		end)
+
+		-- Set next mission cooldown
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_NEXT_MISSION_TIME,
+			CurTime() + (NPC.missionIntervalInMinutes * 60))
+
+		-- Give rewards
+		local character = player:GetCharacter()
+		if character then
+			for attribute, reward in pairs(NPC.missionTwoRewards.attributes) do
+				character:UpdateAttrib(attribute, reward)
+			end
+		end
+
+		npcEntity:PrintChat(player:Name() .. ", you are truly a hero! Thank you for saving a life.")
+	end,
+})
+
+INTERACTION_MISSION_TWO_COMPLETE:RegisterResponse({
+	answer = "I'll come back later.",
+})
+
 --[[
     Mission 3: Heal Y characters
 --]]
@@ -518,10 +614,6 @@ local INTERACTION_MISSION_THREE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 			NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT
 		) or 0
 
-		if (healedCount >= NPC.missionThreeHealAmount) then
-			return "You've done a great job healing the injured again!"
-		end
-
 		return "You have healed " ..
 			healedCount ..
 			" out of " ..
@@ -530,47 +622,65 @@ local INTERACTION_MISSION_THREE_PROGRESS = INTERACTION_SET:RegisterInteraction({
 
 	serverCheckShouldStart = function(interaction, player, npcEntity)
 		local accepted = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_ACCEPTED, true)
-		local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT) or
-			0
+		local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT) or 0
 		local completed = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_COMPLETED, true)
 
-		return accepted and (healedCount < NPC.missionThreeHealAmount or not completed)
-	end,
-
-	serverOnStart = function(interaction, player, npcEntity)
-		-- Check if mission is now complete
-		local healedCount = Schema.progression.Get(
-			player,
-			NPC.uniqueID,
-			NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT
-		) or 0
-
-		if (healedCount >= NPC.missionThreeHealAmount) then
-			-- Complete the mission
-			Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_COMPLETED, true)
-			Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
-				return (value or 0) + 1
-			end)
-
-			-- Give rewards
-			local character = player:GetCharacter()
-			if character then
-				for attribute, reward in pairs(NPC.attributeThreeRewards) do
-					character:UpdateAttrib(attribute, reward)
-				end
-			end
-
-			player:Notify("You've completed the mission and received a medical skill boost.")
-			player.expHealMissionThreeTargets = nil -- No longer needed
-
-			npcEntity:PrintChat(player:Name() ..
-				", you've done a great job! You've healed " .. NPC.missionThreeHealAmount .. " characters in need.")
-		end
+		return accepted and healedCount < NPC.missionThreeHealAmount and not completed
 	end,
 })
 
 INTERACTION_MISSION_THREE_PROGRESS:RegisterResponse({
 	answer = "I'm still working on it.",
+})
+
+-- NEW: Mission 3 Complete Interaction
+local INTERACTION_MISSION_THREE_COMPLETE = INTERACTION_SET:RegisterInteraction({
+	uniqueID = "missionThreeComplete",
+
+	text = function(interaction, player, npcEntity)
+		return "Incredible work, " .. player:Name() .. "! You've successfully healed " .. NPC.missionThreeHealAmount ..
+			" different characters - that's a tremendous achievement! Your dedication to helping others is truly inspiring.\n\n" ..
+			Schema.npc.CreateRewardHTML(NPC.missionThreeRewards.bolts, NPC.missionThreeRewards.items,
+				NPC.missionThreeRewards.attributes)
+	end,
+
+	serverCheckShouldStart = function(interaction, player, npcEntity)
+		local completed = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_COMPLETED, true)
+		local rewarded = Schema.progression.Check(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_REWARDED, true)
+
+		return completed and not rewarded
+	end,
+})
+
+INTERACTION_MISSION_THREE_COMPLETE:RegisterResponse({
+	answer = "Claim Reward",
+
+	serverOnChoose = function(response, player, npcEntity)
+		-- Mark as rewarded to prevent double claims
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_REWARDED, true)
+
+		-- Update missions completed counter
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
+			return (value or 0) + 1
+		end)
+
+		-- Give rewards
+		local character = player:GetCharacter()
+		if character then
+			for attribute, reward in pairs(NPC.missionThreeRewards.attributes) do
+				character:UpdateAttrib(attribute, reward)
+			end
+		end
+
+		player.expHealMissionThreeTargets = nil -- Clear tracking data
+
+		npcEntity:PrintChat(player:Name() ..
+			", you are a true champion of healing! Thank you for everything you've done.")
+	end,
+})
+
+INTERACTION_MISSION_THREE_COMPLETE:RegisterResponse({
+	answer = "I'll come back later.",
 })
 
 --[[
@@ -599,6 +709,13 @@ function NPC:HandleHealMissionOne(player, target)
 	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT, function(value)
 		return (value or 0) + 1
 	end)
+
+	-- Check if mission is complete
+	local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_HEALED_COUNT) or 0
+	if healedCount >= NPC.missionOneHealAmount then
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_ONE_COMPLETED, true)
+		player:Notify("Mission objective complete! Return to Dr. Lila Hart to claim your reward.")
+	end
 end
 
 function NPC:HandleResurrectMissionTwo(player, target)
@@ -612,21 +729,7 @@ function NPC:HandleResurrectMissionTwo(player, target)
 
 	-- Complete mission 2
 	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_TWO_COMPLETED, true)
-	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSIONS_COMPLETED, function(value)
-		return (value or 0) + 1
-	end)
-	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_NEXT_MISSION_TIME,
-		CurTime() + (NPC.missionIntervalInMinutes * 60))
-
-	-- Give rewards
-	local character = player:GetCharacter()
-	if character then
-		for attribute, reward in pairs(NPC.missionTwoAttributeRewards) do
-			character:UpdateAttrib(attribute, reward)
-		end
-	end
-
-	player:Notify("You've completed the mission and received a medical skill boost.")
+	player:Notify("Mission objective complete! Return to Dr. Lila Hart to claim your reward.")
 end
 
 function NPC:HandleHealMissionThree(player, target)
@@ -651,6 +754,13 @@ function NPC:HandleHealMissionThree(player, target)
 	Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT, function(value)
 		return (value or 0) + 1
 	end)
+
+	-- Check if mission is complete
+	local healedCount = Schema.progression.Get(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_HEALED_COUNT) or 0
+	if healedCount >= NPC.missionThreeHealAmount then
+		Schema.progression.Change(player, NPC.uniqueID, NPC.PROGRESSION_MISSION_THREE_COMPLETED, true)
+		player:Notify("Mission objective complete! Return to Dr. Lila Hart to claim your reward.")
+	end
 end
 
 -- Hook into the game events

@@ -7,28 +7,28 @@ ENT.PopulateEntityInfo = true
 ENT.MarkerPosZ = 78
 
 function ENT:Draw()
-    self:DrawModel()
+	self:DrawModel()
 
-    if (not self:GetNpcId()) then
-        return
-    end
+	if (not self:GetNpcId()) then
+		return
+	end
 
 	if (IsValid(ix.menu.panel)) then
 		return
 	end
 
-    local icon = ix.util.GetMaterial("experiment-redux/mission_available.png")
+	local icon = ix.util.GetMaterial("experiment-redux/mission_available.png")
 	local alphaRange, alphaBase = 100, 55
 
-    self.cachedNpcData = self.cachedNpcData or Schema.npc.Get(self:GetNpcId())
+	self.cachedNpcData = self.cachedNpcData or Schema.npc.Get(self:GetNpcId())
 
-	if (not self.cachedNpcData or (self.cachedNpcData.GetAvailable and not self.cachedNpcData:GetAvailable(self))) then
-        icon = ix.util.GetMaterial("experiment-redux/mission_unavailable.png")
-		alphaRange, alphaBase = 55, 5
+	if (not self.cachedNpcData or (self.cachedNpcData.ClientGetAvailable and not self.cachedNpcData:ClientGetAvailable(self))) then
+		icon = ix.util.GetMaterial("experiment-redux/mission_unavailable.png")
+		alphaRange, alphaBase = 0, 5
 	end
 
-    local positionOverNpc = self:GetPos()
-        + (self:GetUp() * self.MarkerPosZ)
+	local positionOverNpc = self:GetPos()
+		+ (self:GetUp() * self.MarkerPosZ)
 		+ (self:GetForward() * 2)
 	positionOverNpc = positionOverNpc + Vector(0, 0, math.cos(CurTime() * .5))
 
@@ -44,7 +44,7 @@ function ENT:Draw()
 	cam.Start3D2D(positionOverNpc, angleFacingPlayer, .4)
 	surface.SetMaterial(icon)
 	surface.SetDrawColor(255, 255, 255, math.abs(math.sin(CurTime() * 2) * alphaRange) + alphaBase)
-    surface.DrawTexturedRect(-16, -16, 32, 32)
+	surface.DrawTexturedRect(-16, -16, 32, 32)
 	cam.End3D2D()
 end
 

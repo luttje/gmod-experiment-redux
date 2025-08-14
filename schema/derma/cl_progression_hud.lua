@@ -81,14 +81,15 @@ do
 
 		for _, tracker in ipairs(trackedTrackers) do
 			if tracker:IsCompleted(LocalPlayer()) then
-				table.insert(completed, tracker)
+				-- Let's not show completed missions on the HUD ever
+				-- table.insert(completed, tracker)
 			else
 				table.insert(inProgress, tracker)
 			end
 		end
 
 		-- Add in-progress category
-		if #inProgress > 0 then
+		if (#inProgress > 0) then
 			self:AddCategory("Active Missions")
 			for _, tracker in ipairs(inProgress) do
 				local row = self:AddRow("Active Missions")
@@ -97,7 +98,7 @@ do
 		end
 
 		-- Add completed category
-		if #completed > 0 then
+		if (#completed > 0) then
 			self:AddCategory("Completed")
 			for _, tracker in ipairs(completed) do
 				local row = self:AddRow("Completed")
@@ -184,13 +185,24 @@ do
 		self.progressBar:Dock(FILL)
 
 		-- Create checkmark for completed boolean goals
-		self.checkMark = vgui.Create("DLabel", self.progressContainer)
-		self.checkMark:SetText("✓")
-		self.checkMark:SetFont("DermaDefault")
+		self.checkMark = vgui.Create("EditablePanel", self.progressContainer)
 		self.checkMark:SizeToContents()
-		self.checkMark:SetTextColor(Color(100, 255, 100))
 		self.checkMark:SetVisible(false)
 		self.checkMark:Dock(RIGHT)
+		self.checkMark:DockMargin(8, 0, 8, 0)
+		self.checkMark.Paint = function(label, w, h)
+			local oldClipping = DisableClipping(true)
+			local text = "✓"
+
+			surface.SetFont("ixMediumFont")
+			local textWidth, textHeight = surface.GetTextSize(text)
+			label:SetWide(textWidth + 8) -- Add padding
+			surface.SetTextColor(Color(100, 255, 100))
+			surface.SetTextPos(0, -textHeight)
+			surface.DrawText(text)
+
+			DisableClipping(oldClipping)
+		end
 
 		-- Create progress labels
 		self.progressLabel = vgui.Create("EditablePanel", self.progressContainer)
