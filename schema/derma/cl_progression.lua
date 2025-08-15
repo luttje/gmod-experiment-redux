@@ -241,8 +241,8 @@ do
 		self.actions:Dock(RIGHT)
 
 		self.trackOnHUD = self.actions:Add("ixCheckBox")
-		self.trackOnHUD:SetEnabledText("Track on HUD")
-		self.trackOnHUD:SetDisabledText("Don't Track")
+		self.trackOnHUD:SetEnabledText("On HUD")
+		self.trackOnHUD:SetDisabledText("Not on HUD")
 		self.trackOnHUD:SizeToContents()
 		self.trackOnHUD:Dock(TOP)
 		self.trackOnHUD.DoClick = function(panel)

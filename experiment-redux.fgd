@@ -108,3 +108,26 @@
     targetName(target_destination) : "Look At Target" : "" : "Entity to point the camera towards (optional)"
     fov(integer) : "Field of View" : 75 : "Camera field of view in degrees"
 ]
+
+// For cinematic spawns, like the prologue, where the player is dropped in a scene outside of regular map bounds
+@PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_cinematic_spawn :
+    "Cinematic spawn point for scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+]
+
+// For item spawns in cinematic sequences
+@PointClass base(Angles) = exp_cinematic_item_spawn :
+    "Cinematic spawn point for items in scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+    itemSpawnID(string) : "Item Spawn ID" : "" : "ID of the item spawn point"
+]
+
+// For enemy spawns in cinematic sequences
+@PointClass base(Angles) = exp_cinematic_enemy_spawn :
+    "Cinematic spawn point for enemies in scripted sequences"
+[
+    sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
+    enemySpawnID(string) : "Enemy Spawn ID" : "" : "ID of the enemy spawn point"
+]
