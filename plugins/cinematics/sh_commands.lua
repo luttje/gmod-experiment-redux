@@ -1,13 +1,13 @@
 local PLUGIN = PLUGIN
 
 --[[
-	Commands only for testing cinematic sequences.
+	Commands for testing the scene-based cinematic system.
 --]]
 
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Start a cinematic sequence for a player."
+	COMMAND.description = "Put a player in a cinematic scene."
 	COMMAND.arguments = {
 		ix.type.player,
 		ix.type.string
@@ -15,20 +15,23 @@ do
 
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, target, sequenceID)
-		PLUGIN:StartCinematicSequence(target, sequenceID)
-		PLUGIN:SpawnPlayerAtCinematic(target, sequenceID)
+	function COMMAND:OnRun(client, target, sceneID)
+		local success = PLUGIN:PutPlayerInScene(target, sceneID)
 
-		client:Notify("Started cinematic sequence '" .. sequenceID .. "' for " .. target:Name())
+		if (success) then
+			client:Notify("Put " .. target:Name() .. " in scene '" .. sceneID .. "'")
+		else
+			client:Notify("Failed to put " .. target:Name() .. " in scene '" .. sceneID .. "'")
+		end
 	end
 
-	ix.command.Add("CinematicStart", COMMAND)
+	ix.command.Add("ScenePut", COMMAND)
 end
 
 do
 	local COMMAND = {}
 
-	COMMAND.description = "End the cinematic sequence for a player."
+	COMMAND.description = "Remove a player from their current scene."
 	COMMAND.arguments = {
 		ix.type.player
 	}
@@ -36,18 +39,49 @@ do
 	COMMAND.superAdminOnly = true
 
 	function COMMAND:OnRun(client, target)
-		PLUGIN:EndCinematicSequence(target)
+		local currentScene = PLUGIN:GetPlayerScene(target)
 
-		client:Notify("Ended cinematic sequence for " .. target:Name())
+		if (currentScene) then
+			PLUGIN:RemovePlayerFromScene(target)
+			client:Notify("Removed " .. target:Name() .. " from scene '" .. currentScene .. "'")
+		else
+			client:Notify(target:Name() .. " is not in any scene")
+		end
 	end
 
-	ix.command.Add("CinematicEnd", COMMAND)
+	ix.command.Add("SceneRemove", COMMAND)
 end
 
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Transition a player to a different cinematic sequence."
+	COMMAND.description = "Transition a player to a different scene."
+	COMMAND.arguments = {
+		ix.type.player,
+		ix.type.string,
+		bit.bor(ix.type.number, ix.type.optional),
+		bit.bor(ix.type.number, ix.type.optional)
+	}
+
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target, newSceneID, fadeTime, blackPeriod)
+		local success = PLUGIN:TransitionPlayerToScene(target, newSceneID, fadeTime, blackPeriod)
+
+		if (success) then
+			client:Notify("Transitioning " .. target:Name() .. " to scene '" .. newSceneID .. "'")
+		else
+			client:Notify("Failed to transition " .. target:Name() .. " to scene '" .. newSceneID .. "'")
+		end
+	end
+
+	ix.command.Add("SceneTransition", COMMAND)
+end
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Show cinematic text to a player."
 	COMMAND.arguments = {
 		ix.type.player,
 		ix.type.string,
@@ -56,60 +90,34 @@ do
 
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, target, newSequenceID, fadeTime)
-		PLUGIN:TransitionPlayerToCinematic(target, newSequenceID, fadeTime)
+	function COMMAND:OnRun(client, target, text, duration)
+		PLUGIN:ShowCinematicText(target, text, duration)
 
-		if (PLUGIN.playerSequences[target]) then
-			PLUGIN.playerSequences[target].sequenceID = newSequenceID
-		end
-
-		client:Notify("Transitioning " .. target:Name() .. " to sequence '" .. newSequenceID .. "'")
+		client:Notify("Showing text to " .. target:Name() .. ": '" .. text .. "'")
 	end
 
-	ix.command.Add("CinematicTransition", COMMAND)
+	ix.command.Add("SceneText", COMMAND)
 end
 
 do
 	local COMMAND = {}
 
-	COMMAND.description = "Toggle black and white effect for a player."
+	COMMAND.description = "Check which scene a player is currently in."
 	COMMAND.arguments = {
-		ix.type.player,
-		bit.bor(ix.type.bool, ix.type.optional)
+		ix.type.player
 	}
 
 	COMMAND.superAdminOnly = true
 
-	function COMMAND:OnRun(client, target, enabled)
-		if (enabled == nil) then
-			enabled = true
+	function COMMAND:OnRun(client, target)
+		local currentScene = PLUGIN:GetPlayerScene(target)
+
+		if (currentScene) then
+			client:Notify(target:Name() .. " is in scene '" .. currentScene .. "'")
+		else
+			client:Notify(target:Name() .. " is not in any scene")
 		end
-
-		PLUGIN:SetPlayerBlackAndWhite(target, enabled)
-
-		client:Notify("Set black and white effect for " .. target:Name() .. " to " .. tostring(enabled))
 	end
 
-	ix.command.Add("CinematicBlackWhite", COMMAND)
-end
-
-do
-	local COMMAND = {}
-
-	COMMAND.description = "Spawn enemies at cinematic enemy spawn points."
-	COMMAND.arguments = {
-		ix.type.string,
-		bit.bor(ix.type.string, ix.type.optional),
-		bit.bor(ix.type.string, ix.type.optional)
-	}
-
-	COMMAND.superAdminOnly = true
-
-	function COMMAND:OnRun(client, sequenceID, enemyClass, enemySpawnID)
-		local enemies = PLUGIN:SpawnCinematicEnemy(sequenceID, enemyClass, enemySpawnID)
-
-		client:Notify("Spawned " .. #enemies .. " enemies for sequence '" .. sequenceID .. "'")
-	end
-
-	ix.command.Add("CinematicSpawnEnemy", COMMAND)
+	ix.command.Add("SceneCheck", COMMAND)
 end

@@ -127,6 +127,10 @@ if (SERVER) then
 		-- Network the entity's instance ID
 		entity:SetNWString("InstanceID", instanceID)
 
+		-- Needed for ShouldCollide to work
+		entity.expInstanceOldCustomCollisionCheck = entity:GetCustomCollisionCheck()
+		entity:SetCustomCollisionCheck(true)
+
 		-- Update transmission for all players
 		Schema.instance.UpdateEntityTransmission(entity)
 
@@ -154,6 +158,8 @@ if (SERVER) then
 
 		-- Clear networked instance ID
 		entity:SetNWString("InstanceID", "")
+
+		entity:SetCustomCollisionCheck(entity.expInstanceOldCustomCollisionCheck or false)
 
 		-- Update transmission for all players (entity becomes visible to everyone)
 		Schema.instance.UpdateEntityTransmission(entity)
@@ -186,6 +192,10 @@ if (SERVER) then
 		-- Network the player's instance to all clients
 		client:SetNWString("InstanceID", instanceID)
 
+		-- Needed for ShouldCollide to work
+		client.expInstanceOldCustomCollisionCheck = client:GetCustomCollisionCheck()
+		client:SetCustomCollisionCheck(true)
+
 		-- Update transmission for all entities
 		Schema.instance.UpdatePlayerTransmission(client)
 
@@ -213,6 +223,8 @@ if (SERVER) then
 
 		-- Clear networked instance ID
 		client:SetNWString("InstanceID", "")
+
+		client:SetCustomCollisionCheck(client.expInstanceOldCustomCollisionCheck or false)
 
 		-- Update transmission for all entities
 		Schema.instance.UpdatePlayerTransmission(client)
@@ -753,37 +765,12 @@ end
 
 -- Shared collision prevention across instances
 hook.Add("ShouldCollide", "expInstanceShouldCollide", function(ent1, ent2)
-	-- Check if one is a player and the other is an entity
-	local player = nil
-	local entity = nil
+	local inst1 = Schema.instance.GetEntityInstance(ent1)
+	local inst2 = Schema.instance.GetEntityInstance(ent2)
 
-	if (ent1:IsPlayer() and not ent2:IsPlayer()) then
-		player = ent1
-		entity = ent2
-	elseif (ent2:IsPlayer() and not ent1:IsPlayer()) then
-		player = ent2
-		entity = ent1
-	elseif (ent1:IsPlayer() and ent2:IsPlayer()) then
-		-- Both are players - use shared function
-		if (not Schema.instance.CanPlayerSeePlayer(ent1, ent2)) then
-			return false
-		end
-	else
-		-- Both are entities - check if they're in the same instance
-		local inst1 = Schema.instance.GetEntityInstance(ent1)
-		local inst2 = Schema.instance.GetEntityInstance(ent2)
-
-		-- If one is instanced and the other isn't, or they're in different instances
-		if ((inst1 and not inst2) or (not inst1 and inst2) or (inst1 ~= inst2)) then
-			return false
-		end
-	end
-
-	if (player and entity) then
-		-- Use shared function for player-entity collision
-		if (not Schema.instance.CanPlayerSeeEntity(player, entity)) then
-			return false
-		end
+	-- If one is instanced and the other isn't, or they're in different instances
+	if ((inst1 and not inst2) or (not inst1 and inst2) or (inst1 ~= inst2)) then
+		return false
 	end
 end)
 
@@ -803,3 +790,31 @@ hook.Add("PlayerTraceAttack", "expInstanceTraceAttack", function(client, damagei
 		end
 	end
 end)
+
+do
+	local COMMAND = {}
+
+	COMMAND.description = "Get the instance ID of a player."
+	COMMAND.arguments = {
+		ix.type.player
+	}
+	COMMAND.superAdminOnly = true
+
+	function COMMAND:OnRun(client, target)
+		if (not IsValid(target)) then
+			client:Notify("Invalid player.")
+			return
+		end
+
+		local instanceID = Schema.instance.GetEntityInstance(target)
+
+		if (not instanceID) then
+			client:Notify("Player is not in an instance.")
+			return
+		end
+
+		client:Notify("Player's instance ID: " .. instanceID)
+	end
+
+	ix.command.Add("InstanceGetID", COMMAND)
+end

@@ -110,7 +110,7 @@
 ]
 
 // For cinematic spawns, like the prologue, where the player is dropped in a scene outside of regular map bounds
-@PointClass base(Angles) studio("models/editor/scriptedsequence.mdl") = exp_cinematic_spawn :
+@PointClass base(Angles) studio("models/editor/playerstart.mdl") = exp_cinematic_spawn :
     "Cinematic spawn point for scripted sequences"
 [
     sequenceID(string) : "Sequence ID" : "" : "ID of the scripted sequence to identify this spawn by"
