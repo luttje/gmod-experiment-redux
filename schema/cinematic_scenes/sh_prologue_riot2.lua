@@ -219,33 +219,15 @@ if (CLIENT) then
 			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_riot2")
 		end
 
-		client.expPrologueRiot2ItemsToPickup = nil
+		Schema.entityMarker.ClearAll()
 
 		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
 	end
 
 	net.Receive("expPrologueRiot2ItemToPickup", function()
 		local itemEntityIndex = net.ReadUInt(MAX_EDICT_BITS)
-		local client = LocalPlayer()
 
-		client.expPrologueRiot2ItemsToPickup = client.expPrologueRiot2ItemsToPickup or {}
-		client.expPrologueRiot2ItemsToPickup[itemEntityIndex] = true
-	end)
-
-	hook.Add("PreDrawHalos", "expPrologueRiot2PreDrawHalos", function()
-		local client = LocalPlayer()
-
-		if (not client.expPrologueRiot2ItemsToPickup) then
-			return
-		end
-
-		for itemEntityIndex in pairs(client.expPrologueRiot2ItemsToPickup) do
-			local itemEntity = Entity(itemEntityIndex)
-
-			if (IsValid(itemEntity)) then
-				halo.Add({ itemEntity }, Color(255, 255, 0), 2, 2, 5, true, false)
-			end
-		end
+		Schema.entityMarker.Mark(itemEntityIndex)
 	end)
 end
 
