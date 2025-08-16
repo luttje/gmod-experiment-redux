@@ -21,6 +21,23 @@ if (CLIENT) then
 
 		Schema.cinematics.prologueMusic = "music/HL2_song6.mp3"
 		Schema.cinematics.PlayCinematicSound(Schema.cinematics.prologueMusic, 0.2, 2.0)
+
+		-- Show only to this client some welcome information on the nemesis monitors
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:SetClientSpecificMonitorVgui("prologue_gateway", function(parent)
+				return vgui.Create("expPrologueMonitorGateway", parent)
+			end)
+		end
+	end
+
+	function SCENE:OnLeaveLocalPlayer()
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_gateway")
+		end
 	end
 end
 

@@ -21,6 +21,22 @@ if (CLIENT) then
 		)
 
 		Schema.cinematics.SetBlackAndWhite(true)
+
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:SetClientSpecificMonitorVgui("prologue_riot1", function(parent)
+				return vgui.Create("expPrologueMonitorRiot1", parent)
+			end)
+		end
+	end
+
+	function SCENE:OnLeaveLocalPlayer()
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_riot1")
+		end
 	end
 end
 

@@ -2,6 +2,9 @@ local PLUGIN = PLUGIN
 
 local scanLinesMaterial = Material("experiment-redux/combinescanline")
 
+-- Client-specific monitor overrides (by specialID)
+PLUGIN.clientSpecificMonitors = PLUGIN.clientSpecificMonitors or {}
+
 net.Receive("expSetMonitorTarget", function(length)
 	local entity = net.ReadEntity()
 
@@ -45,8 +48,67 @@ net.Receive("expMonitorsPrintPresets", function(length)
 	end
 end)
 
+-- Set a client-specific VGUI for monitors with a specific specialID
+function PLUGIN:SetClientSpecificMonitorVgui(specialID, vguiFunction)
+	self.clientSpecificMonitors[specialID] = vguiFunction
+
+	-- Apply to existing monitors
+	local monitors = ents.FindByClass("exp_monitor")
+	for _, monitor in pairs(monitors) do
+		if (monitor:GetSpecialID() == specialID) then
+			self:SetMonitorTargetVgui(monitor, vguiFunction)
+		end
+	end
+end
+
+-- Clear client-specific VGUI for monitors with a specific specialID
+function PLUGIN:ClearClientSpecificMonitorVgui(specialID)
+	self.clientSpecificMonitors[specialID] = nil
+
+	-- Revert to global settings for existing monitors
+	local monitors = ents.FindByClass("exp_monitor")
+	for _, monitor in pairs(monitors) do
+		if (monitor:GetSpecialID() == specialID) then
+			-- Clear the current target and let the normal system take over
+			monitor.expMonitorTargetVgui = nil
+			monitor.expMonitorTargetHtml = nil
+
+			-- Re-apply global settings if they exist
+			if (self.monitorVgui and self.monitorVgui == "expMonitorTarget" and IsValid(self.targetedEntity)) then
+				self:SetMonitorTargetVgui(monitor, function(parent)
+					return vgui.Create("expMonitorTarget", parent)
+				end)
+			elseif (self.monitorVgui) then
+				self:SetMonitorTargetVgui(monitor, function(parent)
+					return vgui.Create(self.monitorVgui, parent)
+				end)
+			end
+		end
+	end
+end
+
+-- Check if a monitor should use client-specific content
+function PLUGIN:GetClientSpecificMonitorContent(monitor)
+	local specialID = monitor:GetSpecialID()
+
+	if (specialID and specialID ~= "") then
+		return self.clientSpecificMonitors[specialID]
+	end
+
+	return nil
+end
+
 -- When a monitor comes into PVS, set it up with the correct vgui
 function PLUGIN:HandleMonitorEntityEnteringPVS(entity)
+	-- Check for client-specific content first
+	local clientSpecificVgui = self:GetClientSpecificMonitorContent(entity)
+
+	if (clientSpecificVgui) then
+		self:SetMonitorTargetVgui(entity, clientSpecificVgui)
+		return
+	end
+
+	-- Fall back to global settings
 	if (not self.monitorVgui) then
 		return
 	end
@@ -74,6 +136,17 @@ function PLUGIN:GetDirectionToTarget(monitor)
 	local direction = heading / distance
 
 	return direction, distance
+end
+
+function PLUGIN:ShouldDrawMonitor(monitor)
+	local clientSpecificVgui = self:GetClientSpecificMonitorContent(monitor)
+
+	if (clientSpecificVgui) then
+		return true
+	end
+
+	-- Use normal power state for global content
+	return monitor:GetPoweredOn()
 end
 
 function PLUGIN:SetupMonitorDrawing(monitor)

@@ -55,14 +55,28 @@ end
 if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText(
-			"That illusion shattered the day the Nemesis AI showed us its real purpose.",
+			"That illusion shattered the day the Nemesis AI showed us its true, unaligned nature. ",
 			8
 		)
 
 		Schema.cinematics.SetBlackAndWhite(true)
+
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:SetClientSpecificMonitorVgui("prologue_riot2", function(parent)
+				return vgui.Create("expPrologueMonitorRiot2", parent)
+			end)
+		end
 	end
 
 	function SCENE:OnLeaveLocalPlayer()
+		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+
+		if (nemesisPlugin) then
+			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_riot2")
+		end
+
 		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
 	end
 end

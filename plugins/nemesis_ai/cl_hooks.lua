@@ -32,7 +32,8 @@ function PLUGIN:PostDrawTranslucentRenderables(isDrawingDepth, isDrawingSkybox)
 	local monitorEntities = ents.FindByClass("exp_monitor")
 
 	for _, monitor in pairs(monitorEntities) do
-		if (not monitor:GetPoweredOn() or monitor:IsDormant()) then
+		-- Use the new ShouldDrawMonitor function that handles both client-specific and global content
+		if (not self:ShouldDrawMonitor(monitor) or monitor:IsDormant()) then
 			continue
 		end
 

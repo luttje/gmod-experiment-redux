@@ -82,9 +82,16 @@ function Schema:LoadFonts(headingFont, readableFont)
 		weight = 600,
 	})
 
-	surface.CreateFont("expMonitorFont", {
+	surface.CreateFont("expMonitorLarge", {
 		font = "Consolas",
-		size = 256,
+		size = 255, -- max is 255
+		extended = true,
+		weight = 100
+	})
+
+	surface.CreateFont("expMonitorMedium", {
+		font = "Consolas",
+		size = 128,
 		extended = true,
 		weight = 100
 	})
