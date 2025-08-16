@@ -25,7 +25,7 @@ function Schema.cinematics.GetCinematicSpawns(cinematicSpawnID)
 end
 
 function Schema.cinematics.PutPlayerInScene(client, sceneID)
-	local scene = Schema.cinematics.Get(sceneID)
+	local scene = Schema.cinematics.Find(sceneID)
 	if (not scene) then
 		ix.util.SchemaErrorNoHalt("Scene not found: " .. sceneID)
 		return false

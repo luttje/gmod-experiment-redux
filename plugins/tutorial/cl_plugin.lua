@@ -1,7 +1,7 @@
 local PLUGIN = PLUGIN
 
 ix.option.Add("showTutorial", ix.type.bool, true, {
-    category = "general",
+	category = "general",
 	OnChanged = function(oldValue, newValue)
 		if (newValue) then
 			PLUGIN.isDisabled = false
@@ -18,26 +18,26 @@ PLUGIN.undimmedRectsCache = PLUGIN.undimmedRectsCache or {}
 
 -- Let the player skip by holding backspace for 3 seconds.
 function PLUGIN:Think()
-    if (self.isDisabled) then
-        return
-    end
+	if (self.isDisabled) then
+		return
+	end
 
 	if (not self.skipButtonDownAt and input.IsKeyDown(KEY_BACKSPACE)) then
 		self.skipButtonDownAt = CurTime()
 	elseif (self.skipButtonDownAt and not input.IsKeyDown(KEY_BACKSPACE)) then
 		self.skipButtonDownAt = nil
-    elseif (self.skipButtonDownAt and CurTime() - self.skipButtonDownAt >= 3) then
+	elseif (self.skipButtonDownAt and CurTime() - self.skipButtonDownAt >= 3) then
 		ix.util.Notify("Tutorial disabled, you can always re-enable it in the settings.")
 		self:DisableTutorial()
 	end
 end
 
 function PLUGIN:DisableTutorial()
-    if (self.isDisabled) then
-        return
-    end
+	if (self.isDisabled) then
+		return
+	end
 
-    self.isDisabled = true
+	self.isDisabled = true
 
 	ix.option.Set("showTutorial", false)
 end
@@ -113,26 +113,6 @@ function PLUGIN:NextTutorial(...)
 	self:SetCurrentTutorial(self.currentTutorial + 1, ...)
 end
 
---- Draws dimmed rectangles everywhere except for the specified rectangle.
---- Useful to draw attention to a specific area.
---- @param x number
---- @param y number
---- @param w number
---- @param h number
---- @param a number
-function PLUGIN:DrawUndimmedRect(x, y, w, h, a)
-	local scrW, scrH = ScrW(), ScrH()
-
-	surface.SetDrawColor(0, 0, 0, a)
-	surface.DrawRect(0, 0, scrW, y)
-	surface.DrawRect(0, y, x, h)
-	surface.DrawRect(x + w, y, scrW - x - w, h)
-	surface.DrawRect(0, y + h, scrW, scrH - y - h)
-
-	surface.SetDrawColor(255, 255, 255, a)
-	surface.DrawOutlinedRect(x, y, w, h)
-end
-
 local lastOrder = PLUGIN:AddTutorial(1, {
 	ActivateOn = "CharacterLoaded",
 	ActivateOnDelay = 0.5,
@@ -153,7 +133,7 @@ local lastOrder = PLUGIN:AddTutorial(1, {
 		local x, y = ix.gui.spawnSelection:LocalToScreen(0, 0)
 		local w, h = ix.gui.spawnSelection:GetSize()
 
-		PLUGIN:DrawUndimmedRect(x, y, w, h, alpha)
+		Schema.draw.DrawUndimmedRect(x, y, w, h, alpha)
 	end,
 })
 
@@ -191,16 +171,16 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnMainMenuCreated",
 
-    OnActivate = function(tutorial, menuPanel)
+	OnActivate = function(tutorial, menuPanel)
 		--
 	end,
 
 	DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
-        local youButton = PLUGIN:FindMenuButton("you")
+		local youButton = PLUGIN:FindMenuButton("you")
 
-        if (not youButton or not IsValid(youButton)) then
-            return
-        end
+		if (not youButton or not IsValid(youButton)) then
+			return
+		end
 
 		tutorial.youButton = youButton
 
@@ -212,23 +192,23 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			return
 		end
 
-		PLUGIN:DrawUndimmedRect(x, y, w, h, alpha)
+		Schema.draw.DrawUndimmedRect(x, y, w, h, alpha)
 	end,
 
 	GetText = function(tutorial)
-        local menuPanel = ix.gui.menu
+		local menuPanel = ix.gui.menu
 
-        if (not IsValid(menuPanel) or menuPanel.bClosing) then
-            local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+		if (not IsValid(menuPanel) or menuPanel.bClosing) then
+			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
-            return {
-                importantText("Press " .. menuKey .. " once to open the main menu."),
-            }
-        end
+			return {
+				importantText("Press " .. menuKey .. " once to open the main menu."),
+			}
+		end
 
-        if (not tutorial.youButton or not IsValid(tutorial.youButton)) then
-            return
-        end
+		if (not tutorial.youButton or not IsValid(tutorial.youButton)) then
+			return
+		end
 
 		local x, y = tutorial.youButton:LocalToScreen(0, 0)
 		local w, h = tutorial.youButton:GetSize()
@@ -252,11 +232,11 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			return
 		end
 
-        local inventoryButton = PLUGIN:FindMenuButton("inv")
+		local inventoryButton = PLUGIN:FindMenuButton("inv")
 
-        if (not inventoryButton or not IsValid(inventoryButton)) then
-            return
-        end
+		if (not inventoryButton or not IsValid(inventoryButton)) then
+			return
+		end
 
 		tutorial.inventoryButton = inventoryButton
 
@@ -278,7 +258,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		local inventoryX, inventoryY = inventoryButton:LocalToScreen(0, 0)
 		local combinedW, combinedH = w + (x - inventoryX), h + (y - inventoryY)
 
-		PLUGIN:DrawUndimmedRect(
+		Schema.draw.DrawUndimmedRect(
 			math.min(x, inventoryX),
 			math.min(y, inventoryY),
 			combinedW,
@@ -322,16 +302,16 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	ActivateOn = "OnMainMenuCreated",
 
-    OnActivate = function(tutorial, menuPanel)
+	OnActivate = function(tutorial, menuPanel)
 		--
 	end,
 
-    DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
-        local inventoryButton = PLUGIN:FindMenuButton("inv")
+	DrawFocusAreas = function(tutorial, scrW, scrH, alpha)
+		local inventoryButton = PLUGIN:FindMenuButton("inv")
 
-        if (not inventoryButton or not IsValid(inventoryButton)) then
-            return
-        end
+		if (not inventoryButton or not IsValid(inventoryButton)) then
+			return
+		end
 
 		tutorial.inventoryButton = inventoryButton
 
@@ -343,13 +323,13 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 			return
 		end
 
-		PLUGIN:DrawUndimmedRect(x, y, w, h, alpha)
+		Schema.draw.DrawUndimmedRect(x, y, w, h, alpha)
 	end,
 
 	GetText = function(tutorial)
-        local menuPanel = ix.gui.menu
+		local menuPanel = ix.gui.menu
 
-        if (not IsValid(menuPanel) or menuPanel.bClosing) then
+		if (not IsValid(menuPanel) or menuPanel.bClosing) then
 			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
 			return {
@@ -374,19 +354,19 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 		local x, y = ix.gui.inv1:LocalToScreen(0, 0)
 		local w, h = ix.gui.inv1:GetSize()
 
-		PLUGIN:DrawUndimmedRect(x, y, w, h, alpha)
+		Schema.draw.DrawUndimmedRect(x, y, w, h, alpha)
 	end,
 
 	GetText = function(tutorial)
-        local menuPanel = ix.gui.menu
+		local menuPanel = ix.gui.menu
 
-        if (not IsValid(menuPanel) or menuPanel.bClosing) then
-            local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
+		if (not IsValid(menuPanel) or menuPanel.bClosing) then
+			local menuKey = Schema.util.LookupBinding("+showscores") or "TAB"
 
-            return {
-                importantText("Press " .. menuKey .. " once to open the main menu."),
-            }
-        end
+			return {
+				importantText("Press " .. menuKey .. " once to open the main menu."),
+			}
+		end
 
 		if (not IsValid(ix.gui.inv1) or not ix.gui.inv1:IsVisible()) then
 			return {
@@ -430,7 +410,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 	end,
 
 	OnDeactivate = function()
-        -- After the last one, we are done and disable the tutorial.
+		-- After the last one, we are done and disable the tutorial.
 		PLUGIN:DisableTutorial()
 	end,
 })
@@ -438,7 +418,7 @@ lastOrder = PLUGIN:AddTutorial(lastOrder + 1, {
 function PLUGIN:DrawOverlay()
 	local showTutorial = ix.option.Get("showTutorial")
 
-    if (not showTutorial or self.hasAlreadyNotShown) then
+	if (not showTutorial or self.hasAlreadyNotShown) then
 		-- Prevent the tutorial from starting during gameplay (awkward, since it starts from spawn selection).
 		self.hasAlreadyNotShown = true
 		return
@@ -480,27 +460,27 @@ function PLUGIN:DrawOverlay()
 		text = { text }
 	end
 
-    for i = 1, #text do
-        local line = textAlignY == TEXT_ALIGN_BOTTOM and text[#text - i + 1] or text[i]
-        local yOffset = textAlignY == TEXT_ALIGN_BOTTOM and -1 or 1
-        local color = color_white
+	for i = 1, #text do
+		local line = textAlignY == TEXT_ALIGN_BOTTOM and text[#text - i + 1] or text[i]
+		local yOffset = textAlignY == TEXT_ALIGN_BOTTOM and -1 or 1
+		local color = color_white
 
-        if (istable(line)) then
-            if (line.color) then
-                color = line.color
-            end
+		if (istable(line)) then
+			if (line.color) then
+				color = line.color
+			end
 
-            line = line.text
-        end
+			line = line.text
+		end
 
-        color = Color(color.r, color.g, color.b, self.currentFade * 255)
+		color = Color(color.r, color.g, color.b, self.currentFade * 255)
 
-        draw.SimpleTextOutlined(line, "ixMediumFont", textX, textY + (i - 1) * 20 * yOffset, color, textAlignX,
-            textAlignY, 1, color_black)
-    end
+		draw.SimpleTextOutlined(line, "ixMediumFont", textX, textY + (i - 1) * 20 * yOffset, color, textAlignX,
+			textAlignY, 1, color_black)
+	end
 
-    -- Show disable tutorial hint in bottom right corner.
-    local disableTutorialText = "Hold BACKSPACE for 3 seconds to disable tutorial."
+	-- Show disable tutorial hint in bottom right corner.
+	local disableTutorialText = "Hold BACKSPACE for 3 seconds to disable tutorial."
 
 	draw.SimpleTextOutlined(disableTutorialText, "expSmallerFont", scrW - 8, scrH - 8, color_white, TEXT_ALIGN_RIGHT,
 		TEXT_ALIGN_BOTTOM, 1, color_black)

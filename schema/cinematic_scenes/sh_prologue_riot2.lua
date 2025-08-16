@@ -2,62 +2,91 @@ local SCENE = SCENE
 
 SCENE.cinematicSpawnID = "prologue_riot2"
 
-local function findItemSpawnPoint(sequenceID, itemSpawnID)
-	for _, ent in ipairs(ents.FindByClass("exp_cinematic_item_spawn")) do
-		if (ent:GetSequenceID() == sequenceID and ent:GetItemSpawnID() == itemSpawnID) then
-			return ent
+if (SERVER) then
+	util.AddNetworkString("expPrologueRiot2ItemToPickup")
+
+	local function findItemSpawnPoint(sequenceID, itemSpawnID)
+		for _, ent in ipairs(ents.FindByClass("exp_cinematic_item_spawn")) do
+			if (ent:GetSequenceID() == sequenceID and ent:GetItemSpawnID() == itemSpawnID) then
+				return ent
+			end
 		end
+
+		return nil
 	end
 
-	return nil
-end
-
-function SCENE:OnEnterServer(client)
-	Schema.instance.AddPlayer(client)
-
-	-- Spawn weapon and ammo in this client's instance
-	local weaponSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "weapon")
-	local ammoSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "ammo")
-
-	if (not weaponSpawn or not ammoSpawn) then
-		ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing item spawn points for weapon or ammo!")
-		Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-		return
+	local function networkItemToPickup(client, itemEntity)
+		net.Start("expPrologueRiot2ItemToPickup")
+		net.WriteUInt(itemEntity:EntIndex(), MAX_EDICT_BITS)
+		net.Send(client)
 	end
 
-	local weaponItemTable = ix.item.Get("ex_glock")
-	local ammo = Schema.ammo.ConvertToAmmo(weaponItemTable.forcedWeaponCalibre)
-	local ammoItemTable = Schema.ammo.FindMainAmmoItem(ammo)
+	function SCENE:OnEnterServer(client)
+		Schema.instance.AddPlayer(client)
 
-	if (not ammoItemTable) then
-		ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing ammo item for weapon!")
-		Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-		return
-	end
+		-- Spawn weapon and ammo in this client's instance
+		local weaponSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "weapon")
+		local ammoSpawn = findItemSpawnPoint(SCENE.cinematicSpawnID, "ammo")
 
-	local instanceID = Schema.instance.GetPlayerInstance(client)
+		if (not weaponSpawn or not ammoSpawn) then
+			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing item spawn points for weapon or ammo!")
+			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+			return
+		end
 
-	-- Track the items this player has to pick up
-	client.expPrologueRiot2Items = {}
+		local weaponItemTable = ix.item.Get("ex_glock")
+		local ammo = Schema.ammo.ConvertToAmmo(weaponItemTable.forcedWeaponCalibre)
+		local ammoItemTable = Schema.ammo.FindMainAmmoItem(ammo)
 
-	ix.item.Spawn(weaponItemTable.uniqueID, weaponSpawn:GetPos(), function(item, itemEntity)
-		Schema.instance.AddEntity(itemEntity, instanceID)
+		if (not ammoItemTable) then
+			ix.util.SchemaErrorNoHalt("Prologue scene 'prologue_riot2' is missing ammo item for weapon!")
+			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+			return
+		end
 
-		client.expPrologueRiot2Items[item.uniqueID] = item
-	end)
+		local instanceID = Schema.instance.GetPlayerInstance(client)
 
-	ix.item.Spawn(ammoItemTable.uniqueID, ammoSpawn:GetPos(), function(item, itemEntity)
-		Schema.instance.AddEntity(itemEntity, instanceID)
+		-- Track the items this player has to pick up
+		client.expPrologueRiot2Items = {}
 
-		client.expPrologueRiot2Items[item.uniqueID] = item
-	end)
+		ix.item.Spawn(weaponItemTable.uniqueID, weaponSpawn:GetPos(), function(item, itemEntity)
+			if (not IsValid(client)) then
+				itemEntity:Remove()
+				return
+			end
 
-	-- TODO: instruct player how to equip it
-	-- TODO: Spawn manhack for them to practice shooting at
-	-- TODO: End scene after they kill the manhack, or when the time expires
-	-- TODO: Handle softlocks, like where they drop the weapon outside bounds or something
+			-- Prevent the map saving this item
+			itemEntity.bTemporary = true
 
-	--[[
+			Schema.instance.AddEntity(itemEntity, instanceID)
+
+			client.expPrologueRiot2Items[item.uniqueID] = item
+
+			networkItemToPickup(client, itemEntity)
+		end)
+
+		ix.item.Spawn(ammoItemTable.uniqueID, ammoSpawn:GetPos(), function(item, itemEntity)
+			if (not IsValid(client)) then
+				itemEntity:Remove()
+				return
+			end
+
+			-- Prevent the map saving this item
+			itemEntity.bTemporary = true
+
+			Schema.instance.AddEntity(itemEntity, instanceID)
+
+			client.expPrologueRiot2Items[item.uniqueID] = item
+
+			networkItemToPickup(client, itemEntity)
+		end)
+
+		-- TODO: instruct player how to equip it
+		-- TODO: Spawn manhack for them to practice shooting at
+		-- TODO: End scene after they kill the manhack, or when the time expires
+		-- TODO: Handle softlocks, like where they drop the weapon outside bounds or something
+
+		--[[
 		Some sounds to have an NPC possibly say:
 			vo/canals/arrest_helpme.wav <- cry for help
 
@@ -81,30 +110,29 @@ function SCENE:OnEnterServer(client)
 			vo/npc/male01/youdbetterreload01.wav
 	--]]
 
-	-- Hard-timer to end scene after some time
-	timer.Simple(60 * 10, function()
-		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot2")) then
-			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
-		end
-	end)
-end
+		-- Hard-timer to end scene after some time
+		timer.Simple(60 * 10, function()
+			if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot2")) then
+				Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
+			end
+		end)
+	end
 
-function SCENE:OnLeaveServer(client)
-	client.expPrologueRiot2Items = nil
+	function SCENE:OnLeaveServer(client)
+		client.expPrologueRiot2Items = nil
 
-	local instanceID = Schema.instance.GetPlayerInstance(client)
-	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
+		local instanceID = Schema.instance.GetPlayerInstance(client)
+		Schema.instance.DestroyInstance(instanceID, "end_of_scene")
 
-	client:KillSilent()
-	client:Spawn()
-	-- TODO: Strip all items after this flashback
-	-- TODO: Show the spawn point selection
-end
+		client:KillSilent()
+		client:Spawn()
+		-- TODO: Strip all items after this flashback
+		-- TODO: Show the spawn point selection
+	end
 
-function SCENE:OnServerThink(client)
-end
+	function SCENE:OnServerThink(client)
+	end
 
-if (SERVER) then
 	local function checkIfPickedUpItems(client)
 		if (table.Count(client.expPrologueRiot2Items) == 0) then
 			-- TODO:
@@ -161,6 +189,10 @@ if (SERVER) then
 end
 
 if (CLIENT) then
+	function SCENE:OnDraw()
+		-- Schema.draw.DrawUndimmedRect(x, y, w, h)
+	end
+
 	function SCENE:OnEnterLocalPlayer()
 		Schema.cinematics.ShowCinematicText(
 			"That illusion shattered the day the Nemesis AI showed us its true, unaligned nature. ",
@@ -180,13 +212,40 @@ if (CLIENT) then
 
 	function SCENE:OnLeaveLocalPlayer()
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
+		local client = LocalPlayer()
 
 		if (nemesisPlugin) then
 			nemesisPlugin:ClearClientSpecificMonitorVgui("prologue_riot2")
 		end
 
+		client.expPrologueRiot2ItemsToPickup = nil
+
 		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
 	end
+
+	net.Receive("expPrologueRiot2ItemToPickup", function()
+		local itemEntityIndex = net.ReadUInt(MAX_EDICT_BITS)
+		local client = LocalPlayer()
+
+		client.expPrologueRiot2ItemsToPickup = client.expPrologueRiot2ItemsToPickup or {}
+		client.expPrologueRiot2ItemsToPickup[itemEntityIndex] = true
+	end)
+
+	hook.Add("PreDrawHalos", "expPrologueRiot2PreDrawHalos", function()
+		local client = LocalPlayer()
+
+		if (not client.expPrologueRiot2ItemsToPickup) then
+			return
+		end
+
+		for itemEntityIndex in pairs(client.expPrologueRiot2ItemsToPickup) do
+			local itemEntity = Entity(itemEntityIndex)
+
+			if (IsValid(itemEntity)) then
+				halo.Add({ itemEntity }, Color(255, 255, 0), 2, 2, 5, true, false)
+			end
+		end
+	end)
 end
 
 hook.Add("ExperimentMonitorsFilter", "expPrologueRiot2DisableNormalBehaviour", function(monitors, filterType)

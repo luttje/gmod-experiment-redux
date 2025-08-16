@@ -95,7 +95,7 @@ end
 --- @realm shared
 --- @class CommonLibrary
 --- @field Get fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table) deprecated, use Find instead
---- @field Find fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table) Finds an object by index/uniqueID/name, or if a table is passed, that is checked to exist in the buffer and returned.
+--- @field Find fun(identifierOrItem: string|number|table, allowPartialMatch?: boolean):(table?) Finds an object by index/uniqueID/name, or if a table is passed, that is checked to exist in the buffer and returned.
 --- @field GetAll fun():(table) Gets all objects in the.
 --- @field GetBuffer fun():(table) Gets all objects in a table where the key is the objects index.
 --- @field UnRegister fun(libraryObject: table):(table) Unregisters an object.
