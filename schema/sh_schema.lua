@@ -91,6 +91,7 @@ RANKS = {
 
 ix.util.IncludeDir("meta")
 
+Schema.cinematics.IncludeDirectory(Schema.folder .. "/schema/cinematic_scenes", "SCENE")
 Schema.achievement.IncludeDirectory(Schema.folder .. "/schema/achievements")
 Schema.buff.IncludeDirectory(Schema.folder .. "/schema/buffs")
 Schema.perk.IncludeDirectory(Schema.folder .. "/schema/perks")

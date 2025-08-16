@@ -1,6 +1,5 @@
-local PLUGIN = PLUGIN
+local SCENE = SCENE
 
-local SCENE = {}
 SCENE.cinematicSpawnID = "prologue_riot2"
 
 function SCENE:OnEnterServer(client)
@@ -35,8 +34,8 @@ function SCENE:OnEnterServer(client)
 
 	-- Hard-timer to end scene after some time
 	timer.Simple(10, function()
-		if (IsValid(client) and PLUGIN:IsPlayerInScene(client, "prologue_riot2")) then
-			PLUGIN:RemovePlayerFromSceneFadeOut(client)
+		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot2")) then
+			Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
 		end
 	end)
 end
@@ -55,17 +54,15 @@ end
 
 if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
-		PLUGIN:ShowCinematicText(
+		Schema.cinematics.ShowCinematicText(
 			"That illusion shattered the day the Nemesis AI showed us its real purpose.",
 			8
 		)
 
-		PLUGIN:SetBlackAndWhite(true)
+		Schema.cinematics.SetBlackAndWhite(true)
 	end
 
 	function SCENE:OnLeaveLocalPlayer()
-		PLUGIN:StopCinematicSound(3.0) -- Fade out over 3 seconds
+		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
 	end
 end
-
-PLUGIN:RegisterScene("prologue_riot2", SCENE)
