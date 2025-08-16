@@ -38,8 +38,7 @@ function ENT:Initialize()
 		"prop_physics",
 		"prop_physics_multiplayer",
 
-		-- NPCs and ragdolls (corpses)
-		"npc_*",
+		-- Ragdolls (corpses)
 		"prop_ragdoll",
 	}
 end

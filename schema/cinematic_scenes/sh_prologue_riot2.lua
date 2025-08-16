@@ -15,6 +15,16 @@ if (SERVER) then
 		return nil
 	end
 
+	local function findEnemySpawnPoint(sequenceID, enemySpawnID)
+		for _, ent in ipairs(ents.FindByClass("exp_cinematic_enemy_spawn")) do
+			if (ent:GetSequenceID() == sequenceID and ent:GetEnemySpawnID() == enemySpawnID) then
+				return ent
+			end
+		end
+
+		return nil
+	end
+
 	local function networkItemToPickup(client, itemEntity)
 		net.Start("expPrologueRiot2ItemToPickup")
 		net.WriteUInt(itemEntity:EntIndex(), MAX_EDICT_BITS)
@@ -81,10 +91,9 @@ if (SERVER) then
 			networkItemToPickup(client, itemEntity)
 		end)
 
-		-- TODO: instruct player how to equip it
-		-- TODO: Spawn manhack for them to practice shooting at
+		-- TODO: instruct player how to equip weapon and ammo
 		-- TODO: End scene after they kill the manhack, or when the time expires
-		-- TODO: Handle softlocks, like where they drop the weapon outside bounds or something
+		-- TODO: Handle softlocks, like where they drop the weapon outside bounds or something (currently handled with removal of items, we should detect that and respawn them or something)
 
 		--[[
 		Some sounds to have an NPC possibly say:
@@ -116,6 +125,8 @@ if (SERVER) then
 				Schema.cinematics.RemovePlayerFromSceneFadeOut(client)
 			end
 		end)
+
+		-- TODO: Hard-timer to spawn the manhacks regardless of whether the player has picked up the items
 	end
 
 	function SCENE:OnLeaveServer(client)
@@ -133,12 +144,40 @@ if (SERVER) then
 	function SCENE:OnServerThink(client)
 	end
 
+	local function spawnManhack(position, targetClient)
+		local manhack = ents.Create("npc_manhack")
+		manhack:SetPos(position)
+		manhack:Spawn()
+
+		-- Set relationships with anything neutral, except the target
+		manhack:AddRelationship("player D_NU 98")
+		manhack:AddEntityRelationship(targetClient, D_HT, 99)
+
+		manhack:SetTarget(targetClient)
+		manhack:UpdateEnemyMemory(targetClient, targetClient:GetPos())
+
+		local instanceID = Schema.instance.GetPlayerInstance(targetClient)
+		Schema.instance.AddEntity(manhack, instanceID)
+
+		return manhack
+	end
+	_G.TestSpawnManhack = spawnManhack
+
 	local function checkIfPickedUpItems(client)
-		if (table.Count(client.expPrologueRiot2Items) == 0) then
-			-- TODO:
-			ix.util.SchemaErrorNoHalt("TODO: Proceed to equip explanation")
-			client.expPrologueRiot2Items = nil
+		if (table.Count(client.expPrologueRiot2Items) > 0) then
+			return
 		end
+
+		client.expPrologueRiot2Items = nil
+
+		local spawnPoint = findEnemySpawnPoint(SCENE.cinematicSpawnID, "manhack")
+
+		if (not spawnPoint) then
+			return
+		end
+
+		-- TODO: Wait for the weapon to be equipped
+		spawnManhack(spawnPoint:GetPos(), client)
 	end
 
 	-- Track the next phase if the player picks up both items
