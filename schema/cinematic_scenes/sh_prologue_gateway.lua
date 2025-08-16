@@ -20,8 +20,12 @@ end
 
 if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
-		Schema.cinematics.ShowCinematicText("The Guardian Testing Facility. A place they told us was safe.")
+		Schema.cinematics.ShowCinematicText({
+			{ text = "The Guardian Testing Facility.", delay = 0, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "A place they told us was safe.", delay = 2, duration = 5, horizontalAlignment = TEXT_ALIGN_CENTER, verticalAlignment = TEXT_ALIGN_CENTER },
+		})
 
+		Schema.cinematics.SetFogData(50, 750, color_black, 1)
 		Schema.cinematics.SetBlackAndWhite(true)
 
 		Schema.cinematics.prologueMusic = "music/HL2_song6.mp3"

@@ -194,11 +194,12 @@ if (CLIENT) then
 	end
 
 	function SCENE:OnEnterLocalPlayer()
-		Schema.cinematics.ShowCinematicText(
-			"That illusion shattered the day the Nemesis AI showed us its true, unaligned nature. ",
-			8
-		)
+		Schema.cinematics.ShowCinematicText({
+			{ text = "That illusion shattered the day the Nemesis AI", delay = 0, duration = 8, horizontalAlignment = TEXT_ALIGN_LEFT, verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "showed us its true, unaligned nature.",          delay = 2, duration = 8, horizontalAlignment = TEXT_ALIGN_LEFT, verticalAlignment = TEXT_ALIGN_CENTER },
+		})
 
+		Schema.cinematics.SetFogData(50, 850, color_black, 1)
 		Schema.cinematics.SetBlackAndWhite(true)
 
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")

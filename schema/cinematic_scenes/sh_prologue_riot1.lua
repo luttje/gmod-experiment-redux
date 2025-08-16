@@ -22,11 +22,13 @@ end
 
 if (CLIENT) then
 	function SCENE:OnEnterLocalPlayer()
-		Schema.cinematics.ShowCinematicText(
-			"A place where even rioting was part of the schedule. A harmless experiment to test their crowd controlling AI...",
-			12
-		)
+		Schema.cinematics.ShowCinematicText({
+			{ text = "A place where even rioting was part of the schedule.",                   delay = 0,  duration = 9,  horizontalAlignment = TEXT_ALIGN_LEFT,  verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "A supposedly harmless experiment to test their crowd controlling AI...", delay = 2,  duration = 10, horizontalAlignment = TEXT_ALIGN_LEFT,  verticalAlignment = TEXT_ALIGN_CENTER },
+			{ text = "Nemesis AI...",                                                          delay = 10, duration = 10, horizontalAlignment = TEXT_ALIGN_RIGHT, verticalAlignment = TEXT_ALIGN_CENTER },
+		})
 
+		Schema.cinematics.SetFogData(50, 850, color_black, 1)
 		Schema.cinematics.SetBlackAndWhite(true)
 
 		local nemesisPlugin = ix.plugin.Get("nemesis_ai")
