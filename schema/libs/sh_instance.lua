@@ -169,7 +169,7 @@ if (SERVER) then
 
 	--- Adds a player to an instance
 	--- @param client Player
-	--- @param instanceID string
+	--- @param instanceID? string Optional ID to identify the instance by, defaults to SteamID64
 	function Schema.instance.AddPlayer(client, instanceID)
 		if (not IsValid(client)) then
 			ix.util.SchemaErrorNoHalt("Attempted to add invalid player to instance '" .. tostring(instanceID) .. "'\n")
@@ -181,6 +181,8 @@ if (SERVER) then
 		if (oldInstanceID) then
 			Schema.instance.RemovePlayer(client)
 		end
+
+		instanceID = instanceID or client:SteamID64()
 
 		-- Create instance if it doesn't exist
 		local instance = Schema.instance.CreateInstance(instanceID)
@@ -581,6 +583,10 @@ if (SERVER) then
 
 	-- Ensure dropped items from a player get moved to the same instance.
 	hook.Add("OnItemSpawned", "expInstanceItemSpawned", function(item)
+		if (not item.ixSteamID) then
+			return
+		end
+
 		local client = player.GetBySteamID(item.ixSteamID)
 
 		if (client) then
@@ -767,6 +773,11 @@ end
 hook.Add("ShouldCollide", "expInstanceShouldCollide", function(ent1, ent2)
 	local inst1 = Schema.instance.GetEntityInstance(ent1)
 	local inst2 = Schema.instance.GetEntityInstance(ent2)
+
+	-- If one is the world, return to have default behaviour
+	if (not IsValid(ent1) or not IsValid(ent2)) then
+		return
+	end
 
 	-- If one is instanced and the other isn't, or they're in different instances
 	if ((inst1 and not inst2) or (not inst1 and inst2) or (inst1 ~= inst2)) then

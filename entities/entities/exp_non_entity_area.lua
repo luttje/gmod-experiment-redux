@@ -25,6 +25,8 @@ function ENT:Initialize()
 
 	-- Create a list of entity types to remove/teleport
 	self.RemovableEntities = {
+		"ix_item",
+
 		-- Experiment Redux specific entities
 		"exp_*",
 
@@ -100,7 +102,8 @@ end
 
 -- Called when an entity starts touching the trigger
 function ENT:StartTouch(ent)
-	if (not IsValid(ent)) then
+	-- Don't remove map entities
+	if (not IsValid(ent) or ent:MapCreationID() > -1) then
 		return
 	end
 
@@ -113,7 +116,7 @@ function ENT:StartTouch(ent)
 			self:TeleportEntity(ent, teleportDest)
 		else
 			-- Remove the entity after a small delay to avoid issues
-			timer.Simple(0.1, function()
+			timer.Simple(0, function()
 				if (IsValid(ent)) then
 					self:RemoveEntity(ent)
 				end
@@ -156,11 +159,6 @@ end
 
 -- Function to remove an entity safely
 function ENT:RemoveEntity(ent)
-	if (not IsValid(ent)) then
-		return
-	end
-
-	-- Create removal effect
 	self:CreateRemovalEffect(ent:GetPos())
 
 	-- Special handling for different entity types
@@ -201,9 +199,11 @@ end
 
 -- Handle keyvalues from the map
 function ENT:KeyValue(key, value)
+	key = key:lower()
+
 	if (key == "name") then
 		self:SetName(value)
-	elseif (key == "teleportTarget") then
+	elseif (key == "teleporttarget") then
 		self.expTeleportTarget = value
 	end
 end

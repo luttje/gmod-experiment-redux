@@ -3,6 +3,8 @@ local SCENE = SCENE
 SCENE.cinematicSpawnID = "prologue_riot1"
 
 function SCENE:OnEnterServer(client)
+	Schema.instance.AddPlayer(client)
+
 	timer.Simple(15, function()
 		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_riot1")) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot2")
@@ -11,6 +13,11 @@ function SCENE:OnEnterServer(client)
 end
 
 function SCENE:OnServerThink(client)
+end
+
+function SCENE:OnLeaveServer(client)
+	local instanceID = Schema.instance.GetPlayerInstance(client)
+	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
 end
 
 if (CLIENT) then

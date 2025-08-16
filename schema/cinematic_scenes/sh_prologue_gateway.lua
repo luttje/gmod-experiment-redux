@@ -4,13 +4,18 @@ SCENE.cinematicSpawnID = "prologue_gateway"
 
 -- TODO: Show the prologue once to each new player and prevent showing the spawn point selection until the prologue is finished
 function SCENE:OnEnterServer(client)
-	Schema.instance.AddPlayer(client, client:SteamID64())
+	Schema.instance.AddPlayer(client)
 
 	timer.Simple(10, function()
 		if (IsValid(client) and Schema.cinematics.IsPlayerInScene(client, "prologue_gateway")) then
 			Schema.cinematics.TransitionPlayerToScene(client, "prologue_riot1")
 		end
 	end)
+end
+
+function SCENE:OnLeaveServer(client)
+	local instanceID = Schema.instance.GetPlayerInstance(client)
+	Schema.instance.DestroyInstance(instanceID, "end_of_scene")
 end
 
 if (CLIENT) then
