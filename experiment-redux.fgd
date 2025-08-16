@@ -8,6 +8,7 @@
 	"Experiment Monitor that matches the position and angles of a prop_static with the same model"
 [
     monitorPreset(string) : "Monitor Preset" : "combine_big" : "Preset used to determine the monitor's screen size"
+    specialID(string) : "Special ID" : "" : "For when you want to filter out this monitor specifically for use in a cinematic for example"
 ]
 
 @PointClass base(Origin, Angles) color(160 78 69) sphere(fademindist) sphere(fademaxdist) studioprop() = exp_scavenging_source :

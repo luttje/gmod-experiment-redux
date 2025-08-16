@@ -1,7 +1,16 @@
 local PLUGIN = PLUGIN
 
 function PLUGIN:NetworkEntityCreated(entity)
-	self:HandleMonitorEntityEnteringPVS(entity)
+	if (entity:GetClass() ~= "exp_monitor") then
+		return
+	end
+
+	-- Delay this call, because SetupDataTables is called after NetworkEntityCreated and the hook inside this function may need those
+	timer.Simple(0, function()
+		if (IsValid(entity) and entity:GetClass() == "exp_monitor") then
+			self:HandleMonitorEntityEnteringPVS(entity)
+		end
+	end)
 end
 
 -- Draw location to locker with anti-virus (if this player has a locker rot event)

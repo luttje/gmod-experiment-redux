@@ -23,3 +23,14 @@ if (CLIENT) then
 		Schema.cinematics.SetBlackAndWhite(true)
 	end
 end
+
+hook.Add("ExperimentMonitorsFilter", "expPrologueRiot1DisableNormalBehaviour", function(monitors, filterType)
+	for i = #monitors, 1, -1 do
+		local monitor = monitors[i]
+		local specialID = monitor:GetSpecialID()
+
+		if (specialID and specialID == "prologue_riot1") then
+			table.remove(monitors, i)
+		end
+	end
+end)

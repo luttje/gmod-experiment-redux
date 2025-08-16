@@ -23,3 +23,14 @@ if (CLIENT) then
 		Schema.cinematics.PlayCinematicSound(Schema.cinematics.prologueMusic, 0.2, 2.0)
 	end
 end
+
+hook.Add("ExperimentMonitorsFilter", "expPrologueGatewayDisableNormalBehaviour", function(monitors, filterType)
+	for i = #monitors, 1, -1 do
+		local monitor = monitors[i]
+		local specialID = monitor:GetSpecialID()
+
+		if (specialID and specialID == "prologue_gateway") then
+			table.remove(monitors, i)
+		end
+	end
+end)

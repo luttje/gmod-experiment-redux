@@ -5,10 +5,12 @@ local scanLinesMaterial = Material("experiment-redux/combinescanline")
 net.Receive("expSetMonitorTarget", function(length)
 	local entity = net.ReadEntity()
 
-    PLUGIN.targetedEntity = IsValid(entity) and entity or nil
+	PLUGIN.targetedEntity = IsValid(entity) and entity or nil
 	PLUGIN.monitorVgui = "expMonitorTarget"
 
 	local monitors = ents.FindByClass("exp_monitor")
+
+	hook.Run("ExperimentMonitorsFilter", monitors, "target")
 
 	for _, monitor in pairs(monitors) do
 		if (IsValid(entity)) then
@@ -24,6 +26,8 @@ net.Receive("expSetMonitorVgui", function(length)
 
 	local monitors = ents.FindByClass("exp_monitor")
 	PLUGIN.monitorVgui = vguiClass
+
+	hook.Run("ExperimentMonitorsFilter", monitors, "vgui")
 
 	for _, monitor in pairs(monitors) do
 		PLUGIN:SetMonitorTargetVgui(monitor, function(parent)
@@ -43,13 +47,19 @@ end)
 
 -- When a monitor comes into PVS, set it up with the correct vgui
 function PLUGIN:HandleMonitorEntityEnteringPVS(entity)
-    if (entity:GetClass() ~= "exp_monitor" or not self.monitorVgui) then
-        return
-    end
+	if (not self.monitorVgui) then
+		return
+	end
 
-	self:SetMonitorTargetVgui(entity, function(parent)
-		return vgui.Create(self.monitorVgui, parent)
-	end)
+	local monitors = { entity }
+
+	hook.Run("ExperimentMonitorsFilter", monitors, self.monitorVgui == "expMonitorTarget" and "target" or "vgui")
+
+	for _, monitor in ipairs(monitors) do
+		self:SetMonitorTargetVgui(monitor, function(parent)
+			return vgui.Create(self.monitorVgui, parent)
+		end)
+	end
 end
 
 function PLUGIN:GetDirectionToTarget(monitor)
@@ -123,7 +133,7 @@ function PLUGIN:SetupAndOrDrawHtml(monitor, renderTargetMaterial)
 		monitor.expVguiPanel:Remove()
 	end
 
-	if(not IsValid(monitor.expHtmlPanel)) then
+	if (not IsValid(monitor.expHtmlPanel)) then
 		monitor.expHtmlPanelWidth = 64
 		monitor.expHtmlPanelHeight = 64
 

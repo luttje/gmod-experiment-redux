@@ -66,3 +66,14 @@ if (CLIENT) then
 		Schema.cinematics.StopCinematicSound(3.0) -- Fade out over 3 seconds
 	end
 end
+
+hook.Add("ExperimentMonitorsFilter", "expPrologueRiot2DisableNormalBehaviour", function(monitors, filterType)
+	for i = #monitors, 1, -1 do
+		local monitor = monitors[i]
+		local specialID = monitor:GetSpecialID()
+
+		if (specialID and specialID == "prologue_riot2") then
+			table.remove(monitors, i)
+		end
+	end
+end)
